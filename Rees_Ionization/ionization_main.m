@@ -7,10 +7,10 @@
 % function ionization_profile_from_flux->energy_deg.m -> albedo.m or -> lambda.m
 
 
-time        = datenum([2005 03 11 05 18 20]); % Must be a scalar or string.
-latitude    = 65; % Degrees.
-longitude   = -148; % Degrees.
-h           = 80:5:500; % km. Must be a scalar.
+time        = datenum([2005 03 11 05 18 20]); 	% 
+latitude    = 65; 								% [Deg]
+longitude   = -148; 							% [Deg]
+h           = 80:5:500; 						% [km] 
 M           = importdata('20050311-051820.dat',' ',1);
 E1          = M.data(end:-1:1,1);
 dE          = diff(E1);
@@ -32,6 +32,7 @@ density = D(:,4);
 %       2. N2: Molecular nitrogen (N_2) number density in m^-3.
 %       3. O2: Molecular oxygen (O_2) number density in m^-3.
 %       4. MASS_DENSITY: Total mas density in kg/m^3.
+
 %% Estimating the Production Rates per Energy and Altitude using AIDA_TOOLS
 
 [A] = ionization_profile_matrix(h',E,nO,nN2,nO2,density,1);
@@ -42,7 +43,7 @@ density = D(:,4);
 q=nansum(A(:,:).*repmat(flux,size(h))',2);
 
 alpha_fit = (2.5*10^-12)*exp(-h/51.2); % [m^3/s] Effective Recombination Coefficient
-alpha_fit = alpha_fit*10^6;           % [cm^3/s]
+alpha_fit = alpha_fit*10^6;            % [cm^3/s]
 
 % Assuming q = alpha_fit*n_e^2
 n_e = (q./alpha_fit').^0.5;            % [cm^-3]
