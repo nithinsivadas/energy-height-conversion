@@ -14,8 +14,10 @@ h           = 80:5:500; % km. Must be a scalar.
 M           = importdata('20050311-051820.dat',' ',1);
 E1          = M.data(end:-1:1,1);
 dE          = diff(E1);
-E           = E1(2:end); %[eV cm-2 s-1 sr-1 eV-1]
-flux        = 4*pi*dE.*M.data(end:-1:2,2)./E; % [cm-2 s-1] Converting energy flux into number flux
+E           = E1(2:end); % [eV] energy bin
+flux        = 2*pi*dE.*M.data(end:-1:2,2)./E; % [cm-2 s-1] Converting energy 
+                                              % flux [eV cm-2 s-1 sr-1 eV-1] 
+                                              % into number flux
 
 %% MSIS-90 Model
 
