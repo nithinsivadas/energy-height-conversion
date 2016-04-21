@@ -17,8 +17,11 @@ h           = 80:5:500; % km. Must be a scalar.
 %E           = E1(2:end); %[eV cm-2 s-1 sr-1 eV-1]
 %flux        = 2*pi*dE.*M.data(end:-1:2,2)./E; % [cm-2 s-1] Converting energy flux into number flux
 % E           = [98,99,100,101,102]';
-E           = (998:1:1002)';
-flux        = [0,0,1.0e8,0,0]';
+E           = (9980:10:10020)';
+dE          = diff(E);
+dE(1)       = dE(1);
+dE(end+1)   = dE(end);
+flux        = [0,0,1.0e8,0,0]'./dE; % [cm-2 sr-1 eV-1]
 
 %% MSIS-90 Model
 
