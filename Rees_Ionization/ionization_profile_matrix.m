@@ -13,7 +13,7 @@ function [A] = ionization_profile_matrix(h,E,nO,nN2,nO2,density,OPTS)
 %   opts = ISR2IeofE; % to produce the default options
 % 
 % Input:
-%  h    - altitude (m), double array [nh x 1]
+%  h    - altitude (km), double array [nh x 1]
 %  E    - energy (eV) grid of the desired output spectra, double array
 %         [nE x 1]
 %  nO   - number density (m^-3) of atomic Oxygen [nh x 1]
@@ -24,7 +24,9 @@ function [A] = ionization_profile_matrix(h,E,nO,nN2,nO2,density,OPTS)
 %         OPTS.isotropic = 1; Run with isotropic electron precipitation,
 %                     set to 2 for field-aligned and anything
 %                     inbetween for any weighted mixture.
-%
+%  Output:
+% A     - is a matrix [nhxnE] which has the units (cm-1 eV)
+%         Note that q = A*phi = [cm-1 eV]*[cm-2 s-1 eV-1]
 % See also ISR2IeofE3 ionizationMatrixSemeter
 
 % The standard options:
