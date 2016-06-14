@@ -40,8 +40,7 @@ for i=0, n_elements(probes)-1 do begin
   
   ;Convert to Spherical Coordinates
   xyz_to_polar,'th'+probe+'_state_pos_sm'
-  
-  
+    
   ;Get data
   ; MLT
   get_data, 'th'+probe+'_state_pos_sm_phi', data = d_phi, dlimits=dl1
@@ -56,15 +55,35 @@ for i=0, n_elements(probes)-1 do begin
   store_data, 'mlt_value_th'+probe, data = {x:d.x ,y:mlt }
   store_data, 'mlat_value_th'+probe, data = {x:d.x ,y:mlat }
   store_data, 'RE_value_th'+probe, data = {x:d.x ,y:RE }
+endfor
+
+
+for i=0, n_elements(probes)-1 do begin
+  probe = probes[i]
+  
+  filename = '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/th'+probe+'_state.txt'
+
+;Getting data to easily write into ascii files  
+  get_data, 'lshell_value_th'+probe, data=d_shells, dlimits=dll1
+  get_data, 'mlt_value_th'+probe, data=d_mlt, dlimits=dll2
+  get_data, 'mlat_value_th'+probe, data=d_mlat, dlimits=dll3
+  get_data, 'RE_value_th'+probe, data=d_RE, dlimits=dll4 
+
+;Write data to ascii files  
+  header =['        Time              L-shell [RE]      MLT [Hr]    MLAT [Deg]     Radial  Distance [in  RE]']
+  sdata  ={time:time_string(d.x), L:d_shells.y, MLT:d_mlt.y, MLAT:d_mlat.y, RE:d_RE.y}
+  write_ascii_cmdline, sdata, filename, header=header, nrec=nrec
+  print, 'Filename: ',filename
+  print, 'The number of data records written from the data structure is: ',nrec
 
 endfor
 
-;Plot
-tplot, 'lshell_value_th'+probes
-tplot, 'mlt_value_th'+probes
-tplot, 'mlat_value_th'+probes
-tplot, 'RE_value_th'+probes
 
-; Need to convert to asci files
+;Plots
+;tplot, 'lshell_value_th'+probes
+;tplot, 'mlt_value_th'+probes
+;tplot, 'mlat_value_th'+probes
+;tplot, 'RE_value_th'+probes
+
 
 end
