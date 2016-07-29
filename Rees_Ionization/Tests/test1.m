@@ -16,8 +16,8 @@ addpath('/home/nithin/Documents/git-repos/energy-height-conversion/Rees_Ionizati
 time        = datenum([2001 02 11 5 18 20]); 	% 
 latitude    = 67; 								% [Deg]
 longitude   = -50; 							    % [Deg]
-h           = 80:0.5:500; 						% [km] 
-E           = (48998:1:49002);                    
+h           = 50:0.5:500; 						% [km] 
+E           = (299998:1:300002);                    
 dE          = diff(E);
 dE(1)       = dE(1);
 dE(end+1)   = dE(end);
@@ -38,7 +38,7 @@ density = D(:,4);
 
 %% Estimating the Production Rates per Energy and Altitude using AIDA_TOOLS
 
-[A] = ionization_profile_matrix(h',E',nO,nN2,nO2,density,1);
+[A] = ionization_profile_matrix(h',E',nO,nN2,nO2,density,1); % cm^-1 eV
 % OPTS=1 : Isotropic precipitation
 
 %% Estimating the Ionization profile
