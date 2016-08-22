@@ -1,4 +1,4 @@
-function [A] = generate_A(h,E,latitude,longitude,time)
+function [A] = generate_A(h,E,longitude,latitude,time)
 %generate_A
 %   Calculates the A matrix: altitude profiles of  production rate per 
 %   incident monoenergteic electron beams
@@ -13,13 +13,11 @@ function [A] = generate_A(h,E,latitude,longitude,time)
 if nargin<5
     time        = datenum([2008 03 26 10 00 00]);
 end
-if nargin<4
-    longitude   = -147.5; % Degrees.
-end
 if nargin<3
     latitude    = 65; % Degrees.
 end
-
+if nargin<2
+longitude   = -147.5; % Degrees.
 
 
 
