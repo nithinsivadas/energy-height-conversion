@@ -2,9 +2,9 @@ function [data] = altitudeInversion( data_pfisr, ebin, DateNumBeg, DateNumEnd )
 % 29-Jul-2016: Update
 % Input:
 % data_pfisr: struct [ nel, alt, time]
-%             nel  - Electron Density in log10 [log10 m^-3]   
-%             alt  - Altitude [km]
-%             time - Time [matlab units]
+%             nel  - Electron Density in log10 [log10 m^-3]   [NxM]
+%             alt  - Altitude [km]                            [Nx1]
+%             time - Time [matlab units]                      [1xM]
 % ebin      : Energy bin values necessary [eV]
 % DateNumBeg: Initial time 
 % DateNumEnd: Final time 
@@ -133,12 +133,13 @@ beta    = 15;
 tdim    = 1:1:length(t1);
 q_1_1   = dn_dt(:,tdim);
 q_1_2   = diag(alpha)*(ne(zdim0,tdim).^2);
-q_1     = q_1_2;                         %[cm^-3 s^-1]
+q_1     = data_pfisr.q*10^-6;                         %[cm^-3 s^-1]
 % var_q   =var(q_1);
 tdim    = 2:1:size(t1)-1;
 % log_h = logspace(log10(min(altitude)),log10(max(altitude)),length(altitude))';
 % q_1   = interp1(altitude,q_1,log_h);
-% var_q   =var(q_1);
+% sigma_q   =mean(data_pfisr.dq);
+sigma_q   =(var(q_1)).^0.5;
 %Plotting A
 A =generate_A(altitude(zdim0),Ebins',69,19,datenum([2015 07 26 21 00 00]));
 data.A=A;
@@ -162,9 +163,9 @@ for i=tdim
 %          W = W./sum(W);
 %         q_temp=(q_1(:,i-1)+q_1(:,i)+q_1(:,i+1))/3;
         q_temp=q_1(:,i);
-        var_q(i)=var(q_temp);
+%         var_q(i)=var(q_temp);
 %         [phi_new1(:,i),q_new(:,i),chi2(i),max_iter(i)] =mem_solve(q_1(:,i),A,beta,phi_new,sqrt(var_q(i)),5000,W);
-        [phi_new1(:,i-1),q_new(:,i-1),chi2(i-1),max_iter(i-1)] =mem_solve(q_temp,A,beta,phi_new,sqrt(var_q(i)),5000,W);
+        [phi_new1(:,i-1),q_new(:,i-1),chi2(i-1),max_iter(i-1)] =mem_solve(q_temp,A,beta,phi_new,(sigma_q(i)),5000,W);
         display([num2str((i-1)/max(tdim)*100), ' %',num2str(chi2(i-1))]);
         
 %       subplot(2,1,1);
@@ -178,16 +179,17 @@ end;
 [T1,X]        = meshgrid(t3,Ebins./(2*pi));
 
 data.eflux    = phi_new1.*X; %Converting diff number flux into diff energy flux
-data.q_THEMIS = q_new;
-data.chi      = chi2;
-data.max_iter = max_iter;
-data.time_ne  = t;
+data.flux     = phi_new1;    %Differential number flux
+data.q_THEMIS = q_new;  % Production rates derived from inverted fluxe estimates
+data.chi      = chi2;   % Chi squared
+data.max_iter = max_iter; % Max number of iterations before convergence
+data.time_ne  = t;        % Time vector for electron density
 data.time_q   = t(2:1:end-1); % Due to differentiation the time for production rates is different
-data.time_PFISR_E   = t(3:1:end-2);
-
-data.ne=ne(zdim0,:);             % Electron density in 
-data.h=altitude(zdim0);
-data.ebin=Ebins(Ebin_0:end);
+data.time_PFISR_E   = t(3:1:end-2); % Time vector for energy spectra
+data.A        = A;
+data.ne       =ne(zdim0,:);             % Electron density in 
+data.h        =altitude(zdim0);
+data.ebin     =Ebins(Ebin_0:end);
 
 % delete(poolobj);
 

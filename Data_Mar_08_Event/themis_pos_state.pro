@@ -6,7 +6,7 @@ del_data,'*'
 ;Set day
 timespan, '2008-03-26'
 
-probes=['d','e','c']
+probes=['d']
 
 for i=0, n_elements(probes)-1 do begin
   probe = probes[i]

@@ -23,8 +23,8 @@ select_time=datenum(date_string);
 [M,i_pn] = min(abs(data.time_ne-select_time)); %Time index for PFISR electron density data
 
 % altitude=data.h;
-% A =generate_A(data.h,data_thm.ebin(11:end)');
-A=A_thm_forwd(:,:);
+A =generate_A(data.h,data_thm.ebin(11:end)');
+% A=A_thm_forwd(:,:);
 
 lc_eflux(:,1:31) = data_thm.E(:,1:31).*repmat(lc_ratio_sst,1,31);
 lc_eflux(:,32:42) = data_thm.E(:,32:42).*repmat(lc_ratio_sst,1,11);
