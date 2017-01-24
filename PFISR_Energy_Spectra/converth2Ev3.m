@@ -1,4 +1,4 @@
-function [data] = converth2Ev2( data_thm, filename, DateNumBeg, DateNumEnd )
+function [data] = converth2Ev3( data_thm, filename, DateNumBeg, DateNumEnd )
 
 % 13-Jun-2016 
 

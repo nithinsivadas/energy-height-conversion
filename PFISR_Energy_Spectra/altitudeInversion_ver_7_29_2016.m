@@ -1,7 +1,16 @@
-function [data] = converth2Ev4( data_thm, filename, DateNumBeg, DateNumEnd )
+function [data] = altitudeInversion( data_pfisr, ebin, DateNumBeg, DateNumEnd )
+% 29-Jul-2016: Update
+% Input:
+% data_pfisr: struct [ nel, alt, time]
+%             nel  - Electron Density in log10 [log10 m^-3]   
+%             alt  - Altitude [km]
+%             time - Time [matlab units]
+% ebin      : Energy bin values necessary [eV]
+% DateNumBeg: Initial time 
+% DateNumEnd: Final time 
+
 % 19-Jul-2016: Update
 % Removed the dn/dt term
-
 % 13-Jun-2016 
 %CONVERTA2E_V2 Summary of this function goes here
 
@@ -41,55 +50,35 @@ function [data] = converth2Ev4( data_thm, filename, DateNumBeg, DateNumEnd )
 %                 steps lesser than time_ne, because it is a derivative of ne
 % data.chi      : The chi^2 value of the fitting/ inversion
 
-% Loading data from the HDF5 file created by a Glow run of precipitating electrons
-% fileName  ='/home/nithin/Dropbox/aurora_data (1)/eigenprofiles/GLOWrates.h5';
-% fileName1 ='q_2008_03_26_rees.h5';
-% fileName1 ='/hlog_home/nithin/Documents/git-repos/aurora-rep/To be reviewed/Scrap/2Dec15/A thd E Normal Ext.h5'
+ne_temp  = 10.^data_pfisr.nel;
+altitude = data_pfisr.alt;
+t_temp   = data_pfisr.time;
 
-% q 		  = hdf5read(fileName1,'prod/eigenprofile');%Production rates (Nreactionz x Nalt x NEnergy)
-% q         = q+min(min(q(q>0)));
+if nargin<4
+    DateNumEnd=max(t_temp);
+    TimeEndIndex=length(t_temp);
+else
+   [c,TimeEndIndex] = min(abs(t_temp-DateNumEnd));
+end
 
-% z         = hdf5read(fileName1,'altitude');			%Altitude
-% % diffflux  = hdf5read(fileName,'diffnumflux');		%Differential number flux (cm^-2 s^-1 eV^-1)
-% %In Rees the diffnumber flux is 1 cm^-2 s^-1 eV^-1
-% %Hence converting it into [cm^-2 s^-1]
+if nargin<3
+    DateNumBeg=min(t_temp);
+    TimeBegIndex = 1;
+else
+    [c,TimeBegIndex] = min(abs(t_temp-DateNumBeg));
+end;
 
-% diffflux  = ones(size(Ebins,1),1).*eb_binsize';		
-% 
-% sensorloc = hdf5read(fileName1,'sensorloc'); 		%Unit in degrees, Geographical coordinates
-% Edim0     = 1:1:length(Ebins);						%Energy available for computation
-
-% [phi]     = diag(diffflux(Edim0));					%Total Input differemtial number flux [cm^-2 sec^-1]
-% phi_inv   = inv(phi);
-% 
-% 
-% [Z,X]=meshgrid(z(zdim0),Ebins(Edim0)/(1000));			%For surface plots
-% 
-
-
-% load input_data.mat
-% data.A=A;
-% A= data.A;
-% Downloading the PFISR Data
-% fileNameStr=downloadPFISR('2008-03-26 06:00','2008-03-26 15:00','yyyy-mm-dd HH:MM');
-
-% [ne_temp,altitude,t_temp]=pfisr_mag_e(filename,1);
-
-[ne_temp,altitude,t_temp]  =pfisr_avg_e_v2(filename); % Using the default value of the altitude grid
-% load ne.mat
-% load A_lin_E.mat
-% A=data.A;
 % Cropping the time array and density matrix to that prescribed by the user
-[c,TimeBegIndex] = min(abs(t_temp-DateNumBeg));
-[c,TimeEndIndex] = min(abs(t_temp-DateNumEnd));
-t=t_temp(TimeBegIndex+1:TimeEndIndex);
-zdim0     = 1:1:(length(altitude)-79);	%Altitude available for computation
-ne=ne_temp(zdim0,TimeBegIndex+1:TimeEndIndex);
+
+
+t                = t_temp(TimeBegIndex+1:TimeEndIndex);
+zdim0            = 1:1:(length(altitude));	%Altitude available for computation
+ne               = ne_temp(zdim0,TimeBegIndex+1:TimeEndIndex);
 
 Ebin_0 = 1;
 % Ebins  = logspace(log10(data_thm.ebin(9)),log10(max(data_thm.ebin)),25);
 % Ebins  = linspace((data_thm.ebin(9)),(max(data_thm.ebin)),60);
-Ebins	  = data_thm.ebin(11:end);	%Energy bin values
+Ebins = ebin;	%Energy bin values
 
 
 
@@ -132,7 +121,7 @@ dn_dt   = dn./(2*DT);
 % phi_new = 10^13*ones(size(diag(phi)',2),1);   %[cm^-2 s^-1]
 kb      = 1.38*10^-23;
 eV      = 1.602E-19;
-T_w     = 10*data_thm.ebin(25)*eV/kb;
+T_w     = 10*10000*eV/kb;
 phi_new = (10^13)*kappa_E(Ebins(Ebin_0:end),10000,T_w,160)';
 % phi_new = 10^-3*phi_new*sum(data_thm.E(2,9:end).*diff(data_thm.E(2,16:end))); 
 %   phi_new = (10^-1*(-(Ebins-max(Ebins))).^2)';
@@ -199,7 +188,6 @@ data.time_PFISR_E   = t(3:1:end-2);
 data.ne=ne(zdim0,:);             % Electron density in 
 data.h=altitude(zdim0);
 data.ebin=Ebins(Ebin_0:end);
-data.time_E=data_thm.time;
 
 % delete(poolobj);
 

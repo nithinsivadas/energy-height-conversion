@@ -14,7 +14,7 @@ function [ total_electron, altitude_grid, t ] = pfisr_avg_e_v2(fileNameStr,altit
 %                             specified altitude points
 %%
 % Invoking the GeoData class to extract range and density from the HDF5 file
-    pfisrGD = GeoData(@readMadhdf5,fileNameStr,{'range','popl'});
+    pfisrGD = GeoData(@readMadhdf5,fileNameStr,{'range','dpopl'});
 
     % Identifying the number of beams
     temp = pfisrGD.dataloc(1,1);

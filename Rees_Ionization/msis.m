@@ -233,7 +233,7 @@ dayyear = dayofyear(year, month, day);
 if isunix || ismac % Curl is built-in to operating system.
     initialcmd = 'curl -d "model=msis';
 else % Use the input curldir (possibly the default for that input).
-    initialcmd = ['"' fullfile(curldir, 'curl"') ' -d "model=msis'];
+    initialcmd = ['"' fullfile(curldir, 'curl') ' -d "model=msis'];
 end
 
 % If one of the inputs can be swept keeping the others constant, run a
