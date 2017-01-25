@@ -6,15 +6,26 @@ clear all;
 initialize_geodata;
 
 %Global Variables
-pfisrDataFileNameStr =...
+computer=getenv('computername');
+if computer=='NITHIN-SURFACE'
+    pfisrDataFileNameStr =...
+    'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\PFISR_Energy_Spectra\Data\DataFile_2008_1.h5';
+    thmDataFileNameStr =...
+    'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Data_Mar_08_Event\space\Espectra_thm.mat';
+    sicDataFileNameStr='C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Ground\summaryresQinversion.mat';
+else
+    pfisrDataFileNameStr =...
     '/home/nithin/Documents/git-repos/energy-height-conversion/PFISR_Energy_Spectra/Data/DataFile_2008_1.h5';
+    thmDataFileNameStr =...
+    '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/space/Espectra_thm.mat';
+    sicDataFileNameStr='/home/nithin/Documents/git-repos/ISR_School_2016/Antti  SIC Model/summaryresQinversion.mat';
+end
+
 timeMin=datenum('26 Mar 2008 08:00');
 timeMax=datenum('26 Mar 2008 13:00');
 altMin = 60;
 altMax = 150;
 
-thmDataFileNameStr =...
-    '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/space/Espectra_thm.mat';
 load (thmDataFileNameStr);
 % data_thm -> E, ebin, time
 thm.energyFlux = data_thm.E(:,19:1:end)'*10^4; %[eV m-2 sr-1 s-1 eV-1]
@@ -54,7 +65,6 @@ dNeAvg(dNeAvg<0)=10^9;
 [dataAvgError] = get_inverted_flux(dqAvg, dqAvgTime, alt, energyBin);
 %% Mode 2: From SIC Measurements
 
-sicDataFileNameStr='/home/nithin/Documents/git-repos/ISR_School_2016/Antti  SIC Model/summaryresQinversion.mat';
 load (sicDataFileNameStr);
 [ionrate_raw, sic.alt] = altitude_crop(ionrate_raw, h,altMin, altMax);
 [ionrate_smoothed, sic.alt] = altitude_crop(ionrate_smoothed, h,altMin, altMax);
@@ -133,16 +143,16 @@ p(1,1).select();
 ylabel({'Normalized cumulative','energy flux','[%]'});
 set(gca,'XTick',10.^[3,4,5,5.477,6],'XLim',10.^[3 6],...
     'XTickLabel','',...
-    'YLim',[0.1 110],'YTick',[ 1 10 20 30 40 50 60 70 80 90 100],...
-    'YScale','linear','XScale','log');
+    'YLim',[0.1 110],'YTick',[ 0.1 5 10 50 100],...
+    'YScale','log','XScale','log');
 title('PFISR Measurement');
 grid on;
 p(2,1).select();
 ylabel({'Normalized cumulative','energy flux','[%]'});
 set(gca,'XTick',10.^[3,4,5,5.477,6],'XLim',10.^[3 6],...
     'XTickLabel',{'1','10','100','300','1000'},...
-    'YLim',[0.1 110],'YTick',[ 1 10 20 30 40 50 60 70 80 90 100],...
-    'YScale','linear','XScale','log');
+    'YLim',[0.1 110],'YTick',[ 0.1 5 10 50 100],...
+    'YScale','log','XScale','log');
 title('THEMIS Measurement');
 grid on;
 xlabel('Energy [keV]');
@@ -163,6 +173,7 @@ plot(dataAvg.energyBin,...
  medianValue=0.5*max(100*afterOnset.dataAvg.cumuEnergyFlux./afterOnset.dataAvg.cumuEnergyFlux(end));
 plot(10.^[3 6],[medianValue medianValue],'--k','LineWidth',2);
 hold on;
+text(-0.175,0.975,[char(96+1),')'],'Units','normalized','FontWeight','bold');
 
 legend('Before onset','Before onset median','After onset','After onset median','Location','southeast');
 grid on;
@@ -183,12 +194,18 @@ plot(thm.energyBin,...
 plot(10.^[3 6],[medianValue medianValue],'--r','LineWidth',2);
 hold on;
 legend('Before onset','Before onset median','After onset','After onset median','Location','southeast');
-
+text(-0.175,0.975,[char(96+2),')'],'Units','normalized','FontWeight','bold');
 grid on;
 
 title('THEMIS-D Measurement');
 
 %%
-export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/cumlativeEnergyFlux.pdf' -pdf 
-save('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/cumlativeEnergyFlux.svg');
-export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/cumlativeEnergyFlux.png' -r600 -png -nocrop
+if computer=='NITHIN-SURFACE'
+    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\cumlativeEnergyFlux.pdf' -pdf
+    save('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\cumlativeEnergyFlux.svg');
+    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\cumlativeEnergyFlux.png' -r600 -png -nocrop
+else
+    export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/cumlativeEnergyFlux.pdf' -pdf 
+    save('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/cumlativeEnergyFlux.svg');
+    export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/cumlativeEnergyFlux.png' -r600 -png -nocrop
+end

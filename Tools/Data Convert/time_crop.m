@@ -14,7 +14,7 @@ function [ yNew,timeNew ] = time_crop( y,time,timeMin, timeMax )
 %  timeNew : Cropped time Array 
 
 %----------------------------------------------------------------------------
-% Modified: 21st Sep 2016 
+% Modified: 21st Sep 2016| 25th Jan 2017 
 % Created : 21st Sep 2016
 % Author  : Nithin Sivadas
 % Ref     :
@@ -40,8 +40,8 @@ function [ yNew,timeNew ] = time_crop( y,time,timeMin, timeMax )
     
     if length(timeTemp)>1
         % Cropping the time array and density matrix to that prescribed by the user
-        timeNew = timeTemp(itimeMin+1:itimeMax);
-        yNew = yTemp(:,itimeMin+1:itimeMax);
+        timeNew = timeTemp(itimeMin:itimeMax); % Changed itimeMin+1 -> itimeMin on 25th Jan 2017
+        yNew = yTemp(:,itimeMin:itimeMax);
     else
         timeNew = timeTemp;
         yNew = yTemp;

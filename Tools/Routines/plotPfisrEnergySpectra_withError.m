@@ -6,16 +6,29 @@ clear all;
 initialize_geodata;
 
 %Global Variables
-pfisrDataFileNameStr =...
-    '/home/nithin/Documents/git-repos/energy-height-conversion/PFISR_Energy_Spectra/Data/DataFile_2008_1.h5';
+computer=getenv('computername');
+if computer=='NITHIN-SURFACE'
+    pfisrDataFileNameStr =...
+        'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\PFISR_Energy_Spectra\Data\DataFile_2008_1.h5';
+    thmDataFileNameStr =...
+        'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Data_Mar_08_Event\space\Espectra_thm.mat';
+    sicDataFileNameStr='C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Ground\summaryresQinversion.mat';
+else 
+    pfisrDataFileNameStr =...
+        '/home/nithin/Documents/git-repos/energy-height-conversion/PFISR_Energy_Spectra/Data/DataFile_2008_1.h5';
+    thmDataFileNameStr =...
+        '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/space/Espectra_thm.mat';
+    sicDataFileNameStr='/home/nithin/Documents/git-repos/ISR_School_2016/Antti  SIC Model/summaryresQinversion.mat';
+end
+
+load (thmDataFileNameStr);
+
 timeMin=datenum('26 Mar 2008 08:00');
 timeMax=datenum('26 Mar 2008 13:00');
 altMin = 60;
 altMax = 150;
 
-thmDataFileNameStr =...
-    '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/space/Espectra_thm.mat';
-load (thmDataFileNameStr);
+
 % data_thm -> E, ebin, time
 thm.energyFlux = data_thm.E(:,19:1:end)'*10^4; %[eV m-2 sr-1 s-1 eV-1]
 thm.energyBin  = data_thm.ebin(19:1:end)';
@@ -53,7 +66,6 @@ dNeAvg(dNeAvg<0)=10^9;
 [dataAvgError] = get_inverted_flux(dqAvg, dqAvgTime, alt, energyBin);
 %% Mode 2: From SIC Measurements
 
-sicDataFileNameStr='/home/nithin/Documents/git-repos/ISR_School_2016/Antti  SIC Model/summaryresQinversion.mat';
 load (sicDataFileNameStr);
 [ionrate_raw, sic.alt] = altitude_crop(ionrate_raw, h,altMin, altMax);
 [ionrate_smoothed, sic.alt] = altitude_crop(ionrate_smoothed, h,altMin, altMax);
@@ -148,6 +160,7 @@ color5='b'; lineStyle5=':'; lineMarker5 ='none'; lineWidth5=1;
 for iTime = 1:1:2
 
     p(iTime,1).select();
+   
     q(1)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, NeAvg, plotThisTime(iTime,:), 0);
     q(1).Color = color1; q(1).LineStyle = lineStyle1; q(1).Marker = lineMarker1; q(1).LineWidth = lineWidth1;
     hold on;
@@ -160,8 +173,21 @@ for iTime = 1:1:2
     hold on;
     q(4)=plot_1D_time_slice(thm.time, thm.alt, thm.NeForward, plotThisTime(iTime,:), 0);
     q(4).Color = color5; q(4).LineStyle = lineStyle5; q(4).Marker = lineMarker5; q(4).LineWidth = lineWidth5;
-    xlim([10^9 10^12]);
-    ylim([60 150]);
+    hold on;
+    
+    x_lim=[10^9 10^12];
+    y_lim=[60 150];
+    xlim(x_lim);
+    ylim(y_lim);
+    
+    if iTime==1
+     text(0.025,0.975,'a)','Units','normalized','FontWeight','bold');
+     patch([x_lim(1) x_lim(2) x_lim(2) x_lim(1)], [y_lim(1) y_lim(1) 85 85], 'k', 'FaceAlpha',0.2,'EdgeColor','none');
+    else
+     text(0.025,0.975,'b)','Units','normalized','FontWeight','bold');
+     patch([x_lim(1) x_lim(2) x_lim(2) x_lim(1)], [y_lim(1) y_lim(1) 70 70], 'k', 'FaceAlpha',0.2,'EdgeColor','none');
+    end
+    
     set(gca,'XTick',10.^[9, 10, 11, 12]);
     if(iTime==2)
     set(gca,'XTickLabel',{'10^9', '10^1^0', '10^1^1', '10^1^2'});
@@ -190,8 +216,21 @@ for iTime = 1:1:2
 
     q(4)=plot_1D_time_slice(thm.time, thm.alt, thm.qForward, plotThisTime(iTime,:), 0);
     q(4).Color = color5; q(4).LineStyle = lineStyle5; q(4).Marker = lineMarker5; q(4).LineWidth = lineWidth5;
-    xlim([10^6 10^12]);
-    ylim([60 150]);
+    hold on;
+    
+    x_lim=[10^6 10^12];
+    y_lim=[60 150];
+    xlim(x_lim);
+    ylim(y_lim);
+    
+    if iTime==1
+     text(0.025,0.975,'c)','Units','normalized','FontWeight','bold');
+     patch([x_lim(1) x_lim(2) x_lim(2) x_lim(1)], [y_lim(1) y_lim(1) 85 85], 'k', 'FaceAlpha',0.2,'EdgeColor','none');
+    else
+     text(0.025,0.975,'d)','Units','normalized','FontWeight','bold');
+     patch([x_lim(1) x_lim(2) x_lim(2) x_lim(1)], [y_lim(1) y_lim(1) 70 70], 'k', 'FaceAlpha',0.2,'EdgeColor','none');
+    end
+    
      title(datestr(dataAvg.time(find_time(dataAvg.time, (plotThisTime(iTime,:)))),'DD-mmm-YYYY HH:MM'),'FontSize',12);
      set(gca,'XTick',10.^[7 8 9 10 11]);
      if(iTime==2)
@@ -223,9 +262,22 @@ for iTime = 1:1:2
     hold on;
     q(4)=plot_1D_time_slice(thm.time, thm.energyBin, thm.energyFlux, plotThisTime(iTime,:), -1);
     q(4).Color = color5; q(4).LineStyle = lineStyle5; q(4).Marker = lineMarker5; q(4).LineWidth = lineWidth5;
-  
-    xlim([10^3 10^6]);
-    ylim([10^6 2*10^12]);
+    hold on;
+
+    
+    x_lim=[10^3 10^6];
+    y_lim=[10^6 2*10^12];
+    xlim(x_lim);
+    ylim(y_lim);
+    
+    if iTime==1
+     text(0.025,0.975,'e)','Units','normalized','FontWeight','bold');
+     patch([10^5 x_lim(2) x_lim(2) 10^5], [y_lim(1) y_lim(1) y_lim(2) y_lim(2)], 'k', 'FaceAlpha',0.2,'EdgeColor','none');
+    else
+     text(0.025,0.975,'f)','Units','normalized','FontWeight','bold');
+     patch([4*10^5 x_lim(2) x_lim(2) 4*10^5], [y_lim(1) y_lim(1) y_lim(2) y_lim(2)], 'k', 'FaceAlpha',0.2,'EdgeColor','none');
+    end
+    
     set(gca,'XTick',10.^[3 4 5 5.477 6]);    
     if(iTime==2)
     set(gca,'XTickLabel',{'1', '10', '100', '300', ''});
@@ -258,6 +310,12 @@ xlabel('Energy [$keV$]','FontWeight','bold','Interpreter','latex');
 ylabel('Diff. Energy Flux [$eV m^{-2} sr^{-1} s^{-1} eV^{-1}$]','Interpreter','latex');
 set(gca,'YTick',10.^[6, 7, 8, 9, 10, 11, 12]);
 %%
-export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/QualityOfInversion.pdf' -pdf 
-save('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/QualityOfInversion.svg');
-export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/QualityOfInversion.png' -r600 -png -nocrop
+if computer=='NITHIN-SURFACE'
+    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.pdf' -pdf 
+    save('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.svg');
+    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.png' -r600 -png -nocrop
+else
+    export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/QualityOfInversion.pdf' -pdf 
+    save('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/QualityOfInversion.svg');
+    export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/QualityOfInversion.png' -r600 -png -nocrop
+end

@@ -6,15 +6,27 @@ clear all;
 initialize_geodata;
 
 %Global Variables
-pfisrDataFileNameStr =...
+computer=getenv('computername');
+if computer=='NITHIN-SURFACE'
+    pfisrDataFileNameStr =...
+    'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\PFISR_Energy_Spectra\Data\DataFile_2008_1.h5';
+    thmDataFileNameStr =...
+    'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Data_Mar_08_Event\space\Espectra_thm.mat';
+    sicDataFileNameStr='C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Ground\summaryresQinversion.mat';
+else
+    pfisrDataFileNameStr =...
     '/home/nithin/Documents/git-repos/energy-height-conversion/PFISR_Energy_Spectra/Data/DataFile_2008_1.h5';
+    thmDataFileNameStr =...
+    '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/space/Espectra_thm.mat';
+    sicDataFileNameStr='/home/nithin/Documents/git-repos/ISR_School_2016/Antti  SIC Model/summaryresQinversion.mat';
+end
+
 timeMin=datenum('26 Mar 2008 08:00');
 timeMax=datenum('26 Mar 2008 13:00');
 altMin = 60;
 altMax = 150;
 
-thmDataFileNameStr =...
-    '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/space/Espectra_thm.mat';
+
 load (thmDataFileNameStr);
 % data_thm -> E, ebin, time
 thm.energyFlux = data_thm.E(:,19:1:end)'*10^4; %[eV m-2 sr-1 s-1 eV-1]
@@ -54,7 +66,6 @@ dNeAvg(dNeAvg<0)=10^9;
 [dataAvgError] = get_inverted_flux(dqAvg, dqAvgTime, alt, energyBin);
 %% Mode 2: From SIC Measurements
 
-sicDataFileNameStr='/home/nithin/Documents/git-repos/ISR_School_2016/Antti  SIC Model/summaryresQinversion.mat';
 load (sicDataFileNameStr);
 [ionrate_raw, sic.alt] = altitude_crop(ionrate_raw, h,altMin, altMax);
 [ionrate_smoothed, sic.alt] = altitude_crop(ionrate_smoothed, h,altMin, altMax);
@@ -158,6 +169,7 @@ plot(dataAvg.energyBin, ratioPfisrEnergyFlux,'--k');
 hold on;
 plot(thm.energyBin, ratioThmEnergyFlux,'-.r');
 hold on;
+text(-0.175,0.975,[char(96+3),')'],'Units','normalized','FontWeight','bold');
 
 legend('Ionosphere (PFISR)', 'Plasmasheet (THEMIS)','Location','southeast');
 
@@ -168,6 +180,8 @@ p(1,1).select();
 plot(dataAvg.energyBin, beforeOnset.dataAvg.energyFlux,'k','LineWidth',1);
 hold on;
 plot(dataAvg.energyBin, afterOnset.dataAvg.energyFlux,'k','LineWidth',2);
+hold on;
+text(-0.175,0.975,[char(96+1),')'],'Units','normalized','FontWeight','bold');
 
 legend(char({'Before Onset'}),...
     char({'After Onset'}),'Location', 'southwest');
@@ -176,13 +190,19 @@ p(2,1).select();
 plot(thm.energyBin, beforeOnset.thm.energyFlux,'r','LineWidth',1);
 hold on;
 plot(thm.energyBin, afterOnset.thm.energyFlux,'r','LineWidth',2);
+hold on;
+text(-0.175,0.975,[char(96+2),')'],'Units','normalized','FontWeight','bold');
 
 legend(char({'Before Onset'}),...
     char({'After Onset'}),'Location', 'southwest');
 
 %% Plot
-
-export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/RatioBeforeAfterOnset.pdf' -pdf 
-save('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/RatioBeforeAfterOnset.svg');
-export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/RatioBeforeAfterOnset.png' -r600 -png -nocrop
-
+if computer=='NITHIN-SURFACE'
+    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\RatioBeforeAfterOnset.pdf' -pdf -nocrop
+    save('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\RatioBeforeAfterOnset.svg');
+    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\RatioBeforeAfterOnset.png' -r600 -png -nocrop
+else
+    export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/RatioBeforeAfterOnset.pdf' -pdf 
+    save('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/RatioBeforeAfterOnset.svg');
+    export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/RatioBeforeAfterOnset.png' -r600 -png -nocrop
+end

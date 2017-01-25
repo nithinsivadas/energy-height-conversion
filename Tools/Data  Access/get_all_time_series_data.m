@@ -27,6 +27,18 @@ function [ Data ] = get_all_time_series_data()
 % Data(19): Parallel Potential [1-D Time Series, with 1 Variable]
 
 %% Loading variables
+
+computer=getenv('computername');
+if computer=='NITHIN-SURFACE'
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Ground\pfisr_data_26_Mar_2008.mat')
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Ground\thmasi_data_26_Mar_2008.mat')
+
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Space\thd_data_26_Mar_2008.mat')
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Space\parallel_potential.mat')
+
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Global\IMF_data_26_Mar_2008.mat')
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Global\GeomagneticIndex_data_26_Mar_2008.mat')    
+else
 load ('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Data/Ground/pfisr_data_26_Mar_2008.mat')
 load ('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Data/Ground/thmasi_data_26_Mar_2008.mat')
 
@@ -35,7 +47,7 @@ load ('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/D
 
 load ('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Data/Global/IMF_data_26_Mar_2008.mat')
 load ('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Data/Global/GeomagneticIndex_data_26_Mar_2008.mat')
-
+end
 %% Organizing the data accoring to number
 
 % Global Measurements
@@ -222,6 +234,14 @@ Data(thisData).zValue = thd.waveLowFrequencyEFI.wavePowerGsmY';
 minzValue=min(min(((Data(thisData).zValue(Data(thisData).zValue>0)))));
 Data(thisData).zValue(Data(thisData).zValue==0)=minzValue;
 
+% Calculating Ion Gyro Freqyencies
+B = interp1(thd.magneticVectorFieldFGM.time,thd.magneticVectorFieldFGM.BTotal,Data(thisData).time).*10^-9; % [T]
+e = 1.602*10^-19; % [Coulombs]
+m = 1.672619*10^-27; % [kg] 
+f_HI = e*B/(2*pi*m); % Hz
+f_OI = e*B/(2*pi*16*m); % Hz
+f_HeI = e*B/(2*pi*4*m); % Hz
+f_HeII = 2*e*B/(2*pi*4*m); %Hz
 Data(thisData).label = ({'Thm-D','EFI GSM-Y','[Hz]'});
 Data(thisData).color.label={'[mV m^-^1 Hz^-^0^.^5]'};
 Data(thisData).y.tick=10.^[-2 -1 0];
@@ -230,6 +250,11 @@ Data(thisData).y.lim=[min(Data(thisData).yAxis) max(Data(thisData).yAxis)];
 Data(thisData).color.lim=10.^[-4 3];
 Data(thisData).color.tick=10.^[-4 -2 0 2];
 Data(thisData).color.tickLabel={'10^-^4','10^-^2', '10^0', '10^2'};
+Data(thisData).y.f_HI =f_HI;
+Data(thisData).y.f_OI =f_OI;
+Data(thisData).y.f_HeI =f_HeI;
+Data(thisData).y.f_HeII =f_HeII;
+
 % Wave power <1Hz from FGM along X
 thisData=14;
 Data(thisData).time = thd.waveLowFrequencyFGM.time;

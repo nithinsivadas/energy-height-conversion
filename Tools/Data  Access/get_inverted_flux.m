@@ -60,12 +60,12 @@ function [data] = get_inverted_flux( q, time, alt, energyBin, A, guessFlux, Date
                 65,-147.5,datenum([2008 03 26 10 00 00])); %[m^-1 eV] 
     end;
 
-    [timeMaxNo] = find_time(time, DateNumEnd);
-    [timeMinNo] = find_time(time, DateNumBeg);
+%     [timeMaxNo] = find_time(time, DateNumEnd);
+%     [timeMinNo] = find_time(time, DateNumBeg);
 
     %% Preparing the data for inversion
     % Cropping the time array and density matrix to that prescribed by the user
-    [q, time] = time_crop(q, time, time(timeMinNo), time(timeMaxNo));
+    [q, time] = time_crop(q, time, DateNumBeg, DateNumEnd);
 
     % Removing nans
     q = interp_nans(q);
