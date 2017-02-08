@@ -1,11 +1,14 @@
 function [ B_abs, B_r, B_theta, B_eq, L, magneticLatitude, invariantLatitude ] =...
     get_dipole_mag_field( radiusInEarthRadii, polarAngle )
-%GET_DIPOLE_MAG_FIELD Summary of this function goes here
-%Input
+%% GET_DIPOLE_MAG_FIELD Dipole magnetic field parameters given input radius and polar angle
+%-------------------------------------------------------------------------
+% Input
+%------
 % radiusInEarthRadii: r/RE
 % polarAngle        : theta (colatitude) [deg]
-%
+%-------------------------------------------------------------------------
 % Output
+%---------
 % B_abs             : |B| of the dipole magnetic field [T]
 % B_r               : Radial field of the dipole magnetic field [T]
 % B_theta           : Field along polar angle of the dipole magnetic field [T]
@@ -15,9 +18,13 @@ function [ B_abs, B_r, B_theta, B_eq, L, magneticLatitude, invariantLatitude ] =
 % magneticLatitude  : pi/2 - theta [deg]
 % invariantLatitude : where a particular field line described by the L-shell
 %                     intersects the ground
-
-
-
+%----------------------------------------------------------------------------
+% Modified: 25th Jan 2017 
+% Created : 25th Jan 2017 
+% Author  : Nithin Sivadas
+% Ref     :
+%----------------------------------------------------------------------------
+%%
 r = radiusInEarthRadii;
 theta = deg2rad(polarAngle);
 

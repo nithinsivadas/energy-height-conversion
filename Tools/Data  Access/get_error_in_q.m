@@ -1,7 +1,6 @@
 function [ error_in_q, q, qTime ] = get_error_in_q( Ne, dNe, alt, time, mode, alpha)
-
-%calcError.m Calculates the error 
-
+%% get_error_in_q.m Calculates the error in production rate q, from dNe.  
+%--------------------------------------------------------------------------
 %   Input
 %-----------
 %   Ne     : electron density [m-3] (mean electron density)
@@ -12,12 +11,20 @@ function [ error_in_q, q, qTime ] = get_error_in_q( Ne, dNe, alt, time, mode, al
 %   mode   : Choose between the following calculations
 %		'1': q = dn/dt + alpha*ne^2 (Default)
 %		'2': q = alpha*ne^2 
-
+%------------------------------------------------------------------------
 %  Output
 %-----------
 %    error_in_q    : error in production rate [m-3 s-1]
 %    q             : production rate [m-3 s-1]
 %    qTime         : time instances where q is estimated [matlab units]
+%%
+%----------------------------------------------------------------------------
+% Modified: 24th Jan 2017 
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%----------------------------------------------------------------------------
+%%
 
 	if nargin<5
 		mode = 1;

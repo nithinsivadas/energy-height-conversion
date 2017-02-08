@@ -1,6 +1,6 @@
 function [ dataNew, lat, lon, az_new, el_new, sensorloc, time ] = DASC_aer_to_geodetic(fileNameStr, az, el,...
     imageSize, minElevation, projectionAltitude)
-%DASC_aer_to_geodetic Convert aer to geodetic coordinates
+%% DASC_aer_to_geodetic Converts input Digital All Sky Camera image with az, el coordinates to lat, lon projected at the given projection altitude. 
 % Input:
 % fileNameStr : Name of the FITS data file
 % az          : Azimuth Coordinate of data (Default form: 0 deg -> West;
@@ -20,6 +20,9 @@ function [ dataNew, lat, lon, az_new, el_new, sensorloc, time ] = DASC_aer_to_ge
 %               and 90 -> North
 % el_new      : Elevation points of dataNew [1-D Array] 
 % sensorloc   : Specifying location of DASC
+
+% Last Updated : 7th Feb 2017
+% Created by Nithin Sivadas
 %% Read FITS data from file
 dataOldRes = fitsread(fileNameStr);
 azOldRes = az;
@@ -62,6 +65,7 @@ time = unix_to_matlab_time(time);
 %% 
 coordnames = 'Geodetic';
 dataloc = [slantRange(:),rotate_array(az_new(:),-90),el_new(:)];
+
 % Rotating azimuth counter-clockwise by 90 degrees, as calibration data is stored
 % 90 deg clockwise: East -> 0 deg, North ->270 deg
 % Rotating => North -> 0 deg, and East -> 90 deg

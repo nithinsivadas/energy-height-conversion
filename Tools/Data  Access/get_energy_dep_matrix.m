@@ -1,25 +1,26 @@
 function [A] = get_energy_dep_matrix(alt,energyBin,latitude,longitude,time)
-% get_energy_dep_matrix.m
-%   Calculates the energy deposition matrix matrix: altitude profiles of  production rate per 
-%   incident monoenergteic electron beams
+% get_energy_dep_matrix.m Calculates the energy deposition matrix : 
+% altitude profiles of  production rate per incident monoenergteic electron beams
 
 % Functions required
-% msis.m
-% AIDA_TOOLS: ionization_profile_matrix.m (and its following sub-functions)
+% 1. msis.m
+% 2. AIDA_TOOLS: ionization_profile_matrix.m (and its following sub-functions)
 % All of these are in Folder: PFISR_Energy_Spectra/Tools
 
+%-------------------------------------------------------------------------
 % Input:
+%-------
 %  alt    		: altitude (km), double array [nh x 1]
 %  energyBin    : energy (eV) grid of the desired output spectra, double array
 %         		  [nE x 1]
 %  latitude     : Latitude where the measurement is being made
 %  longitude    : Longitude where the measurement is being made
 %  time         : matlab units
-
+%-------------------------------------------------------------------------
 %  Output:
+%---------
 %  A    		: is a matrix [nhxnE] which has the units (m-1 eV)
-%         			Note that q = A*phi = [m-1 eV]*[m-2 s-1 eV-1]
-
+%         	      Note that q = A*phi = [m-1 eV]*[m-2 s-1 eV-1]
 %----------------------------------------------------------------------------
 % Modified: 25th Sep 2016 
 % Created : 25th Sep 2016

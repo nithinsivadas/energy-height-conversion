@@ -8,18 +8,6 @@ function [ medianIndex ] = find_half_energy( array, dim )
 % dim   : The energy dimension - by default 1 as per above definition of
 %         array. It can also be 2
 %-------------------------------------------------------------------------
-% Output :
-%---------
-% medianIndex : The index number of the energy bin array which cuts the 
-%               cumulative energy flux distribution in half
-%%
-%------------------------------------------------------------------------
-% Modified: 7th Feb 2017 
-% Created : 21st Dec 2016
-% Author  : Nithin Sivadas
-% Ref     :
-%----------------------------------------------------------------------------
-%%
   if nargin==1
     dim = 1; 
   end

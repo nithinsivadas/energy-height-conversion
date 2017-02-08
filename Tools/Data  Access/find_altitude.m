@@ -1,10 +1,8 @@
 function [altitudeNo] = find_altitude( altitudeGrid, thisAltitude)
-
-%%find_time.m Find the index of a 1-D time array, given 
-%           a particular time value 
+%% find_altitude.m Find the index of a 1-D altitude array, given a particular altitude value 
 
 % Input
-%  altitudeGrid    	: 1-D time Array 
+%  altitudeGrid    	: 1-D altitude Array 
 %  thisaltitude     : Value identifying the index of the altitude to be found 
 %                    from the array '60.5'
 % Output:

@@ -1,8 +1,9 @@
 function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamma)
 
 %% get_error_in_energyFlux.m Calculates the covariance matrix of energy flux estimates
-
+%-------------------------------------------------------------------------
 %  Input 
+%-------
 %  dq         : Error in the form of std. dev. of production rates [m^-3 s^-1]
 %  A          : Matrix of production rates per unit number flux [eV m-1]
 %  energyBin  : Electron energy bin values [eV]
@@ -12,9 +13,10 @@ function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamm
 %               in -S/Gamma &  0.5 [e]'[C_d^-1][e]
 %               If Gamma == inf - maximum error (Default)
 %               If Gamma == 0   - least possible error
-
+%-------------------------------------------------------------------------
 % Output
-% dE          : Std. deviation in energy flux - worst case [eV m-2 s-1 eV-1
+%--------
+% dE          : Std. deviation in energy flux - worst case [eV m-2 s-1 eV-1]
 %%
 %----------------------------------------------------------------------------
 % Modified: 22nd Sep 2016 
