@@ -1,11 +1,20 @@
 function B = interp_nans(A)
-% This function removes nan by interpolating along altitude
-%----------------------------------------------------------------------------
+%% interp_nans.m This function removes nan by interpolating along altitude
+%--------------------------------------------------------------------------
+% Input
+%------
+% A - Input altitude vs. time matrix [nh x nT]
+%--------------------------------------------------------------------------
+% Output
+%-------
+% B - Interpolated altitude vs. time matrix, along the altitude directon
+%     with nans removed [nh x nT]
+%--------------------------------------------------------------------------
 % Modified: 25th Sep 2016 
 % Created : 25th Sep 2016
 % Author  : Nithin Sivadas
 % Ref     : 
-%----------------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 	x=1:1:size(A,1);
 

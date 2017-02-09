@@ -2,8 +2,9 @@ function [ q, qTime, alpha ] = get_production_rate(Ne, alt, time, mode, alpha)
 
 %% get_production_rate: Estimates the production rate from measured electron density
 %  assuming a effective recombination coefficient that is static with time
-
+%-------------------------------------------------------------------------
 % Input:
+%-------
 % Ne              : Electron density [length(height) x length(time)] [m-3]
 % alt             : height vector [length(height) x 1] [km]
 % time            : time vector [1 x length(time)] [s]
@@ -12,8 +13,9 @@ function [ q, qTime, alpha ] = get_production_rate(Ne, alt, time, mode, alpha)
 %		       '2': q = alpha*ne^2 
 % alpha           : User defined effective recombination coefficients 
 %                   per altitude point [m^3 s^-1]
-
+%--------------------------------------------------------------------------
 % Output:
+%--------
 % q     		  : production rate [m-3 s-1]
 % qTime           : time instances where q is estimated [s]
 % alpha           : Effective recombination coefficients 

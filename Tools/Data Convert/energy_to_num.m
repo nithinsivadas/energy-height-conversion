@@ -1,5 +1,5 @@
 function [numberFlux] = energy_to_num(energyFlux, time, energyBin)
-%energy_to_num.m Converting differential energy flux to differential number flux
+%% energy_to_num.m Converting differential energy flux to differential number flux
 
 % Input:
 % energyFlux : NxM matrix [eV cm^-2 sr^-1 s^-1 eV^-1] or [eV m^-2 sr^-1 s^-1 eV^-1]

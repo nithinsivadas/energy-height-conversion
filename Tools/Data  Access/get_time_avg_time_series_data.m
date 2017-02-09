@@ -1,12 +1,15 @@
 function [ timeAvgData ] = get_time_avg_time_series_data( data, time, timeMin, timeMax )
 %GET_TIME_AVG_FLUX Calculates time average flux given the time limits
+%--------------------------------------------------------------------------
 % Input
+%------
 % data: Any type of 2D time series data, exmaple: energyFlux [nExnT]
 % time: Time array [nTx1]
 % timeMin: Minimum time value in matlab units
 % timeMax: Maximum time value in matlab units
-
+%--------------------------------------------------------------------------
 % Output
+%-------
 % timeAvgData: Time averaged data [nEx1]
 
 %%

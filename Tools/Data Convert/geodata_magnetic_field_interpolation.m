@@ -1,21 +1,29 @@
 function [ pfisrGD, magcoords, atTime, atAltitude] = geodata_magnetic_field_interpolation...
     ( pfisrGD, minTimeStr, maxTimeStr, thisAltitude, magBeamNo)
-%geodata_magnetic_field_interpolation Converts the data into cartesian
-%coordinates, and creates beams that point along the magnetic field
-%direction
-
+%% geodata_magnetic_field_interpolation Interpolate geodata beam coordinates along magnetic field direction
+%Converts geodata aer coordinates, and creates beams that point along 
+%the magnetic field direction
+%--------------------------------------------------------------------------
 % Input 
+%------
 % pfisrGD      - coordinates of pfisrGD data should be in aer coordinates
 % thisTimeStr  - Time string where you wish the data to be interpolated
 % thisAltitude - Altitude where the beam coordinates will be 
-
+%--------------------------------------------------------------------------
 % Output
+%-------
 % pfisrGD    - Data interpolated to beams parallel to mag. field line and
 %              coordinates in xEast, yNorth, zUp
 % magcoords  - [xEast, yNorth, zUp] 
 % atTime     - Beginning and end time of the data in matlab time units
 % atAltitude - The altitude where the coordinates of beams parallel to magnetic field
 %              lines coincide with the actual beam coordinates
+%----------------------------------------------------------------------------
+% Modified: 24th Jan 2017 [needs more clarification]
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%----------------------------------------------------------------------------
 
  switch nargin
         case 5

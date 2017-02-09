@@ -1,21 +1,23 @@
 function [ noParticles ] = kappa_E(energyBin, meanEnergy, T, kappa)
 % kappa_E.m Normalized Energy distribution function (noParticles) for particles with mean energy
 % E0,T, and kappa value kappa.
-
+%--------------------------------------------------------------------------
 % Input:
+%--------
 % energyBin  - Energy variable in [eV]
 % meanEnergy - Mean energy in [eV]
 % T  - Temperature in [kappa]
 % kappa  - Kappa (unitless)
-
+%--------------------------------------------------------------------------
 % Output:
+%--------
 % noParticles - no. of particles per Energy [eV-1]
-%----------------------------------------------------------------------------
+%--------------------------------------------------------------------------
 % Modified: 25th Sep 2016 
 % Created : 25th Sep 2016
 % Author  : Nithin Sivadas
 % Ref     : 
-%----------------------------------------------------------------------------
+%--------------------------------------------------------------------------
 
 eV = 1.60218E-19;
 kb = 1.38*10^-23; %Boltzmann Constant

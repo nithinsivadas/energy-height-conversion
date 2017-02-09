@@ -1,14 +1,16 @@
 function [yNew, altNew] = altitude_crop(y, alt, minAlt, maxAlt)
-%%altitudeCrop.m Crop Matrix Y with N time values and M altitude values to M* altitude values
-
+%% altitudeCrop.m Crop Matrix Y with N time values and M altitude values to M* altitude values
+%--------------------------------------------------------------------------
 % Input
+%------
 %  y     : 2D matrix [NxM], where N is the time dimension and is monotonically
 %         increasing; while M is the altitude dimension
 %  alt    : Altitude array
 %  minAlt : Lower limit of cropped altitude dimension 
 %  maxAlt : Upper limit of cropped altitude dimension
-
+%--------------------------------------------------------------------------
 % Output
+%-------
 % yNew    : 2D matrix [NxM*], where N is the time dimension and M* is the cropped altitude
 % 		    dimension
 % altNew  : The cropped altitude array

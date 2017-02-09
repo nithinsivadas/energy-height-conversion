@@ -1,14 +1,21 @@
 function [ newMatrix ] = change_matrix_size( matrix, newRowSize, newColSize )
-% change_matrix_size.m Changes the size of the matrix by interpolating
-% within
-
+%% change_matrix_size.m Changes the size of the matrix by interpolating within
+%--------------------------------------------------------------------------
 % Input :
+%-------
 % matrix - Any real valued matrix
 % newRowSize - Row size of the new matrix
 % newColSize - Col size of the new matrix
-
+%--------------------------------------------------------------------------
 % Output :
+%---------
 % newMatrix - The new matrix interpolated with the new row and column size
+%----------------------------------------------------------------------------
+% Modified: 24th Jan 2017 [needs more clarification]
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%----------------------------------------------------------------------------
 
 A = matrix;
 
@@ -25,6 +32,7 @@ iNewCol = linspace(1,size(A,2),newColSize);
 
 [Xq, Yq] = meshgrid(iNewRow, iNewCol);
 
+% Interpolation
 newMatrix = interp2(X,Y,A,Xq,Yq,'nearest',0);
 
 

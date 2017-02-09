@@ -1,7 +1,19 @@
 function [ data ] = read_all_sky_fits(fileNameStr, az, el,...
     imageSize, minElevation, projectionAltitude)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%% read_all_sky_fits Read from .FITS file from the Digital All Sky Camera
+%--------------------------------------------------------------------------
+% Input
+%-------
+% fileNameStr  : String which points to the FITS file
+% az           : Azimuth calibration points for pixels
+% el           : Elevation calibration points for pixels
+% imageSize    : pixel sizes you wish e.g. 1024
+% minElevation : Minimum elevation cut off
+% projectionAltitude : The altitude to which the lat, lon would be projected
+%--------------------------------------------------------------------------
+% Output
+%-------
+% data -> ?
 
 data = fitsread(fileNameStr);
 

@@ -1,24 +1,24 @@
 function [ yNew,timeNew ] = time_crop( y,time,timeMin, timeMax )
-
-%%time_crop.m Crop a 2D matrix NxM, with time dimension M to
-%             a new time dimension M*<M
-
+%% time_crop.m Crop a 2D matrix NxM, with time dimension M to a new time dimension M*<M
+%--------------------------------------------------------------------------
 % Input
+%------
 %  y       : 2D matrix [NxM], where M is the time dimension
 %  time    : Time Array 
 %  timeMin :  Initial crop time in matlab time units
 %  timeMax :  Final crop time in matlab time units
-
+%--------------------------------------------------------------------------
 % Outut
+%------
 %  yNew    : Cropped 2D matrix [NxM], where M* is the cropped time dimension
 %  timeNew : Cropped time Array 
 
-%----------------------------------------------------------------------------
+%--------------------------------------------------------------------------
 % Modified: 21st Sep 2016| 25th Jan 2017 
 % Created : 21st Sep 2016
 % Author  : Nithin Sivadas
 % Ref     :
-%----------------------------------------------------------------------------
+%--------------------------------------------------------------------------
 %%
 	yTemp = y;
 	timeTemp = time;

@@ -1,17 +1,19 @@
 function [data] = get_inverted_flux( q, time, alt, energyBin, A, guessFlux, DateNumBeg, DateNumEnd )
-
-%% get_inverted_flux.m Using altitude profiles of production rates, this function uses
-% the maximum entropy inversion method to estimate the energy spectra.
-
+%% get_inverted_flux.m Estimate energy spectra by inverting q(z) 
+% Using altitude profiles of production rates and the maximum entropy inversion 
+% method to estimate the energy spectra.
+%--------------------------------------------------------------------------
 % Input:
+%--------
 % q         : Production rates [m^-3 s^-1]   [nHxnT]
 % alt       : Altitude [km]                  [nHx1]
 % time      : Time [matlab units]            [1xnT]
 % energyBin : Energy bin values [eV]         [nEx1]
 % DateNumBeg: Initial time 
 % DateNumEnd: Final time 
-
-% Output
+%--------------------------------------------------------------------------
+% Output:
+%--------
 % data.flux          : Differential number flux [m-2 s^-1 eV^-1] (Isotropic flux)
 % data.energyFlux    : Differential energy flux [eV m-2 sr-1 s-1 eV-1]
 % data.chi2          : Measures the deviation between the measured q and inverted q (q-A*flux)/qSigma

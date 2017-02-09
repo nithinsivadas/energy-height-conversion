@@ -1,6 +1,26 @@
 function [ax1,h] = plot_DASC_geodetic( dataNew, time, lat, lon, imageSize, latLim, lonLim )
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
+%% plot_DASC_geodetic Plot DASC optical image in geodetic coordinates on a map
+%--------------------------------------------------------------------------
+% Input
+%------
+% dataNew - 2-D optical data from DASC in geodetic coordinates [nCoordinates]
+% time    - Matlab time of the particular DASC image [nCoordinates]
+% lat     - latitude coordinates [nCoordinates]
+% lon     - longitude coordinates [nCoordinates]
+% imageSize - the total pixel size of the output image e.g. 1024 
+% latLim    - latitude limits e.g. [61 65]
+% lonLim    - longitude limits e.g. [141.5 144.5]
+%--------------------------------------------------------------------------
+% Output
+%-------
+% ax1 - map axes
+% h   - pcolor handle of color plot of the optical data
+%--------------------------------------------------------------------------
+% Modified: 24th Jan 2017 
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%--------------------------------------------------------------------------
 
 F = scatteredInterpolant(lat,lon,dataNew,'nearest','none');
 latq = linspace(latLim(1),latLim(2),imageSize);

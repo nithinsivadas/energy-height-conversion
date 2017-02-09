@@ -1,15 +1,27 @@
 function [h2] = plot_2D_energy_slice( data, magcoords, energyBin, nBeams, timeNo, altitude, energy, setMapOn )
-%UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
-
-% data - arranged beam-wise
+%plot_2D_energy_slice.m Plot 2D differential energy flux slices 
+%from 4-D PFISR data sets
+%--------------------------------------------------------------------------
+%Input
+%-----
+% data arranged beam-wise
 % magcoords - arranged non-beam-wise
-
+%--------------------------------------------------------------------------
+%Output
+%------
+% h2 - plot handle
+%
+%% 
+%----------------------------------------------------------------------------
+% Modified: 24th Jan 2017 [needs more clarification]
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%----------------------------------------------------------------------------
+%%
 if nargin < 8
     setMapOn = true;
 end
-
-
 %% Generating lat, lon, h, energy coordinates
 
 [lat,lon,zMagUp ] = magcoords_ned2geodetic( magcoords);
@@ -64,9 +76,6 @@ end;
 
 h2=pcolorm(latq,lonq,log10(Vq)); 
 set(h2,'EdgeColor','none');
-% hold on;
-% scatterm(lat1,lon1,'.','k');
-% caxis([8 12]);
 hold on;
 textm(latLim(2), lonLim(2)+0.1, ['PFISR: ', num2str(energy),' keV'],'color','r');
 textm(latLim(2)-0.2, lonLim(2)+0.1,...

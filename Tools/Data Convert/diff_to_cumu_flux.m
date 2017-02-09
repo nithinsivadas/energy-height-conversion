@@ -1,14 +1,15 @@
 function [ cumuEnergyFlux ] = diff_to_cumu_flux( energyFlux, energyBin )
-%diff_to_cumu_flux Converts differential energy flux into cumulative energy
-% flux
+%% diff_to_cumu_flux.m Converts differential energy flux into cumulative energy flux
+%--------------------------------------------------------------------------
 % Input
+%-------
 % energyFlux : differential energy flux [eV m-2 sr-1 s-1 ev-1] [nExnT]
 % energyBin  : energy bin values [eV]
-%
+%--------------------------------------------------------------------------
 % Output
+%-------
 % cumuEnergyFlux : cumulative energy flux [eV m-2 sr-1 s-1] [nExnT]
 %
-
 %%
 %----------------------------------------------------------------------------
 % Modified: 26th Sep 2016 
