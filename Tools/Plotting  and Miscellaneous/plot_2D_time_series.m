@@ -1,7 +1,9 @@
 function h=plot_2D_time_series(time, yAxis, zValue, timeTick, mode, timeMinStr, timeMaxStr)
 
-%% plot2D.m Plots the electron energy flux using an input data structure
-
+%% plot2D.m Plots 2D time series data
+%--------------------------------------------------------------------------
+% Input:
+%-------
 %  time 	: 1xN - A time array [matlab units]
 %  yAxis 	: Mx1 - Values of the parameter on vertical axis (y-axis)
 %                 Example: Energy bin [eV]
@@ -14,7 +16,10 @@ function h=plot_2D_time_series(time, yAxis, zValue, timeTick, mode, timeMinStr, 
 %        '3': Assumes one is plotting Differential Energy Flux
 % timeMin   : Minimum value of time [String] Ex: '26 Mar 2008 11:00'
 % timeMax   : Maximum value of time [String] Ex: '26 Mar 2008 11:00'
-
+%--------------------------------------------------------------------------
+% Output:
+%-------
+% h         : pcolor handle
 %----------------------------------------------------------------------------
 % Modified: 21st Sep 2016
 %         : 29th Sep 2016 : Included label_time_axis function to shorten

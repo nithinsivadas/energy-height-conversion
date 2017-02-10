@@ -1,6 +1,8 @@
 function label_time_axis(time, setLabel, timeTick, timeMinStr, timeMaxStr )
 %% LABEL_TIME_AXIS Sets the time axis (x-axis) time-tick locations and labels
-
+%--------------------------------------------------------------------------
+% Input:
+%-------
 % time          : 1xN - A time array [matlab units]
 % setLabel      : true or false, if true there will be  tick marks, and labels
 %                 if false there will be only tick marks

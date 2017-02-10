@@ -1,9 +1,28 @@
 function [h2] = plot_2D_energy_slice_aer( data, aercoords, energyBin, nBeams, timeNo, altitude, energy, setMapOn )
-%UNTITLED5 Summary of this function goes here
-%   Detailed explanation goes here
-
-% data - arranged beam-wise
-% magcoords - arranged non-beam-wise
+%% plot_2D_energy_slice_aer.m Plot 2D energy flux map at a particular time, energy and projected at an altitude
+%--------------------------------------------------------------------------
+% Input:
+%-------
+% data          - arranged beam-wise
+%    -energyFlux- contains inverted energy flux varying with energy bin for each beam
+%    -time      - time array
+% aercoords     - azimuth, elevation, range coordinates arranged non-beam wise
+% energyBin     - vector containing energy bin values of the data
+% nBeams        - number of beams
+% timeNo        - index of time value in time array 
+% altitude      - altitude value where image ought to be projected
+% energy        - energy array 
+% setMapOn      - true: plots map axes
+%--------------------------------------------------------------------------
+% Output:
+%-------
+% h2            - pcolor handle
+%--------------------------------------------------------------------------
+% Modified: 24th Jan 2017 
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%--------------------------------------------------------------------------
 
 if nargin < 8
     setMapOn = true;

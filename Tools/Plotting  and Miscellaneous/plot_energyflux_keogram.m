@@ -1,6 +1,26 @@
 function h=plot_energyflux_keogram( data, aercoords, energyBin, nBeams, timeMinStr, timeMaxStr, altitude, energy )
-%UNTITLED12 Summary of this function goes here
-%   Detailed explanation goes here
+%% plot_energyflux_keogram.m Plot 2-D keogram of enegry flux at particular energy
+%--------------------------------------------------------------------------
+% Input
+%------
+% data      - 2-D optical data from DASC in geodetic coordinates [nCoordinates]
+% aercoords - Azimuth, elevation, and range coordinates [nCoordinates x 3]
+% energyBin - Array with values of energy bin
+% nBeams    - Total number of beams
+% timeMinStr - Lower limit of time in string
+% timeMaxStr - Upper limit of time in string
+% altitude   - The altitude at which the keogram is projected 
+% energy     - The energy to be plotted
+%--------------------------------------------------------------------------
+% Output
+%------
+% h          - pcolor plot handle of plot_2D_time_series
+%--------------------------------------------------------------------------
+% Modified: 24th Jan 2017 
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%--------------------------------------------------------------------------
 
 az = aercoords(:,1);
 el = aercoords(:,2);

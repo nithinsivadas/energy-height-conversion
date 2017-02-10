@@ -1,7 +1,17 @@
 function plot_grid_aer(az, el, colorStr)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
-
+%% plot_grid_aer.m Plots grid lines in polar plot at specified azimuth and elevation
+%--------------------------------------------------------------------------
+% Input
+%------
+% az        - Array of azimuth values to plot grid lines
+% el        - Array of elevation values to plot grid lines
+% colorStr  - Color of the grid lines e.g. 'r' 
+%--------------------------------------------------------------------------
+% Modified: 24th Jan 2017 
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%--------------------------------------------------------------------------
 az_all = 0:1:360;
 el_all = 0:1:90;
 

@@ -1,7 +1,8 @@
 function add_horizontal_axes( TTick, TTickLim, newAxisTime, newAxisValue, newAxisLabel, axisNo)
-%add_horizontal_axes.m Add additional XTickLabels below the existing time
-%axis
+%% add_horizontal_axes.m Add additional XTickLabels below the existing time axis
+%----------------------------------------------------------------------------
 % Input
+%------
 % TTick       : Time Tick values which ought to be labelled in MATLAB units
 % TTickLim    : The min and max value of time axis in MATLAB units
 % newAxisTime : [1xN] Time array of the new axis tick values
@@ -10,7 +11,12 @@ function add_horizontal_axes( TTick, TTickLim, newAxisTime, newAxisValue, newAxi
 % axisNo      : Integer values specifying the number of the axes. This
 %               integer will determine the distance of the labels from 
 %               the axis line
-    
+%----------------------------------------------------------------------------
+% Modified: 24th Jan 2017 [needs more clarification]
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%----------------------------------------------------------------------------    
     DateNumBeg = TTickLim(1);
     DateNumEnd = TTickLim(2);
     normalizedTTick=(TTick-DateNumBeg)/(DateNumEnd-DateNumBeg);

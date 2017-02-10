@@ -1,7 +1,9 @@
 function p=plot_1D_time_slice(time, yAxis, zValue, thisTime, mode)
 
-%% plot2D.m Plots the electron energy flux using an input data structure
-
+%% plot_1D_time_slice.m Plots the 1-D energy flux using an input data structure
+%--------------------------------------------------------------------------
+% Input
+%------
 %  time 	: 1xN - A time array [matlab units]
 %  yAxis 	: Mx1 - Values of the parameter on vertical axis (y-axis)
 %                 Example: Energy bin [eV]
@@ -14,12 +16,16 @@ function p=plot_1D_time_slice(time, yAxis, zValue, thisTime, mode)
 %		 '1': Assumes one is plotting Electron Density
 %        '2': Assumes one is plotting Production rates
 %        '3': Assumes one is plotting Differential Energy Flux
-%----------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+% Output
+%-------
+% p         : plot handle
+%--------------------------------------------------------------------------
 % Modified: 26th Sep 2016 : added plot handle 'p'
 % Created : 22nd Sep 2016
 % Author  : Nithin Sivadas
 % Ref     :
-%----------------------------------------------------------------------------
+%--------------------------------------------------------------------------
 %%
 
 %% Default Settings

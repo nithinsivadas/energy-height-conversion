@@ -1,8 +1,18 @@
 function plot_DASC_aer( dataNew, az, el, imageSize )
-%plot_DASC_aer Plots the All Sky Image
-%   Detailed explanation goes here
-
-
+%% plot_DASC_aer.m Plots the All Sky Image in az, el, range coordinates
+%--------------------------------------------------------------------------
+% Input
+%------
+% dataNew - 2-D optical data from DASC in geodetic coordinates [nCoordinates]
+% az     - Azimuth coordinates [nCoordinates]
+% el     - Elevation coordinates [nCoordinates]
+% imageSize - the total pixel size of the output image e.g. 1024 
+%--------------------------------------------------------------------------
+% Modified: 24th Jan 2017 
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%--------------------------------------------------------------------------
 % include_new_colormaps;
 % colormap(viridis);
 
