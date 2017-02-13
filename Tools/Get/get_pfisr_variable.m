@@ -1,7 +1,7 @@
 function [msrParValue, altitudeGrid, time] =...
-    read_pfisr_variable(fileNameStr, msrParameter, mode, altitudeGrid)
+    get_pfisr_variable(fileNameStr, msrParameter, mode, altitudeGrid)
 
-%% read_pfisr_variable.m 
+%% get_pfisr_variable.m 
 % Calculates the value of the parmater specified in 'msrParameter'
 % along altitude from measurements along the different beams of PFISR (Poker
 % Flat Incoherent Radar) system. 

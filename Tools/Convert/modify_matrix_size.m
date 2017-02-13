@@ -1,5 +1,5 @@
-function [ newMatrix ] = change_matrix_size( matrix, newRowSize, newColSize )
-%% change_matrix_size.m Changes the size of the matrix by interpolating within
+function [ newMatrix ] = modify_matrix_size( matrix, newRowSize, newColSize )
+%% modify_matrix_size.m Changes the size of the matrix by interpolating within
 %--------------------------------------------------------------------------
 % Input :
 %-------

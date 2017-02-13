@@ -1,5 +1,5 @@
-function [ nBeams ] = calculate_nBeams(pfisrGD, coordinateNo)
-%% calculate_nBeams Calculate the number of beams in PFISR experiment
+function [ nBeams ] = get_nbeams(pfisrGD, coordinateNo)
+%% get_nbeams Calculate the number of beams in PFISR experiment
 % using the range, or slant_height coordinate - which is same for all beams
 %--------------------------------------------------------------------------
 % Input

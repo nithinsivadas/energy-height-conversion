@@ -1,5 +1,5 @@
-function [h2] = plot_2D_energy_slice_aer( data, aercoords, energyBin, nBeams, timeNo, altitude, energy, setMapOn )
-%% plot_2D_energy_slice_aer.m Plot 2D energy flux map at a particular time, energy and projected at an altitude
+function [h2] = plot_2D_energy_slice_geodetic_aer( data, aercoords, energyBin, nBeams, timeNo, altitude, energy, setMapOn )
+%% plot_2D_energy_slice_geodetic_aer.m Plot 2D energy flux map in aer coordinates at articular time, energy and projected at an altitude
 %--------------------------------------------------------------------------
 % Input:
 %-------

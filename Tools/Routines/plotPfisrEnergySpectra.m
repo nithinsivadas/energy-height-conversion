@@ -22,11 +22,11 @@ clear data_thm;
 energyBin = thm.energyBin;
 
 %% Mode 1: Inversion from measurements along the magnetic field line
-[ePopDenMag, altPop, timePop] = read_pfisr_variable(pfisrDataFileNameStr, 'popl', -1);
+[ePopDenMag, altPop, timePop] = get_pfisr_variable(pfisrDataFileNameStr, 'popl', -1);
 
 % Tidying up Electron Density
-[NeMag, time] = time_crop(ePopDenMag, timePop, timeMin, timeMax);
-[NeMag, alt] = altitude_crop(NeMag, altPop,altMin, altMax);
+[NeMag, time] = crop_time(ePopDenMag, timePop, timeMin, timeMax);
+[NeMag, alt] = crop_altitude(NeMag, altPop,altMin, altMax);
 NeMag = interp_nans(NeMag);
 NeMag(NeMag<0)=10^9;
 
@@ -39,11 +39,11 @@ dataMag.energyFlux(dataMag.energyFlux<0)=10^6;
 
 
 %%  Mode 2: From measurements averaged across the PFISR beams
-[ePopDenAvg, altPop, timePop] = read_pfisr_variable(pfisrDataFileNameStr, 'popl', 0);
+[ePopDenAvg, altPop, timePop] = get_pfisr_variable(pfisrDataFileNameStr, 'popl', 0);
 
 % Tidying up Electron Density
-[NeAvg, time] = time_crop(ePopDenAvg, timePop, timeMin, timeMax);
-[NeAvg, alt] = altitude_crop(NeAvg, altPop,altMin, altMax);
+[NeAvg, time] = crop_time(ePopDenAvg, timePop, timeMin, timeMax);
+[NeAvg, alt] = crop_altitude(NeAvg, altPop,altMin, altMax);
 NeAvg = interp_nans(NeAvg);
 NeAvg(NeAvg<0)=10^9;
 

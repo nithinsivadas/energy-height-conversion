@@ -1,5 +1,5 @@
-function [ numberFlux ] = kappa_j(x,energyBin)
-%kappa_j.m Normalized flux (j(energyBin)) for particles with bulk energy
+function [ numberFlux ] = get_kappa_j(x,energyBin)
+%get_kappa_j.m Normalized flux (j(energyBin)) for particles with bulk energy
 %(/velocity) meanEnergy,T,plasmaDensity, and kappa value k.
 %-------------------------------------------------------------------------
 % Input:
@@ -27,7 +27,7 @@ kappa=(x(3));
 plasmaDensity=(x(4))*10^-6; %[cm^-3]
 m=1;
 m = m*(1.602*10^-15)^-1; %[eV/(cm s-1)^2]
-numberFlux = (plasmaDensity*(energyBin).^0.5).*((2*pi*sqrt(2*m))^-1).*kappa_E(energyBin,meanEnergy,T,kappa);
+numberFlux = (plasmaDensity*(energyBin).^0.5).*((2*pi*sqrt(2*m))^-1).*get_kappa_E(energyBin,meanEnergy,T,kappa);
 
 % converting to SI units
 numberFlux=numberFlux*10^4;

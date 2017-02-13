@@ -1,7 +1,7 @@
 function [beamNo, latitude, longitude, altitudeGrid] =...
-    read_pfisr_beam_coordinates(fileNameStr, msrParameter, altitudeGrid)
+    get_pfisr_beam_coordinates(fileNameStr, msrParameter, altitudeGrid)
 
-%% read_pfisr_beam_coordinates.m 
+%% get_pfisr_beam_coordinates.m 
 %
 % Calculates the coordinates of measurement parameters varying with
 % altitude along different beams of PFISR (Poker Flat Incoherent Radar)
@@ -78,7 +78,7 @@ function [beamNo, latitude, longitude, altitudeGrid] =...
     
     % Identifying the number of beams
     coordinateNo=1; % Using slant range to evaluate the number of beams
-    nBeams = calculate_nBeams(pfisrGD, coordinateNo);
+    nBeams = get_nbeams(pfisrGD, coordinateNo);
     
     % Estimating the length of the range and time array
     nRange = size(pfisrGD.dataloc,1);

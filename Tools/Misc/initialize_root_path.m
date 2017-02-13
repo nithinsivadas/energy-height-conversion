@@ -1,5 +1,5 @@
-function [ rootPathStr ] = root_path()
-%% root_path.m Generates the root git-hub path based on the computer
+function [ rootPathStr ] = initialize_root_path()
+%% initialize_root_path.m Generates the root git-hub path based on the computer
 %--------------------------------------------------------------------------
 % Output
 %-------

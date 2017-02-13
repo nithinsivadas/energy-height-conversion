@@ -72,7 +72,7 @@ slantMag= slant;
 
  % Calculating the number of beams
 coordinateNo=1; % Using slant range to evaluate the number of beams
-nBeams = calculate_nBeams(pfisrGD, coordinateNo);
+nBeams = get_nbeams(pfisrGD, coordinateNo);
  
 % Creating the default altitude grid (altitude grid of magnetic field
 % aligned beam)

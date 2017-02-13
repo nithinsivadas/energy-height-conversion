@@ -1,5 +1,5 @@
-function [ noParticles ] = kappa_E(energyBin, meanEnergy, T, kappa)
-% kappa_E.m Normalized Energy distribution function (noParticles) for particles with mean energy
+function [ noParticles ] = get_kappa_E(energyBin, meanEnergy, T, kappa)
+% get_kappa_E.m Normalized Energy distribution function (noParticles) for particles with mean energy
 % E0,T, and kappa value kappa.
 %--------------------------------------------------------------------------
 % Input:

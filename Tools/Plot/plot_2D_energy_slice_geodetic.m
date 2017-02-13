@@ -1,11 +1,27 @@
-function [h2] = plot_2D_energy_slice( data, magcoords, energyBin, nBeams, timeNo, altitude, energy, setMapOn )
-%plot_2D_energy_slice.m Plot 2D differential energy flux slices 
-%from 4-D PFISR data sets
+function [h2] = plot_2D_energy_slice_geodetic( data, magcoords, energyBin, nBeams, timeNo, altitude, energy, setMapOn )
+%plot_2D_energy_slice_geodetic.m Plot 2D differential energy flux slices 
+%from 4-D PFISR data sets on lat, long map
 %--------------------------------------------------------------------------
 %Input
 %-----
-% data arranged beam-wise
-% magcoords - arranged non-beam-wise
+% data          : arranged beam-wise
+% -> flux       : differential number flux [nE x nTime]
+% -> energyFlux : differential energy flux [nE x nTime]
+% -> chi2       : Reduced chi-2 of the maximum entropy regression [1 x nTime]
+% -> qInvert    : Production rate from inverted energy flux [nh x nTime]
+% -> maxIter    : Maximum number of iterations [1 x nTime]
+% -> energyBin  : Energy bin values [nE x 1]
+% -> time       : Time array [nTime x 1]
+% -> alt        : Altitude array [nh x 1]
+% -> A          : Production rate vs. number flux matrix [nh x nE]
+% -> qInput     : Production rate derived from electron density [nh x nTime]
+% magcoords     : arranged non-beam-wise [nCoordinates x 3]
+% energyBin     : Energy bin values [nE x 1]
+% nBeams        : Total number of beams
+% timeNo        : Time number of the energy slice to be plotted
+% altitude      : Altitude of projection of the energy slice
+% energy        : Energy in keV of the differential energy flux to be plotted
+% setMapOn      : True => Map axis on
 %--------------------------------------------------------------------------
 %Output
 %------

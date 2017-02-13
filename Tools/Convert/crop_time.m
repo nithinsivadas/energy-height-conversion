@@ -1,5 +1,5 @@
-function [ yNew,timeNew ] = time_crop( y,time,timeMin, timeMax )
-%% time_crop.m Crop a 2D matrix NxM, with time dimension M to a new time dimension M*<M
+function [ yNew,timeNew ] = crop_time( y,time,timeMin, timeMax )
+%% crop_time.m Crop a 2D matrix NxM, with time dimension M to a new time dimension M*<M
 %--------------------------------------------------------------------------
 % Input
 %------

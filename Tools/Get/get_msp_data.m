@@ -1,5 +1,5 @@
-function [dataMSP] = extract_msp_data( fileNameStr, timeMinStr, timeMaxStr)
-%% extract_msp_data Extract Meridional Scanning Photometer Data given Josh's
+function [dataMSP] = get_msp_data( fileNameStr, timeMinStr, timeMaxStr)
+%% get_msp_data Extract Meridional Scanning Photometer Data given Josh's
 %msp_vvel.mat file
 %-------------------------------------------------------------------------
 % Input:

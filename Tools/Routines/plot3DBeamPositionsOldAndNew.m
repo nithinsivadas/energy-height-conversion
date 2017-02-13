@@ -81,4 +81,4 @@ hold on;
 scatter3(x1MagEast, y1MagNorth, zMagUp,'.r');
 
 %% Using Magnetic Field aligned pfisrGD object to extract data along a beam
-[msrParValue, altitudeGrid, time] = extract_pfisr_beam_data(pfisrGDmag, 'ne', 1);
+[msrParValue, altitudeGrid, time] = get_pfisr_beam_data(pfisrGDmag, 'ne', 1);

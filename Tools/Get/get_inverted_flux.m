@@ -52,8 +52,8 @@ function [data] = get_inverted_flux( q, time, alt, energyBin, A, guessFlux, Date
         kb          = 1.38*10^-23;
         eV          = 1.602E-19;
         T_w         = 10*5000*eV/kb;
-%         guessFlux = kappa_j([10000,T_w,160, 10^12], energyBin); %[m^-2 s^-1]
-        guessFlux = (10^13)*kappa_E(energyBin,10000,T_w,160); %[m^-2 s^-1]
+%         guessFlux = get_kappa_j([10000,T_w,160, 10^12], energyBin); %[m^-2 s^-1]
+        guessFlux = (10^13)*get_kappa_E(energyBin,10000,T_w,160); %[m^-2 s^-1]
     end;
     
     if nargin<5
@@ -67,7 +67,7 @@ function [data] = get_inverted_flux( q, time, alt, energyBin, A, guessFlux, Date
 
     %% Preparing the data for inversion
     % Cropping the time array and density matrix to that prescribed by the user
-    [q, time] = time_crop(q, time, DateNumBeg, DateNumEnd);
+    [q, time] = crop_time(q, time, DateNumBeg, DateNumEnd);
 
     % Removing nans
     q = interp_nans(q);

@@ -5,7 +5,7 @@ data = allData(4);
 
 fileNameStr='/home/nithin/Documents/git-repos/energy-height-conversion/PFISR_Energy_Spectra/Data/DataFile_2008_1.h5';
 [datamag.zValue, datamag.yAxis, datamag.time] =...
-    read_pfisr_variable(fileNameStr, 'popl', -1);
+    get_pfisr_variable(fileNameStr, 'popl', -1);
 datamag.zValue=interp_nans(datamag.zValue);
 %%
 timeMin = datenum('26-Mar-2008 10:00');

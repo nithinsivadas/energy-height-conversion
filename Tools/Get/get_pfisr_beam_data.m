@@ -1,43 +1,39 @@
 function [msrParValue, xEastAlongGrid, yNorthAlongGrid, altitudeGrid, time] =...
-    extract_pfisr_beam_data(pfisrGD, msrParameter, beamNo, nBeams, altitudeGrid)
+    get_pfisr_beam_data(pfisrGD, msrParameter, beamNo, nBeams, altitudeGrid)
 
-%% Extract PFISR Beam Data, given input coordinates are in xEast, yNorth, zUP
-
-%% read_pfisr_variable.m 
+%% get_pfisr_beam_data.m given beam No and parameter
 % Calculates the value of the parmater specified in 'msrParameter'
-% along altitude from measurements along the different beams of PFISR (Poker
+% along altitude from measurements along a particular beam number of PFISR (Poker
 % Flat Incoherent Radar) system. 
 %
 %------------------------------------------------------------------------------
 % Input
 %-------
-% fileNameStr : [String] The path to HDF5 file which contains the PFISR data
+% pfisrGD : The GeoData object that contains data from PFISR
 %
 % msrParameter: [String] - The name of the measurement parameter
 %               (specified in the HDF5 file) which you would like to
 %               extract from the HDF5 file (e.g. 'dpopl','popl')
 %               Default: Uncorrected electron density: 'popl'
 %               IMPORTANT- The parameter has to be expressed in log scale
+% beamNo      : The id of the PFISR beam from which data will be extracted
+% nBeams      : Total number of beams
 % altitudeGrid: [N x 1] [km] - A column vector of the altitude points for 
 %               which you need the 
 %               value of the measurement parameter 
 %               Default value of the altitude grid is the altitude projection 
 %               of the range points of the beam pointing along 
 %               the magnetic field line
-% mode        : Determines the kind of data output [Integer values]
-%         '-1': Retrieves data along the magnetic field aligned beam
-%          '0': [Default mode] Retrieves data averaged across the total number 
-%               of beams 
-%    '1' or >1: Assumes the number as the beam number along which you would 
-%               like the data to be retrieved
 %----------------------------------------------------------------------------
 % Output 
 %--------
-% msrParValue : The value of the measurement parameter per altitude; 
-%               Units as given by the HDF5 file
-% altitudeGrid: The default altitude (of beam 1) 
-%               or user specified altitude points
-% time        : Time array
+% msrParValue       : The value of the measurement parameter per altitude; 
+%                       Units as given by the HDF5 file
+% xEastAlongGrid    : Coordinates along East
+% yNorthAlongGrid   : Coordinates along North
+% altitudeGrid      : The default altitude (of beam 1) 
+%                       or user specified altitude points
+% time              : Time array
 %%
 %----------------------------------------------------------------------------
 % Modified: 21st Sep 2016 

@@ -35,7 +35,7 @@ figureHandle = figure;
 
 timeMinStr = '26 Mar 2008 11:00';
 timeMaxStr = '26 Mar 2008 12:00';
-dataMSP = extract_msp_data(MSPDataStr, timeMinStr, timeMaxStr);
+dataMSP = get_msp_data(MSPDataStr, timeMinStr, timeMaxStr);
 %%
 totalPanelNo=6;
 p=panel(figureHandle);

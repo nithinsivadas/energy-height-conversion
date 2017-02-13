@@ -1,4 +1,4 @@
-function [yNew, altNew] = altitude_crop(y, alt, minAlt, maxAlt)
+function [yNew, altNew] = crop_altitude(y, alt, minAlt, maxAlt)
 %% altitudeCrop.m Crop Matrix Y with N time values and M altitude values to M* altitude values
 %--------------------------------------------------------------------------
 % Input

@@ -29,9 +29,9 @@ azOldRes = az;
 elOldRes = el;
 
 %% Change resolution of data location and data to user specified imageSize
-az = change_matrix_size(azOldRes, imageSize, imageSize);
-el = change_matrix_size(elOldRes, imageSize, imageSize);
-data = change_matrix_size(dataOldRes, imageSize, imageSize);
+az = modify_matrix_size(azOldRes, imageSize, imageSize);
+el = modify_matrix_size(elOldRes, imageSize, imageSize);
+data = modify_matrix_size(dataOldRes, imageSize, imageSize);
 
 %% Fix problems with the coordinate matrix
 % Look for large gradients in the az mapping because the in between values

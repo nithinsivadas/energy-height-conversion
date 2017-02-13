@@ -68,7 +68,7 @@ end
 % Data(thisData).legend = ['B_z'];
 %  IMF_OMNI  Bz
 thisData=1;
-[data(thisData).yAxis, data(thisData).time] = time_crop(imf_omni.Bz', imf_omni.time',...
+[data(thisData).yAxis, data(thisData).time] = crop_time(imf_omni.Bz', imf_omni.time',...
     datenum('26 Mar 2008 08:00'), datenum('26 Mar 2008 13:00'));
 data(thisData).label = ({'IMF B_z','[nT]'});
 data(thisData).y.tick=[-10, -5, 0, 5, 10];
@@ -306,7 +306,7 @@ data(thisData).zValue=100*data(thisData).zValue/max(max(data(thisData).zValue));
 data(thisData).time = pfisrBeamAvg.energySpectraVickery.time;
 data(thisData).yAxis = pfisrBeamAvg.energySpectraVickery.energyBin;
 
-halfEnergyIndex = find_half_energy( data(thisData).zValue, 1 );
+halfEnergyIndex = find_median_energy( data(thisData).zValue, 1 );
 data(thisData).yValue = data(thisData).yAxis(halfEnergyIndex)'; % 50% energy flux Energy
 
 data(thisData).label = ({'PFISR Inversion','(Vickrey et.al 1982)','Norm. cumulative','energy flux','[keV]'});
@@ -328,7 +328,7 @@ data(thisData).zValue= diff_to_cumu_flux(...,
     pfisrBeamAvg.energySpectraSIC.energyBin);
 data(thisData).zValue=100*data(thisData).zValue/max(max(data(thisData).zValue));
 
-halfEnergyIndex = find_half_energy( data(thisData).zValue, 1 );
+halfEnergyIndex = find_median_energy( data(thisData).zValue, 1 );
 data(thisData).yValue = data(thisData).yAxis(halfEnergyIndex)'; % 50% energy flux Energy
 
 data(thisData).label = ({'PFISR Inversion','SIC Model','Norm. cumulative','energy flux','[keV]'});
@@ -350,7 +350,7 @@ data(thisData).zValue= diff_to_cumu_flux(...,
     thd.energySpectra.energyBin');
 data(thisData).zValue=100*data(thisData).zValue/max(max(data(thisData).zValue));
 
-halfEnergyIndex = find_half_energy( data(thisData).zValue, 1 );
+halfEnergyIndex = find_median_energy( data(thisData).zValue, 1 );
 data(thisData).yValue = data(thisData).yAxis(halfEnergyIndex)'; % 50% energy flux Energy
 
 data(thisData).label = ({'Thm-D','Norm. cumulative','energy flux','[keV]'});

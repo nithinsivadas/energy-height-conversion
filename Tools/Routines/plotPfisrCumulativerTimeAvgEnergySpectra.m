@@ -35,11 +35,11 @@ clear data_thm;
 energyBin = thm.energyBin;
 
 %%  Mode 1: From measurements averaged across the PFISR beams
-[ePopDenAvg, altPop, timePop] = read_pfisr_variable(pfisrDataFileNameStr, 'popl', 0);
+[ePopDenAvg, altPop, timePop] = get_pfisr_variable(pfisrDataFileNameStr, 'popl', 0);
 
 % Tidying up Electron Density
-[NeAvg, time] = time_crop(ePopDenAvg, timePop, timeMin, timeMax);
-[NeAvg, alt] = altitude_crop(NeAvg, altPop,altMin, altMax);
+[NeAvg, time] = crop_time(ePopDenAvg, timePop, timeMin, timeMax);
+[NeAvg, alt] = crop_altitude(NeAvg, altPop,altMin, altMax);
 NeAvg = interp_nans(NeAvg);
 NeAvg(NeAvg<0)=10^9;
 
@@ -50,11 +50,11 @@ NeAvg(NeAvg<0)=10^9;
 [dataAvg] = get_inverted_flux(qAvg, qAvgTime, alt, energyBin);
 
 %%  Mode 1.1: Error in PFISR Measurements
-[dePopDenAvg, altPop, timePop] = read_pfisr_variable(pfisrDataFileNameStr, 'dpopl', 0);
+[dePopDenAvg, altPop, timePop] = get_pfisr_variable(pfisrDataFileNameStr, 'dpopl', 0);
 
 % Tidying up Electron Density
-[dNeAvg, time] = time_crop(dePopDenAvg, timePop, timeMin, timeMax);
-[dNeAvg, alt] = altitude_crop(dNeAvg, altPop,altMin, altMax);
+[dNeAvg, time] = crop_time(dePopDenAvg, timePop, timeMin, timeMax);
+[dNeAvg, alt] = crop_altitude(dNeAvg, altPop,altMin, altMax);
 dNeAvg = interp_nans(dNeAvg);
 dNeAvg(dNeAvg<0)=10^9;
 
@@ -66,8 +66,8 @@ dNeAvg(dNeAvg<0)=10^9;
 %% Mode 2: From SIC Measurements
 
 load (sicDataFileNameStr);
-[ionrate_raw, sic.alt] = altitude_crop(ionrate_raw, h,altMin, altMax);
-[ionrate_smoothed, sic.alt] = altitude_crop(ionrate_smoothed, h,altMin, altMax);
+[ionrate_raw, sic.alt] = crop_altitude(ionrate_raw, h,altMin, altMax);
+[ionrate_smoothed, sic.alt] = crop_altitude(ionrate_smoothed, h,altMin, altMax);
 sic.qRaw = ionrate_raw*10^6;
 sic.qSmooth = ionrate_smoothed*10^6;
 sic.Ne = Nedata*10^6;

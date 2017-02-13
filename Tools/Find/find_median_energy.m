@@ -1,5 +1,5 @@
-function [ medianIndex ] = find_half_energy( array, dim )
-%% find_half_energy.m Calculates the energy bin that cuts the cumulative energy flux distribution into half
+function [ medianIndex ] = find_median_energy( array, dim )
+%% find_median_energy.m Calculates the energy bin that cuts the cumulative energy flux distribution into half
 %-------------------------------------------------------------------------
 % Input:
 %--------
