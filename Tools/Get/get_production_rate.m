@@ -24,6 +24,7 @@ function [ q, qTime, alpha ] = get_production_rate(Ne, alt, time, mode, alpha)
 %%
 %----------------------------------------------------------------------------
 % Modified: 21st Sep 2016 
+%         : 9th Mar 2017, Replaces size() with lenght()
 % Created : 21st Sep 2016
 % Author  : Nithin Sivadas
 % Ref     : Semeter & Kamalabadi 2005
@@ -52,14 +53,14 @@ function [ q, qTime, alpha ] = get_production_rate(Ne, alt, time, mode, alpha)
 			[DT,DNE]= meshgrid(dt,Ne(ialt,1));
 
 			dn_dt = dn./(2*DT);
-			itime = 1:1:size(timePrev);
+			itime = 1:1:length(timePrev);
 			q_1 = dn_dt(:,itime);
 			q_2 = diag(alpha)*(Ne(ialt,itime).^2);
 			q = q_1 + q_2; 
 			qTime=timePrev;
 
 		case 2
-			itime = 1:1:size(time);
+			itime = 1:1:length(time);
 			q = diag(alpha)*(Ne(ialt,itime).^2);
 			qTime = time;
 
