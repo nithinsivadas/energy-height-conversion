@@ -24,6 +24,7 @@ function h=plot_2D_time_series(time, yAxis, zValue, timeTick, mode, timeMinStr, 
 % Modified: 21st Sep 2016
 %         : 29th Sep 2016 : Included label_time_axis function to shorten
 %         : 15th Oct 2016 : Changed surf plot to pcolor
+%         : 9th Mar 2017 : Modified datestr format
 % Created : 21st Sep 2016
 % Author  : Nithin Sivadas
 % Ref     :
@@ -83,11 +84,11 @@ function h=plot_2D_time_series(time, yAxis, zValue, timeTick, mode, timeMinStr, 
 		case 2
 			set(get(gca,'YLabel'),'String','Altitude [km]');
             label_time_axis(time, true, timeTick, timeMinStr, timeMaxStr);
-			title(['Production Rates log_1_0 [m^-^3 s^-^1] at ',datestr(time(1),'DD-MM-YY')]);
+			title(['Production Rates log_1_0 [m^-^3 s^-^1] at ',datestr(time(1),'DD-mmm-YY')]);
 		case 3
 			set(get(gca,'YLabel'),'String','Energy [eV]');
             label_time_axis(time, true, timeTick, timeMinStr, timeMaxStr);
-			title(['Differential Energy Flux log_1_0 [eV m^-^2 s^-^1 sr^-^1 eV^-^1] at ',datestr(time(1),'DD-MM-YY')]);
+			title(['Differential Energy Flux log_1_0 [eV m^-^2 s^-^1 sr^-^1 eV^-^1] at ',datestr(time(1),'DD-mmm-YY')]);
 			set(gca,'YScale','log');
 		otherwise
 		    warning('No mode selected')
