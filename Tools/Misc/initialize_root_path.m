@@ -13,9 +13,9 @@ function [ rootPathStr ] = initialize_root_path()
 computer=getenv('computername');
 if nargin<1
     if computer=='NITHIN-SURFACE'
-        rootPathStr=['C:\Users\Nithin\Documents\GitHub\energy-height-conversion\'];    
+        rootPathStr=['C:\Users\Nithin\Documents\GitHub\'];    
     else
-        rootPathStr=['/home/nithin/Documents/git-repos/energy-height-conversion/'];
+        rootPathStr=['/home/nithin/Documents/git-repos/'];
     end
 end;
 
