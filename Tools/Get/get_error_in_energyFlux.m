@@ -19,7 +19,7 @@ function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamm
 % dE          : Std. deviation in energy flux - worst case [eV m-2 s-1 eV-1]
 %%
 %----------------------------------------------------------------------------
-% Modified: 22nd Sep 2016 
+% Modified: 22nd Sep 2016, 26 May 2017: Take the square root before converting to energy flux! 
 % Created : 22nd Sep 2016
 % Author  : Nithin Sivadas
 % Ref     : D. L. Hysell 2007
@@ -28,7 +28,7 @@ function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamm
 
 
 
-    if nargin < 7
+    if nargin < 6
         Gamma = -1;
     end;
 
@@ -38,7 +38,7 @@ function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamm
 
         thisFlux = numFlux(:,itime);
         
-        Cq = diag(dq(:,i).^2);
+        Cq = diag(dq(:,itime).^2);
 
         part1 = A'*inv(Cq)*A; 
         if Gamma ~= -1
@@ -51,12 +51,12 @@ function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamm
         
         [X,D]=eig(Cflux,'matrix');
            
-        dnumFlux=diag(D);        
-        denergyFlux(i,:)=num_to_energy(dnumFlux,1,energyBin); 
+        dnumFlux=(diag(D)).^0.5;        
+        denergyFlux(itime,:)=num_to_energy(dnumFlux,1,energyBin); 
      
      end;
      
-    dE=denergyFlux.^0.5;
+    dE=denergyFlux;
 
     [isThereNAN, totalNAN] = check_nan(dE);
     
