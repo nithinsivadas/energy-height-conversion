@@ -12,7 +12,7 @@ if computer=='NITHIN-SURFACE'
         'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\PFISR_Energy_Spectra\Data\DataFile_2008_1.h5';
     thmDataFileNameStr =...
         'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Data_Mar_08_Event\space\Espectra_thm.mat';
-    sicDataFileNameStr='C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Ground\summaryresQinversion.mat';
+    sicDataFileNameStr='C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Data\Ground\summaryresQinversion.mat';
 else 
     pfisrDataFileNameStr =...
         '/home/nithin/Documents/git-repos/energy-height-conversion/PFISR_Energy_Spectra/Data/DataFile_2008_1.h5';
@@ -60,10 +60,15 @@ dNeAvg = interp_nans(dNeAvg);
 dNeAvg(dNeAvg<0)=10^9;
 
 % Generate Production Rate
-[dqAvg,dqAvgTime, alpha] = get_production_rate(dNeAvg, alt, time, 2);
-
+[dqAvg0,dqAvgTime, alpha] = get_production_rate(dNeAvg, alt, time, 2);
+dqAvg = 2*alpha.*NeAvg.*dNeAvg; %Simon wedlund et al. 2013
 % Invert production rates
-[dataAvgError] = get_inverted_flux(dqAvg, dqAvgTime, alt, energyBin);
+[dataAvgError0] = get_inverted_flux(dqAvg, dqAvgTime, alt, energyBin);
+dataAvgError = dataAvgError0;
+dataAvgError.energyFlux = (get_error_in_energyFlux(dqAvg, dataAvg.A, dataAvg.energyBin, dataAvg.energyFlux, dataAvg.time,-1))';
+% 882 is the number of singular values (A<0.0001) in the forward model
+% dataAvgError.energyFlux = dataAvgError0.energyFlux-dataAvg.energyFlux;
+% dataAvgError.flux = dataAvgError0.flux-dataAvg.flux;
 %% Mode 2: From SIC Measurements
 
 load (sicDataFileNameStr);
@@ -161,7 +166,7 @@ for iTime = 1:1:2
 
     p(iTime,1).select();
    
-    q(1)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, NeAvg, plotThisTime(iTime,:), 0);
+    q(1)=plot_1D_time_slice_with_error(dataAvg.time, dataAvg.alt, NeAvg, dNeAvg, plotThisTime(iTime,:), 0);
     q(1).Color = color1; q(1).LineStyle = lineStyle1; q(1).Marker = lineMarker1; q(1).LineWidth = lineWidth1;
     hold on;
     q(2)=plot_1D_time_slice(dataAvgError.time, dataAvgError.alt, dNeAvg, plotThisTime(iTime,:), 0);
@@ -198,7 +203,7 @@ for iTime = 1:1:2
         set(lgd,'FontSize',8);
     end;
     p(iTime,2).select();
-    q(1)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, qAvg, plotThisTime(iTime,:), 0);
+    q(1)=plot_1D_time_slice_with_error(dataAvg.time, dataAvg.alt, qAvg, dqAvg, plotThisTime(iTime,:), 0);
     q(1).Color = color1; q(1).LineStyle = lineStyle1; q(1).Marker = lineMarker1; q(1).LineWidth = lineWidth1;
     hold on;
 
@@ -249,7 +254,7 @@ for iTime = 1:1:2
 
 
     p(iTime,3).select();
-    q(1)=plot_1D_time_slice(dataAvg.time, dataAvg.energyBin, dataAvg.energyFlux, plotThisTime(iTime,:), -1);
+    q(1)=plot_1D_time_slice_with_error(dataAvg.time, dataAvg.energyBin, dataAvg.energyFlux, dataAvgError.energyFlux, plotThisTime(iTime,:), -1);
     q(1).Color = color1; q(1).LineStyle = lineStyle1; q(1).Marker = lineMarker1; q(1).LineWidth = lineWidth1;
     hold on;
 
@@ -311,9 +316,9 @@ ylabel('Diff. Energy Flux [$eV m^{-2} sr^{-1} s^{-1} eV^{-1}$]','Interpreter','l
 set(gca,'YTick',10.^[6, 7, 8, 9, 10, 11, 12]);
 %%
 if computer=='NITHIN-SURFACE'
-    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.pdf' -pdf 
-    save('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.svg');
-    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.png' -r600 -png -nocrop
+    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.pdf' -pdf 
+    save('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.svg');
+    export_fig 'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Plots\Draft 12 Plots\QualityOfInversion.png' -r600 -png -nocrop
 else
     export_fig '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/QualityOfInversion.pdf' -pdf 
     save('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Plots/Draft10_Plots/PDF/QualityOfInversion.svg');
