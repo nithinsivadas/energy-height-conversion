@@ -2,8 +2,12 @@
 
 clear all;
 data=get_all_time_series_data();
-load('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Data/Space/thd_data_26_Mar_2008.mat')
-
+computer=getenv('computername');
+if computer=='NITHIN-SURFACE'
+    load('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Data\Space\thd_data_26_Mar_2008.mat')
+else
+   load('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Projects/Paper 1/Data/Space/thd_data_26_Mar_2008.mat')
+end
 pad_low = thd.pitchAngleDistribution.esa.flux;
 pa =cell2mat(thd.pitchAngleDistribution.esa.pitchAngle);
 pa_time = thd.pitchAngleDistribution.esa.time;
