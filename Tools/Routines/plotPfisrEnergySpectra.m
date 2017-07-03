@@ -4,15 +4,25 @@ clear all;
 initialize_geodata;
 
 %Global Variables
-pfisrDataFileNameStr =...
+computer=getenv('computername');
+if computer=='NITHIN-SURFACE'
+   pfisrDataFileNameStr =...
+    'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\PFISR_Energy_Spectra\Data\DataFile_2008_1.h5';
+   thmDataFileNameStr =...
+    'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Data_Mar_08_Event\space\Espectra_thm.mat';
+else
+   pfisrDataFileNameStr =...
     '/home/nithin/Documents/git-repos/energy-height-conversion/PFISR_Energy_Spectra/Data/DataFile_2008_1.h5';
+   thmDataFileNameStr =...
+    '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/space/Espectra_thm.mat';
+end
+
 timeMin=datenum('26 Mar 2008 08:00');
 timeMax=datenum('26 Mar 2008 13:00');
 altMin = 60;
 altMax = 180;
 
-thmDataFileNameStr =...
-    '/home/nithin/Documents/git-repos/energy-height-conversion/Data_Mar_08_Event/space/Espectra_thm.mat';
+
 load (thmDataFileNameStr);
 % data_thm -> E, ebin, time
 thm.energyFlux = data_thm.E(:,19:1:end)'*10^4; %[eV m-2 sr-1 s-1 eV-1]
