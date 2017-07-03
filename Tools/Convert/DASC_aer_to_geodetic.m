@@ -1,6 +1,7 @@
 function [ dataNew, lat, lon, az_new, el_new, sensorloc, time ] = DASC_aer_to_geodetic(fileNameStr, az, el,...
     imageSize, minElevation, projectionAltitude)
 %% DASC_aer_to_geodetic Converts input Digital All Sky Camera image with az, el coordinates to lat, lon projected at the given projection altitude. 
+% Need to initialize Geodata
 % Input:
 % fileNameStr : Name of the FITS data file
 % az          : Azimuth Coordinate of data (Default form: 0 deg -> West;
@@ -27,7 +28,7 @@ function [ dataNew, lat, lon, az_new, el_new, sensorloc, time ] = DASC_aer_to_ge
 dataOldRes = fitsread(fileNameStr);
 azOldRes = az;
 elOldRes = el;
-
+initialize_geodata;
 %% Change resolution of data location and data to user specified imageSize
 az = modify_matrix_size(azOldRes, imageSize, imageSize);
 el = modify_matrix_size(elOldRes, imageSize, imageSize);
