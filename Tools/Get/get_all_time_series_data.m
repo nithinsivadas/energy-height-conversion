@@ -36,14 +36,14 @@ function [ data ] = get_all_time_series_data()
 
 computer=getenv('computername');
 if computer=='NITHIN-SURFACE'
-load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Ground\pfisr_data_26_Mar_2008.mat')
-load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Ground\thmasi_data_26_Mar_2008.mat')
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Data\Ground\pfisr_data_26_Mar_2008.mat')
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Data\Ground\thmasi_data_26_Mar_2008.mat')
 
-load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Space\thd_data_26_Mar_2008.mat')
-load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Space\parallel_potential.mat')
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Data\Space\thd_data_26_Mar_2008.mat')
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Data\Space\parallel_potential.mat')
 
-load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Global\IMF_data_26_Mar_2008.mat')
-load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Paper 1\Data\Global\GeomagneticIndex_data_26_Mar_2008.mat')    
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Data\Global\IMF_data_26_Mar_2008.mat')
+load ('C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 1\Data\Global\GeomagneticIndex_data_26_Mar_2008.mat')    
 else
 load ('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Data/Ground/pfisr_data_26_Mar_2008.mat')
 load ('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 1/Data/Ground/thmasi_data_26_Mar_2008.mat')
