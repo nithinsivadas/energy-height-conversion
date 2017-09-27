@@ -1,0 +1,24 @@
+borovsky - fare
+
+D-region conductivity 
+
+D-region echoes to track Gravity waves (tracer for neutral motion) 
+
+ISR reflection at really low altitudes (collision domintaed region, long-correlation times)
+
+Stephen Kaepler 2016; Conductivity and average energy
+
+1970s Jeff Theyer: Separates out various energy transfer mechanisms, it is possibility to derive neutral wind vector - & electric field where it is collision- and less - and determine what the neutral wind contribution might be.
+
+Joule heating, fly wheel effect (revisit that work)
+
+Average the electric field and square, and square electric field and average it => they have different results 
+AMISR gives variations of conductivity
+
+Classification of magnetosphere acceleration mechanism
+
+Abstract 1. physics of magnetopsheric variablity and its relation with conductances
+Abstract 2. how energy is dissipated into electromangnetic 
+
+
+
