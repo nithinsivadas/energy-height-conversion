@@ -1,7 +1,8 @@
 function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitude, longitude, time )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
-    
+%get_conductivity_v1.m returns the hall and pederson conductivity given an 
+%input electron density value, along with some other output parameters.
+% Date Modified: 27 Sep 2017
+%--------------------------------------------------------------------------
     % Initilization
 	if nargin<5
 	    time        = datenum([2008 03 26 10 00 00]);
@@ -25,9 +26,9 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
     
     N = sum(Nn,2); % Total density
     
-    % IRI2012
+    % IRI2016
     IRI=iri2012(time, latitude, longitude, alt1, true, coordinateSystem,curlDir, [], [], [], [], [], [], [], [], [], [] ,[] ,[], [], [], 'RBV10/TTS03' );
-%     IRI=iri2007(time, latitude, longitude, alt1, [], [],curlDir);
+    %iri2012 function modified to use iri2016
 
     Tn = T(:,1); % Neutral temperature from MSIS
     Ti = IRI(:,4);
@@ -39,11 +40,9 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
     C(:,3) = IRI(:,9)/100.000;  %O2I
     C(:,4) = IRI(:,12)/100.000; %N+
     C(:,5) = IRI(:,7)/100.000;  %H+
-%     C(:,5) = IRI(:,8)/100.000;  %He+
-    
-%     
+%   C(:,6) = IRI(:,8)/100.000;  %He+
 
-% Correcting IRI
+% Correcting IRI [The discrepancy in the sum of the ion concentrations]
      C(C<0)=0;
      C_Sum = sum(C,2);
      C(:,1) = C(:,1)./C_Sum;
@@ -53,11 +52,11 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
      C(:,5) = C(:,5)./C_Sum;
 
     
-    % B field
+% B field
     [Bx, By, Bz] = igrf(time, latitude, longitude, alt1, coordinateSystem);
     B = ((Bx(:).^2 + By(:).^2 + Bz(:).^2).^0.5)*10^-9;
     
-    % Coefficients of ion-neutral interactions % Shunk and Negy, Table 4.4
+% Coefficients of ion-neutral interactions % Shunk and Negy, Table 4.4
            %   O       N2      O2    
     C_in = [   0   ,   6.84,   6.64;   % OI
                2.44,   4.34,   4.27;   % NOI
@@ -65,16 +64,17 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
                4.42,   7.47,   7.25;   % NI
                0   ,   33.6,   32.0;]; % HI                             
     
+% Converting to SI units
     C_in = C_in*10^-16;
-    % Reduced mass
+
+% Reduced mass
     m_e = 9.11*10^-31; % Electron mass
     m_p = 1.673*10^-27; % Proton mass
     Z_n = [16; 28; 32];
     m_n = Z_n*m_p; % Mass of neurtrals[kg]
-    Z_i = [16; 30; 32; 14; 1]; % Ion mass in proton mass units
+    Z_i = [16; 30; 32; 14]; % Ion mass in proton mass units
     m_i = Z_i*m_p;
-    q_i = [1;1;1; 1;1 ]; % Ion charge
-    
+    q_i = [1;1;1; 1]; % Ion charge
     
     for thisIon=1:length(m_i)
         for thisNeutral=1:length(m_n)
@@ -84,7 +84,7 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
     end
     
     
-    % Gyro frequencies
+% Gyro frequencies
     q = 1.6*10^-19;
     k = 1.28*10^-23;
     w_e  = q.*B./m_e;
@@ -96,7 +96,8 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
     
     v_i = zeros(length(alt),length(m_i));
     Tr = (Ti+Tn)/2;
-    % Ion collision frequency
+
+% Ion-neutral collision frequency
     for i=1:length(m_i)
         for n = 1:length(m_n)
             
@@ -121,51 +122,44 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
             
         end
     end
-       
+% Electron-neutral Collision frequency
     v_eO  = (8.9*10^-17).*Nn(:,1).*(1+(5.7*10^-4).*Te).*Te.^0.5;
     v_eO2 = (1.82*10^-16).*Nn(:,3).*(1+(3.6*10^-2).*Te.^0.5).*Te.^0.5;
     v_eN2 = (2.33*10^-17).*Nn(:,2).*(1+(1.21*10^-4).*Te).*Te;
     v_en = v_eO + v_eO2 + v_eN2;
     
+% Electron density assignment
 %     ne = electronDensity';
     ne = IRI(:,1);
     ne(ne<=0)=10^6;
-    
-%     v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(34 + 4.18.*log(((Te.^3)./(ne.*(10^-6))))); % Michael C Kelley
+
+% Electron-ion collision frequency
+%   v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(34 + 4.18.*log(((Te.^3)./(ne.*(10^-6))))); % Michael C Kelley
     v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(59 + 4.18.*log10(((Te.^3).*(ne)).^3));
     v_ei_1=  54.5*(ne.*(10^-6).*Te.^-1.5).*(C(:,1).*q_i(1).^2 + C(:,2).*q_i(2).^2 + C(:,3).*q_i(3).^2);
     
-    
+% Electron collision frequency   
     v_e   = v_en+v_ei;
     
-    
+% Mobility
     for i=1:length(m_i)
         k_i(:,i) = w_i(:,i)./v_i(:,i);
     end;
     k_e = w_e./v_e;
        
+% Conductivity
     sigma_P = zeros(length(alt1),1);
     sigma_P1 = zeros(length(alt1),1);
     sigma_H = zeros(length(alt1),1);
     sigma_H1 = zeros(length(alt1),1);
-%     for i=1:length(m_i)
-%         for n = 1:length(m_n)
-%             sigma_P1(:,i) = sigma_P1(:,i) + (v_in(:,i,n)./f_i(:,i))./(1+(v_in(:,i,n)./f_i(:,i)).^2);
-%             sigma_H1(:,i) = sigma_H1(:,i) + 1./(1+(v_in(:,i,n)./f_i(:,i)).^2);     
-%         end
-%         sigma_P = sigma_P + C(:,i).*sigma_P1(:,i);
-%         sigma_H = sigma_H + C(:,i).*sigma_H1(:,i);
-%     end
-%     sigma_P = (q*ne./B).*(sigma_P + (v_e./f_e)./(1+(v_e./f_e).^2));
-%     sigma_H = (q*ne./B).*abs(sigma_H - 1./(1+(v_e./f_e).^2));
-
     for i=1:1:length(m_i)
         sigma_P =  sigma_P + C(:,i).*k_i(:,i)./(1+(k_i(:,i).^2));
         sigma_H1 =  sigma_H1 + C(:,i).*(k_i(:,i).^2)./(1+(k_i(:,i).^2));     
     end
     sigma_P = (q*ne./B).*(sigma_P + (k_e)./(1+k_e.^2));
     sigma_H = (q*ne./B).*abs((sigma_H1 - (k_e.^2)./(1+k_e.^2)));
-    
+
+% Storing output
     data.B=B; data.Tn=Tn; data.Ti=Ti; data.C=C; data.Nn=Nn; data.N=N;
     data.w_i = w_i; data.w_e = w_e; data.v_e = v_e; data.v_in = v_in;
     data.v_i = v_i;
