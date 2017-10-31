@@ -9,14 +9,13 @@ function [ rootPathStr ] = initialize_root_path()
 % Created : 10th Feb 2017
 % Author  : Nithin Sivadas
 % Ref     :
-% Update  : v1.1 10/31/2017 Added Nithin-Carbon, Also changed the
-% comparison function to strcmp, instead of just "=="
+% Update  : v1.1 10/31/2017 Added Nithin-Carbon
 %----------------------------------------------------------------------------
 computer=getenv('computername');
 if nargin<1
-    if strcmp(computer,'NITHIN-SURFACE')
+    if strcmp(computer,'NITHIN-SURFACE'
         rootPathStr=['C:\Users\Nithin\Documents\GitHub\'];    
-    elseif strcmp(computer,'NITHIN-CARBON')
+    elseif computer=='NITHIN-CARBON'
         rootPathStr=['C:\Users\nithin\Documents\GitHub\'];    
     else 
         rootPathStr=['/home/nithin/Documents/git-repos/'];
