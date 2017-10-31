@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- saved from url=(0141)http://www.oracle.com/webfolder/technetwork/tutorials/obe/cloud/13_2/messagingservice/files/installing_curl_command_line_tool_on_windows.html -->
+<html><!-- OBE Template 2012: Version 3.0 Last updated 3/13/2012--><!-- Author: Glenn Stokol and Marcie Young--><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>Installing cURL Command Line Tool on Windows</title>
+    <link rel="stylesheet" href="./Installing cURL Command Line Tool on Windows_files/jquery-ui-1.8.16.custom.css">
+    <link rel="stylesheet" href="./Installing cURL Command Line Tool on Windows_files/base.css">
+    <!-- Load jQuery, SimpleModal and Basic JS files -->
+    <script type="text/javascript" src="./Installing cURL Command Line Tool on Windows_files/viewport.js.download"></script><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2, minimum-scale=1">
+    <script type="text/javascript" src="./Installing cURL Command Line Tool on Windows_files/jquery-1.10.2.js.download"></script>
+    <script type="text/javascript" src="./Installing cURL Command Line Tool on Windows_files/jquery-ui-1.8.16.custom.min.js.download"></script>
+    
+    <!--[if lt IE 9]>
+<script src="js/html5.js"></script><![endif]-->
+  </head>
+  <body style="">
+    <article>
+      <header><br>
+      </header>
+      <div id="container"> <br>
+        <section>
+          <h2 id="t5">Installing the cURL Command-Line Tool on Windows<br>
+          </h2>
+          <div>
+            <ol>
+              <p>This tutorial shows you how to access Oracle Messaging Cloud
+                Service via the REST interface by using the cURL command-line tool. cURL is free, open software that runs under various operating systems. <br>
+              </p>
+              <p>This tutorial demonstrates cURL on a Windows 64-bit 
+                operating system that is enabled for the secure sockets layer (SSL). The authentication aspects of the Messaging
+                Cloud Service require an SSL-enabled environment. <br>
+              </p>
+              <p>Your first task is to install the appropriate version of cURL
+                for your SSL-enabled environment. <br>
+              </p>
+              <p>There is an ordered series of steps to follow to install cURL
+                on Windows. There are two  libraries to install and they must
+                be installed before cURL will work with SSL. Also, they must be
+                installed in this order to work. <strong>Do not skip
+                  the  step to install a recent certificate</strong>.</p>
+            </ol>
+            <blockquote>
+              <ul>
+              </ul>
+            </blockquote>
+            <ol>
+              <figure> <figcaption>
+                  <p>Install Visual C++ <span style="font-weight: bold; text-decoration: underline;">2008</span>
+                    Redistributable Package.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+                    <br>
+                    For 64-bit systems: Visual C++ 2008 Redistributables
+                    (x64) from <a target="_blank" href="http://www.microsoft.com/en-us/download/details.aspx?id=15336">http://www.microsoft.com/en-us/download/details.aspx?id=15336</a><br>
+                    <br>
+                    For 32-bit systems: Visual C++ 2008 Redistributables
+                    (x32)</p>
+                </figcaption><img alt="download Visual C++ 2008 Redistributable x64" src="./Installing cURL Command Line Tool on Windows_files/download MS Visual C++ 2008 Redistributable Package x64.png" class="ScreenShot" id="sign_in_screen"><br>
+                <figcaption></figcaption></figure>
+              <figure> <figcaption>
+                  <p>Install Visual C++ <span style="font-weight: bold; text-decoration: underline;">2010</span>
+                    Redistributable Package.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+                    <br>
+                    For 64-bit systems: Visual C++ 2010 Redistributables
+                    (x64) from <a target="_blank" href="http://www.microsoft.com/en-us/download/details.aspx?id=14632">http://www.microsoft.com/en-us/download/details.aspx?id=14632</a><br>
+                    <br>
+                    For 32-bit systems: Visual C++ 2010 Redistributables
+                    (x32)</p>
+                </figcaption><img alt="download Visual C++ 2010 Redistributable x64" src="./Installing cURL Command Line Tool on Windows_files/2140219.jpg" http:="" www.oracle.com="" webfolder="" technetwork="" tutorials="" obe="" cloud="" 13_2="" messagingservice="" files="" images="" download_visual_c++_2010.jpg"="" class="ScreenShot" id="sign_in_screen"><br>
+                <figcaption></figcaption></figure>
+              <figure> <figcaption>
+                  <p>Install Win(32/64) OpenSSL v1.0.0k Light from <a target="_blank" href="http://www.shininglightpro.com/products/Win32OpenSSL.html">http://www.shininglightpro.com/products/Win32OpenSSL.html</a>.<br>
+                    <br>
+                    For 64-bit systems: Win64 OpenSSL v1.0.0k Light<br>
+                    <br>
+                    For 32-bit systems: Win32 OpenSSL v1.0.0k Light</p>
+                </figcaption><img alt="download Win64 OpenSSL v1.0.0k Light" src="./Installing cURL Command Line Tool on Windows_files/download Win64 OpenSSL v1.0.0k Light.png" class="ScreenShot" id="sign_in_screen"><figcaption></figcaption></figure>
+              <figure> <figcaption>
+                  <p>In your browser, navigate to the cURL welcome page at <a target="_blank" href="http://curl.haxx.se/">http://curl.haxx.se</a> and
+                    click <strong>Download</strong>.</p>
+                </figcaption><img alt="click Download" src="./Installing cURL Command Line Tool on Windows_files/click Download.png" class="ScreenShot" id="sign_in_screen"><figcaption></figcaption></figure>
+              <figure> <figcaption>
+                  <p>On the cURL Releases and Downloads page, click the link for the SSL-enabled version                    for your computer's operating system, download the zip file, and install
+                    it in a new folder on your computer. <br>
+                    <br>
+                    The cURL website offers a wizard to find the appropriate version for your 
+                    computer's operating system. <br>
+                    <br>For this tutorial, the 64-bit generic, SSL-enabled version for Windows is selected.<br>
+                  </p>
+                </figcaption> <img alt="choose Win64 binary SSL" src="./Installing cURL Command Line Tool on Windows_files/Win64 binary SSL.png" class="ScreenShot" id="t50102"> </figure>
+              <figure> <figcaption>
+                  <p>Install recent CA Certificates. <strong>Do not skip this step.</strong></p>
+                    Download <code><strong>cacert.pem</strong></code>, a recent copy of valid CERT  
+                    files, from <a target="_blank" href="http://curl.haxx.se/docs/caextract.html">http://curl.haxx.se/docs/caextract.html</a>.<br>
+                    <br>
+                    Copy it to the same folder where you placed <code>curl.exe</code>
+                    and rename it <code><strong>curl-ca-bundle.crt</strong></code>.<p></p>
+                </figcaption><img alt="download cacert.pem" src="./Installing cURL Command Line Tool on Windows_files/download cacert.pem.png" class="ScreenShot" id="sign_in_screen"><figcaption></figcaption></figure>
+              <figure> <figcaption>
+                  <p>Invoke <code>curl.exe</code> from a command window (in Windows, click <strong>Start                   &gt; Run</strong> and then enter <code><strong>"cmd"</strong></code> in the Run dialog box).</p>
+                </figcaption><img alt="download cacert.pem" src="./Installing cURL Command Line Tool on Windows_files/invoke curl.exe from CMD window.png" class="ScreenShot" id="sign_in_screen"><br>
+                <br>
+                <figcaption>
+                <p>You can enter <code>curl --help</code> to see a list of cURL commands.</p>
+                </figcaption>
+                <img alt="type help for curl commands" src="./Installing cURL Command Line Tool on Windows_files/type help for curl commands.png" class="ScreenShot" id="sign_in_screen"><br>
+              </figure>
+            </ol>
+          </div>
+        </section>
+        <br>
+      </div>
+      <!-- container -->
+      <div id="dialog-help" title="Help">
+        <p>To navigate this Oracle by Example tutorial, note the following: </p>
+        <dl>
+          <dt>Hide Header Buttons:</dt>
+          <dd>Click the title to hide the buttons in the header. To show the
+            buttons again, click the title again.</dd>
+          <dt>Topic List:</dt>
+          <dd>Click a topic to navigate to that section.</dd>
+          <dt>Expand All Topics:</dt>
+          <dd>Click the button to show or hide the details for the sections. By
+            default, all topics are collapsed.</dd>
+          <dt>Hide All Images:</dt>
+          <dd>Click the button to show or hide the screenshots. By default, all
+            images are displayed.</dd>
+          <dt>Print:</dt>
+          <dd>Click the button to print the content. The content that is
+            currently displayed or hidden is printed.</dd>
+        </dl>
+      </div>
+      <div id="dialog" title="Topic List">
+        <p>To navigate to a particular section in this tutorial, select the
+          topic from the list.</p>
+        <ul>
+        </ul>
+      </div>
+      <footer>
+        <nav> <a class="help" href="http://www.oracle.com/webfolder/technetwork/tutorials/obe/cloud/13_2/messagingservice/files/installing_curl_command_line_tool_on_windows.html#"> Help</a><a href="http://www.oracle.com/goto/oll">
+            OLL</a><a href="http://www.oracle.com/us/corporate/index.html" onclick="navTrack(&#39;otn&#39;,&#39;en&#39;,&#39;footer&#39;,&#39;about oracle&#39;);" class="footerLinks"> About Oracle</a><a href="http://apex.oracle.com/pls/apex/f?p=44785:34:0" onclick="navTrack(&#39;otn&#39;,&#39;en&#39;,&#39;footer&#39;,&#39;contact us&#39;);" class="footerLinks">
+            Contact Us</a><a href="http://www.oracle.com/us/legal/terms/index.html" onclick="navTrack(&#39;otn&#39;,&#39;en&#39;,&#39;footer&#39;,&#39;terms of use&#39;);" class="footerLinks">
+            Terms of Use</a></nav>
+      </footer>
+    </article>
+  
+
+</body></html>
