@@ -2,7 +2,6 @@ function [timeNo] = find_time( time, thisTime)
 
 %%find_time.m Find the index of a 1-D time array, given 
 %           a particular time value 
-
 % Input
 %  time    	: 1-D time Array 
 %  thisTime	: String identifying the time to be found 

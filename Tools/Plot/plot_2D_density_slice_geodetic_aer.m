@@ -10,9 +10,9 @@ end
 %% Initializing coordinates
 lat = geodeticCoords(:,1);
 lon = geodeticCoords(:,2);
-alt = altitude;
+alt = geodeticCoords(:,3);
 
-electronDensity = data.electronDensity;
+electronDensity = data.electronDensity(:,timeNo);
 
 %% Generating data slice
 F = scatteredInterpolant(lat, lon, alt, electronDensity, 'nearest', 'none');
