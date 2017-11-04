@@ -1,6 +1,6 @@
-function [ figureHandle ] = plot_2D_density_slice_geodetic...
-    ( data, geodeticCoords, timeNo, altitudeSelected, setMapOn, latLim, lonLim)
-%plot_2D_density_slices_geodetic Plotting a 2D slice of PFISR densities
+function [ figureHandle ] = plot_2D_conductivity_slice_geodetic...
+    ( data, geodeticCoords, timeNo, altitudeSelected, conductivityType, setMapOn, latLim, lonLim)
+%plot_2D_conductivity_slice_geodetic Plotting a 2D slice of PFISR densities
 % Input
 % data : data.electronDensity --> Matrix of electron density point at each[position, time]
 %      : the measurements can be organized in any order
@@ -14,6 +14,10 @@ function [ figureHandle ] = plot_2D_density_slice_geodetic...
 
 %% Setting default values
 if nargin <5
+    conductivityType='H';
+end
+
+if nargin <6
     setMapOn=true;
 end
 
@@ -22,17 +26,23 @@ lat = geodeticCoords(:,1);
 lon = geodeticCoords(:,2);
 alt = geodeticCoords(:,3);
 
-electronDensity = data.electronDensity(:,timeNo);
+hallConductivity = data.sigma_H(:,timeNo);
+pedersenConductivity = data.sigma_P(:,timeNo);
 
 %% Generating data slice
-F = scatteredInterpolant(lat, lon, alt, electronDensity, 'nearest', 'none');
+if conductivityType=='H'
+  F = scatteredInterpolant(lat, lon, alt, hallConductivity, 'nearest', 'none');
+elseif conductivityType=='P'
+  F = scatteredInterpolant(lat, lon, alt, pedersenConductivity, 'nearest', 'none');
+end
+
 imageSize = 512;
 
 % Loading default values for the lat and lon limit, if not specified
-if nargin<6
+if nargin<7
 latLim = [min(lat(:)) max(lat(:))];
 end
-if nargin<7
+if nargin<8
 lonLim = [min(lon(:)) max(lon(:))];
 end
 %% Plotting map
@@ -49,20 +59,18 @@ if setMapOn==true
     load coastlines
     plotm(coastlat,coastlon)
     hold on;
-    h2=pcolorm(latq,lonq,log10(Vq)); 
+    h2=pcolorm(latq,lonq,log10(Vq));
     hold on;
     textm(latLim(2), lonLim(1)+0.1, ['PFISR: ', num2str(altitudeSelected),' km'],'color','r');
     textm(latLim(2)-0.2, lonLim(1)+0.1,...
      [datestr(data.time(timeNo),'HH:MM:SS'),' UT'],'color', 'r');
 
 else
-    h2=pcolor(lonq,latq,log10(Vq)); 
+    h2=pcolor(lonq,latq,log10(Vq));
     hold on;
     title(['PFISR: ', num2str(altitudeSelected),' km ',datestr(data.time(timeNo),'HH:MM:SS'),' UT']);
 end
 
 set(h2,'EdgeColor','none');
 
-%check plot_2D_energy_slice_geodetic.m
 end
-

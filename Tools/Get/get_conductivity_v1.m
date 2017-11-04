@@ -144,7 +144,7 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
 % Mobility
     for i=1:length(m_i)
         k_i(:,i) = w_i(:,i)./v_i(:,i);
-    end;
+    end
     k_e = w_e./v_e;
        
 % Conductivity
