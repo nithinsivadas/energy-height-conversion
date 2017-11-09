@@ -1,10 +1,13 @@
-function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitude, longitude, time )
+function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitude, longitude, time, mode )
 %get_conductivity_v1.m returns the hall and pederson conductivity given an 
 %input electron density value, along with some other output parameters.
 % Date Modified: 27 Sep 2017
 %--------------------------------------------------------------------------
     % Initilization
-	if nargin<5
+	if nargin<6
+        mode = 0; % uses electronDensity to estimate conductivity
+    end
+    if nargin<5
 	    time        = datenum([2008 03 26 10 00 00]);
 	end
 	if nargin<4
@@ -129,8 +132,11 @@ function [ outputArguments ] = get_conductivity_v1( alt, electronDensity, latitu
     v_en = v_eO + v_eO2 + v_eN2;
     
 % Electron density assignment
-%     ne = electronDensity';
-    ne = IRI(:,1);
+    if mode==0
+        ne = electronDensity;
+    else
+        ne = IRI(:,1);
+    end
     ne(ne<=0)=10^6;
 
 % Electron-ion collision frequency

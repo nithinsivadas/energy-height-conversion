@@ -51,19 +51,19 @@ lonq = linspace(lonLim(1),lonLim(2),imageSize);
 Vq = F({latq,lonq,altitudeSelected});
 
 if setMapOn==true
-    ax2=axesm('lambertstd','MapLatLimit',[floor(latLim(1)) ceil(latLim(2))],...
-        'MapLonLimit',[floor(lonLim(1)) ceil(lonLim(2))],...
+    ax2=axesm('lambertstd','MapLatLimit',[(latLim(1)) (latLim(2))],...
+        'MapLonLimit',[(lonLim(1)) (lonLim(2))],'FontSize',6,...
         'Frame','on','Grid','on','MeridianLabel','on','ParallelLabel','on',...
-        'PLineLocation',1,'MLineLocation',1);
+        'PLineLocation',0.5,'MLineLocation',1,'MLabelRound',-1,'PLabelRound',-1);
     axis off
     load coastlines
     plotm(coastlat,coastlon)
     hold on;
     h2=pcolorm(latq,lonq,log10(Vq));
     hold on;
-    textm(latLim(2), lonLim(1)+0.1, ['PFISR: ', num2str(altitudeSelected),' km'],'color','r');
-    textm(latLim(2)-0.2, lonLim(1)+0.1,...
-     [datestr(data.time(timeNo),'HH:MM:SS'),' UT'],'color', 'r');
+%     titlem(latLim(2), lonLim(1)+0.1, [num2str(altitudeSelected),' km'],'color','r');
+%     textm(latLim(2)-0.1, lonLim(1)+0.1,...
+%      [datestr(data.time(timeNo),'HH:MM:SS'),' UT'],'color', 'r');
 
 else
     h2=pcolor(lonq,latq,log10(Vq));
