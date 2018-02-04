@@ -36,6 +36,8 @@ function [data] = get_inverted_flux( q, time, alt, energyBin, A, guessFlux, Date
 % 2. Semeter and Kamalabadi 2005 
 % 3. Rees 1989
 % 4. Wedlund et al "Electron Energy Spectra and Auroral Arcs" JGR 2013
+% Note:
+% Required Fuzzy Logic Toolbox for gaussmf.m in matlab
 %----------------------------------------------------------------------------
 
 
@@ -91,14 +93,15 @@ function [data] = get_inverted_flux( q, time, alt, energyBin, A, guessFlux, Date
     W=W./sum(W);
 
     % Maximum entropy inversion
+    hWaitMEM= waitbar(0);
     for thisTime=itime
+            
             qThis=q(:,thisTime);
             [fluxNew(:,thisTime),qNew(:,thisTime),chi2(thisTime),maxIter(thisTime)] = ...
             mem_solve(qThis, A, beta, guessFlux, (qSigma(thisTime)), noIter, W);
-
-            display([num2str((thisTime)/max(itime)*100), ' %',num2str(chi2(thisTime))]);
-    end;
-
+            custom_waitbar(hWaitMEM,thisTime,itime(end),['MEM Inverison: Chi^2= ',sprintf('%7.4f',chi2(thisTime)),' ']);
+    end
+%     close(hWaitMEM);
     % Generating the output structure
 
     data.flux = fluxNew; % Differential number flux [m-2 s^-1 eV^-1] (Isotropic flux)

@@ -25,12 +25,12 @@ totalNAN = sum(thisArrayNAN(:));
         isThereNAN = true;
     else
         isThereNAN = false;
-    end;
+    end
 
     if isThereNAN==true
         warning(['There are ',num2str(totalNAN),...
         ' nan values in your data. The results may not be accurate.']);
-    end;
+    end
     
 end
 

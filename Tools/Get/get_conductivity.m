@@ -1,5 +1,6 @@
 function [ outputArguments ] = get_conductivity( alt, electronDensity, latitude, longitude, time )
-%% GET_CONDUCTIVITY Hall and Pederson conductivity given input altitude profile of electron density 
+%% GET_CONDUCTIVITY Hall and Pederson conductivity given input altitude profile of electron density
+%% I believe this is not being used...
 %-------------------------------------------------------------------------
 % Input
 %------
@@ -17,8 +18,8 @@ function [ outputArguments ] = get_conductivity( alt, electronDensity, latitude,
 %   outputArguments.alt      - Altitude [km]
 %
 %----------------------------------------------------------------------------
-% Modified: 27th Sep 2017 
-% Created : 27th Sep 2017 
+% Modified: 27th Sep 2017
+% Created : 27th Sep 2017
 % Author  : Nithin Sivadas
 % Ref     :
 % Comments: The formulae needs to be looked at carefully. [Pending]
@@ -29,7 +30,7 @@ if nargin<5
     time        = datenum([2008 03 26 10 00 00]);
 end
 if nargin<4
-    longitude   = -147.5; % Degrees. 
+    longitude   = -147.5; % Degrees.
 end
 if nargin<3
     latitude    = 65; % Degrees.
@@ -78,12 +79,12 @@ C(:,5) = C(:,5)./C_Sum;
 B = ((Bx(:).^2 + By(:).^2 + Bz(:).^2).^0.5)*10^-9;
 
 % Coefficients of ion-neutral interactions % Shunk and Negy, Table 4.4
-       %   O       N2      O2    
+       %   O       N2      O2
 C_in = [   0   ,   6.84,   6.64;   % OI
            2.44,   4.34,   4.27;   % NOI
            2.31,   4.13,   0   ;   % O2I
            4.42,   7.47,   7.25;   % NI
-           0   ,   33.6,   32.0;]; % HI                             
+           0   ,   33.6,   32.0;]; % HI
 
 % Converting to SI units
 C_in = C_in*10^-16;
@@ -159,7 +160,7 @@ ne(ne<=0)=10^6;
 v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(59 + 4.18.*log10(((Te.^3).*(ne)).^3));
 % v_ei_1=  54.5*(ne.*(10^-6).*Te.^-1.5).*(C(:,1).*q_i(1).^2 + C(:,2).*q_i(2).^2 + C(:,3).*q_i(3).^2);
 
-% Electron collision frequency   
+% Electron collision frequency
 v_e   = v_en+v_ei;
 
 % Mobility
@@ -175,14 +176,13 @@ sigma_H = zeros(length(alt1),1);
 sigma_H1 = zeros(length(alt1),1);
 for i=1:1:length(m_i)
     sigma_P =  sigma_P + C(:,i).*k_i(:,i)./(1+(k_i(:,i).^2));
-    sigma_H1 =  sigma_H1 + C(:,i).*(k_i(:,i).^2)./(1+(k_i(:,i).^2));     
+    sigma_H1 =  sigma_H1 + C(:,i).*(k_i(:,i).^2)./(1+(k_i(:,i).^2));
 end
 sigma_P = (q*ne./B).*(sigma_P + (k_e)./(1+k_e.^2));
 sigma_H = (q*ne./B).*abs((sigma_H1 - (k_e.^2)./(1+k_e.^2)));
 
 % Storing output
-data.sigma_P = sigma_P; data.sigma_H = sigma_H; data.alt = alt1; 
+data.sigma_P = sigma_P; data.sigma_H = sigma_H; data.alt = alt1;
 outputArguments = data;
 
 end
-

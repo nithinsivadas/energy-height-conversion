@@ -4,6 +4,7 @@ function [ax1,h] = plot_DASC_geodetic( dataNew, time, lat, lon, imageSize, latLi
 % Input
 %------
 % dataNew - 2-D optical data from DASC in geodetic coordinates [nCoordinates]
+%           produced from DASC_aer_to_geodetic.m
 % time    - Matlab time of the particular DASC image [nCoordinates]
 % lat     - latitude coordinates [nCoordinates]
 % lon     - longitude coordinates [nCoordinates]
@@ -37,7 +38,7 @@ plotm(coastlat,coastlon)
 hold on;
 h=pcolorm(LAT,LON,(Vq)); 
 set(h,'EdgeColor','none');
-textm(latLim(2)-0.2, lonLim(1)+0.1, ['DASC: ',datestr(time,'HH:MM:SS'),' UT']);
-
+textm(latLim(2)+(latLim(2)-latLim(1))*0.05, lonLim(1) +(lonLim(2)-lonLim(1))*0.35, ['DASC: ',datestr(time,'HH:MM:SS'),' UT']);
+% textm(latLim(2)-0.19, lonLim(1)+0.1, ['DASC: ',datestr(time,'HH:MM:SS'),' UT']);
 end
 

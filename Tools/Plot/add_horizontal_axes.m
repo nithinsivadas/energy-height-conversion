@@ -23,7 +23,7 @@ function add_horizontal_axes( TTick, TTickLim, newAxisTime, newAxisValue, newAxi
     
     for iTick=1:1:length(TTick)
         iState(iTick)=find_time(newAxisTime, datestr(TTick(iTick)));
-    end;
+    end
     
     delta = -0.11*(axisNo)-0.03*(axisNo-1); % 0.11 is the first axis tick label's vertical distance
                                              %0.03 is the vertical distance between
@@ -33,7 +33,7 @@ function add_horizontal_axes( TTick, TTickLim, newAxisTime, newAxisValue, newAxi
         thisTick = normalizedTTick(iTick);
         txtHandle = text(thisTick, delta, num2str(round(newAxisValue(iState(iTick)),1)),'Units','normalized');
         set(txtHandle, 'HorizontalAlignment','center','VerticalAlignment','middle');
-    end;
+    end
     
     txtHandle = text(-0.05, delta, newAxisLabel,'Units','normalized','FontSize',7);
     set(txtHandle, 'HorizontalAlignment','right','VerticalAlignment','middle');
