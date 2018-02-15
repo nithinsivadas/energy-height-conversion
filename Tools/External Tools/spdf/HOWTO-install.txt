@@ -1,0 +1,102 @@
+Download and Installation Instructions
+
+Windows:
+
+   Download one of following self-extracting files: 
+       32-bit Windows: matlab_cdf364_win32.exe
+       64-bit Windows: matlab_cdf364_win64.exe
+   Download leap second table: CDFLeapSeconds.txt
+   Set environment variable CDF_LEAPSECONDSTABLE to the downloaded leap second
+       table. The step is necessary when a new leap second is added and the
+       shared library is not upgraded. This environment variable needs to be
+       set when running CDF modules under MATLAB. 
+       set CDF_LEAPSECONDSTABLE=<...>\CDFLeapSeconds.txt (C/TCsh)
+              where <...> is the directory that holds CDFLeapSeconds.txt
+   Double-click the downloaded file to extract the files included 
+       in the package to a directory (dafault to
+       c:\matlab_cdf364_patch-[32|64]).
+   Invoke Matlab and issue the following command at the Matlab prompt:
+        addpath '<patch_install_dir>'
+        For example, if the patch is installed under
+        C:\matlab_cdf364_patch-[32|64], the command should be
+          addpath 'C:\matlab_cdf364_patch-[32|64]'
+   Use Matlab as usual (e.g. data=spdfcdfread('test.cdf')).
+
+Mac OS X:
+
+   Download one of the the following compressed tarfiles:
+       Mac OS X Intel 32-bit: matlab_cdf364_mac32.tar.gz
+       Mac OS X Intel 64-bit: matlab_cdf364_mac64.tar.gz
+   Download leap second table: CDFLeapSeconds.txt 
+   Move the Matlab-CDF-Patch directory in the downloaded file to the 
+       directory you want the patch to be installed under.
+   Extract the files in the package using the following command:
+        tar zxvf <downloaded compressed tar file>
+     [The extracted files will be placed in matlab_cdf364_patch-* directory,
+      where * is either 32 or 64. depending the tarfile.]
+   Set environment variable CDF_LEAPSECONDSTABLE to the downloaded leap second
+       table. The step is necessary when a new leap second is added and the
+       shared library is not upgraded. This environment variable needs to be
+       set when running CDF modules under MATLAB. 
+       setenv CDF_LEAPSECONDSTABLE <...>/CDFLeapSeconds.txt (C/TCsh)
+       export CDF_LEAPSECONDSTABLE=<...>/CDFLeapSeconds.txt (Bourne/Bash)
+              where <...> is the directory that holds CDFLeapSeconds.txt
+   Invoke Matlab and issue the following command at the Matlab prompt:
+        addpath '<patch_install_dir>' 
+        For example, if the patch is installed under /Users/cdf, the 
+        command should be
+          addpath '/Users/cdf/matlab_cdf364_patch-[32|64]'
+   Use Matlab as usual (e.g. data=spdfcdfread('test.cdf')).
+
+Linux
+
+   Download one of the following compressed tar files:
+       Linux 32-bit: matlab_cdf364_lin32.tar.gz
+       Linux 32-bit: matlab_cdf364_lin64.tar.gz
+       Solaris/Sparc 64-bit: matlab_cdf364_sol64.tar.gz
+   Download leap second table: CDFLeapSeconds.txt
+   Go to the directory where you want the patch to be installed under.
+   Extract the files in the package using the following command:
+        tar zxvf <downloaded compressed tar file> 
+     [The extracted files will be placed in matlab_cdf364_patch-x directory,
+      where * is either 32 or 64. depending the tarfile.]
+   Set environment variable CDF_LEAPSECONDSTABLE to the downloaded leap second
+       table. The step is necessary when a new leap second is added and the
+       shared library is not upgraded. This environment variable needs to be
+       set when running CDF modules under MATLAB..
+       setenv CDF_LEAPSECONDSTABLE <...>/CDFLeapSeconds.txt (C/TCsh)
+       export CDF_LEAPSECONDSTABLE=<...>/CDFLeapSeconds.txt (Bourne/Bash)
+              where <...> is the directory that holds CDFLeapSeconds.txt
+   Invoke Matlab and issue the following command at the Matlab prompt:
+        addpath '<patch_install_dir>'
+        For example, if the patch is installed under /home/cdf, the
+        command should be
+          addpath '/home/cdf/matlab_cdf364_patch-[32|64]'
+   Use Matlab as usual (e.g. data=spdfcdfread('test.cdf')).
+
+Solaris:
+
+   Download the following compressed tar file:
+       Solaris/Sparc 64-bit: matlab_cdf364_sol64.tar.gz
+   Download leap second table: CDFLeapSeconds.txt
+   Go to the directory where you want the patch to be installed under.
+   Extract the files in the package using the following command:
+        tar zxvf <downloaded compressed tar file>
+     [The extracted files will be placed in matlab_cdf364_patch-64 directory.]
+   Set environment variable CDF_LEAPSECONDSTABLE to the downloaded leap second
+       table. The step is necessary when a new leap second is added and the
+       shared library is not upgraded. This environment variable needs to be
+       set when running CDF modules under MATLAB..
+       setenv CDF_LEAPSECONDSTABLE <...>/CDFLeapSeconds.txt (C/TCsh)
+       export CDF_LEAPSECONDSTABLE=<...>/CDFLeapSeconds.txt (Bourne/Bash)
+              where <...> is the directory that holds CDFLeapSeconds.txt
+   Invoke Matlab and issue the following command at the Matlab prompt:
+        addpath '<patch_install_dir>'
+        For example, if the patch is installed under /export/home/cdf, the
+        command should be
+          addpath '/export/home/cdf/matlab_cdf364_patch-64'
+   Use Matlab as usual (e.g. data=spdfcdfread('test.cdf')).
+
+If you have any questions or encounter problems, please send an email to 
+gsfc-cdf-support@lists.nasa.gov and we'll respond as soon as possible.
+
