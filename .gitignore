@@ -60,3 +60,4 @@ Temporary Items
 
 # Directories not to be synced
 spdf/
+spdf_linux/
