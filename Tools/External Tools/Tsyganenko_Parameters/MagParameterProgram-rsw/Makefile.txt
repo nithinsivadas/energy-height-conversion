@@ -1,0 +1,187 @@
+# To create new ASCII data files:
+# Change version numbers VerHr and VerMN as appropriate
+# Change MERGEDIR to be for ftp site
+# make all
+#
+# To create merge CDF and MAT files: Run Denton2.m in MATLAB after make all.
+
+# Data version numbers
+VerHr=4
+VerMn=2
+
+# Location to place downloaded OMNI data from NSSDC ftp site
+DIRTMP=./tmp
+
+# Location to place local copies of ASCII input and output data TODO:
+# These copies should be removed after final copies are placed on FTP
+# site.
+DATADIR=/home/weigel/svn/tsds/data/original-s0/www.dartmouth.edu/~rdenton
+
+# Location to place final copies of ASCII input and output data
+#MERGEDIR=/var/www/ftp/QinDenton
+MERGEDIR=/tmp/QinDenton
+
+# Not used - eventually want to include date in ASCII input/output file name
+# to be consistent with how merge files are named
+TS=_merged_`date +%Y%m%d`
+
+all:
+	make omniupdate	
+	make hourall
+	make 5minall
+	make 1minall
+	make merge
+	make mergetoftp
+	make symlink
+
+MagmodelinputONE: MagmodelinputONE.f
+	g77 -o MagmodelinputONE MagmodelinputONE.f
+
+# See README-rsw.txt for explanation of _corrected.f file
+MagmodelinputONE_corrected: MagmodelinputONE_corrected.f
+	g77 -o MagmodelinputONE_corrected MagmodelinputONE_corrected.f
+
+merge: hour/omni2_hour.dat 5min/omni_5min.asc 1min/omni_min.asc 
+	zip -j $(DIRTMP)/omni2_hour-v$(VerHr).dat.zip ./hour/omni2_hour.dat
+	zip -j $(DIRTMP)/omni_5min-v$(VerMn).asc.zip ./5min/omni_5min.asc
+	zip -j $(DIRTMP)/omni_min-v$(VerMn).asc.zip ./1min/omni_min.asc
+	zip -j $(DIRTMP)/WGhour-v$(VerHr).d.zip ./hour/WGhour.d
+	zip -j $(DIRTMP)/WGparameters5min-v$(VerMn).d.zip ./5min/WGparameters5min.d
+	zip -j $(DIRTMP)/WGparametersmin-v$(VerMn).d.zip ./1min/WGparametersmin.d
+	zip -j $(DIRTMP)/kpdst.lst.zip ./5min/kpdst.lst
+
+mergetoftp:
+	mkdir -p $(MERGEDIR)/hour/merged
+	mkdir -p $(MERGEDIR)/5min/merged
+	mkdir -p $(MERGEDIR)/1min/merged
+	mv $(DIRTMP)/omni2_hour-v$(VerHr).dat.zip $(MERGEDIR)/hour/merged
+	mv $(DIRTMP)/omni_5min-v$(VerMn).asc.zip $(MERGEDIR)/5min/merged
+	mv $(DIRTMP)/omni_min-v$(VerMn).asc.zip $(MERGEDIR)/1min/merged
+	mv $(DIRTMP)/WGhour-v$(VerHr).d.zip $(MERGEDIR)/hour/merged
+	mv $(DIRTMP)/WGparameters5min-v$(VerMn).d.zip $(MERGEDIR)/5min/merged
+	mv $(DIRTMP)/WGparametersmin-v$(VerMn).d.zip $(MERGEDIR)/1min/merged
+	cp $(DIRTMP)/kpdst.lst.zip ./5min/kpdst.lst $(MERGEDIR)/5min/merged
+	mv $(DIRTMP)/kpdst.lst.zip ./1min/kpdst.lst $(MERGEDIR)/1min/merged
+
+symlink:
+	mkdir -p $(MERGEDIR)/hour/merged/latest
+	mkdir -p $(MERGEDIR)/5min/merged/latest
+	mkdir -p $(MERGEDIR)/1min/merged/latest
+	rm -f $(MERGEDIR)/hour/merged/latest/*
+	rm -f $(MERGEDIR)/5min/merged/latest/*
+	rm -f $(MERGEDIR)/1min/merged/latest/*
+	cd $(MERGEDIR)/5min/merged/latest; \
+	 ln -s ../WGparameters5min-v$(VerMn).d.zip WGparameters5min-latest.d.zip
+	cd $(MERGEDIR)/hour/merged/latest; \
+	 ln -s ../WGhour-v$(VerHr).d.zip WGhour-latest.d.zip
+	cd $(MERGEDIR)/1min/merged/latest; \
+	 ln -s ../WGparametersmin-v$(VerMn).d.zip WGparametersmin-latest.d.zip
+	cd $(MERGEDIR)/hour/merged/latest; \
+	 ln -s ../omni2_hour-v$(VerMn).d.zip omni2_hour-latest.d.zip
+	cd $(MERGEDIR)/1min/merged/latest; \
+	 ln -s ../omni_min-v$(VerMn).asc.zip omni_min-latest.asc.zip
+	cd $(MERGEDIR)/5min/merged/latest; \
+	 ln -s ../kpdst.lst.zip kpdst-latest.lst.zip
+
+omniupdate:
+	rm -f hour/omni2_hour.dat
+	rm -f 5min/omni_5min.asc
+	rm -f 1min/omni_min.asc
+	rm -f 5min/kpdst.lst
+	make hour/omni2_hour.dat
+	make 5min/omni_5min.asc
+	make 1min/omni_min.asc
+	make 5min/kpdst.lst
+
+###############################################################################
+# Hourly
+###############################################################################
+# Download the full hourly file
+hour/omni2_hour.dat:
+	cd hour; wget -m -l1 --cut-dirs=2 -nH ftp://nssdcftp.gsfc.nasa.gov/spacecraft_data/omni/omni2_all_years.dat
+	cd hour ; ln -s -f omni2_all_years.dat omni2_hour.dat
+
+hourall: MagmodelinputONE_corrected hour/omni2_hour.dat
+	echo "60" | ./MagmodelinputONE_corrected
+	mkdir -p $(DATADIR)/hour-v$(VerHr)
+	cp hour/WGhour.d $(DATADIR)/hour-v$(VerHr)/WGhour.d
+	cp hour/omni2_hour.dat $(DATADIR)/hour-v$(VerHr)/omni2_all_years.dat
+###############################################################################
+
+###############################################################################
+# 1min and 5min
+###############################################################################
+5min/kpdst.lst: hour/omni2_hour.dat
+	cut -c 1-11,219-221,226-231 hour/omni2_hour.dat > tmp.dat
+	more +280513 tmp.dat > 5min/kpdst.lst
+	rm -f tmp.dat
+	cd 1min ; ln -s -f ../5min/kpdst.lst 
+
+1min/kpdst.lst: 5min/kpdst.lst
+	cd 1min ; ln -s -f ../5min/kpdst.lst 
+
+5min/omni_5min.asc:
+	mkdir -p $(DIRTMP)
+	cd $(DIRTMP); wget -m -l1 ftp://nssdcftp.gsfc.nasa.gov/spacecraft_data/omni/high_res_omni/
+	find $(DIRTMP)/nssdcftp.gsfc.nasa.gov/spacecraft_data/omni/high_res_omni/ -name "omni_5min*.asc" | sort | xargs -i cat {} > 5min/omni_5min.asc	
+
+1min/omni_min.asc:
+	mkdir -p $(DIRTMP)
+	cd $(DIRTMP); wget -m -l1 ftp://nssdcftp.gsfc.nasa.gov/spacecraft_data/omni/high_res_omni/
+	find $(DIRTMP)/nssdcftp.gsfc.nasa.gov/spacecraft_data/omni/high_res_omni/ -name "omni_min*.asc" | sort | xargs -i cat {} > 1min/omni_min.asc	
+
+5minall: 5min/kpdst.lst 5min/omni_5min.asc
+	echo "5" | ./MagmodelinputONE_corrected
+	mkdir -p $(DATADIR)/5min-v$(VerMn)
+	cp 5min/WGparameters5min.d $(DATADIR)/5min-v$(VerMn)/WGparameters5min.d
+	cp 5min/omni_5min.asc $(DATADIR)/5min-v$(VerMn)/omni_5min.asc
+
+1minall: 1min/kpdst.lst 1min/omni_min.asc
+	echo "1" | ./MagmodelinputONE_corrected
+	mkdir -p $(DATADIR)/1min-v$(VerMn)
+	cp 1min/WGparametersmin.d $(DATADIR)/1min-v$(VerMn)/WGparametersmin.d
+	cp 1min/omni_min.asc $(DATADIR)/1min-v$(VerMn)/omni_min.asc
+###############################################################################
+
+###############################################################################
+# Tests
+#
+# Compare sample output from Denton.  Differences are probably due to
+# the fact that the omni2_2000.dat file changed at SPDF (seriously)
+# between the time Denton downloaded it and the time it was downloaded
+# and copied to ./hour (a year or so later).
+testhour2000: MagmodelinputONE
+	echo "60" | ./MagmodelinputONE
+	diff ../MagParameterProgram/hour/WGhour_0.d ./hour/WGhour.d	
+
+testhour: MagmodelinputONE
+	echo "60" | ./MagmodelinputONE
+
+testhour_corrected: MagmodelinputONE_corrected
+	echo "60" | ./MagmodelinputONE_corrected
+
+test5min: MagmodelinputONE
+	- gunzip ../MagParameterProgram/5min/kpdst.lst.gz
+	- gunzip ../MagParameterProgram/5min/omni_5min.asc.gz
+	echo "5" | ./MagmodelinputONE
+
+test1min: MagmodelinputONE
+	- gunzip ../MagParameterProgram/1min/kpdst.lst.gz
+	- gunzip ../MagParameterProgram/1min/omni_min.asc.gz
+	echo "1" | ./MagmodelinputONE
+###############################################################################
+
+clean:
+	- rm -f *.o
+	- rm -f *~
+	- find . -name "*.d" | xargs -i rm -f {}
+	- find . -name "*.dat" | xargs -i rm -f {}
+	- find . -name "*.lst" | xargs -i rm -f {}
+	- find . -name "*.asc" | xargs -i rm -f {}
+
+distclean:
+	- make clean
+	- rm -f MagmodelinputONE
+	- rm -f MagmodelinputONE_corrected
+	- rm -rf ./tmp
+

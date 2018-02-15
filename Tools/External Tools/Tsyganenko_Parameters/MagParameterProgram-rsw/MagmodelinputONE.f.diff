@@ -1,0 +1,117 @@
+*** MagmodelinputONE.f	2009-01-31 11:27:06.000000000 -0500
+--- ../MagParameterProgram/MagmodelinputONE.f	2009-01-31 10:00:48.000000000 -0500
+***************
+*** 5,64 ****
+  c                                                                                c
+  c     By Zhengrui Qin and Richard Denton, 09/01/2007                             c 
+  cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! C      character yesno*3
+!       common istart,wst(6)
+  cccccc   Choose data format of the OMNIWEB data(http://omniweb.gsfc.nasa.gov/) ccc 
+! C      write(*,*)''
+! C      write(*,*)'Please read readme.txt (where to download input files)'
+! C      write(*,*)''
+! C      write(*,*)'cccccccccccccccccccccccccccccccccccccccccccccccccccccc' 
+! C      write(*,*)'c    Please choose the data format of input files    c'
+! C      write(*,*)'c    IFORMAT = 1 for one minute data                 c'
+! C      write(*,*)'c    IFORMAT = 5 for five minute data                c'
+! C      write(*,*)'c    IFORMAT = 60 for hourly data                    c'
+! C      write(*,*)'c    Please input IFORMAT:                           c'
+! C      write(*,*)'cccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+! C 71   read(*,*)iformat
+!       READ *, iformat
+  c      write(*,*)'IFORMAT =',iformat
+        if(iformat.ne.1.and.iformat.ne.5.and.iformat.ne.60) then
+             write(*,*)'  Input error, please input again.  '
+! C           goto 71
+        endif
+! C      write(*,*)''
+  
+  ccccc Starting options ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! C      write(*,*)'cccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+! C      write(*,*)'c    W values starting options                       c'                            
+! C      write(*,*)'c    1 to start from 0 for all W parameters          c'
+! C      write(*,*)'c    2 to start from user specified values           c'
+! C      write(*,*)'c      (W values right before the first record       c'
+! C      write(*,*)'c       of the file which you are analyzing)         c' 
+! C      write(*,*)'c    e.g., for 5 minute data, enter the W parameters c'
+! C      write(*,*)'c      for the preceding 5 minute interval           c'
+! C      write(*,*)'c    Input the starting option:                      c'
+! C      write(*,*)'c         ( 2 is recommended )                       c'
+! C      write(*,*)'cccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+! C 73   read(*,*)istart
+! C      if(istart.ne.1.and.istart.ne.2) then
+! C           write(*,*)'  Input error, please input again.  '
+! C           goto 73
+! C      endif
+! C      if(istart.eq.2) then 
+! C      write(*,*)'     Type the starting values for all six W parameters'
+! C      write(*,*)'     Six number separated by comma or space'
+! C      read(*,*)wst(1),wst(2),wst(3),wst(4),wst(5),wst(6) 
+! C      endif
+! C      write(*,*)''
+!       istart = 2
+!       wst(1) = 0.
+!       wst(2) = 0.
+!       wst(3) = 0.
+!       wst(4) = 0.
+!       wst(5) = 0.
+!       wst(6) = 0.
+  cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! C      iformat = 60
+        if(iformat.eq.1) then
+                call kp3_min
+                call kpdst_min
+--- 5,56 ----
+  c                                                                                c
+  c     By Zhengrui Qin and Richard Denton, 09/01/2007                             c 
+  cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!       character yesno*3
+! C      common istart,wst(6)
+  cccccc   Choose data format of the OMNIWEB data(http://omniweb.gsfc.nasa.gov/) ccc 
+!       write(*,*)''
+!       write(*,*)'Please read readme.txt (where to download input files)'
+!       write(*,*)''
+!       write(*,*)'cccccccccccccccccccccccccccccccccccccccccccccccccccccc' 
+!       write(*,*)'c    Please choose the data format of input files    c'
+!       write(*,*)'c    IFORMAT = 1 for one minute data                 c'
+!       write(*,*)'c    IFORMAT = 5 for five minute data                c'
+!       write(*,*)'c    IFORMAT = 60 for hourly data                    c'
+!       write(*,*)'c    Please input IFORMAT:                           c'
+!       write(*,*)'cccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+!  71   read(*,*)iformat
+  c      write(*,*)'IFORMAT =',iformat
+        if(iformat.ne.1.and.iformat.ne.5.and.iformat.ne.60) then
+             write(*,*)'  Input error, please input again.  '
+!            goto 71
+        endif
+!       write(*,*)''
+  
+  ccccc Starting options ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!       write(*,*)'cccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+!       write(*,*)'c    W values starting options                       c'                            
+!       write(*,*)'c    1 to start from 0 for all W parameters          c'
+!       write(*,*)'c    2 to start from user specified values           c'
+!       write(*,*)'c      (W values right before the first record       c'
+!       write(*,*)'c       of the file which you are analyzing)         c' 
+!       write(*,*)'c    e.g., for 5 minute data, enter the W parameters c'
+!       write(*,*)'c      for the preceding 5 minute interval           c'
+!       write(*,*)'c    Input the starting option:                      c'
+!       write(*,*)'c         ( 2 is recommended )                       c'
+!       write(*,*)'cccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+!  73   read(*,*)istart
+!       if(istart.ne.1.and.istart.ne.2) then
+!            write(*,*)'  Input error, please input again.  '
+!            goto 73
+!       endif
+!       if(istart.eq.2) then 
+!       write(*,*)'     Type the starting values for all six W parameters'
+!       write(*,*)'     Six number separated by comma or space'
+!       read(*,*)wst(1),wst(2),wst(3),wst(4),wst(5),wst(6) 
+!       endif
+!       write(*,*)''
+  cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!       
+        if(iformat.eq.1) then
+                call kp3_min
+                call kpdst_min

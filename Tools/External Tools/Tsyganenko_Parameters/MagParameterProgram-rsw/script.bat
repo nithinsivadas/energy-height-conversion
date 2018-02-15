@@ -1,0 +1,2 @@
+MagmodelinputONE %1
+
