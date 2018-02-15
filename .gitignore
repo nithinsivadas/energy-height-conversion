@@ -54,3 +54,6 @@ Temporary Items
 # Image files
 *.fig
 *.pub
+
+# Temporary files
+*.asv

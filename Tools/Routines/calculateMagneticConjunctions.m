@@ -2,8 +2,8 @@
 
 %% Initialize
 clear all;
-timeMinStr = '26 Mar 2008';
-timeMaxStr = '26 Mar 2008 23:59';
+timeMinStr = '26 Mar 2008 8:00:00';
+timeMaxStr = '26 Mar 2008 18:00:00';
 groundstation.GDZ = [65.126, -147.47];
 groundstation.field = 'pokerflat';
 conjunction.probeStr = 'pokerflat';
@@ -40,7 +40,7 @@ downloadTimes(end) = timeMax;
 
 %% Calculating Magnetic conjunctions
 nMonth = length(downloadTimes);
-tempStorage = 'C:\Users\nithin\Documents\Temp\';
+tempStorage = [initialize_root_path,'..\Temp\'];
 minute = 1/(24*60); % 1 min is 1/(24*60) days
 multiWaitbar('Calculating magnetic conjunctions',0);
 for iMonth=1:1:nMonth
