@@ -1,4 +1,4 @@
-function [ rootPathStr ] = initialize_root_path()
+function [ rootPathStr,comp ] = initialize_root_path()
 %% initialize_root_path.m Generates the root git-hub path based on the computer
 %--------------------------------------------------------------------------
 % Output
@@ -15,11 +15,14 @@ function [ rootPathStr ] = initialize_root_path()
 computer=getenv('computername');
 if nargin<1
     if strcmp(computer,'NITHIN-SURFACE')
-        rootPathStr=['C:\Users\Nithin\Documents\GitHub\'];    
+        rootPathStr=['C:\Users\Nithin\Documents\GitHub\'];
+        comp = 'NITHIN-SURFACE'
     elseif strcmp(computer,'NITHIN-CARBON')
         rootPathStr=['C:\Users\nithin\Documents\GitHub\'];    
+        comp = 'NITHIN-CARBON'
     else 
         rootPathStr=['/home/nithin/Documents/git-repos/'];
+        comp = 'Aurora-Optiplex';
     end
 end
 

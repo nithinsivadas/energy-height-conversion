@@ -42,23 +42,23 @@ if strcmp(dataType,'cdf')
     dataFinalLink1min = [dataStoreLink,'hro_1min/',datestr(date,'yyyy'),'/'];
     omni2=ftp(host);
     cd(omni2,dataFinalLinkHourly);
-    mget(omni2,'*.cdf',[storeDir,datestr(date,'yyyymmdd'),filesep,'omni',filesep,'hourly',filesep]);
+    mget(omni2,'*.cdf',[storeDir,datestr(date,'yyyymmdd'),'',filesep,'omni',filesep,'hourly',filesep,'']);
     cd(omni2,dataFinalLink1min);
     if str2num(datestr(date,'mm'))~=1
     prevmm=datestr([datestr(date,'yyyy'),'/',...
         num2str(str2num(datestr(date,'mm'))-1),'/',num2str(01)],'mm');
     mget(omni2,['omni_hro_1min_',datestr(date,'yyyy'),prevmm,'01_v01.cdf'],...
-        [storeDir,datestr(date,'yyyymmdd'),filesep,'omni',filesep,'1min',filesep]); % previous month
+        [storeDir,datestr(date,'yyyymmdd'),'',filesep,'omni',filesep,'1min',filesep,'']); % previous month
     else
     prevyy=num2str((str2num(datestr(date,'yyyy'))-1));
     dataPrevLink1min = [dataStoreLink,'hro_1min/',prevyy,'/'];
     cd(omni2,dataPrevLink1min);
     mget(omni2,['omni_hro_1min_',prevyy,num2str(12),'01_v01.cdf'],...
-        [storeDir,datestr(date,'yyyymmdd'),filesep,'omni',filesep,'1min',filesep]); % previous month
+        [storeDir,datestr(date,'yyyymmdd'),'\omni\1min\']); % previous month
     cd(omni2,dataFinalLink1min);
     end     
     mget(omni2,['omni_hro_1min_',datestr(date,'yyyymm'),'01_v01.cdf'],...
-        [storeDir,datestr(date,'yyyymmdd'),filesep,'omni',filesep,'1min',filesep]); % current month
+        [storeDir,datestr(date,'yyyymmdd'),'\omni\1min\']); % current month
     close(omni2);
 end
 
@@ -71,21 +71,21 @@ if strcmp(dataType,'asc')
     prevyy=num2str((str2num(datestr(date,'yyyy'))-1));
     data1minPrevStr=['omni_min',prevyy,'.asc'];
     data1minStr=['omni_min',datestr(date,'yyyy'),'.asc'];
-    mget(omni2,data1minPrevStr,[storeDir,filesep,'omni',filesep,'ASC',filesep]);
-    mget(omni2,data1minStr,[storeDir,filesep,'omni',filesep,'ASC',filesep]);
+    mget(omni2,data1minPrevStr,[storeDir,'\omni\ASC\']);
+    mget(omni2,data1minStr,[storeDir,'\omni\ASC\']);
     
     data5minPrevStr=['omni_5min',prevyy,'.asc'];
     data5minStr=['omni_5min',datestr(date,'yyyy'),'.asc'];
-    mget(omni2,data5minPrevStr,[storeDir,filesep,'omni',filesep,'ASC',filesep]);
-    mget(omni2,data5minStr,[storeDir,filesep,'omni',filesep,'ASC',filesep]);
+    mget(omni2,data5minPrevStr,[storeDir,'\omni\ASC\']);
+    mget(omni2,data5minStr,[storeDir,'\omni\ASC\']);
     
     % Downloading CDF files that will let you create kp and dst files
     dataFinalLinkHourly = [dataStoreLink,'../omni_cdaweb/hourly/',datestr(date,'yyyy'),'/'];
     cd(omni2,dataFinalLinkHourly);
-    mget(omni2,'*.cdf',[storeDir,filesep,'omni',filesep,'CDF',filesep]);
+    mget(omni2,'*.cdf',[storeDir,'\omni\CDF\']);
     dataFinalLinkHourly = [dataStoreLink,'../omni_cdaweb/hourly/',prevyy,'/'];
     cd(omni2,dataFinalLinkHourly);
-    mget(omni2,'*.cdf',[storeDir,filesep,'omni',filesep,'CDF',filesep]);
+    mget(omni2,'*.cdf',[storeDir,'\omni\CDF\']);
     
     close(omni2);
 end
