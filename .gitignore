@@ -57,3 +57,6 @@ Temporary Items
 
 # Temporary files
 *.asv
+
+# Directories not to be synced
+spdf/

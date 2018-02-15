@@ -1,14 +1,15 @@
 %% Routine to calculate the times of conjunctions
 
 %% Initialize
-timeMinStr = '26 Mar 2008';
-timeMaxStr = '26 Mar 2008 23:59';
+clear all;
+timeMinStr = '26 Mar 2008 8:00:00';
+timeMaxStr = '26 Mar 2008 18:00:00';
 groundstation.GDZ = [65.126, -147.47];
 groundstation.field = 'pokerflat';
 conjunction.probeStr = 'pokerflat';
 conjunction.radius = 500; %km
 % thmProbeStr = 'tha,thb,thc,thd,the';
-thmProbeStr = 'thd,the';
+thmProbeStr = 'the,thd';
 stopAlt = 110; % km
 hemiFlag = 1; % Northern Hemisphere
 % magFieldModel = 7; %Tsyganenko 1996
@@ -43,6 +44,7 @@ tempStorage = 'C:\Users\nithin\Documents\Temp\';
 minute = 1/(24*60); % 1 min is 1/(24*60) days
 multiWaitbar('Calculating magnetic conjunctions',0);
 for iMonth=1:1:nMonth
+    % Generating the input data for find_magnetic_conjunctions
     multiWaitbar('Calculating magnetic conjunctions','Increment',1/nMonth,...
         'Relabel',['Calculating mag. conj. for ',datestr(downloadTimes(iMonth),'mmm YYYY')]);
     omniData = process_omni_data(datestr(downloadTimes(iMonth)),tempStorage);
