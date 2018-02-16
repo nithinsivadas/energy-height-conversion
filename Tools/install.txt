@@ -21,6 +21,8 @@ Listing several things to track:
 	Install the linux version of the SPDF, and add folder to .gitgnore
 
 	3.4 IRBEM
+	Download IRBEM, and install according to instructions. And add it to MATLAB 		path file.
+
 
 
 
