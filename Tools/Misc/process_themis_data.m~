@@ -9,7 +9,7 @@ f=filesep;
         probeStr = 'tha,thb,thc,thd,the';
     end
     if nargin < 2
-        dataStoreDir = [initialize_root_path,'LargeFiles',f];
+        dataStoreDir = [initialize_root_path,'LargeFiles',f,''];
     end
     if nargin < 1
         dateStr = '26 Mar 2008';
@@ -18,7 +18,7 @@ f=filesep;
     probe = strsplit(probeStr,',');
     date = datenum(dateStr);
     if strcmp(dataType,'state')
-    cdfLocalDir = [dataStoreDir,'themis',f,'state',f];
+    cdfLocalDir = [dataStoreDir,'themis',f,'state',f,''];
      for thisSC = 1:length(probe)
         thisProbe = char(probe(thisSC));
         cdfFileStr = [thisProbe,'_or_ssc_',datestr(date,'yyyymm'),'01_v01.cdf'];
@@ -57,7 +57,7 @@ themisData.info = ['Contains themis data for ',datestr(date,'mmm YYYY')];
 
 %% Appending themis data onto themisData.mat file
 % Need to check if this works after adding more than one dataType.
-themisLocalMatDir = [dataStoreDir,datestr(date,'yyyymmdd'),f];
+themisLocalMatDir = [dataStoreDir,datestr(date,'yyyymmdd'),'\'];
 matFilePath = [themisLocalMatDir,'themisData.mat'];
 if isfile(matFilePath)
     themisDataOld=themisData;

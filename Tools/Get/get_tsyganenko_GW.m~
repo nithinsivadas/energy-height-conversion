@@ -111,8 +111,7 @@ if ~isfile([GWstoreDir,GWfileStr])
     if isunix
         dos('./MagmodelinputONElinux');
     else
-        dos('MagmodelinputONE');
-    end
+    dos('MagmodelinputONE');
     cd(currentPath);
 
     %% Converting .d files into matlab variables

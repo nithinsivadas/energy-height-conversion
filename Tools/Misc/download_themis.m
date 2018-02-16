@@ -25,6 +25,7 @@ function download_themis(dateStr,storeDir,probeStr,dataType)
 % Author  : Nithin Sivadas
 % Ref     : 
 %--------------------------------------------------------------------------
+    f = filesep;
     if nargin < 4
         dataType = 'state';
     end
@@ -53,7 +54,7 @@ function download_themis(dateStr,storeDir,probeStr,dataType)
             dataStoreLink = ['/pub/data/themis/',(thisProbe),'/ssc/'];
             dataFinalLink = [dataStoreLink,datestr(date,'yyyy'),'/'];
             fileStr = [thisProbe,'_or_ssc_',datestr(date,'yyyymm'),'01_v01.cdf'];
-            dataLocalDir = [storeDir,'\themis\state\'];
+            dataLocalDir = [storeDir,f,'themis',f,'state',f];
             if ~isfile([dataLocalDir,fileStr])
                 cd(thmFTP,dataFinalLink);
                 mget(thmFTP,fileStr,dataLocalDir);

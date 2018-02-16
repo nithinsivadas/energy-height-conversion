@@ -1,0 +1,26 @@
+Listing several things to track:
+
+1. MATLAB 2017b
+	For isfile
+
+2. Usage of filesep function
+	All path names ought to have the appropriate file separation '/'
+
+3. External Tools
+	3.1 G77 Fortran
+	Installing g77	
+	https://askubuntu.com/questions/837618/need-the-gnu-g77-fortran-compiler-on-ubuntu-16-04-having-issues
+	Fix errors here:	
+	http://seanelvidge.com/2017/01/install-g77-on-ubuntu-14-04/
+
+	3.2 MagParameterProgram
+	Compile the fortran code
+	Add folder to .gitignore	
+	
+	3.3 SPDF
+	Install the linux version of the SPDF, and add folder to .gitgnore
+
+	3.4 IRBEM
+
+
+
