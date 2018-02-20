@@ -7,7 +7,7 @@ timeMaxStr = '26 Mar 2008 12:00:00';
 groundstation.GDZ = [65.126, -147.47];
 groundstation.field = 'pokerflat';
 conjunction.probeStr = 'pokerflat';
-conjunction.radius = 500; %km
+conjunction.radius = 200; %km
 % thmProbeStr = 'tha,thb,thc,thd,the';
 thmProbeStr = 'the,thd';
 stopAlt = 110; % km
@@ -84,8 +84,8 @@ for iMonth=1:1:nMonth
             'Increment',1/length(probes(iMonth).probeNames));
         thisProbe = char(probes(iMonth).probeNames(iProbe));
         if ~strcmp(thisProbe,conjunction.probeStr)
-            startIndx = find(diff(probes.flag(:,1))==1);
-            stopIndx  = find(diff(probes.flag(:,1))==-1);
+            startIndx = find(diff(probes.flag(:,iProbe))==1);
+            stopIndx  = find(diff(probes.flag(:,iProbe))==-1);
             % Appending arrays in dataConjunctions after each month
             % iteration
             if iMonth==1
