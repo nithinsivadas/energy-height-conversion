@@ -77,6 +77,8 @@ for iMonth=1:1:nMonth
     probes(iMonth) = probesOne;
     probes(iMonth).time = thisTimeArray;
     
+    
+    
 % Listing down the conjunction start and end times 
     multiWaitbar('Recording conjunction start and end times',0,'Color',[0.2 0.9 0.3]);
     for iProbe = 1:1:length(probes(iMonth).probeNames)

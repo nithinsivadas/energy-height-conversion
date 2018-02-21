@@ -124,11 +124,11 @@ for thisSC = 1:1:nProbes
     thisProbe = char(probeNames(thisSC));
     multiWaitbar('find_magnetic_conjunctions','Increment',1/nProbes,'Relabel',['Magnetic conjunctions for ',thisProbe]);
     GEO=interp1(spacecraft.(thisProbe).time,spacecraft.(thisProbe).GEO,time,'linear');
-    disp(['starting to use IRBEM for ',thisProbe,'\n']);
+%     disp(['starting to use IRBEM for ',thisProbe,'\n']);
     GDZ=onera_desp_lib_find_foot_point(magFieldModel,options,...
         sysaxes,time,GEO(:,1),GEO(:,2),GEO(:,3),stopAlt,hemiFlag,maginput); % alt lat lon
     multiWaitbar('find_foot_point','Reset');
-    disp('end IRBEM\n');
+%     disp('end IRBEM\n');
     probes.(thisProbe).GDZ = GDZ(:,2:3); %lat lon
     probes.(thisProbe).GEO = GEO(:,2:3); %lat lon
     multiWaitbar(['Magnetic conjunctions for ',thisProbe],'Relabel','find_magnetic_conjunctions');
