@@ -2,19 +2,23 @@
 
 %% Initialize
 clear all;
-timeMinStr = '26 Mar 2008 8:00:00';
-timeMaxStr = '26 Mar 2008 12:00:00';
+timeMinStr = '31 Mar 2008 8:00:00';
+timeMaxStr = '01 April 2008 12:00:00';
 groundstation.GDZ = [65.126, -147.47];
 groundstation.field = 'pokerflat';
 conjunction.probeStr = 'pokerflat';
 conjunction.radius = 200; %km
+f= filesep();
 % thmProbeStr = 'tha,thb,thc,thd,the';
 thmProbeStr = 'the,thd';
 stopAlt = 110; % km
 hemiFlag = 1; % Northern Hemisphere
 % magFieldModel = 7; %Tsyganenko 1996
 magFieldModel = 10;
-
+h5FilePath = [initialize_root_path(),'LargeFiles',f,'magConjunctions',f];
+h5FileStr  = ([datestr(timeMinStr,'YYYYmmDD'),...
+    'to',datestr(timeMaxStr,'YYYYmmDD'),'_',...
+    char(strjoin(string(strsplit(thmProbeStr,',')),'_')),'.h5']);
 multiWaitbar('CloseAll');
 %% Creating omniData amd other spacecraft data for the required time period
 timeMinVec = datevec(timeMinStr);
@@ -45,6 +49,17 @@ tempStorage = [initialize_root_path,'..',filesep,'Temp',filesep];
 
 minute = 1/(24*60); % 1 min is 1/(24*60) days
 multiWaitbar('Calculating magnetic conjunctions',0);
+
+% Creating H5 file to store data
+origPath = pwd;
+if ~isfolder(h5FilePath)
+    mkdir(h5FilePath);
+end
+cd(h5FilePath);
+h5create(h5FileStr,'/conjunctions/flag',[inf inf],'Datatype','single','ChunkSize',[10 50000]);
+h5create(h5FileStr,'/conjunctions/time',[inf inf],'Datatype','double','ChunkSize',[1 50000]);
+cd(origPath);
+h5Pointer = 1;
 for iMonth=1:1:nMonth
     % Generating the input data for find_magnetic_conjunctions
     multiWaitbar('Calculating magnetic conjunctions','Increment',1/nMonth,...
@@ -76,9 +91,7 @@ for iMonth=1:1:nMonth
         groundstation,conjunction,stopAlt,hemiFlag,magFieldModel);
     probes(iMonth) = probesOne;
     probes(iMonth).time = thisTimeArray;
-    
-    
-    
+        
 % Listing down the conjunction start and end times 
     multiWaitbar('Recording conjunction start and end times',0,'Color',[0.2 0.9 0.3]);
     for iProbe = 1:1:length(probes(iMonth).probeNames)
@@ -106,8 +119,13 @@ for iMonth=1:1:nMonth
                 [dataConjunctions.(thisProbe).stopGDZ; probes(iMonth).(thisProbe).GDZ(stopIndx,:)];
         end
     end
+    
     multiWaitbar('Recording conjunction start and end times','Reset');
     multiWaitbar(['Calculating mag. conj. for ',datestr(downloadTimes(iMonth),'mmm YYYY')],...
         'Relabel','Calculating magnetic conjunctions');
-    
+    dataSize=size(probes.flag');
+    timeSize=dataSize(2);
+    h5write([h5FilePath,h5FileStr],'/conjunctions/flag',single(probes.flag)',[1 h5Pointer],dataSize);
+    h5write([h5FilePath,h5FileStr],'/conjunctions/time',probes.time,[1 h5Pointer],[1 timeSize]);
+    h5Pointer = h5Pointer + dataSize(2);
 end   
