@@ -56,8 +56,12 @@ if ~isfolder(h5FilePath)
     mkdir(h5FilePath);
 end
 cd(h5FilePath);
-h5create(h5FileStr,'/conjunctions/flag',[inf inf],'Datatype','single','ChunkSize',[10 50000]);
-h5create(h5FileStr,'/conjunctions/time',[inf inf],'Datatype','double','ChunkSize',[1 50000]);
+if isfile([h5FilePath,h5FileStr])
+    warning(['Overwriting : ',h5FileStr]);
+else
+    h5create(h5FileStr,'/conjunctions/flag',[inf inf],'Datatype','single','ChunkSize',[10 50000]);
+    h5create(h5FileStr,'/conjunctions/time',[inf inf],'Datatype','double','ChunkSize',[1 50000]);
+end
 cd(origPath);
 h5Pointer = 1;
 for iMonth=1:1:nMonth
