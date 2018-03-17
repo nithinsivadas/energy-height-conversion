@@ -2,8 +2,8 @@
 
 %% Initialize
 clear all;
-timeMinStr = '31 Mar 2008 8:00:00';
-timeMaxStr = '01 April 2008 12:00:00';
+timeMinStr = '01 Mar 2008 8:00:00';
+timeMaxStr = '15 April 2008 12:00:00';
 groundstation.GDZ = [65.126, -147.47];
 groundstation.field = 'pokerflat';
 conjunction.probeStr = 'pokerflat';
@@ -93,8 +93,8 @@ for iMonth=1:1:nMonth
     end
     probesOne = find_magnetic_conjunctions(thisTimeArray,omniData,spacecraft,...
         groundstation,conjunction,stopAlt,hemiFlag,magFieldModel);
+    probesOne.time = thisTimeArray;
     probes(iMonth) = probesOne;
-    probes(iMonth).time = thisTimeArray;
         
 % Listing down the conjunction start and end times 
     multiWaitbar('Recording conjunction start and end times',0,'Color',[0.2 0.9 0.3]);
