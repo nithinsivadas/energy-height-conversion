@@ -1,6 +1,6 @@
 function [themisData, matFilePath] = process_themis_data(dateStr,dataStoreDir,probeStr,dataType)
 %UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%   Process and download themis data for a month
 f=filesep;
  if nargin < 4
         dataType = 'state';
