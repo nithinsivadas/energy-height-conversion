@@ -22,7 +22,7 @@ function [iyear,idoy,UT] = onera_desp_lib_matlabd2yds(matlabd)
 % function [iyear,idoy,UT] = onera_desp_lib_matlabd2yds(matlabd);
 % helper function to convert between matlab date number and
 % date format expected by onera_desp_lib routines
-matlabd = datenum(matlabd)';
+matlabd = datenum(reshape(matlabd,[],1));
 dvec = datevec(matlabd);
 iyear = dvec(:,1);
 nTime = length(iyear);
