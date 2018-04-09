@@ -57,14 +57,14 @@ elseif strcmp(mode,'acf')
 end    
     
     
-R = toeplitz(conj(RArrayDisplay));  %Traditional Autocorrelation matrix
-R1 = toeplitz(conj(RArrayModified)); %Contains reflection of the RArray
+% R = toeplitz(conj(RArrayDisplay));  %Traditional Autocorrelation matrix
+% R1 = toeplitz(conj(RArrayModified)); %Contains reflection of the RArray
 
 % Calculate D, covR, covS.
-D = dftmtx(length(RArrayModified)); %Question? Should the input be modified periodic ACF or just one-half
+% D = dftmtx(length(RArrayModified)); %Question? Should the input be modified periodic ACF or just one-half
 
 %PSD using the DFT matrix
-S1 = fftshift(abs(D*RArrayModified)).*dt; %X
+% S1 = fftshift(abs(D*RArrayModified)).*dt; %X
 
 %PSD using the fft function
 [S,f] = get_fft(RArrayDisplay,dt);
@@ -79,9 +79,9 @@ S1 = fftshift(abs(D*RArrayModified)).*dt; %X
 moments.ACF_Array=RArrayDisplay;
 moments.ACF_Array_modified = RArrayModified;
 moments.lag=lagDisplay;
-moments.ACF=R;
-moments.S_DFT = S1; %PSD from DFT matrix multiplication method
-moments.D=D;
+% moments.ACF=R;
+% moments.S_DFT = S1; %PSD from DFT matrix multiplication method
+% moments.D=D;
 
 end
 
