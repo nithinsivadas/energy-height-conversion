@@ -15,7 +15,7 @@ DregionExps = {'MSWinds01';'MSWinds02';'MSWinds03';'MSWinds04';'MSWinds05';...
     'MSWinds23m';'MSWinds23_dt013';'MSWinds26.v01';'MSWinds26.v02';'MSWinds26.v03';...
     'MSWinds24';'MSWinds25';'MSWindsrand_v01';'MSWindsrand_v02'};
 conjunctionExps = {'Themis30';'Themis31';'Themis36';'Lyons02';'Lyons13';'Lyons30_3dt'};
-expName=DregionExps;
+expName={'MSWinds23'};
 TBytes=zeros(length(expName),1);
 for j=1:1:length(expName)
     expIndx = find((strcmp(table(:,2),expName(j))));
