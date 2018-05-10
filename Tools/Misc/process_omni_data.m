@@ -1,4 +1,4 @@
-function [omniData, matFilePath] = process_omni_data(dateStr,dataStoreDir)
+function [omniData, matFilePath] = process_omni_data(dateStr,dataStoreDir,setCalculateGW)
 %% process_omni_cdf.m Processes hourly and minute-wise omni data and stores 
 %                     it as .mat files, under each event date folder. 
 %                     Can be used as input for magnetic field models
@@ -26,6 +26,9 @@ function [omniData, matFilePath] = process_omni_data(dateStr,dataStoreDir)
 % Ref     : 
 % Notes   : 
 %--------------------------------------------------------------------------
+if nargin < 3
+    setCalculateGW=true;
+end
 
 if nargin < 2
     dataStoreDir = [initialize_root_path,'LargeFiles',filesep];
@@ -90,12 +93,6 @@ VarNamesHourlyInfoID = find(tf);
 VarNamesHourlyInfoID = VarNamesHourlyInfoID(p);
 omniData.hourly.maginputFieldNames = info.VariableAttributes.FIELDNAM(VarNamesHourlyInfoID,:);
 
-%% Calculating additional maginput variables for IRBEM [Incomplete]
- programDir = [initialize_root_path,...
-        'energy-height-conversion',filesep,'Tools',filesep,'External Tools',filesep,'Tsyganenko_Parameters',filesep,'MagParameterProgram-rsw',filesep];
-omniASCDir = [initialize_root_path,'LargeFiles',filesep,'omni',filesep,'ASC',filesep];
-GW = get_tsyganenko_GW(str2num(datestr(date,'YYYY')),programDir,omniASCDir);  % This is minute-wise
-
 %% Generating minute wise data
 file1minStr= get_files_in_folder(omni1minDir,'*.cdf');
 VarNames1min1=[{'SYM_H'}]; % Assume SYM_H = DST
@@ -106,6 +103,19 @@ omniData.minutely.time = double...
     'ConvertEpochToDatenum', true)');% Time
 timeMin = omniData.minutely.time(1);
 timeMax = omniData.minutely.time(end);
+
+% Calculating additional maginput variables for IRBEM [Incomplete]
+if setCalculateGW == true
+    programDir = [initialize_root_path,...
+            'energy-height-conversion',filesep,'Tools',filesep,'External Tools',filesep,'Tsyganenko_Parameters',filesep,'MagParameterProgram-rsw',filesep];
+    omniASCDir = [initialize_root_path,'LargeFiles',filesep,'omni',filesep,'ASC',filesep];
+    GW = get_tsyganenko_GW(str2num(datestr(date,'YYYY')),programDir,omniASCDir);  % This is minute-wise
+else
+    GW.time = omniData.minutely.time; 
+    GW.G = zeros(length(omniData.minutely.time),3);
+    GW.W = zeros(length(omniData.minutely.time),6);
+end
+
 tempIndex = 1:1:length(GW.time);
 timeIndex = crop_time(tempIndex,GW.time,timeMin,timeMax);
 omniData.minutely.maginput(:,1) = interp1(omniData.hourly.time,...

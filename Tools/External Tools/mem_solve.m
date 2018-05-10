@@ -51,8 +51,8 @@ if (nargin<3), relax=1; end
 %******************************************************
 %make sure there are no 0's in y
 %******************************************************
-y_bad=find(y<=1);
-y(y_bad)=1;
+% y_bad=find(y<=1);
+% y(y_bad)=1;
 
 % W=sigma;
 % W=linspace(1,0,size(A,1))';

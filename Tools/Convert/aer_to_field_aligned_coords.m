@@ -62,5 +62,7 @@ amisrData.cartCoords.zUp = zUpMag;
 amisrData.origCartCoords.xEast = xEast;
 amisrData.origCartCoords.yNorth = yNorth;
 amisrData.origCartCoords.zUp = zUp;
+
+amisrData.projectionAlt = projectionAlt;
 end
 

@@ -16,10 +16,10 @@ if ~isfield(amisrData,'magCartCoords')
         'not available in the structure amisrData']);
 end 
 
-if nargin < 3
+if nargin < 3 || isempty(timeMaxStr)
     timeMaxStr = datestr(max(amisrData.time(1,:)));
 end
-if nargin < 2
+if nargin < 2 || isempty(timeMinStr)
     timeMinStr = datestr(min(amisrData.time(1,:)));
 end
 
@@ -35,6 +35,18 @@ hWait = waitbar(0);
             amisrData.origCartCoords.zUp(:),ne(:),'linear','none');
         amisrData.magElectronDensity(:,:,itime) = ...
             F(amisrData.magCartCoords.xEast,amisrData.magCartCoords.yNorth,...
+            amisrData.magCartCoords.zUp);
+        
+%       Removing the NANs of Ne
+        dne = amisrData.dNeFrac(:,:,itime);
+        dneModel = (nanmean(amisrData.dNeFrac,3));
+        dne(isnan(dne))=dneModel(isnan(dne));
+        
+        dF = scatteredInterpolant(amisrData.origCartCoords.xEast(:),...
+            amisrData.origCartCoords.yNorth(:),...
+            amisrData.origCartCoords.zUp(:),dne(:),'linear','none');
+        amisrData.magdNeFrac(:,:,itime) = ...
+            dF(amisrData.magCartCoords.xEast,amisrData.magCartCoords.yNorth,...
             amisrData.magCartCoords.zUp);
     end
 delete(hWait);

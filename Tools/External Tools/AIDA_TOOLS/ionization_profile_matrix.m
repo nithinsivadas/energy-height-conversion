@@ -42,10 +42,10 @@ elseif nargin > 14
 end
 
 
-disp('Using "ionization_profile_matrix" from:')
-dbstack
-disp('consider changing to your own prefered function for calculating')
-disp('the monoenergetic-production profile matrix.')
+% disp('Using "ionization_profile_matrix" from:')
+% dbstack
+% disp('consider changing to your own prefered function for calculating')
+% disp('the monoenergetic-production profile matrix.')
 
 %% 1 stack the atmospheric profiles together:
 atmosphere = [h,nN2,nO,nO2,density];

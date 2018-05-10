@@ -16,12 +16,12 @@ radarDatabase.nExpId=radarDatabase.nExpId+1;%correcting for matlab indices
 radarDatabase.nMountPathId=radarDatabase.nMountPathId+1; %correcting for matlab indices
 
 %% Input
-interestedExpNames=expNames(find(strncmpi(expNames,'MSWinds23',9)));
+interestedExpNames=expNames(find(strncmpi(expNames,'Inspire',7)));
 % interestedExpNames=expNames;
 
 %% Results
 selectedExperiments = get_experiment_path(interestedExpNames,expNames,expMountPaths,radarDatabase);
-[folderArray,mount]=create_file_list(selectedExperiments,expMountPaths,false,'\Setup\*.exp');
+% [folderArray,mount]=create_file_list(selectedExperiments,expMountPaths,false,'\Setup\*.exp');
 
 %% Functoins
 function [folderArray,mount]=create_file_list(selectedExperiments,expMountPaths,setSaveFileOn,sizeCalculationFilesWildcard)

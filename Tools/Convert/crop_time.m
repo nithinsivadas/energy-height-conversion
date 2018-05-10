@@ -20,7 +20,8 @@ function [ yNew,timeNew ] = crop_time( y,time,timeMin, timeMax )
 % Ref     :
 %--------------------------------------------------------------------------
 %%
-	yTemp = y;
+	nTime = length(time);
+    yTemp = reshape(y,nTime,[]);
 	timeTemp = time;
 
 	if nargin < 4
@@ -41,7 +42,7 @@ function [ yNew,timeNew ] = crop_time( y,time,timeMin, timeMax )
     if length(timeTemp)>1
         % Cropping the time array and density matrix to that prescribed by the user
         timeNew = timeTemp(itimeMin:itimeMax); % Changed itimeMin+1 -> itimeMin on 25th Jan 2017
-        yNew = yTemp(:,itimeMin:itimeMax);
+        yNew = yTemp(itimeMin:itimeMax,:);
     else
         timeNew = timeTemp;
         yNew = yTemp;

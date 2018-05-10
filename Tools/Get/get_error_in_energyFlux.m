@@ -1,4 +1,4 @@
-function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamma)
+function [dE,dEFrac] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamma)
 
 %% get_error_in_energyFlux.m Calculates the covariance matrix of energy flux estimates
 %-------------------------------------------------------------------------
@@ -11,7 +11,7 @@ function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamm
 %  time       : Time vector in [matlab units]
 %  Gamma      : A constant that weighs the importance of two error terms
 %               in -S/Gamma &  0.5 [e]'[C_d^-1][e]
-%               If Gamma == inf - maximum error (Default)
+%               If Gamma == -1  - (inf) maximum error (Default)
 %               If Gamma == 0   - least possible error
 %-------------------------------------------------------------------------
 % Output
@@ -30,7 +30,7 @@ function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamm
 
     if nargin < 6
         Gamma = -1;
-    end;
+    end
 
     numFlux = energy_to_num(energyFlux, time, energyBin); 
 
@@ -42,22 +42,24 @@ function [dE] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, time, Gamm
 
         part1 = A'*inv(Cq)*A; 
         if Gamma ~= -1
-            part2 = inv(Gamma*diag(thisFlux));            
+            part2 = inv(Gamma*diag(thisFlux)); 
+            
         else
-            part2 = 0; % Simulating Gamma -> inf
-        end;
+            part2 = zeros(size(part1)); % Simulating Gamma -> inf
+        end
         Cflux_inv = part1 + part2;        
         Cflux = inv(Cflux_inv);
         
         [X,D]=eig(Cflux,'matrix');
            
-        dnumFlux=(diag(D)).^0.5;        
-        denergyFlux(itime,:)=num_to_energy(dnumFlux,1,energyBin); 
+        dnumFlux=(abs(diag(D))).^0.5;        
+        denergyFlux(:,itime)=num_to_energy(dnumFlux,1,energyBin); 
      
-     end;
+    end
      
     dE=denergyFlux;
-
+    dEFrac = denergyFlux./energyFlux;
+    
     [isThereNAN, totalNAN] = check_nan(dE);
     
 end
