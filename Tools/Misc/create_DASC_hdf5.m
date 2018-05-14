@@ -7,25 +7,26 @@ function [dataASILastDay] = create_DASC_hdf5(localStoreDir,outputH5FileStr,...
 if nargin<9
     setDownloadDASCFlag = true;
 end
-if nargin<8 || isempty(calFileAz)
+if nargin<8 || isempty(calFileEl)
+    calFileEl = [initialize_root_path,'LargeFiles',filesep,'DASC',filesep,...
+        '26Mar2008',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_EL_10deg.FITS'];
+if nargin<7 || isempty(calFileAz)
     calFileAz = [initialize_root_path,'LargeFiles',filesep,'DASC',filesep,...
         '26Mar2008',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_AZ_10deg.FITS'];
 end
-if nargin<7 || isempty(calFileEl)
-    calFileEl = [initialize_root_path,'LargeFiles',filesep,'DASC',filesep,...
-        '26Mar2008',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_EL_10deg.FITS'];
+
 end
 if nargin<6
     maxTimeStr=[];
 end
 if nargin<5
-    minElevation=30;
+    minTimeStr=[];
 end
 if nargin<4
-    projectionAltitude=110;
+    minElevation=30;
 end
 if nargin<3
-    minTimeStr=[];
+    projectionAltitude=110;
 end
 if nargin<2
     outputH5FileStr='outputDASC.h5';
@@ -42,9 +43,9 @@ if ~isempty(maxTimeStr) && ~isempty(minTimeStr)
     dayArray = datenum(datestr(minTimeStr,'dd-mmm-yyyy')):...
         1:datenum(datestr(minTimeStr,'dd-mmm-yyyy'))+ndays;
 elseif ~isempty(maxTimeStr) && isempty(minTimeStr)
-    dayArray = datenum(dateStr(maxTimeStr,'dd-mmm-yyyy'));
+    dayArray = datenum(datestr(maxTimeStr,'dd-mmm-yyyy'));
 elseif ~isempty(minTimeStr) && isempty(maxTimeStr)
-    dayArray = datenum(dateStr(minTimeStr,'dd-mmm-yyyy'));
+    dayArray = datenum(datestr(minTimeStr,'dd-mmm-yyyy'));
 else
     error('No date is specified to process DASC data');
 end
@@ -58,9 +59,14 @@ for idays=1:1:length(dayArray)
     localDASCDirPath(idays,:) = ([localStoreDir,filesep,datestr(dayArray(idays),'yyyymmdd')]); 
     
     fileStr = get_files_in_folder(localDASCDirPath(idays,:));
-    fitsTimeStamp = fitsfiletimestamp(fileStr);
-    timeASI = (fitsTimeStamp-datenum('jan-01-1970'))*(24*3600);
-    timeASI = unix_to_matlab_time(timeASI);
+    timeASI = fitsfiletimestamp(fileStr);
+    
+    if idays==1 && ~isempty(minTimeStr)
+        [fileStr, timeASI]=crop_time(fileStr,timeASI,datenum(minTimeStr), timeASI(end));
+    end
+    if idays==length(dayArray) && ~isempty(maxTimeStr)
+        [fileStr, timeASI]=crop_time(fileStr,timeASI,timeASI(1),datenum(maxTimeStr));
+    end
     
     nTimeASI = length(timeASI);
     timeStartIndx = 1; timeEndIndx = nTimeASI;
@@ -93,7 +99,7 @@ for idays=1:1:length(dayArray)
             data.timeDASC(itime,1) = timeDASC;
             message(itime) = strcat('Successfully loaded: ',ASIDataStr);
         catch ME
-            message(itime)=strcat('Could not load file: ',ASIDataStr);
+            message(itime)=strcat('Could not load file: ',ASIDataStr,' because of: ', ME.message, 'in Function ', ME.stack.file);
             data.timeDASC(itime,1) = timeASI(itime);
         end
         

@@ -60,10 +60,7 @@ sensorloc = [65.1260,-147.4789,689 ];
 
 %% Generating Time Stamp
 splitFileNameStr = strsplit(fileNameStr,filesep);
-aldtnum = fitsfiletimestamp(splitFileNameStr(end));
-time = (aldtnum-datenum('jan-01-1970'))*(24*3600);
-time = unix_to_matlab_time(time);
-
+time = fitsfiletimestamp(splitFileNameStr(end));
 
 %% 
 coordnames = 'Geodetic';

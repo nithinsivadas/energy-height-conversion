@@ -37,7 +37,7 @@ function [ yNew,timeNew ] = crop_time( y,time,timeMin, timeMax )
 	else
 	    itimeMin = find_time(timeTemp, timeMin);
 
-	end;
+    end
     
     if length(timeTemp)>1
         % Cropping the time array and density matrix to that prescribed by the user
@@ -46,8 +46,8 @@ function [ yNew,timeNew ] = crop_time( y,time,timeMin, timeMax )
     else
         timeNew = timeTemp;
         yNew = yTemp;
-    end;
+    end
     
-	[isThereNAN, totalNAN] = check_nan(yNew);
+% 	[isThereNAN, totalNAN] = check_nan(yNew);
 
 end
