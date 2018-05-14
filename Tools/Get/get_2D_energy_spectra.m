@@ -38,7 +38,7 @@ if strcmp(setTypeofCoords,'magnetic')
     maxAltNo = find_altitude(amisrData.magGeodeticCoords.alt(:,amisrData.magBeamNo),altLim(2));
     coordRange = minAltNo:1:maxAltNo;
     coords = zeros(length(coordRange),nBeams,3);
-    for iBeam = 1:1:1
+    for iBeam = 1:1:nBeams
         custom_waitbar(hWait,iBeam,nBeams,'Calculating 2D energy fluxes');
         Ne = squeeze(amisrData.magElectronDensity(coordRange,iBeam,timeRange));
         dNeFrac = squeeze(amisrData.magdNeFrac(coordRange,iBeam,timeRange));

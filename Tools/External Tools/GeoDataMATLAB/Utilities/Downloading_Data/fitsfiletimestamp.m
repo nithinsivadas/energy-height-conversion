@@ -31,7 +31,7 @@ for k = 1:N
     time_split = regexp(split_cell{1},'\_','split');
     if length(time_split{end-1})==6
         yearstr = ['20',time_split{end-1}];
-        makewarn =true;
+%         makewarn =true;
     elseif length(time_split{end-1})==8
         yearstr = time_split{end-1};
     end

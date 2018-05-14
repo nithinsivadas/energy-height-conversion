@@ -1,7 +1,10 @@
-function [data,status] = generate_energy_spectra_h5...
+function [data,status] = generate_energy_spectra_data_product...
     (inputAMISRExpFile,filePath,projectionAlt,energyBin,altLim,outputH5FileStr,...
     timeMinStr,timeMaxStr)
-%UNTITLED2 Summary of this function goes here
+%UNTITLED2 Generates the energy spectra data product that contains the
+%magnetically field aligned electron densities, energy flux of primary
+%electrons that generate the aurora, and DASC camera data to put them in
+%context. 
 %   Detailed explanation goes here
 if nargin < 8 || isempty(timeMaxStr)
     timeMaxStr = [];

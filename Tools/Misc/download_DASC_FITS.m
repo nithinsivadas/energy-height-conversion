@@ -27,16 +27,20 @@ cd(dasc,remoteFinalLink);
 remoteFileList = dir(dasc);
 remoteFileListName = string(char(remoteFileList.name));
 
+% Check if local Store Path exists
 if isdir(localStorePath)
     localFileList = dir(localStorePath);
     localFileListName = string(char(localFileList.name));
+    % Identifying identical files in remote and local directories
     index = arrayfun(@(k)sum(strcmp(remoteFileListName(k),localFileListName))>0, (1:length(remoteFileListName))','UniformOutput',false);
-    indexPendingFiles = find(~cell2mat(index));
-    if isempty(indexPendingFiles)
-        warning('DASC data already downloaded');
+    indexMissingFiles = find(~cell2mat(index));
+    % If all files are already downloaded then displaying a message
+    if isempty(indexMissingFiles)
+        disp('DASC data already downloaded');
     end
-    for i=1:1:length(indexPendingFiles)
-        mget(dasc,remoteFileListName(indexPendingFiles(i)),localStorePath);
+    % Downloading only the missing files
+    for i=1:1:length(indexMissingFiles)
+        mget(dasc,remoteFileListName(indexMissingFiles(i)),localStorePath);
     end
 else
     mget(dasc,'*',localStorePath);

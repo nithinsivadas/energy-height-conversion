@@ -13,7 +13,7 @@ function [ dataNew, lat, lon, az_new, el_new, sensorloc, time ] = DASC_aer_to_ge
 % minElevation: The minimum elevation angle [eg., 15]
 % projectionAltitude: The atltitude where the image ought to be projected
 %                     to in [km]
-
+%
 % Output:
 % dataNew     : All-Sky Image data cropped within the required elevation [1-D Array]
 % lat         : Latitude points of dataNew [1-D Array] 
@@ -22,7 +22,7 @@ function [ dataNew, lat, lon, az_new, el_new, sensorloc, time ] = DASC_aer_to_ge
 %               and 90 -> North
 % el_new      : Elevation points of dataNew [1-D Array] 
 % sensorloc   : Specifying location of DASC
-
+%
 % Last Updated : 7th Feb 2017
 % Created by Nithin Sivadas
 %% Read FITS data from file
@@ -59,7 +59,8 @@ slantRange = projectionAltitude*1000./sind(el_new);
 sensorloc = [65.1260,-147.4789,689 ];
 
 %% Generating Time Stamp
-aldtnum = fitsfiletimestamp(fileNameStr);
+splitFileNameStr = strsplit(fileNameStr,filesep);
+aldtnum = fitsfiletimestamp(splitFileNameStr(end));
 time = (aldtnum-datenum('jan-01-1970'))*(24*3600);
 time = unix_to_matlab_time(time);
 

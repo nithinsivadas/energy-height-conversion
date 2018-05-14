@@ -5,7 +5,7 @@ if nargin<2
     wildcard='*';
 end
 
-files = dir([dirName,'/',wildcard]);
+files = dir([dirName,filesep,wildcard]);
 fileIndex = find(~[files.isdir]);
 fileTempCells  = struct2cell(files);
 fileStr = fileTempCells(1,fileIndex);
