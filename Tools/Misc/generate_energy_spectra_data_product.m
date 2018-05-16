@@ -52,6 +52,12 @@ amisrData = interpolate_to_field_aligned_coords(amisrData,timeMinStr,timeMaxStr)
 dataPFISREnergyFlux = create_energyFlux_hdf5(dataInv,dataInputInv,outputH5FileStr,'dataInv');
 
 % Optical data from DASC
+if isempty(timeMinStr)
+    timeMinStr = datestr(min(amisrData.time(1,:)));
+end
+if isempty(timeMaxStr)
+    timeMaxStr = datestr(max(amisrData.time(1,:)));
+end
 dataASILastDay = create_DASC_hdf5(dascRootPath,outputH5FileStr,...
 projectionAlt,dascMinElevation,...
 timeMinStr,timeMaxStr,...
