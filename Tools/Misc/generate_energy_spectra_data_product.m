@@ -45,11 +45,11 @@ end
 % Energy Flux from PFISR
 amisrFileNameStr = [amisrRootPath,amisrFileStr];
 amisrData = read_amisr(amisrFileNameStr);
-amisrData = aer_to_field_aligned_coords(amisrData,projectionAlt);
-amisrData = interpolate_to_field_aligned_coords(amisrData,timeMinStr,timeMaxStr);
-[dataInv, magcoords, dataInputInv] = get_2D_energy_spectra(amisrData,energyBin',...
-   timeMinStr,timeMaxStr,altLim,'magnetic');
-dataPFISREnergyFlux = create_energyFlux_hdf5(dataInv,dataInputInv,outputH5FileStr,'dataInv');
+% amisrData = aer_to_field_aligned_coords(amisrData,projectionAlt);
+% amisrData = interpolate_to_field_aligned_coords(amisrData,timeMinStr,timeMaxStr);
+% [dataInv, magcoords, dataInputInv] = get_2D_energy_spectra(amisrData,energyBin',...
+%    timeMinStr,timeMaxStr,altLim,'magnetic');
+% dataPFISREnergyFlux = create_energyFlux_hdf5(dataInv,dataInputInv,outputH5FileStr,'dataInv');
 
 % Optical data from DASC
 if isempty(timeMinStr)
@@ -58,7 +58,7 @@ end
 if isempty(timeMaxStr)
     timeMaxStr = datestr(max(amisrData.time(1,:)));
 end
-dataASILastDay = create_DASC_hdf5(dascRootPath,outputH5FileStr,...
+dataASILastDay = create_DASC_hdf5_low_memory(dascRootPath,outputH5FileStr,...
 projectionAlt,dascMinElevation,...
 timeMinStr,timeMaxStr,...
 dascCalFileAz,dascCalFileEl, dascSetDownloadFlag);
