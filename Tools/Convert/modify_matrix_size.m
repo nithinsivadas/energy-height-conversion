@@ -11,30 +11,32 @@ function [ newMatrix ] = modify_matrix_size( matrix, newRowSize, newColSize )
 %---------
 % newMatrix - The new matrix interpolated with the new row and column size
 %----------------------------------------------------------------------------
-% Modified: 24th Jan 2017 [needs more clarification]
+% Modified: 18th May 2018 [needs more clarification]
 % Created : 24th Jan 2017
 % Author  : Nithin Sivadas
 % Ref     : 
+% Notes   : 18th May 2018 - tried to improve the speed, and reduce
+%           redundancy 
 %----------------------------------------------------------------------------
+if size(matrix,1) ~= newRowSize || size(matrix,2) ~= newColSize
+    oldRowSize = size(matrix,1);
+    oldColSize = size(matrix,2);
 
-A = matrix;
+    iOldRow = linspace(1,oldRowSize,oldRowSize);
+    iOldCol = linspace(1,oldColSize,oldColSize);
 
-oldRowSize = size(A,1);
-oldColSize = size(A,2);
+    [X, Y] = meshgrid(iOldRow, iOldCol);
 
-iOldRow = linspace(1,size(A,1),size(A,1));
-iOldCol = linspace(1,size(A,2),size(A,2));
+    iNewRow = linspace(1,oldRowSize,newRowSize);
+    iNewCol = linspace(1,oldColSize,newColSize);
 
-[X, Y] = meshgrid(iOldRow, iOldCol);
+    [Xq, Yq] = meshgrid(iNewRow, iNewCol);
 
-iNewRow = linspace(1,size(A,1),newRowSize);
-iNewCol = linspace(1,size(A,2),newColSize);
-
-[Xq, Yq] = meshgrid(iNewRow, iNewCol);
-
-% Interpolation
-newMatrix = interp2(X,Y,A,Xq,Yq,'nearest',0);
-
+    % Interpolation
+    newMatrix = interp2(X,Y,matrix,Xq,Yq,'nearest',0);
+else
+    newMatrix = matrix;
+end
 
 
 end

@@ -22,6 +22,10 @@ function [ax1,h] = plot_DASC_geodetic( dataNew, time, lat, lon, imageSize, latLi
 % Author  : Nithin Sivadas
 % Ref     : 
 %--------------------------------------------------------------------------
+nanFlags = isnan(lat) | isnan(lon) | isnan(dataNew);
+lat(nanFlags) = [];
+lon(nanFlags) = [];
+dataNew(nanFlags) = [];
 
 F = scatteredInterpolant(lat,lon,dataNew,'nearest','none');
 latq = linspace(latLim(1),latLim(2),imageSize);

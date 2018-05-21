@@ -63,7 +63,7 @@ projectionAlt,dascMinElevation,...
 timeMinStr,timeMaxStr,...
 dascCalFileAz,dascCalFileEl, dascSetDownloadFlag);
 
-data.PFISR = dataPFISREnergyFlux;
+% data.PFISR = dataPFISREnergyFlux;
 data.DASC = dataASILastDay;
 status = ['Successfully stored the file in ',outputH5FileStr];
 end

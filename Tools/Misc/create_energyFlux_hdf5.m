@@ -22,11 +22,11 @@ if strcmp(mode,'dataInv')
     for iField = 1:1:nFields
         data{1,iField} = fieldNames{iField};
         if iField == 1|| iField == 2 || iField == 3 || iField == 5 ||...
-                iField == 10
+                iField == 10 || iField == 11
             for iBeam = 1:1:nBeams
             data{2,iField}(:,iBeam,:)=dataStructure(iBeam).(fieldNames{iField})';
             end
-        elseif iField == 11 || iField == 12
+        elseif iField == 12
             for iBeam = 1:1:nBeams
             data{2,iField}(:,iBeam,:)=dataStructure(iBeam).(fieldNames{iField});
             end
@@ -44,10 +44,15 @@ if strcmp(mode,'dataInv')
 
     for iField=1:1:nInputFields
         data{1,iField+nFields} = inputFieldNames{iField};
-            for iBeam = 1:1:nBeams
-            data{2,iField+nFields}(:,iBeam,:)=...
-                amisrMagDataStructure(iBeam).(inputFieldNames{iField});
-            end 
+            if iField+nFields==17
+                data{2,iField+nFields}=...
+                        amisrMagDataStructure(1).(inputFieldNames{iField});
+            else
+                for iBeam = 1:1:nBeams
+                    data{2,iField+nFields}(:,iBeam,:)=...
+                        amisrMagDataStructure(iBeam).(inputFieldNames{iField});
+                end 
+            end
     end
     
     data{3,1} = 'nTime x nBeams x nEnergyBin'; 

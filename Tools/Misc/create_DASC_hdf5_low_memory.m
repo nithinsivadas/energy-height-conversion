@@ -50,6 +50,8 @@ else
     error('No date is specified to process DASC data');
 end
 multiWaitbar('Creating DASC HDF5 File',0);
+start = [1 1 1];
+start5 = [1 1];
 for idays=1:1:length(dayArray)
     if setDownloadDASCFlag == true
         fprintf(['Status: Downloading FITS files ',datestr(dayArray(idays),'dd-mmm-yyyy')]);
@@ -70,129 +72,146 @@ for idays=1:1:length(dayArray)
     
     nTimeASI = length(timeASI);
     timeStartIndx = 1; timeEndIndx = nTimeASI;
-    DASCCalFile.az = calFileAz; DASCCalFile.el = calFileEl; 
-    azOldRes = fitsread(DASCCalFile.az);
-    elOldRes = fitsread(DASCCalFile.el);
+    azOldRes = fitsread(calFileAz);
+    elOldRes = fitsread(calFileEl);
 
-    data.ASI = nan(1,imageSize.^2); %size = [nTimeASI, imageSize.^2];
-    data.lat = nan(1,imageSize.^2);
-    data.lon = nan(1,imageSize.^2);
-    data.az_new = nan(1,imageSize.^2);
-    data.el_new = nan(1,imageSize.^2);
-    data.timeDASC = nan(1,1); %size = [nTimeASI, 1]
+    ASI = nan(nTimeASI,imageSize,imageSize); %size = [nTimeASI, imageSize.^2];
+    data.lat = nan(imageSize,imageSize);
+    data.lon = nan(imageSize,imageSize);
+    data.alt = nan(imageSize,imageSize);
+    data.az = nan(imageSize,imageSize);
+    data.el = nan(imageSize,imageSize);
+    data.lowAzGradientFilter = nan(imageSize,imageSize);
+    data.minElFilter = nan(imageSize,imageSize);
+    data.time = nan(nTimeASI,1); %size = [nTimeASI, 1]
     
     fieldNames = fieldnames(data);
     nFields = length(fieldNames);
-    sizeData = [imageSize.^2, nTimeASI];
-    sizeData6 = [1, nTimeASI];
-    count = [imageSize.^2 1];
-    count6 = [1 1];
+    sizeData = [imageSize,imageSize, nTimeASI];
+    sizeData1 = [imageSize,imageSize];
+    sizeData5 = [1, nTimeASI];
     
-    for iField = 1:1:nFields
-        if iField <6
-            if(sizeData(1)<50)chunkSize(1,1)=sizeData(1);else chunkSize(1,1)=50;end
-            if(sizeData(2)<80)chunkSize(1,2)=sizeData(2);else chunkSize(1,2)=80;end      
-            h5create(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/',fieldNames{iField}],...
-                sizeData,'ChunkSize',chunkSize,'Deflate',9);
-            h5writeatt(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/',fieldNames{iField}],...
-                'Dimensions','nTime x nCoords');
-        else
-            if(sizeData6(1)<50)chunkSize(1,1)=sizeData6(1);else chunkSize(1,1)=50;end
-            if(sizeData6(2)<80)chunkSize(1,2)=sizeData6(2);else chunkSize(1,2)=80;end       
-            h5create(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/',fieldNames{iField}],...
-                sizeData6,'ChunkSize',chunkSize,'Deflate',9);
-            h5writeatt(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/',fieldNames{iField}],...
-                'Dimensions','nTime x 1');
-        end
-    end  
+    count = [imageSize imageSize nTimeASI];
+    count5 = [1 nTimeASI];
+    if(sizeData(1)<64)chunkSize(1,1)=sizeData(1);else chunkSize(1,1)=64;end
+    if(sizeData(2)<64)chunkSize(1,2)=sizeData(2);else chunkSize(1,2)=64;end
+    if(sizeData(3)<80)chunkSize(1,3)=sizeData(3);else chunkSize(1,3)=80;end
+    if(sizeData1(1)<50)chunkSize1(1,1)=sizeData1(1);else chunkSize1(1,1)=50;end
+    if(sizeData1(2)<80)chunkSize1(1,2)=sizeData1(2);else chunkSize1(1,2)=80;end  
+    if(sizeData5(1)<50)chunkSize5(1,1)=sizeData5(1);else chunkSize5(1,1)=50;end
+    if(sizeData5(2)<80)chunkSize5(1,2)=sizeData5(2);else chunkSize5(1,2)=80;end  
     
+    if idays==1
+        h5create(outputH5FileStr,['/DASC/','ASI'],...
+            [sizeData(1) sizeData(2) Inf],'ChunkSize',chunkSize,'Deflate',9);
+        h5writeatt(outputH5FileStr,['/DASC/','ASI'],...
+            'Dimensions','nTime x nImageSize x nImageSize');
+        for iField = 1:1:nFields
+            if iField < nFields 
+                h5create(outputH5FileStr,['/DASC/',fieldNames{iField}],...
+                    sizeData1,'ChunkSize',chunkSize1,'Deflate',9);
+                h5writeatt(outputH5FileStr,['/DASC/',fieldNames{iField}],...
+                    'Dimensions','nImageSize x nImageSize');
+            else
+
+                h5create(outputH5FileStr,['/DASC/',fieldNames{iField}],...
+                    [sizeData5(1) Inf],'ChunkSize',chunkSize5,'Deflate',9);
+                h5writeatt(outputH5FileStr,['/DASC/',fieldNames{iField}],...
+                    'Dimensions','nTime x 1');
+                h5writeatt(outputH5FileStr,['/DASC/',fieldNames{iField}],...
+                    'Units','Posix time');
+            end
+        end  
+    [data.az, data.el, data.lowAzGradientFilter] = calibrate_DASC_pixels(azOldRes,elOldRes,imageSize);
+    [data.minElFilter, data.lat, data.lon, data.alt] = DASC_aer_to_geodetic_v2018(data.az, data.el,...
+        minElevation, projectionAltitude);
+    end
     multiWaitbar('Reading data',0);
     for itime=timeStartIndx:1:timeEndIndx
  
         multiWaitbar('Reading data','Increment',1/timeEndIndx);
-        start = [1 itime];
         ASIDataStr = strcat(localDASCDirPath(idays,:),filesep,(fileStr(itime)));
+
         try
-            [ASI(1,:), lat(1,:), lon(1,:),...
-                az_new(1,:), el_new(1,:),...
-                sensorloc, timeDASC] =...
-                DASC_aer_to_geodetic(char(ASIDataStr),azOldRes,elOldRes,...
-                imageSize,minElevation,projectionAltitude);
-            notNANCoords = 1:length(lat);
-            data.ASI(1,notNANCoords) = ASI; 
-            data.lat(1,notNANCoords) = lat;
-            data.lon(1,notNANCoords) = lon;
-            data.az_new(1,notNANCoords) = az_new;
-            data.el_new(1,notNANCoords) = el_new;
-            data.timeDASC(1,1) = timeDASC;
+            [ASI(itime,:,:),data.time(itime,1)]=read_DASC_fits(char(ASIDataStr),imageSize);
             message(itime) = strcat('Successfully loaded: ',ASIDataStr);
         catch ME
             message(itime)=strcat('Could not load file: ',ASIDataStr,' because of: ', ME.message, 'in Function ', ME.stack.file);
-            data.timeDASC(1,1) = timeASI(itime);
+            data.time(itime,1) = timeASI(itime);
         end
         
-        for iField = 1:1:nFields
-            if iField <6
-                h5write(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/',fieldNames{iField}],...
-                    (data.(fieldNames{iField}))',start,count);       
-            else
-                h5write(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/',fieldNames{iField}],...
-                    (data.(fieldNames{iField}))',start,count6);
-            end
-        end    
-        
-        data.ASI = nan(1,imageSize.^2); %size = [nTimeASI, imageSize.^2];
-        data.lat = nan(1,imageSize.^2);
-        data.lon = nan(1,imageSize.^2);
-        data.az_new = nan(1,imageSize.^2);
-        data.el_new = nan(1,imageSize.^2);
-        data.timeDASC = nan(1,1); %size = [nTimeASI, 1]
     end
     
-    %% Writing Data         
-h5create(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/','azCalData'],...
-    size(azOldRes'),'ChunkSize',[50 80],'Deflate',9);
-h5write(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/','azCalData'],...
-    (azOldRes'));
-h5writeatt(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/','azCalData'],...
-    'Calibration File Used',calFileAz);
+    %% Writing Data
+    multiWaitbar('Writing data',0);
+    data.time = posixtime(datetime(data.time,'ConvertFrom','datenum'));
+    if idays==1
+        for iField = 1:1:nFields-1
+            h5write(outputH5FileStr,['/DASC/',fieldNames{iField}],...
+                    (data.(fieldNames{iField}))');  
+        end
+    multiWaitbar('Writing data','Value',0.2);
+    h5create(outputH5FileStr,['/DASC/','azCalData'],...
+        size(azOldRes'),'ChunkSize',[50 80],'Deflate',9);
+    h5write(outputH5FileStr,['/DASC/','azCalData'],...
+        (azOldRes'));
+    h5writeatt(outputH5FileStr,['/DASC/','azCalData'],...
+        'Calibration File Used',calFileAz);
 
-h5create(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/','elCalData'],...
-    size(elOldRes'),'ChunkSize',[50 80],'Deflate',9);
-h5write(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/','elCalData'],...
-    (elOldRes'));
-h5writeatt(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/','elCalData'],...
-    'Calibration File Used',calFileEl);
+    h5create(outputH5FileStr,['/DASC/','elCalData'],...
+        size(elOldRes'),'ChunkSize',[50 80],'Deflate',9);
+    h5write(outputH5FileStr,['/DASC/','elCalData'],...
+        (elOldRes'));
+    h5writeatt(outputH5FileStr,['/DASC/','elCalData'],...
+        'Calibration File Used',calFileEl);
+    end
+    multiWaitbar('Writing data','Value',0.4);
+    iField = nFields;
+    h5write(outputH5FileStr,['/DASC/',fieldNames{iField}],...
+                    (data.(fieldNames{iField}))',start5,count5);
+    multiWaitbar('Writing data','Value',0.5);
+    h5write(outputH5FileStr,['/DASC/','ASI'],...
+                permute(ASI,[3 2 1]),start,count);       
+    multiWaitbar('Writing data','Value',1);
+    messageTotal(start5(2):1:start5(2)+nTimeASI-1) = message;
+    multiWaitbar('Creating DASC HDF5 File','Increment',1/length(dayArray));    
+    multiWaitbar('Reading data','Reset');
+    multiWaitbar('Writing data','Reset');
+     start = start + [0 0 nTimeASI];
+     start5 = start5 + [0 nTimeASI];
+     if idays==1
+        startTime = timeASI(1);
+     end
+     if idays==length(dayArray)
+         endTime = timeASI(end);
+     end
+end
 
-dset = (message)';
-dset_details.Location = ['/DASC/',datestr(dayArray(idays),'yyyymmdd')];
+dset = (messageTotal)';
+dset_details.Location = '/DASC/';
 dset_details.Name = 'message';
 
 attr = 'nTime x nMessageLength';
 attr_details.Name = 'Dimensions';
-attr_details.AttachedTo = ['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/','message'];
+attr_details.AttachedTo = ['/DASC/','message'];
 attr_details.AttachType = 'dataset';
 
 hdf5write(outputH5FileStr,dset_details,dset,...
     attr_details,attr,'WriteMode','append');
 
+sensorloc=[65.1260,-147.4789,689 ]; %poker flat location
 dset = sensorloc;
 dset_details.Name = 'sensorloc';
 attr = '3x1 [lat,lon,alt-meters]';
-attr_details.AttachedTo = ['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/',dset_details.Name];
+attr_details.AttachedTo = ['/DASC/',dset_details.Name];
 attr_details.AttachType = 'dataset';
 hdf5write(outputH5FileStr,dset_details,dset,...
     attr_details,attr,'WriteMode','append');
 
-h5writeatt(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/'],...
+h5writeatt(outputH5FileStr,'/DASC/',...
     'creation_date',datestr(now));
-h5writeatt(outputH5FileStr,['/DASC/',datestr(dayArray(idays),'yyyymmdd'),'/'],...
-    'duration_contained_in_file',[datestr(timeASI(1)),' - ',datestr(timeASI(nTimeASI))]);
-
-multiWaitbar('Creating DASC HDF5 File','Increment',1/length(dayArray));    
-multiWaitbar('Reading data','Reset');
-
-end
+h5writeatt(outputH5FileStr,'/DASC/',...
+    'duration_contained_in_file',[datestr(startTime),' - ',datestr(endTime)]);
 
 multiWaitbar('Creating DASC HDF5 File','Reset');
 dataASILastDay = data;
