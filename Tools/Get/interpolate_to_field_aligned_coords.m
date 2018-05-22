@@ -25,10 +25,10 @@ end
 
 timeMinIndx = find_time(amisrData.time(1,:),timeMinStr);
 timeMaxIndx = find_time(amisrData.time(1,:),timeMaxStr);
-hWait = waitbar(0);
+dtime = 1./(length(timeMinIndx:1:timeMaxIndx));
+multiWaitbar('Interpolate Ne along field-aligned coords',0);
     for itime = timeMinIndx:timeMaxIndx
-        custom_waitbar(hWait,itime-timeMinIndx+1,timeMaxIndx-timeMinIndx+1,...
-            'Interpolating Ne along field-aligned coords');
+        multiWaitbar('Interpolate Ne along field-aligned coords','Increment',dtime);
         ne=amisrData.electronDensity(:,:,itime);
         F = scatteredInterpolant(amisrData.origCartCoords.xEast(:),...
             amisrData.origCartCoords.yNorth(:),...
@@ -49,6 +49,6 @@ hWait = waitbar(0);
             dF(amisrData.magCartCoords.xEast,amisrData.magCartCoords.yNorth,...
             amisrData.magCartCoords.zUp);
     end
-delete(hWait);
+% multiWaitbar('Interpolate Ne along field-aligned coords','Close');
 end
 

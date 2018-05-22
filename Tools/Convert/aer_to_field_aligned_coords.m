@@ -32,13 +32,14 @@ zUpMag = -zDownMag;
 
 % Interpolating Cartesian coordinates to altitude common to mag. field aligned beam
 altitudeGrid = amisrData.altitude(:,magBeamNo);
-hWait = waitbar(0);
+dBeams = 1./nBeams;
+multiWaitbar('Creating field-aligned coordinates',0);
 for iBeam = 1:1:nBeams
-    custom_waitbar(hWait,iBeam,nBeams,'Creating magnetic field aligned coordinates');
+    multiWaitbar('Creating field-aligned coordinates','Increment',dBeams);
     xEast1(:,iBeam) = interp1(zUp(:,iBeam),xEast(:,iBeam),altitudeGrid,'linear','extrap');
     yNorth1(:,iBeam) = interp1(zUp(:,iBeam),yNorth(:,iBeam),altitudeGrid,'linear','extrap');
 end
-delete(hWait);
+% multiWaitbar('Creating field-aligned coordinates','Close');
 
 projectionAltNo = find_altitude(altitudeGrid,projectionAlt);
 yNorthMag1 = yNorthMag - (yNorthMag(projectionAltNo)-yNorth1(projectionAltNo,:));

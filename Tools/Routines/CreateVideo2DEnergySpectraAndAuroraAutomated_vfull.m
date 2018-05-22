@@ -15,7 +15,7 @@ maxE = 10^6;
 
 % DASC
 dascRootPath = '/media/nithin/PFISR_002_006/DASC';
-dascMinElevation = 30;
+dascMinElevation = 0;
 dascCalFileAz = [];
 dascCalFileEl = [];
 dascSetDownloadFlag = false;

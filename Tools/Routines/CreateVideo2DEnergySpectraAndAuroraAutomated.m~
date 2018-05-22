@@ -2,8 +2,8 @@
 tic
 % PFISR
 pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
-minTimeStr = [];
-maxTimeStr = [];
+minTimeStr = '16 Feb 2008 11:15';
+maxTimeStr = '16 Feb 2008 11:22';
 pfisrRootPath = '/media/nithin/PFISR_002_006/PFISR Processed/Sporadic03/';
 % pfisrRootPath = 'G:\My Drive\Research\Projects\Paper 2\Data\Madrigal Events\';
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
@@ -22,15 +22,6 @@ dascCalFileAz = [];
 dascCalFileEl = [];
 dascSetDownloadFlag = false;
 
-%Images
-energySlice = 3; %keV
-energyFluxLim = [9 12];
-timeMinStr = [];
-timeMaxStr = [];
-latLim = [];
-lonLim  = [];
-setStoreImage = true;
-
 % Files
 % outputH5FileStr = ['G:\My Drive\Research\Projects\Paper 2\Data\Madrigal Events\',...
 %     pfisrExpFileName(1:20),'-energyFlux_sample_3.h5'];
@@ -39,8 +30,14 @@ outputH5FileStr = ['/media/nithin/PFISR_002_006/PFISR Processed/Sporadic03/',...
 % Plotting/Videos
 % outputFiguresFolder = 'G:\My Drive\Research\Projects\Paper 2\Data\Madrigal Events\Figures\';
 outputFiguresFolder = ['/media/nithin/PFISR_002_006/PFISR Processed/Sporadic03/Figures_',pfisrExpFileName(1:8),'/'];
-outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV.avi'];
-
+outputVideoStr = '20080216_energyFlux_3keV.avi';
+energySlice = 3; %keV
+energyFluxLim = [9 12];
+timeMinStr = [];
+timeMaxStr = [];
+latLim = [];
+lonLim  = [];
+setStoreImage = true;
 
 %% Creating H5 File
 multiWaitbar('Close All');

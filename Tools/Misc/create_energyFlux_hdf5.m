@@ -124,7 +124,10 @@ if strcmp(mode,'dataInv')
     data{5,17} = '[km]';
     
     %% Writing into HDF5 File
+    dFields = 1./(nFields+nInputFields);
+    multiWaitbar('Write energyflux into HDF5',0);
     for iField=1:1:nFields
+        multiWaitbar('Write energyflux into HDF5','Increment',dFields);
         if iField ~= 6 && iField ~= 7 && iField ~= 8 && iField ~= 9 && iField ~= 4
             h5create(h5FileStr,['/energyFluxFromMaxEnt/',data{1,iField}],size(permute(data{2,iField},[3 2 1])));
             h5write(h5FileStr,['/energyFluxFromMaxEnt/',data{1,iField}],permute(data{2,iField},[3 2 1]));
@@ -138,6 +141,7 @@ if strcmp(mode,'dataInv')
     end
 
     for iField=nFields+1:nFields+nInputFields
+        multiWaitbar('Write energyflux into HDF5','Increment',dFields);
         if iField == 13 || iField == 14
             h5create(h5FileStr,['/inputData/',data{1,iField}],size(permute(data{2,iField},[3 2 1])));
             h5write(h5FileStr,['/inputData/',data{1,iField}],permute(data{2,iField},[3 2 1]));
@@ -161,7 +165,7 @@ if strcmp(mode,'dataInv')
     end
     h5writeatt(h5FileStr,'/','creation_date',datestr(now));
     h5writeatt(h5FileStr,'/','duration_contained_in_file',[datestr(data{2,8}(1)),' - ',datestr(data{2,8}(end))]);
-    
+%     multiWaitbar('Write energyflux into HDF5','Close');
 end
 
 end

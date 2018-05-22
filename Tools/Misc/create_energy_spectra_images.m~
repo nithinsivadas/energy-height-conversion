@@ -8,10 +8,10 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     if nargin < 10
         setStoreImage = true;
     end
-    if nargin < 9 || isempty(lonLim)
+    if nargin < 9 && isempty(lonLim)
         lonLim = [-153 -143];
     end
-    if nargin < 8 || isempty(latLim)
+    if nargin < 8 && isempty(latLim)
         latLim = [63 67];
     end
     if nargin < 7
@@ -36,8 +36,16 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
         mkdir(imageStoreDir);
     end
     time.pfisr.h5Address = '/energyFluxFromMaxEnt/time';
+%     info.dasc = h5info(h5FileStr,'/DASC/');
+%     nDays = length(info.dasc.Groups);
     time.dasc.h5Address = '/DASC/time';
-    thisDascAddress = '/DASC/';
+%     for iDay=1:nDays
+%         tempAddress(iDay,:) = [info.dasc.Groups(iDay).Name];
+%         tempFileSep = strsplit(tempAddress(iDay,:),'/');
+%         time.dasc.date(iDay) = datenum(tempFileSep(end),'yyyymmdd'); 
+%         time.dasc.h5Address(iDay,:)=[tempAddress(iDay,:),'/timeDASC'];
+%     end
+%%
 % Read time arrays
     time.pfisr.value(:,1) = h5read(h5FileStr,time.pfisr.h5Address)';
     if isempty(timeMinStr)
@@ -49,20 +57,48 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     time.pfisr.min.indx = find_time(time.pfisr.value(:,1),timeMinStr);
     time.pfisr.max.indx = find_time(time.pfisr.value(:,1),timeMaxStr);
     
-    time.dasc.value(:,1) = unix_to_matlab_time(h5read(h5FileStr,time.dasc.h5Address)');
-  
+    time.dasc.value(:,1) = h5read(h5FileStr,time.dasc.h5Address)';
+           
+%         for iDay = 1:nDays
+%             time.dasc.value(:,iDay) = h5read(h5FileStr,time.dasc.h5Address(iDay,:));
+%             if floor(datenum(timeMinStr))==time.dasc.date(iDay)
+%                 time.dasc.min.thisiDay = iDay;
+%                 time.dasc.min.indx = find_time(time.dasc.value(:,iDay),timeMinStr);
+%             end
+%             if floor(datenum(timeMaxStr))==time.dasc.date(iDay)
+%                 time.dasc.max.thisiDay = iDay;
+%                 time.dasc.max.indx = find_time(time.dasc.value(:,iDay),timeMaxStr);
+%             end
+%         end
     time.dasc.min.indx = find_time(time.dasc.value(:,1),timeMinStr);
     time.dasc.max.indx = find_time(time.dasc.value(:,1),timeMaxStr);
 %%
 % Calculating primary time array  
     if time.pfisr.value(2)-time.pfisr.value(1)<=time.dasc.value(2)-time.dasc.value(1)
-        timePrimary = time.pfisr.value(time.pfisr.min.indx:time.pfisr.max.indx);
+        timePrimary = time.pfisr.value;
     else
-        timePrimary = time.dasc.value(time.dasc.min.indx:time.dasc.max.indx);
+        dayArray = time.dasc.min.thisiDay:1:time.dasc.max.thisiDay;
+        if length(dayArray)==1
+        timePrimary = time.dasc.value(time.dasc.min.indx:time.dasc.max.indx,1);
+        else
+            for iDay = dayArray 
+                if floor(datenum(timeMinStr))==time.dasc.date(iDay)
+                    timePrimary = time.dasc.value(time.dasc.min.indx:end,iDay); 
+                elseif time.dasc.date(iDay)>floor(datenum(timeMinStr)) && time.dasc.date(iDay)<floor(datenum(timeMaxStr))
+                    n0 = length(timePrimary);
+                    n1 = length(time.dasc.value(:,iDay));
+                    timePrimary(n0+1:n0+1+n1) = time.dasc.value(:,iDay);
+                elseif time.dasc.date(iDay)==floor(datenum(timeMaxStr))
+                    n0 = length(timePrimary);
+                    n1 = length(time.dasc.value(1:time.dasc.max.indx,iDay));
+                    timePrimary(n0+1:n0+1+n1) = time.dasc.value(1:time.dasc.max.indx,iDay);
+                end
+            end
+        end
     end
 %%
 % Reading the important variables
-%     dascDayIndxPrimary = floor(timePrimary)-time.dasc.date(1)+1;
+    dascDayIndxPrimary = floor(timePrimary)-time.dasc.date(1)+1;
     energyBin = readh5_variable_at_time(h5FileStr,'energyBin',...
         '/energyFluxFromMaxEnt/',[])';
     
@@ -88,10 +124,12 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     for itime = 1:1:nTime
         thisTime = timePrimary(itime);
         pfisrTimeIndx = find_time(time.pfisr.value,thisTime);
-        dascTimeIndx = find_time(time.dasc.value,thisTime);
+        dascDayIndx = dascDayIndxPrimary(itime);
+        dascTimeIndx = find_time(time.dasc.value(:,dascDayIndx),thisTime);
+        thisDascAddress = ['/DASC/',datestr(time.dasc.date(dascDayIndx),'yyyymmdd'),'/'];
 
         pfisrTime = time.pfisr.value(pfisrTimeIndx);
-        dascTime = time.dasc.value(dascTimeIndx);
+        dascTime = readh5_variable_at_time(h5FileStr,'timeDASC',thisDascAddress,dascTimeIndx);
     %     message = readh5_variable_at_time(h5FileStr,'message',thisDascAddress,dascTimeIndx);
         diffEnergyFlux = readh5_variable_at_time(h5FileStr,'energyFlux',...
             '/energyFluxFromMaxEnt/',pfisrTimeIndx)';
@@ -105,17 +143,14 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
         figureHandle=figure;
         plot_2D_energy_slice_with_DASC_v2018(figureHandle,pfisrTime,...
         diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
-            zEnergyBin, energySlice, eFluxLim, opticalData(:), dascTime,...
-            dascLatitude(:), dascLongitude(:),...
+            zEnergyBin, energySlice, eFluxLim, opticalData, dascTime,...
+            dascLatitude, dascLongitude,...
         imageStoreDir,latLim,lonLim,setStoreImage);
         multiWaitbar('Store Images','Increment',waitBarIncrement);
     end
     
     tempDir = strsplit(imageStoreDir,filesep);
     iImageDir=length(find(~cellfun(@isempty,tempDir)));
-    if isunix 
-        iImageDir=iImageDir+1; 
-    end
     create_video(strjoin(tempDir(1:iImageDir-1),filesep),tempDir{iImageDir},videoFileNameStr);
     multiWaitbar('Store Images','Close');
 end
@@ -239,7 +274,7 @@ end
 
 % Storing image
     if setStoreImage == true
-        export_fig(strcat(storeImageDir,imageName,'.png'),'-r300','-png','-nocrop');
+        export_fig(strcat(storeImageDir,imageName,'.png'),'-r600','-png','-nocrop');
         close(figureHandle);
     end
     end

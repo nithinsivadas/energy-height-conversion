@@ -4,11 +4,11 @@ function create_video(mainDirName,imageDir,videoFileName)
 multiWaitbar('Generating Video',0);
 videoDir ='Videos';  
 mkdir(mainDirName,videoDir);
-outputVideo = VideoWriter(fullfile([mainDirName,'\',videoDir,...
-    '\',videoFileName]));
+outputVideo = VideoWriter(fullfile([mainDirName,filesep,videoDir,...
+    filesep,videoFileName]));
 outputVideo.FrameRate = 8;
 open(outputVideo);
-imageFileStr = get_files_in_folder(strcat(mainDirName,'\',imageDir));
+imageFileStr = get_files_in_folder(strcat(mainDirName,filesep,imageDir));
 
 nn = length(imageFileStr);
 di = 1./nn;

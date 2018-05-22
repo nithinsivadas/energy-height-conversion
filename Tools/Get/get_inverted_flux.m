@@ -102,16 +102,17 @@ function [data] = get_inverted_flux( q, dq, time, alt, energyBin, A, guessFlux, 
     W=W./sum(W);
 
     % Maximum entropy inversion
-    hWaitMEM= waitbar(0);
+    dtime = 1./length(time);
+%     multiWaitbar('MEM Inversion',0);
     for thisTime=itime
-            
+%             multiWaitbar('MEM Inversion','Increment',dtime);
             qThis=q(thisTime,:)';
             qSigmaThis = dq(thisTime,:)';
             [fluxNew(:,thisTime),qNew(:,thisTime),chi2(thisTime),maxIter(thisTime)] = ...
             mem_solve(qThis, A, beta, guessFlux, qSigmaThis, noIter, W);
-            custom_waitbar(hWaitMEM,thisTime,itime(end),['MEM Inverison: Chi^2= ',sprintf('%7.4f',chi2(thisTime)),' ']);
+%             custom_waitbar(hWaitMEM,thisTime,itime(end),['MEM Inverison: Chi^2= ',sprintf('%7.4f',chi2(thisTime)),' ']);
     end
-%     close(hWaitMEM);
+    
     % Generating the output structure
 
     data.flux = fluxNew; % Differential number flux [m-2 s^-1 eV^-1] (Isotropic flux)
@@ -129,6 +130,7 @@ function [data] = get_inverted_flux( q, dq, time, alt, energyBin, A, guessFlux, 
     data.qInput = q; % the production rate which was input to this function [m^-3 s^-1]
     data.qError = dq;
     
+%     multiWaitbar('MEM Inversion','Close');
     
     
     

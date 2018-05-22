@@ -30,16 +30,17 @@ timeMaxIndx = find_time(amisrData.time(1,:),timeMaxStr);
 nBeams = amisrData.nBeams;
 timeRange = timeMinIndx:1:timeMaxIndx;
 time = amisrData.time(1,timeRange);
-hWait = waitbar(0);
-
+multiWaitbar('get_2D_energy_spectra()',0);
+dBeams = 1./nBeams;
 
 if strcmp(setTypeofCoords,'magnetic')
     minAltNo = find_altitude(amisrData.magGeodeticCoords.alt(:,amisrData.magBeamNo),altLim(1));
     maxAltNo = find_altitude(amisrData.magGeodeticCoords.alt(:,amisrData.magBeamNo),altLim(2));
     coordRange = minAltNo:1:maxAltNo;
     coords = zeros(length(coordRange),nBeams,3);
+    
     for iBeam = 1:1:nBeams
-        custom_waitbar(hWait,iBeam,nBeams,'Calculating 2D energy fluxes');
+        multiWaitbar('get_2D_energy_spectra()','Increment',dBeams);
         Ne = squeeze(amisrData.magElectronDensity(coordRange,iBeam,timeRange));
         dNeFrac = squeeze(amisrData.magdNeFrac(coordRange,iBeam,timeRange));
         alt = amisrData.magGeodeticCoords.alt(coordRange,iBeam);
@@ -60,7 +61,7 @@ if strcmp(setTypeofCoords,'magnetic')
     end
 elseif strcmp(setTypeofCoords,'original') %Need to work on making uniform altitudes
     for iBeam = 1:1:nBeams
-        custom_waitbar(hWait,iBeam,nBeams,'Calculating 2D energy fluxes');
+        multiWaitbar('get_2D_energy_spectra()','Increment',dBeams);
         minAltNo = find_altitude(amisrData.altitude(:,iBeam),altLim(1));
         maxAltNo = find_altitude(amisrData.altitude(:,iBeam),altLim(2));
         coordRange = minAltNo:1:maxAltNo;
@@ -74,6 +75,6 @@ elseif strcmp(setTypeofCoords,'original') %Need to work on making uniform altitu
 else
     error('setTypeofCoords unknown');
 end
-delete(hWait);
+% multiWaitBar('get_2D_energy_spectra()','Close');
 end
 
