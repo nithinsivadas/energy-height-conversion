@@ -2,8 +2,8 @@
 tic
 % PFISR
 
-% pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
-pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
+pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
+% pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
 
 if isunix
     baseDir = '/media/nithin/PFISR_002_006/';
@@ -21,8 +21,8 @@ else
     outputFiguresFolder = [baseDir,'Figures_',pfisrExpFileName(1:8),'\'];
 end
 
-minTimeStr = '26 Mar 2008 11:00';
-maxTimeStr = '26 Mar 2008 11:20';
+minTimeStr = [];
+maxTimeStr = [];
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 minAlt = 60;
 maxAlt = 200;
@@ -54,15 +54,15 @@ outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV
 %% Creating H5 File
 multiWaitbar('Close All');
 
-if ~isfile(outputH5FileStr)
+% if ~isfile(outputH5FileStr)
     [status]=generate_energy_spectra_data_product(pfisrExpFileName,pfisrRootPath,...
         dascRootPath,projectionAlt,logspace(log10(minE),log10(maxE),nEnergyBins),...
         [minAlt maxAlt], outputH5FileStr, minTimeStr, maxTimeStr,...
         dascMinElevation,dascCalFileAz,dascCalFileEl, dascSetDownloadFlag);
-end
-set(0, 'DefaultFigureVisible', 'off');
-create_energy_spectra_images(outputH5FileStr,...
-    outputFiguresFolder,outputVideoStr,energySlice,energyFluxLim,...
-    minTimeStr,maxTimeStr,latLim,lonLim,setStoreImage);
-set(0, 'DefaultFigureVisible', 'on');
+% end
+% set(0, 'DefaultFigureVisible', 'off');
+% create_energy_spectra_images(outputH5FileStr,...
+%     outputFiguresFolder,outputVideoStr,energySlice,energyFluxLim,...
+%     minTimeStr,maxTimeStr,latLim,lonLim,setStoreImage);
+% set(0, 'DefaultFigureVisible', 'on');
 toc
