@@ -1,11 +1,28 @@
 %% Inputs
 tic
 % PFISR
-pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
-minTimeStr = [];
-maxTimeStr = [];
-pfisrRootPath = '/media/nithin/PFISR_002_006/PFISR Processed/Sporadic03/';
-% pfisrRootPath = 'G:\My Drive\Research\Projects\Paper 2\Data\Madrigal Events\';
+
+% pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
+pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
+
+if isunix
+    baseDir = '/media/nithin/PFISR_002_006/';
+    pfisrRootPath = [baseDir,'PFISR Processed/Sporadic03/'];
+    dascRootPath = [baseDir,'DASC'];
+    outputH5FileStr = [baseDir,'PFISR Processed/Sporadic03/',...
+    pfisrExpFileName(1:20),'-energyFlux.h5'];
+    outputFiguresFolder = ['/media/nithin/PFISR_002_006/PFISR Processed/Sporadic03/Figures_',pfisrExpFileName(1:8),'/'];
+else
+    baseDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Event 1\';
+    pfisrRootPath = baseDir;
+    dascRootPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC';
+    outputH5FileStr = [baseDir,...
+        pfisrExpFileName(1:20),'-energyFlux.h5'];
+    outputFiguresFolder = [baseDir,'Figures_',pfisrExpFileName(1:8),'\'];
+end
+
+minTimeStr = '26 Mar 2008 11:00';
+maxTimeStr = '26 Mar 2008 11:20';
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 minAlt = 60;
 maxAlt = 200;
@@ -15,8 +32,6 @@ minE = 10^3;
 maxE = 10^6;
 
 % DASC
-dascRootPath = '/media/nithin/PFISR_002_006/DASC';
-% dascRootPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC';
 dascMinElevation = 0;
 dascCalFileAz = [];
 dascCalFileEl = [];
@@ -32,13 +47,7 @@ lonLim  = [];
 setStoreImage = true;
 
 % Files
-% outputH5FileStr = ['G:\My Drive\Research\Projects\Paper 2\Data\Madrigal Events\',...
-%     pfisrExpFileName(1:20),'-energyFlux_sample_3.h5'];
-outputH5FileStr = ['/media/nithin/PFISR_002_006/PFISR Processed/Sporadic03/',...
-    pfisrExpFileName(1:20),'-energyFlux.h5'];
 % Plotting/Videos
-% outputFiguresFolder = 'G:\My Drive\Research\Projects\Paper 2\Data\Madrigal Events\Figures\';
-outputFiguresFolder = ['/media/nithin/PFISR_002_006/PFISR Processed/Sporadic03/Figures_',pfisrExpFileName(1:8),'/'];
 outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV.avi'];
 
 

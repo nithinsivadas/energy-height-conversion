@@ -9,10 +9,10 @@ if nargin<9
 end
 if nargin<8 || isempty(calFileEl)
     calFileEl = [initialize_root_path,'LargeFiles',filesep,'DASC',filesep,...
-        '26Mar2008',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_EL_10deg.FITS'];
+        '20080326',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_EL_10deg.FITS'];
 if nargin<7 || isempty(calFileAz)
     calFileAz = [initialize_root_path,'LargeFiles',filesep,'DASC',filesep,...
-        '26Mar2008',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_AZ_10deg.FITS'];
+        '20080326',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_AZ_10deg.FITS'];
 end
 
 end
@@ -60,7 +60,7 @@ for idays=1:1:length(dayArray)
     
     localDASCDirPath(idays,:) = ([localStoreDir,filesep,datestr(dayArray(idays),'yyyymmdd')]); 
     
-    fileStr = get_files_in_folder(localDASCDirPath(idays,:));
+    fileStr = get_files_in_folder(localDASCDirPath(idays,:),'*.FITS');
     timeASI = fitsfiletimestamp(fileStr);
     
     if idays==1 && ~isempty(minTimeStr)

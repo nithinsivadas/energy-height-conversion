@@ -13,10 +13,10 @@ if nargin<13
 end
 if nargin<12 || isempty(dascCalFileEl)
     dascCalFileEl = [initialize_root_path,'LargeFiles',filesep,'DASC',filesep,...
-        '26Mar2008',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_EL_10deg.FITS'];
+        '20080326',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_EL_10deg.FITS'];
 if nargin<11 || isempty(dascCalFileAz)
     dascCalFileAz = [initialize_root_path,'LargeFiles',filesep,'DASC',filesep,...
-        '26Mar2008',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_AZ_10deg.FITS'];
+        '20080326',filesep,'PKR_Cal_before_2011',filesep,'PKR_20111006_AZ_10deg.FITS'];
 end
 if nargin < 10
     dascMinElevation = 30;
@@ -45,11 +45,11 @@ end
 % Energy Flux from PFISR
 amisrFileNameStr = [amisrRootPath,amisrFileStr];
 amisrData = read_amisr(amisrFileNameStr);
-% amisrData = aer_to_field_aligned_coords(amisrData,projectionAlt);
-% amisrData = interpolate_to_field_aligned_coords(amisrData,timeMinStr,timeMaxStr);
-% [dataInv, magcoords, dataInputInv] = get_2D_energy_spectra(amisrData,energyBin',...
-%    timeMinStr,timeMaxStr,altLim,'magnetic');
-% create_energyFlux_hdf5(dataInv,dataInputInv,outputH5FileStr,'dataInv');
+amisrData = aer_to_field_aligned_coords(amisrData,projectionAlt);
+amisrData = interpolate_to_field_aligned_coords(amisrData,timeMinStr,timeMaxStr);
+[dataInv, magcoords, dataInputInv] = get_2D_energy_spectra(amisrData,energyBin',...
+   timeMinStr,timeMaxStr,altLim,'magnetic');
+create_energyFlux_hdf5(dataInv,dataInputInv,outputH5FileStr,'dataInv');
 
 % Optical data from DASC
 if isempty(timeMinStr)
