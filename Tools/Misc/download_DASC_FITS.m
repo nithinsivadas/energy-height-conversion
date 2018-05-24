@@ -1,4 +1,4 @@
-function download_DASC_FITS(dateStr,storeDir)
+function [status,cmdout]=download_DASC_FITS(dateStr,storeDir)
 %DOWNLOAD_DASC_FITS Downloads PokerFlat DASC FITS file
 
 % Input
@@ -30,7 +30,7 @@ remoteFileListName = string(char(remoteFileList.name));
 % Check if local Store Path exists
 if isdir(localStorePath)
     localFileList = dir(localStorePath);
-    localFileListName = string(char(localFileList.name));
+    localFileListName = strtrim(string(char(localFileList.name)));
     % Identifying identical files in remote and local directories
     index = arrayfun(@(k)sum(strcmp(remoteFileListName(k),localFileListName))>0, (1:length(remoteFileListName))','UniformOutput',false);
     indexMissingFiles = find(~cell2mat(index));
@@ -39,12 +39,34 @@ if isdir(localStorePath)
         disp('DASC data already downloaded');
     end
     % Downloading only the missing files
-    for i=1:1:length(indexMissingFiles)
-        mget(dasc,remoteFileListName(indexMissingFiles(i)),localStorePath);
+    urlFile = 'tempURL.txt';
+    urlFilePath = [localStorePath,filesep,urlFile];
+    urls = strcat('ftp://',host,remoteFinalLink,'/',remoteFileListName(indexMissingFiles));
+    fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
+    if isunix
+    [status,cmdout]=unix(['aria2c -V -c -j 50 ','-d',localStorePath,' -i ',urlFilePath]);
+    else
+    [status,cmdout]=system(['aria2c -V -c -j 50 ','-d',localStorePath,' -i ',urlFilePath]);
     end
+
 else
-    mget(dasc,'*',localStorePath);
+    mkdir(localStorePath);
+    urlFile = 'tempURL.txt';
+    urlFilePath = [localStorePath,filesep,urlFile];
+    urls = strcat('ftp://',host,remoteFinalLink,'/',remoteFileListName);
+    fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
+    if isunix
+        [status,cmdout]=...
+            unix(['aria2c -V -c -j 50 ','-d',localStorePath,'-i ',urlFilePath]);
+    else
+        [status,cmdout]=...
+            system(['aria2c -V -c -j 50 ','-d',localStorePath,'-i ',urlFilePath]);
+    end    
 end
+
+fileIDVerbose = fopen([localStorePath,filesep,'status.txt'],'a');
+fprintf(fileIDVerbose,cmdout);
+fclose(fileIDVerbose);
 
 
 close(dasc);
