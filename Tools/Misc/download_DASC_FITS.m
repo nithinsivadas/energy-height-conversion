@@ -44,9 +44,9 @@ if isdir(localStorePath)
     urls = strcat('ftp://',host,remoteFinalLink,'/',remoteFileListName(indexMissingFiles));
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
-    [status,cmdout]=unix(['aria2c -V -c -j 50 ','-d',localStorePath,' -i ',urlFilePath]);
+    [status,cmdout]=unix(['aria2c -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
     else
-    [status,cmdout]=system(['aria2c -V -c -j 50 ','-d',localStorePath,' -i ',urlFilePath]);
+    [status,cmdout]=system(['aria2c -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
     end
 
 else
@@ -57,10 +57,10 @@ else
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
         [status,cmdout]=...
-            unix(['aria2c -V -c -j 50 ','-d',localStorePath,'-i ',urlFilePath]);
+            unix(['aria2c -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
     else
         [status,cmdout]=...
-            system(['aria2c -V -c -j 50 ','-d',localStorePath,'-i ',urlFilePath]);
+            system(['aria2c -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
     end    
 end
 
