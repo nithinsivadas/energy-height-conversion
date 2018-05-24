@@ -35,7 +35,7 @@ maxE = 10^6;
 dascMinElevation = 0;
 dascCalFileAz = [];
 dascCalFileEl = [];
-dascSetDownloadFlag = false;
+dascSetDownloadFlag = true;
 
 %Images
 energySlice = 3; %keV
@@ -54,15 +54,15 @@ outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV
 %% Creating H5 File
 multiWaitbar('Close All');
 
-% if ~isfile(outputH5FileStr)
+if ~isfile(outputH5FileStr)
     [status]=generate_energy_spectra_data_product(pfisrExpFileName,pfisrRootPath,...
         dascRootPath,projectionAlt,logspace(log10(minE),log10(maxE),nEnergyBins),...
         [minAlt maxAlt], outputH5FileStr, minTimeStr, maxTimeStr,...
         dascMinElevation,dascCalFileAz,dascCalFileEl, dascSetDownloadFlag);
-% end
-% set(0, 'DefaultFigureVisible', 'off');
-% create_energy_spectra_images(outputH5FileStr,...
-%     outputFiguresFolder,outputVideoStr,energySlice,energyFluxLim,...
-%     minTimeStr,maxTimeStr,latLim,lonLim,setStoreImage);
-% set(0, 'DefaultFigureVisible', 'on');
+end
+set(0, 'DefaultFigureVisible', 'off');
+create_energy_spectra_images(outputH5FileStr,...
+    outputFiguresFolder,outputVideoStr,energySlice,energyFluxLim,...
+    minTimeStr,maxTimeStr,latLim,lonLim,setStoreImage);
+set(0, 'DefaultFigureVisible', 'on');
 toc
