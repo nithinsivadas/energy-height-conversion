@@ -2,20 +2,20 @@
 tic
 % PFISR
 
-pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
-% pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
+% pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
+pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
 
 if isunix
     baseDir = '/media/nithin/PFISR_002_006/';
-    pfisrRootPath = [baseDir,'PFISR Processed/Sporadic03/'];
-    dascRootPath = [baseDir,'DASC'];
-    outputH5FileStr = [baseDir,'PFISR Processed/Sporadic03/',...
+    pfisrRootPath = [baseDir,'PFISR Processed/Sporadic04/'];
+    dascRootPath = [baseDir,'DASC/'];
+    outputH5FileStr = [baseDir,'PFISR Processed/Sporadic04/',...
     pfisrExpFileName(1:20),'-energyFlux.h5'];
-    outputFiguresFolder = ['/media/nithin/PFISR_002_006/PFISR Processed/Sporadic03/Figures_',pfisrExpFileName(1:8),'/'];
+    outputFiguresFolder = ['/media/nithin/PFISR_002_006/PFISR Processed/Sporadic04/Figures_',pfisrExpFileName(1:8),'/'];
 else
     baseDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Event 1\';
     pfisrRootPath = baseDir;
-    dascRootPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC';
+    dascRootPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\';
     outputH5FileStr = [baseDir,...
         pfisrExpFileName(1:20),'-energyFlux.h5'];
     outputFiguresFolder = [baseDir,'Figures_',pfisrExpFileName(1:8),'\'];
@@ -39,7 +39,7 @@ dascSetDownloadFlag = true;
 
 %Images
 energySlice = 3; %keV
-energyFluxLim = [9 12];
+energyFluxLim = [10 13];
 timeMinStr = [];
 timeMaxStr = [];
 latLim = [];
@@ -54,12 +54,12 @@ outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV
 %% Creating H5 File
 multiWaitbar('Close All');
 
-if ~isfile(outputH5FileStr)
+% if ~isfile(outputH5FileStr)
     [status]=generate_energy_spectra_data_product(pfisrExpFileName,pfisrRootPath,...
         dascRootPath,projectionAlt,logspace(log10(minE),log10(maxE),nEnergyBins),...
         [minAlt maxAlt], outputH5FileStr, minTimeStr, maxTimeStr,...
         dascMinElevation,dascCalFileAz,dascCalFileEl, dascSetDownloadFlag);
-end
+% end
 set(0, 'DefaultFigureVisible', 'off');
 create_energy_spectra_images(outputH5FileStr,...
     outputFiguresFolder,outputVideoStr,energySlice,energyFluxLim,...

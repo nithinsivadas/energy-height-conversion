@@ -59,7 +59,7 @@ for idays=1:1:length(dayArray)
         download_DASC_FITS(datestr(dayArray(idays)),localStoreDir);
     end
     
-    localDASCDirPath(idays,:) = ([localStoreDir,filesep,datestr(dayArray(idays),'yyyymmdd')]); 
+    localDASCDirPath(idays,:) = ([localStoreDir,datestr(dayArray(idays),'yyyymmdd')]); 
     
     fileStr = get_files_in_folder(localDASCDirPath(idays,:),'*.FITS');
     timeASI = fitsfiletimestamp(fileStr);
