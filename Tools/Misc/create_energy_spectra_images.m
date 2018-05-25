@@ -218,11 +218,11 @@ end
     axis off
     latWidth = latLim(2)-latLim(1);
     lonWidth = lonLim(2)-lonLim(1);
-    [h2]=plot_2D_energy_slice_geodetic_v2018(diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
+    [h2]=plot_2D_energy_slice_geodetic_v2018(real(diffEnergyFlux), pfisrLatitude, pfisrLongitude,...
         zEnergyBin, pfisrTime,...
         energySlice,latWidth,lonWidth,false,settings.energySlice.setTimeLabel);
 
-    colormap(axesHandleOptical,'gray');
+    colormap(axesHandleOptical,'viridis');
     colormap(axesHandleEnergy,'inferno');
     
     cb1 = colorbar(axesHandleOptical,'eastoutside');
