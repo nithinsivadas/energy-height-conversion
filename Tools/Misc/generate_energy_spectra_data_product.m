@@ -45,7 +45,7 @@ end
 % Energy Flux from PFISR
 amisrFileNameStr = [amisrRootPath,amisrFileStr];
 amisrData = read_amisr(amisrFileNameStr);
-% amisrData = aer_to_field_aligned_coords(amisrData,projectionAlt);
+amisrData = aer_to_field_aligned_coords(amisrData,projectionAlt);
 amisrData = interpolate_to_field_aligned_coords(amisrData,timeMinStr,timeMaxStr);
 [dataInv, magcoords, dataInputInv] = get_2D_energy_spectra(amisrData,energyBin',...
    timeMinStr,timeMaxStr,altLim,'magnetic');

@@ -21,8 +21,12 @@ else
     outputFiguresFolder = [baseDir,'Figures_',pfisrExpFileName(1:8),'\'];
 end
 
-minTimeStr = [];
-maxTimeStr = [];
+% minTimeStr = [];
+% maxTimeStr = [];
+
+minTimeStr = '26-Mar-2008 11:31';
+maxTimeStr = '26-Mar-2008 12:00';
+
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 minAlt = 60;
 maxAlt = 200;

@@ -144,7 +144,7 @@ for idays=1:1:length(dayArray)
             ASIDataStr = strcat(localDASCDirPath(idays,:),filesep,(fileStr(itime)));
 
             try
-                [ASI(itempTime,:,:),data.time(itempTime,1)]=read_DASC_fits(char(ASIDataStr),imageSize);
+                [ASI(itempTime,:,:),data.time(itime,1)]=read_DASC_fits(char(ASIDataStr),imageSize);
                 message(itempTime) = strcat('Successfully loaded: ',ASIDataStr);
             catch ME
                 message(itempTime)=strcat('Could not load file: ',ASIDataStr,' because of: ', ME.message, 'in Function ', ME.stack.file);

@@ -105,8 +105,7 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
 
         % Plotting
         figureHandle=figure;
-        if (abs(dascTime-thisTime)*24*60 > 3) opticalData = NaN(size(opticalData)); end
-        if (abs(pfisrTime-thisTime)*24*60 > 3) diffEnergyFlux = NaN(size(diffEnergyFlux)); end
+        if (abs(dascTime-thisTime)*24*60 > 3) opticalData = nan
         plot_2D_energy_slice_with_DASC_v2018(figureHandle,thisTime,pfisrTime,...
         diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
             zEnergyBin, energySlice, eFluxLim, opticalData(:), dascTime,...
@@ -200,7 +199,7 @@ if isempty(eFluxLim)
     eFluxLim = [8 10];
 end
 
-    imageName = strcat('figure_',datestr(thisTime,'HH_MM_SS'));
+    imageName = strcat('figure_',datestr(pfisrTime,'HH_MM_SS'));
     if isfile(strcat(storeImageDir,imageName,'.png')) && setStoreImage==true
     warning('Image file already exists, skipping calculation...');
         % Create two axes
@@ -222,8 +221,7 @@ end
     axis off
     latWidth = latLim(2)-latLim(1);
     lonWidth = lonLim(2)-lonLim(1);
-    diffEnergyFlux(diffEnergyFlux(:)<0)=nan;
-    [h2]=plot_2D_energy_slice_geodetic_v2018(diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
+    [h2]=plot_2D_energy_slice_geodetic_v2018(real(diffEnergyFlux), pfisrLatitude, pfisrLongitude,...
         zEnergyBin, pfisrTime,...
         energySlice,latWidth,lonWidth,false,settings.energySlice.setTimeLabel);
 
