@@ -24,24 +24,35 @@ nBeams = amisrData.nBeams;
 [yNorth, xEast, zDown] = aer2ned(az,elev,slantRange);
 zUp = -zDown;
 
+% Removing altitude < 10 km
+if amisrData.altitude(1,magBeamNo)<10
+    minAltNo = find_altitude(amisrData.altitude(:,magBeamNo),10);
+else
+    minAltNo = 1;
+end
+maxAltNo = length(amisrData.altitude(:,magBeamNo));
+altRange = minAltNo:maxAltNo; 
+
 % Creating copies of mag. field. aligned beams
-yNorthMag = repmat(yNorth(:,magBeamNo),1,nBeams);
-xEastMag = repmat(xEast(:,magBeamNo),1,nBeams);
-zDownMag = repmat(zDown(:,magBeamNo),1,nBeams);
+yNorthMag = repmat(yNorth(altRange,magBeamNo),1,nBeams);
+xEastMag = repmat(xEast(altRange,magBeamNo),1,nBeams);
+zDownMag = repmat(zDown(altRange,magBeamNo),1,nBeams);
 zUpMag = -zDownMag;
 
 % Interpolating Cartesian coordinates to altitude common to mag. field aligned beam
-altitudeGrid = amisrData.altitude(:,magBeamNo);
+altitudeGrid = amisrData.altitude(altRange,magBeamNo);
+projectionAltNo = find_altitude(altitudeGrid,projectionAlt);
+
 dBeams = 1./nBeams;
 multiWaitbar('Creating field-aligned coordinates',0);
 for iBeam = 1:1:nBeams
     multiWaitbar('Creating field-aligned coordinates','Increment',dBeams);
-    xEast1(:,iBeam) = interp1(zUp(:,iBeam),xEast(:,iBeam),altitudeGrid,'linear','extrap');
-    yNorth1(:,iBeam) = interp1(zUp(:,iBeam),yNorth(:,iBeam),altitudeGrid,'linear','extrap');
+    xEast1(:,iBeam) = interp1(zUp(altRange,iBeam),xEast(altRange,iBeam),altitudeGrid,'linear','extrap');
+    yNorth1(:,iBeam) = interp1(zUp(altRange,iBeam),yNorth(altRange,iBeam),altitudeGrid,'linear','extrap');
 end
 % multiWaitbar('Creating field-aligned coordinates','Close');
 
-projectionAltNo = find_altitude(altitudeGrid,projectionAlt);
+
 yNorthMag1 = yNorthMag - (yNorthMag(projectionAltNo)-yNorth1(projectionAltNo,:));
 xEastMag1 = xEastMag - (xEastMag(projectionAltNo)-xEast1(projectionAltNo,:));
 
@@ -51,7 +62,8 @@ amisrData.magCartCoords.yNorth = yNorthMag1;
 amisrData.magCartCoords.zUp = zUpMag;
 
 [amisrData.magGeodeticCoords.lat,amisrData.magGeodeticCoords.lon,amisrData.magGeodeticCoords.alt]=...
-    ned2geodetic(yNorthMag1,xEast,-zUpMag,amisrData.site.latitude,amisrData.site.longitude,...
+    ned2geodetic(amisrData.magCartCoords.yNorth,amisrData.magCartCoords.xEast,...
+    -amisrData.magCartCoords.zUp,amisrData.site.latitude,amisrData.site.longitude,...
     amisrData.site.altitude./1000,wgs84Ellipsoid('km'));
 
 % Not magnetic field aligned, but interpolated to altitude points of the mag. field aligned beam
@@ -60,10 +72,19 @@ amisrData.cartCoords.yNorth = yNorth1;
 amisrData.cartCoords.zUp = zUpMag;
 
 % Not magnetic field aligned, but interpolated to altitude points of the mag. field aligned beam
-amisrData.origCartCoords.xEast = xEast;
-amisrData.origCartCoords.yNorth = yNorth;
-amisrData.origCartCoords.zUp = zUp;
+amisrData.origCartCoords.xEast = xEast(altRange,:);
+amisrData.origCartCoords.yNorth = yNorth(altRange,:);
+amisrData.origCartCoords.zUp = zUp(altRange,:);
 
 amisrData.projectionAlt = projectionAlt;
+
+amisrData.electronDensity = amisrData.electronDensity(altRange,:,:);
+amisrData.altitude = amisrData.altitude(altRange,:);
+amisrData.range = amisrData.range(altRange,:);
+amisrData.dNeFrac = amisrData.dNeFrac(altRange,:,:);
+amisrData.az = amisrData.az(altRange,:);
+amisrData.el = amisrData.el(altRange,:);
+
+
 end
 
