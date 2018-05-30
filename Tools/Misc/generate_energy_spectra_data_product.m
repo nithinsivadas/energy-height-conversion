@@ -46,10 +46,10 @@ end
 amisrFileNameStr = [amisrRootPath,amisrFileStr];
 amisr = read_amisr(amisrFileNameStr);
 amisrData = aer_to_field_aligned_coords(amisr,projectionAlt);
-amisrData = interpolate_to_field_aligned_coords(amisrData,timeMinStr,timeMaxStr);
-[dataInv, magcoords, dataInputInv] = get_2D_energy_spectra(amisrData,energyBin',...
-   timeMinStr,timeMaxStr,altLim,'magnetic');
-create_energyFlux_hdf5(dataInv,dataInputInv,outputH5FileStr,'dataInv');
+% amisrData = interpolate_to_field_aligned_coords(amisrData,timeMinStr,timeMaxStr);
+% [dataInv, magcoords, dataInputInv] = get_2D_energy_spectra(amisrData,energyBin',...
+%    timeMinStr,timeMaxStr,altLim,'magnetic');
+% create_energyFlux_hdf5(dataInv,dataInputInv,outputH5FileStr,'dataInv');
 
 % Optical data from DASC
 if isempty(timeMinStr)

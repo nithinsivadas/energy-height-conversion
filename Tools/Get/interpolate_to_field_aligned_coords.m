@@ -25,6 +25,7 @@ end
 
 timeMinIndx = find_time(amisrData.time(1,:),timeMinStr);
 timeMaxIndx = find_time(amisrData.time(1,:),timeMaxStr);
+timeRange = timeMinIndx:timeMaxIndx;
 dtime = 1./(length(timeMinIndx:1:timeMaxIndx));
 multiWaitbar('Interpolate Ne along field-aligned coords',0);
 ik = 1;
@@ -52,6 +53,9 @@ ik = 1;
         ik=ik+1;
     end
 % multiWaitbar('Interpolate Ne along field-aligned coords','Close');
+amisrData.time = amisrData.time(:,timeRange);
+amisrData.electronDensity = amisrData.electronDensity(:,:,timeRange);
+amisrData.dNeFrac = amisrData.dNeFrac(:,:,timeRange);
 end
 
 

@@ -17,20 +17,20 @@ else
     pfisrRootPath = baseDir;
     dascRootPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\';
     outputH5FileStr = [baseDir,...
-        pfisrExpFileName(1:20),'-energyFlux.h5'];
-    outputFiguresFolder = [baseDir,'Figures_',pfisrExpFileName(1:8),'\'];
+        pfisrExpFileName(1:20),'-energyFlux_v2.h5'];
+    outputFiguresFolder = [baseDir,'Figures_v2_',pfisrExpFileName(1:8),'\'];
 end
 
 % minTimeStr = [];
 % maxTimeStr = [];
 
-minTimeStr = '26-Mar-2008 11:31';
+minTimeStr = '26-Mar-2008 11:00';
 maxTimeStr = '26-Mar-2008 12:00';
 
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 minAlt = 60;
 maxAlt = 200;
-projectionAlt = 70; % km
+projectionAlt = 60; % km
 nEnergyBins = 30;
 minE = 10^3;
 maxE = 10^6;
@@ -42,8 +42,8 @@ dascCalFileEl = [];
 dascSetDownloadFlag = true;
 
 %Images
-energySlice = 3; %keV
-energyFluxLim = [10 13];
+energySlice = 5; %keV
+energyFluxLim = [9 12];
 timeMinStr = [];
 timeMaxStr = [];
 latLim = [];
@@ -52,7 +52,7 @@ setStoreImage = true;
 
 % Files
 % Plotting/Videos
-outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV.avi'];
+outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV_v2.avi'];
 
 
 %% Creating H5 File

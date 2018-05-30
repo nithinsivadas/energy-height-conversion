@@ -98,7 +98,7 @@ function [data] = get_inverted_flux( q, dq, time, alt, energyBin, A, guessFlux, 
     % Generating the weighting function
     W=ones(size(A,1),1);
 %     W = gaussmf((1:1:size(W,1)),[50 100])';
-    W = gaussmf(alt,[30 100]);
+%     W = gaussmf(alt,[30 100]);
     W=W./sum(W);
 
     % Maximum entropy inversion

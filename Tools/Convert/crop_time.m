@@ -21,7 +21,8 @@ function [ yNew,timeNew ] = crop_time( y,time,timeMin, timeMax )
 %--------------------------------------------------------------------------
 %%
 	nTime = length(time);
-    yTemp = reshape(y,nTime,[]);
+%     yTemp = reshape(y,nTime,[]); % not sure if this works as I want it to. 
+    yTemp = y;
 	timeTemp = time;
 
 	if nargin < 4

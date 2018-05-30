@@ -65,10 +65,10 @@ for idays=1:1:length(dayArray)
     timeASI = fitsfiletimestamp(fileStr);
     
     if idays==1 && ~isempty(minTimeStr)
-        [fileStr, timeASI]=crop_time(fileStr,timeASI,datenum(minTimeStr), timeASI(end));
+        [fileStr, timeASI]=crop_time(reshape(fileStr,[],1),timeASI,datenum(minTimeStr), timeASI(end));
     end
     if idays==length(dayArray) && ~isempty(maxTimeStr)
-        [fileStr, timeASI]=crop_time(fileStr,timeASI,timeASI(1),datenum(maxTimeStr));
+        [fileStr, timeASI]=crop_time(reshape(fileStr,[],1),timeASI,timeASI(1),datenum(maxTimeStr));
     end
     
     nTimeASITotal = length(timeASI);
