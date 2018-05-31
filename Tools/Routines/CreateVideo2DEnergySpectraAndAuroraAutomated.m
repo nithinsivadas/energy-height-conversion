@@ -3,7 +3,7 @@ tic
 % PFISR
 
 % pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
-pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
+pfisrExpFileName = '20080326.001_bc_2min-fitcal.h5';
 
 if isunix
     baseDir = '/media/nithin/PFISR_002_006/';
@@ -42,8 +42,8 @@ dascCalFileEl = [];
 dascSetDownloadFlag = true;
 
 %Images
-energySlice = 5; %keV
-energyFluxLim = [9 12];
+energySlice = 3; %keV
+energyFluxLim = [10 13];
 timeMinStr = [];
 timeMaxStr = [];
 latLim = [];
@@ -52,7 +52,7 @@ setStoreImage = true;
 
 % Files
 % Plotting/Videos
-outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV_v2.avi'];
+outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice),'keV_2min.avi'];
 
 
 %% Creating H5 File
