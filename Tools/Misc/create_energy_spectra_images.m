@@ -1,23 +1,23 @@
 function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
-    imageStoreDir,videoFileNameStr,energySlice,eFluxLim,timeMinStr,timeMaxStr,latLim,lonLim,setStoreImage)
+    imageStoreDir,videoFileNameStr,energySlice,eFluxLim, opticalLim, timeMinStr,timeMaxStr,latLim,lonLim,setStoreImage)
     %create_energy_spectra_images.m Create energy spectra images
     %   Creates images of energy spectra overlaid on optical images from
     %   eneryFlux HDF5 file, and then stores the images on a folder specified
     %   by imageStore Dir. 
 
-    if nargin < 10
+    if nargin < 11
         setStoreImage = true;
     end
-    if nargin < 9 || isempty(lonLim)
+    if nargin < 10 || isempty(lonLim)
         lonLim = [-153 -143];
     end
-    if nargin < 8 || isempty(latLim)
+    if nargin < 9 || isempty(latLim)
         latLim = [63 67];
     end
-    if nargin < 7
+    if nargin < 8
         timeMaxStr = [];
     end
-    if nargin < 6
+    if nargin < 7
         timeMinStr = [];
     end
 %%
@@ -115,7 +115,7 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
         if (abs(pfisrTime-thisTime)*24*60 > 3) diffEnergyFlux = NaN(size(diffEnergyFlux)); end
         plot_2D_energy_slice_with_DASC_v2018(figureHandle,thisTime,pfisrTime,...
         diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
-            zEnergyBin, energySlice, eFluxLim, opticalData(:), dascTime,...
+            zEnergyBin, energySlice, eFluxLim, opticalData(:), opticalLim, dascTime,...
             dascLatitude(:), dascLongitude(:),...
         imageStoreDir,latLim,lonLim,setStoreImage);
         multiWaitbar('Store Images','Increment',waitBarIncrement);
@@ -187,7 +187,7 @@ end
 %% Function to plot 2D energy slice overlaid with DASC 
 function plot_2D_energy_slice_with_DASC_v2018(figureHandle,thisTime,pfisrTime,...
     diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
-        zEnergyBin, energySlice, eFluxLim, opticalData, dascTime,...
+        zEnergyBin, energySlice, eFluxLim, opticalData,opticalLim, dascTime,...
         dascLatitude, dascLongitude,...
     storeImageDir,latLim,lonLim, setStoreImage)
 
@@ -206,7 +206,9 @@ end
 if isempty(eFluxLim)
     eFluxLim = [8 10];
 end
-
+if isempty(opticalLim)
+    eFluxLim = [300 600];
+end
     imageName = strcat('figure_',datestr(thisTime,'HH_MM_SS'));
     if isfile(strcat(storeImageDir,imageName,'.png')) && setStoreImage==true
     warning('Image file already exists, skipping calculation...');
@@ -242,7 +244,7 @@ end
     cb2 = colorbar(axesHandleEnergy,'westoutside');
     ylabel(cb1, '[Rayleigh]');                  
     ylabel(cb2, 'log_1_0 [eV m^-^2 s^-^1 sr^-^1 eV^-^1]');
-    caxis(axesHandleOptical,[250 500]); %clim for optical intensity
+    caxis(axesHandleOptical,opticalLim); %clim for optical intensity
     caxis(axesHandleEnergy,eFluxLim);     %clim for energy flux
     % Making Energy spectra translucent
     alpha(axesHandleEnergy,0.5);

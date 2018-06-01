@@ -57,8 +57,8 @@ function [data] = get_inverted_flux( q, dq, time, alt, energyBin, A, guessFlux, 
         eV          = 1.602E-19;
         T_w         = 10*5000*eV/kb;
 %         guessFlux = get_kappa_j([10000,T_w,160, 10^12], energyBin); %[m^-2 s^-1]
-%         guessFlux = (10^13)*get_kappa_E(energyBin,10000,T_w,160); %[m^-2 s^-1]
-        guessFlux = (10^12)*get_kappa_E(energyBin,13000,T_w,10); %[m^-2 s^-1]
+        guessFlux = (10^13)*get_kappa_E(energyBin,10000,T_w,160); %[m^-2 s^-1]
+%         guessFlux = (10^12)*get_kappa_E(energyBin,13000,T_w,10); %[m^-2 s^-1]
     end
     
     if nargin<6
@@ -97,7 +97,7 @@ function [data] = get_inverted_flux( q, dq, time, alt, energyBin, A, guessFlux, 
 
     % Generating the weighting function
     W=ones(size(A,1),1);
-%     W = gaussmf((1:1:size(W,1)),[50 100])';
+    W = gaussmf((1:1:size(W,1)),[50 100])';
 %     W = gaussmf(alt,[30 100]);
     W=W./sum(W);
 
