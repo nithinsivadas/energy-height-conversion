@@ -1,0 +1,79 @@
+Issue:
+31 May 2018
+The optical auroral image superimposed on the 3 keV precipitation, does not match. This matched with the results created a year back. Possible reasons include:
+  1. Std. deviation estimate of production rate (q) used
+  2. Weighting function in MEM solving
+  3. Coordinate transformation?
+
+Trial 1: x
+  1. q calculated from get_error_in_q() (changed from previous)
+  2. W - flat distribution - (changed from previous)
+  3. interpolate_to_field_aligned_coordinates() - (changed from previous)
+
+  dNe has a lot of NANs, those are replaced by average of nonNAN dNe-s across time.
+
+  For results see:
+  Figures_v1_20080326
+  20080326.001_bc_2min-energyFlux_v1.h5
+
+  Notes: MSE is about 0.2 (which means we are over-fitting)
+
+Trail 2: xx
+    1. q calculate by simply taking variance across altitude. (same as previous)
+    2. W - flat distribution - (changed from previous)
+    3. interpolate_to_field_aligned_coordinates() - (changed from previous)
+
+    For results see:
+    Figures_v2_20080326
+    20080326.001_bc_2min-energyFlux_v2.h5
+
+    Notes: MSE is about 0.02 (which means we are further over-fitting)
+    The 11:42:45 UT PFISR Energy flux map for 3 keV looks worse than trial 1.
+
+Trial 3: x
+    -> 1. q calculated from get_error_in_q() (changed from previous)
+    2. W - flat distribution - (changed from previous)
+    3. interpolate_to_field_aligned_coordinates() - (changed from previous)
+    x 4. Remove the negative values in electron density...
+    (In the previous trials we hadn't removed them...)
+    For results see:
+    Figures_v3_20080326
+    20080326.001_bc_2min-energyFlux_v3.h5
+
+    Notes: No change
+
+Trial 4: xx
+    -> 1. q calculated from get_error_in_q() (changed from previous)
+    x  2. W - gaussmf[50,100] - (changed from previous)
+    3. interpolate_to_field_aligned_coordinates() - (changed from previous)
+    -> 4. Keep the negative values in electron density...
+    (In the previous trials we hadn't removed them...)
+    For results see:
+    Figures_v4_20080326
+    20080326.001_bc_2min-energyFlux_v4.h5
+    Notes: Pretty bad
+
+Trial 5: x
+  -> 1. q calculated from get_error_in_q() (changed from previous)
+  -> 2. W - flat distribution - (changed from previous)
+  3. interpolate_to_field_aligned_coordinates() - (changed from previous)
+  -> 4. Keep the negative values in electron density...
+  x 5. altitude range adjusted from 60-200 to 60-180.
+
+Trial 6: +
+  -> 1. q calculated from get_error_in_q() (changed from previous)
+  -> 2. W - flat distribution - (changed from previous)
+  -> 3. create_energy_spectra_images - plot the pfisr map at peak ionization altitude;
+        generate_energy_spectra_data_product: projection altitude of DASC @ 110 km
+  -> 4. Keep the negative values in electron density...
+  -> 5. altitude range from 60-200
+
+    Notes: Slightly better correlation now.
+    (Give warning to isnan in get_error_in_q() or remove it
+    Check if there are complex numbers in the inverted flux results)
+
+Trial 7:
+    Addition to the above,
+    2. W - distribution before [50,100]'
+    6. change guess flux
+.....
