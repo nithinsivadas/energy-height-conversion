@@ -62,6 +62,7 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
         timePrimary = time.dasc.value(time.dasc.min.indx:time.dasc.max.indx);
         whichPrimaryTime = 'dasc';
     end
+    nTime = length(timePrimary);
 %%
 % Reading the important variables
 %     dascDayIndxPrimary = floor(timePrimary)-time.dasc.date(1)+1;
@@ -75,17 +76,21 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     pfisrAltitude = squeeze(magcoords(3,:,:)); 
     % Interpolate beam-wise at projectionAlt, and get the lat, lon values for [nBeamsxnEnergy]
     tempLatitude = squeeze(magcoords(1,:,:)); 
-    tempLongitude = squeeze(magcoords(2,:,:)); 
+    tempLongitude = squeeze(magcoords(2,:,:));
+    
+    peakIonizationAltitude = calculate_peak_altitude_of_ionization(energySlice,...
+        (timePrimary(nTime)+timePrimary(1))/2,temp)
+
     nBeams = size(tempLatitude,1);
     
     for iBeam = 1:1:nBeams
-        pfisrLatitude(iBeam,1) = interp1(pfisrAltitude(iBeam,:),tempLatitude(iBeam,:),projectionAlt(1));
-        pfisrLongitude(iBeam,1) = interp1(pfisrAltitude(iBeam,:),tempLongitude(iBeam,:),projectionAlt(1));  
+        pfisrLatitude(iBeam,1) = interp1(pfisrAltitude(iBeam,:),tempLatitude(iBeam,:),projectionAlt(1),'linear','extrap');
+        pfisrLongitude(iBeam,1) = interp1(pfisrAltitude(iBeam,:),tempLongitude(iBeam,:),projectionAlt(1),'linear','extrap');  
     end
     pfisrLatitude = repmat(pfisrLatitude,size(energyBin));
     pfisrLongitude = repmat(pfisrLongitude,size(energyBin));
     multiWaitbar('Store Images',0);
-    nTime = length(timePrimary);
+    
     waitBarIncrement = 1./nTime;
     for itime = 1:1:nTime
         thisTime = timePrimary(itime);
@@ -97,6 +102,7 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     %     message = readh5_variable_at_time(h5FileStr,'message',thisDascAddress,dascTimeIndx);
         diffEnergyFlux = readh5_variable_at_time(h5FileStr,'energyFlux',...
             '/energyFluxFromMaxEnt/',pfisrTimeIndx)';
+        diffEnergyFlux(diffEnergyFlux<0) = 10^3;
         zEnergyBin=repmat(energyBin,size(diffEnergyFlux,1),1);
         
         opticalData = readh5_variable_at_time(h5FileStr,'ASI',thisDascAddress,dascTimeIndx);
@@ -105,7 +111,8 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
 
         % Plotting
         figureHandle=figure;
-        if (abs(dascTime-thisTime)*24*60 > 3) opticalData = nan
+        if (abs(dascTime-thisTime)*24*60 > 3) opticalData = NaN(size(opticalData)); end
+        if (abs(pfisrTime-thisTime)*24*60 > 3) diffEnergyFlux = NaN(size(diffEnergyFlux)); end
         plot_2D_energy_slice_with_DASC_v2018(figureHandle,thisTime,pfisrTime,...
         diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
             zEnergyBin, energySlice, eFluxLim, opticalData(:), dascTime,...
@@ -122,6 +129,7 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     create_video(strjoin(tempDir(1:iImageDir-1),filesep),tempDir{iImageDir},videoFileNameStr);
     multiWaitbar('Store Images','Close');
 end
+
 
 %% Function to read h5 variable at a particular time index
 function varValue=readh5_variable_at_time(h5FileStr,varStr,address,thisTimeIndx)
@@ -199,7 +207,7 @@ if isempty(eFluxLim)
     eFluxLim = [8 10];
 end
 
-    imageName = strcat('figure_',datestr(pfisrTime,'HH_MM_SS'));
+    imageName = strcat('figure_',datestr(thisTime,'HH_MM_SS'));
     if isfile(strcat(storeImageDir,imageName,'.png')) && setStoreImage==true
     warning('Image file already exists, skipping calculation...');
         % Create two axes
@@ -221,7 +229,8 @@ end
     axis off
     latWidth = latLim(2)-latLim(1);
     lonWidth = lonLim(2)-lonLim(1);
-    [h2]=plot_2D_energy_slice_geodetic_v2018(real(diffEnergyFlux), pfisrLatitude, pfisrLongitude,...
+    diffEnergyFlux(diffEnergyFlux(:)<0)=nan;
+    [h2]=plot_2D_energy_slice_geodetic_v2018(diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
         zEnergyBin, pfisrTime,...
         energySlice,latWidth,lonWidth,false,settings.energySlice.setTimeLabel);
 
@@ -347,3 +356,4 @@ if setTimeLabelOn==true
 end
 
 end
+

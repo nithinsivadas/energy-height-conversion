@@ -21,12 +21,11 @@ if strcmp(mode,'dataInv')
     
     for iField = 1:1:nFields
         data{1,iField} = fieldNames{iField};
-        if iField == 1|| iField == 2 || iField == 3 || iField == 5 ||...
-                iField == 10 || iField == 11
+        if iField == 1|| iField == 2 || iField == 3 || iField == 10
             for iBeam = 1:1:nBeams
             data{2,iField}(:,iBeam,:)=dataStructure(iBeam).(fieldNames{iField})';
             end
-        elseif iField == 12
+        elseif iField == 12 || iField == 11 || iField == 5
             for iBeam = 1:1:nBeams
             data{2,iField}(:,iBeam,:)=dataStructure(iBeam).(fieldNames{iField});
             end

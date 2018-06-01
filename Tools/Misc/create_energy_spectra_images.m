@@ -62,6 +62,7 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
         timePrimary = time.dasc.value(time.dasc.min.indx:time.dasc.max.indx);
         whichPrimaryTime = 'dasc';
     end
+    nTime = length(timePrimary);
 %%
 % Reading the important variables
 %     dascDayIndxPrimary = floor(timePrimary)-time.dasc.date(1)+1;
@@ -75,17 +76,21 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     pfisrAltitude = squeeze(magcoords(3,:,:)); 
     % Interpolate beam-wise at projectionAlt, and get the lat, lon values for [nBeamsxnEnergy]
     tempLatitude = squeeze(magcoords(1,:,:)); 
-    tempLongitude = squeeze(magcoords(2,:,:)); 
-    nBeams = size(tempLatitude,1);
+    tempLongitude = squeeze(magcoords(2,:,:));
     
+    peakIonizationAlt = calculate_peak_altitude_of_ionization(energySlice*1000,...
+        (timePrimary(nTime)+timePrimary(1))/2,tempLatitude(1,:)',tempLongitude(1,:)',...
+        pfisrAltitude(1,:)');
+    fprintf('PFISR Energy Flux Map projected at ',num2str(peakIonizationAlt),' km');
+    nBeams = size(tempLatitude,1);
     for iBeam = 1:1:nBeams
-        pfisrLatitude(iBeam,1) = interp1(pfisrAltitude(iBeam,:),tempLatitude(iBeam,:),projectionAlt(1),'linear','extrap');
-        pfisrLongitude(iBeam,1) = interp1(pfisrAltitude(iBeam,:),tempLongitude(iBeam,:),projectionAlt(1),'linear','extrap');  
+        pfisrLatitude(iBeam,1) = interp1(pfisrAltitude(iBeam,:),tempLatitude(iBeam,:),peakIonizationAlt,'linear','extrap');
+        pfisrLongitude(iBeam,1) = interp1(pfisrAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt,'linear','extrap');  
     end
     pfisrLatitude = repmat(pfisrLatitude,size(energyBin));
     pfisrLongitude = repmat(pfisrLongitude,size(energyBin));
     multiWaitbar('Store Images',0);
-    nTime = length(timePrimary);
+    
     waitBarIncrement = 1./nTime;
     for itime = 1:1:nTime
         thisTime = timePrimary(itime);
@@ -124,6 +129,7 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     create_video(strjoin(tempDir(1:iImageDir-1),filesep),tempDir{iImageDir},videoFileNameStr);
     multiWaitbar('Store Images','Close');
 end
+
 
 %% Function to read h5 variable at a particular time index
 function varValue=readh5_variable_at_time(h5FileStr,varStr,address,thisTimeIndx)
@@ -223,7 +229,8 @@ end
     axis off
     latWidth = latLim(2)-latLim(1);
     lonWidth = lonLim(2)-lonLim(1);
-    diffEnergyFlux(diffEnergyFlux(:)<0)=nan;
+%     diffEnergyFlux(diffEnergyFlux(:)<0)=nan;
+    diffEnergyFlux(imag(diffEnergyFlux(:))~=0)=nan;
     [h2]=plot_2D_energy_slice_geodetic_v2018(diffEnergyFlux, pfisrLatitude, pfisrLongitude,...
         zEnergyBin, pfisrTime,...
         energySlice,latWidth,lonWidth,false,settings.energySlice.setTimeLabel);
@@ -325,7 +332,7 @@ lonLim = [min(longitude(:)) max(longitude(:))];
 latq = linspace(latLim(1),latLim(2),imageSize);
 lonq = linspace(lonLim(1),lonLim(2),imageSize);
 Vq = F({latq,lonq,thisEnergy*1000});
-
+Vq(Vq<=0)=nan;
 if setMapOn==true
     ax2=axesm('lambertstd','MapLatLimit',[(latLim(1))-latWidth/2 (latLim(2))+latWidth/2],...
         'MapLonLimit',[(lonLim(1))-lonWidth/2 (lonLim(2))+lonWidth/2],...
@@ -350,3 +357,4 @@ if setTimeLabelOn==true
 end
 
 end
+

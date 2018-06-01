@@ -1,5 +1,5 @@
 function [dataASILastDay] = create_DASC_hdf5_low_memory(localStoreDir,outputH5FileStr,...
-    projectionAltitude,minElevation,...
+    projectionAltitudeDASC,minElevation,...
     minTimeStr,maxTimeStr,...
     calFileAz,calFileEl, setDownloadDASCFlag)
 %UNTITLED3 Summary of this function goes here
@@ -25,8 +25,8 @@ end
 if nargin<4
     minElevation=30;
 end
-if nargin<3
-    projectionAltitude=110;
+if nargin<3 || isempty(projectionAltitudeDASC)
+    projectionAltitudeDASC=110;
 end
 if nargin<2
     outputH5FileStr='outputDASC.h5';
@@ -36,6 +36,7 @@ if nargin<1
 end
 
 imageSize=512;
+fprintf(['Projection Alt of DASC ',num2str(projectionAltitudeDASC),' km']);
 
 if ~isempty(maxTimeStr) && ~isempty(minTimeStr)
     ndays = days(datenum(datestr(maxTimeStr,'dd-mmm-yyyy'))- ...
@@ -135,7 +136,7 @@ for idays=1:1:length(dayArray)
             end  
         [data.az, data.el, data.lowAzGradientFilter] = calibrate_DASC_pixels(azOldRes,elOldRes,imageSize);
         [data.minElFilter, data.lat, data.lon, data.alt] = DASC_aer_to_geodetic_v2018(data.az, data.el,...
-            minElevation, projectionAltitude);
+            minElevation, projectionAltitudeDASC);
         end
         itempTime=1;
         for itime=timeStartIndx:1:timeEndIndx

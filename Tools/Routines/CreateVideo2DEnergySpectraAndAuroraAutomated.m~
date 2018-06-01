@@ -12,27 +12,27 @@ if isunix
     outputH5FileStr = [baseDir,'PFISR Processed/Sporadic04/',...
     pfisrExpFileName(1:regexp(pfisrExpFileName,'-fit')),'energyFlux_v8.h5'];
     outputFigureBaseDir = '/media/nithin/PFISR_002_006/PFISR Processed/Sporadic04/';
-    outputFigureFolderStr = ['Figures',pfisrExpFileName(1:8)];
+    outputFigureFolderStr = ['Figures_v7_',pfisrExpFileName(1:8)];
 else
     baseDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Event 1\';
     pfisrRootPath = baseDir;
     dascRootPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\';
     outputH5FileStr = [baseDir,...
         pfisrExpFileName(1:20),'-energyFlux_v1.h5'];
-    outputFiguresFolder = [baseDir,'Figures_v1_',pfisrExpFileName(1:8),'\'];
+    outputFiguresFolder = [baseDir,'Figures',pfisrExpFileName(1:8),'\'];
 end
 
 % minTimeStr = [];
 % maxTimeStr = [];
 
-minTimeStr = [];
-maxTimeStr = [];
+minTimeStr = '26-Mar-2008 11:41';
+maxTimeStr = '26-Mar-2008 11:44';
 
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 minAlt = 60;
-maxAlt = 200;
+maxAlt = 180;
 projectionAltPFISR = 60; % km, altitude of origin of magnetic field aligned lines
-nEnergyBins = 30;
+nEnergyBins = 25;
 minE = 10^3;
 maxE = 10^6;
 
