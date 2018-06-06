@@ -1,8 +1,9 @@
-%% Scrape AMISR Experiment Data
+%% Find processed AMISR Exp Data 
 clear variables
 % Step 1: Get all experiment folder names
 expDatabaseFilePath = 'G:\Team Drives\Semeter-Research in Progress\All AMISR Experiments\RawData_Folders_Exps_Times_by_Radar_9_April_2018.h5';
-
+webDatabase = 'G:\Team Drives\Semeter-Research in Progress\All AMISR Experiments\amisrWebDatabase_May_2018.h5';
+superMagDatabase = 'G:\My Drive\Research\Projects\Paper 2\Data\Events List\20180605-20-14-substorms.txt';
 %% Processing radar database
 [data,h5DataLoc] = h5read_data(expDatabaseFilePath);
 % expNames=regexprep(num2cell(data.ExpNames.Names.ExpName,2),'\s','');
@@ -16,12 +17,70 @@ radarDatabase.nExpId=radarDatabase.nExpId+1;%correcting for matlab indices
 radarDatabase.nMountPathId=radarDatabase.nMountPathId+1; %correcting for matlab indices
 
 %% Input
-interestedExpNames=expNames(find(strncmpi(expNames,'Sporadic',7)));
+interestedExpNames=expNames(find(strncmpi(expNames,'Sporadic',8) | ...
+    strncmpi(expNames,'MSWind',6) | strncmpi(expNames,'Themis',6) | ...
+    strncmpi(expNames,'Lyons',5)));
 % interestedExpNames=expNames;
 
 %% Results
 selectedExperiments = get_experiment_path(interestedExpNames,expNames,expMountPaths,radarDatabase);
 % [folderArray,mount]=create_file_list(selectedExperiments,expMountPaths,false,'\Setup\*.exp');
+
+%% Check if processed or unprocessed
+webData=h5read_data(webDatabase);
+nInterestedExp = length(interestedExpNames);
+for iExp = 1:1:nInterestedExp
+    nExpID = length(selectedExperiments(iExp).folderName);
+    for iExpID = 1:1:nExpID
+        indx=find(strcmp(deblank(string(webData.PFISR.expId)),selectedExperiments(iExp).folderName(iExpID)));
+        try
+            selectedExperiments(iExp).status(iExpID,1)={(deblank(string(webData.PFISR.processingStatus(indx(1)))))};
+            selectedExperiments(iExp).startTime(iExpID,1)={unix_to_matlab_time(webData.PFISR.startTime(indx(1)))};
+            selectedExperiments(iExp).endTime(iExpID,1)={unix_to_matlab_time(webData.PFISR.endTime(indx(1)))};
+        catch ME
+            selectedExperiments(iExp).status(iExpID,1)={'Unknown'};
+            selectedExperiments(iExp).startTime(iExpID,1)={0};
+            selectedExperiments(iExp).endTime(iExpID,1)={0};
+        end
+    end
+end
+
+%% Print out
+k = 1;
+for iExp = 1:1:nInterestedExp
+    nExpID = length(selectedExperiments(iExp).folderName);
+    for iExpID = 1:1:nExpID
+        writeTable(k,1) = {string(interestedExpNames(iExp))};
+        writeTable(k,2) = {string(selectedExperiments(iExp).folderName(iExpID,1))}; 
+        writeTable(k,3) = selectedExperiments(iExp).status(iExpID,1); 
+        writeTable(k,4) = selectedExperiments(iExp).startTime(iExpID,1);
+        writeTable(k,5) = selectedExperiments(iExp).endTime(iExpID,1);
+        k=k+1;
+    end
+end
+writeTable(find(cellfun(@isempty,writeTable(:,3))),3)={'Unknown'};
+% processedIndx=find(strcmp(string(writeTable(:,3)),'Processed and Available - Calibrated'));
+% T = cell2table(writeTable(:,1:3),'VariableNames',{'ExpName','ExpID','Status'});
+% writetable(T,'Lyons.xlsx');
+
+%% SuperMag Database
+substorms = dlmread(superMagDatabase,'',68,0);
+tempSubstormDate = datenum(datetime([substorms(:,1:5),ones(size(substorms,1),1)]));
+substormList(:,1) = cellstr(datestr(datetime([substorms(:,1:5),ones(size(substorms,1),1)])));
+substormList(:,2) = num2cell(substorms(:,6));
+substormList(:,3) = num2cell(substorms(:,7));
+%%
+for i=1:1:length(substormList(:,1))
+    try 
+        substormList(i,4)={string(writeTable{cell2mat(writeTable(:,4))<=tempSubstormDate(i) & cell2mat(writeTable(:,5))>=tempSubstormDate(i),2})};
+        substormList(i,5)={string(writeTable{cell2mat(writeTable(:,4))<=tempSubstormDate(i) & cell2mat(writeTable(:,5))>=tempSubstormDate(i),1})};
+        substormList(i,6)={string(writeTable{cell2mat(writeTable(:,4))<=tempSubstormDate(i) & cell2mat(writeTable(:,5))>=tempSubstormDate(i),3})};
+    catch ME
+        substormList(i,4) = {"nan"};
+    end
+end
+substormTable = cell2table(substormList,'VariableNames',{'Time','MLAT','MLT','ExpID','ExpName','processingStatus'});
+writetable(substormTable,'substorm_2001_to_2017.txt');
 
 %% Functoins
 function [folderArray,mount]=create_file_list(selectedExperiments,expMountPaths,setSaveFileOn,sizeCalculationFilesWildcard)
@@ -87,11 +146,16 @@ for thisGroup=1:1:nGroups
     h5DataLoc{thisGroup,thisDataSet} = ...
         strcat('/',thisGroupName,'/',thisDataSetName);
     
-    data.(thisGroupName).(thisDataSetName) = ...
-        structfun(@transpose,...
-        h5read(h5FilePath,h5DataLoc{thisGroup,thisDataSet}),...
-        'UniformOutput',false);
-    
+    temp=h5read(h5FilePath,h5DataLoc{thisGroup,thisDataSet});
+    if isstruct(temp)
+        data.(thisGroupName).(thisDataSetName) = ...
+            structfun(@transpose,...
+            temp,...
+            'UniformOutput',false);
+    else
+        data.(thisGroupName).(thisDataSetName) = ...
+            transpose(temp);
+    end
     end
 end
 end

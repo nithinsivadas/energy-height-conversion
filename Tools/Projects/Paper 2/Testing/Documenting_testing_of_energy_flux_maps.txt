@@ -76,4 +76,7 @@ Trial 7:
     Addition to the above,
     2. W - distribution before [50,100]'
     6. change guess flux
+    Notes: No demonstrable change.
+
+    So we are going with Trial 6, as our fixed parameters. 
 .....

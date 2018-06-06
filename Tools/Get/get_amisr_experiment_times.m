@@ -48,6 +48,7 @@ startYear = str2num(datestr(timeMinStr,'yyyy'));
 table = [];
 
 for iMonth = 1:1:nMonths
+    try 
     mm = num2str(startMonth);
     yyyy = num2str(startYear);
     % Link to the webpage with experiment information
@@ -69,7 +70,8 @@ for iMonth = 1:1:nMonths
     end
     % Appending cell array with data
     table = [table ; tempTableCell(timeIndxBeg:timeIndxEnd,:)];
-            
+    catch ME
+    end
     if startMonth<12
         startMonth = startMonth+1;
     else 

@@ -39,9 +39,11 @@ function label_time_axis(time, setLabel, timeTick, timeMinStr, timeMaxStr )
     if nargin<1
 	    error('plot_eflux:TooFewInputs','required at least 1 inputs');
 	end;
-        
+    
     [TTick, DateNumBeg, DateNumEnd] = get_axes_time_tick_values( time, timeTick, timeMinStr, timeMaxStr );
-
+%     datestr(DateNumBeg)
+%     datestr(DateNumEnd)
+%     size(TTick)
 %% Creating X-axis Ticks & Labels
  	set(gca,'XTick',TTick);
     

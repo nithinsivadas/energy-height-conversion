@@ -117,7 +117,7 @@ else
 end
 
 tempIndex = 1:1:length(GW.time);
-timeIndex = crop_time(tempIndex,GW.time,timeMin,timeMax);
+timeIndex = crop_time(tempIndex',GW.time,timeMin,timeMax);
 omniData.minutely.maginput(:,1) = interp1(omniData.hourly.time,...
     omniData.hourly.maginput(:,1),omniData.minutely.time,'nearest'); % KP
 omniData.minutely.maginput(:,2) =...
