@@ -19,4 +19,6 @@ function [C] = define_universal_constants()
   C.epsilon0 = 8.85418782e-12;
   C.info.epsilon0 = 'Electric constant [m-3 kg-1 s4 A2]';
 
+   C.RE = 6.371*10^6;
+   C.info.RE = 'Average Radius of Earth [m]';
 end

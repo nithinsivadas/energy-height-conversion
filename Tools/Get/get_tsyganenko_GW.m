@@ -132,7 +132,7 @@ if ~isfile([GWstoreDir,GWfileStr])
     tempIndex = 1:length(tempTime);
     timeMin = datenum(datetime(yyyy,1,1));
     timeMax = datenum(datetime(yyyy+1,1,1))-1/(24*60);
-    timeIndex = crop_time(tempIndex,tempTime,timeMin,timeMax);
+    timeIndex = crop_time(tempIndex',tempTime,timeMin,timeMax);
     GW.time = tempTime(timeIndex);
     GW.ByIMF = double(dataGW{1,5}(timeIndex)); 
     GW.BzIMF = double(dataGW{1,6}(timeIndex));
