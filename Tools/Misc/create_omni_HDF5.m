@@ -40,7 +40,7 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
     fileListCell = struct2cell(files);
     formatSpecOmni1 = '%4d %4d %3d %3d %3d %3d %4d %4d %4d %7d %7d %6.2f %7d %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.1f %8.1f %8.1f %8.1f %7.2f %9.0f %6.2f %7.2f %7.2f %6.1f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %6d %6d %6d %6d %6d %6d %6d %7.2f %5.1f';
     formatSpecOmni2 = '%4d %4d %3d %5d %3d %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %6.2f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %7.2f %7.2f %6.1f %3d %4d %6d %5d %10.2f %9.2f %9.2f %9.2f %9.2f %9.2f %3d %4d %6.1f %6.1f %6d %6d %5.1f %6.2f';
-    fileListMinStr=strcat(fileListCell(2,strncmp(fileListCell(1,:)','omni_min',8))','\',fileListCell(1,strncmp(fileListCell(1,:)','omni_min',8))');
+    fileListMinStr=strcat(fileListCell(2,strncmp(fileListCell(1,:)','omni_min',8))',filesep,fileListCell(1,strncmp(fileListCell(1,:)','omni_min',8))');
     n = length(fileListMinStr);
     k=1;
     l=1;
@@ -108,7 +108,7 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
             zeros(kwidth,1));
         
         %% omni2
-        fileOmni2Str=strcat(fileListCell(2,strncmp(fileListCell(1,:)',['omni2_',num2str(yr)],10))','\',fileListCell(1,strncmp(fileListCell(1,:)',['omni2_',num2str(yr)],10))');
+        fileOmni2Str=strcat(fileListCell(2,strncmp(fileListCell(1,:)',['omni2_',num2str(yr)],10))',filesep,fileListCell(1,strncmp(fileListCell(1,:)',['omni2_',num2str(yr)],10))');
         omni2 = load_ascii_files(fileOmni2Str{1},formatSpecOmni2);     
         lwidth = length(omni2{1,1});
         time2 = datetime(omni2{1,1},ones(lwidth,1),...
