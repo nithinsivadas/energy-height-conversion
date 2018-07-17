@@ -1,4 +1,4 @@
-function GW=get_tsyganenko_GW(yyyy,programDir,omniASCDir)
+function GW=get_tsyganenko_GW_1(yyyy,programDir,omniASCDir)
 %% get_tsyganenko_GW.m Runs the fortran code MagParametersProgramONE 
 %                    to calculate G1-G3, and W1-W6: input parameters to the
 %                    tsyganenko magnetic field models 2001, 2003.
@@ -41,42 +41,27 @@ if nargin <2
     programDir = [initialize_root_path,...
         'energy-height-conversion',f,'Tools',f,'External Tools',f,'Tsyganenko_Parameters',f,'MagParameterProgram-rsw',f];
 end
-GWstoreDir = [omniASCDir,'..',f,'MAT',f];
-GWfileStr = ['Tsy_GW_',num2str(yyyy),'.mat'];
 
 % Run fortran application only if GW paramters aren't already stored
-if ~isfile([GWstoreDir,GWfileStr])
 %     h = waitbar(12/75,'Calculating G and W values');
-    omniCDFDir = [omniASCDir,'..',f,'CDF',f];
-    cdfFileStr{1} = ['omni2_h0_mrg1hr_',num2str(yyyy-1),'0101_v01.cdf'];
-    cdfFileStr{2} = ['omni2_h0_mrg1hr_',num2str(yyyy-1),'0701_v01.cdf'];
-    cdfFileStr{3} = ['omni2_h0_mrg1hr_',num2str(yyyy),'0101_v01.cdf'];
-    cdfFileStr{4} = ['omni2_h0_mrg1hr_',num2str(yyyy),'0701_v01.cdf'];
-
-    if ~isfile([omniCDFDir,cdfFileStr{1}]) || ~isfile([omniCDFDir,cdfFileStr{2}])...
-        || ~isfile([omniCDFDir,cdfFileStr{3}]) || ~isfile([omniCDFDir,cdfFileStr{4}])
-        warning('Source CDF files not present. Downloading them...');
-        download_omni_cdf(['01 Jan ',num2str(yyyy)],[omniASCDir,'..',f,'..',f],'asc');
-    end
-
-    omniData.hourly.time = double...
-        ([spdfcdfread([omniCDFDir,cdfFileStr{1}],'Variables',{'Epoch'},'ConvertEpochToDatenum', true)'...
-        spdfcdfread([omniCDFDir,cdfFileStr{2}],'Variables',{'Epoch'},'ConvertEpochToDatenum', true)' ...
-        spdfcdfread([omniCDFDir,cdfFileStr{3}],'Variables',{'Epoch'},'ConvertEpochToDatenum', true)' ...
-        spdfcdfread([omniCDFDir,cdfFileStr{4}],'Variables',{'Epoch'},'ConvertEpochToDatenum', true)']');
-    VarNamesHourly1 = [{'KP'};{'DST'}];
-    omniData.hourly.kpdst(:,1:2) =...
-        double([cell2mat((spdfcdfread([omniCDFDir,cdfFileStr{1}],'Variables',VarNamesHourly1)));...
-        cell2mat((spdfcdfread([omniCDFDir,cdfFileStr{2}],'Variables',VarNamesHourly1)));...
-        cell2mat((spdfcdfread([omniCDFDir,cdfFileStr{3}],'Variables',VarNamesHourly1)));...
-        cell2mat((spdfcdfread([omniCDFDir,cdfFileStr{4}],'Variables',VarNamesHourly1)));...
-        ]);
-
-    [YEAR,M,D,HR,MIN,S] = datevec(omniData.hourly.time);
-    DOY = day(datetime(datestr(omniData.hourly.time,'dd-mmm-yyyy')),'dayofyear');
+    formatSpecOmni2 = '%4d %4d %3d %5d %3d %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %6.2f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %7.2f %7.2f %6.1f %3d %4d %6d %5d %10.2f %9.2f %9.2f %9.2f %9.2f %9.2f %3d %4d %6.1f %6.1f %6d %6d %5.1f %6.2f';
+    ascOmni2FileStr{1} = ['omni2_',num2str(yyyy-1),'.dat'];
+    ascOmni2FileStr{2} = ['omni2_',num2str(yyyy),'.dat'];
+    inputFileID1 = fopen([omniASCDir,ascOmni2FileStr{1}],'r');
+    inputFileID2 = fopen([omniASCDir,ascOmni2FileStr{2}],'r');
+    omni2PrevYr = textscan(inputFileID1,formatSpecOmni2);
+    omni2CurrYr = textscan(inputFileID2,formatSpecOmni2);
+    fclose(inputFileID1);
+    fclose(inputFileID2);
+    
+    DOY = [(omni2PrevYr{1,2});(omni2CurrYr{1,2})];
+    YEAR = [(omni2PrevYr{1,1});(omni2CurrYr{1,1})];
+    HR = [(omni2PrevYr{1,3});(omni2CurrYr{1,3})];
+    Kp = [(omni2PrevYr{1,39});(omni2CurrYr{1,39})];
+    Dst = [(omni2PrevYr{1,41});(omni2CurrYr{1,41})];
 %     waitbar(30/75,h,'Calculating G and W values');
     % Columns: YEAR DOY HR MIN  Kp DST
-    matrixOutput = [YEAR, DOY, HR, omniData.hourly.kpdst];
+    matrixOutput = [YEAR, DOY, HR, Kp, Dst];
     % Writing kpdst.lst file
     outputFileID = fopen([programDir,'1min',f,'kpdst.lst'],'w');
     formatSpec = '%4u %3u %2u %2u %5d\n';
@@ -152,17 +137,6 @@ if ~isfile([GWstoreDir,GWfileStr])
         double(dataGW{1,27}(timeIndex)),double(dataGW{1,28}(timeIndex))];
     GW.Status6 = double(dataGW{1,29}(timeIndex));
     GW.fieldNames = C_text;
-    if ~isfolder(GWstoreDir)
-        mkdir(GWstoreDir);
-    end
-    save([GWstoreDir,GWfileStr],'GW');
-%     waitbar(1,h,'Complete');
-%     delete(h);
-else
-    load([GWstoreDir,GWfileStr]);
-    disp(['MAT file: ',GWfileStr,' already exisits in ',GWstoreDir]);
-end
-
-
+    
 end
 

@@ -95,6 +95,13 @@ omniData.hourly.maginputFieldNames = info.VariableAttributes.FIELDNAM(VarNamesHo
 
 %% Generating minute wise data
 file1minStr= get_files_in_folder(omni1minDir,'*.cdf');
+if length(file1minStr)<2
+    download_omni_cdf(dateStr,dataStoreDir);
+    file1minStr= get_files_in_folder(omni1minDir,'*.cdf');
+    if length(file1minStr)<2
+        error('The previous month CDF file not available')
+    end
+end
 VarNames1min1=[{'SYM_H'}]; % Assume SYM_H = DST
 VarNames1min2=[{'proton_density'};{'flow_speed'};{'Pressure'};{'BY_GSM'};{'BZ_GSM'}];
 
