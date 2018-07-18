@@ -3,20 +3,36 @@ clear variables
 magFieldModel=7; %TS96 
 xmmOutputFileStr = 'xmm_eq_magnetic_point_TS96.dat';
 c4OutputFileStr = 'c4_eq_magnetic_point_TS96.dat';
+
 % 
 % magFieldModel=9; %TS01 
 % xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01.dat';
 % c4OutputFileStr = 'c4_eq_magnetic_point_TS01.dat';
 
+if ispc
+    xmmDataFolder = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
+    c4DataFolder = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
+    omniH5FileStr = 'G:\My Drive\Research\Projects\Data\omni.h5';
+elseif isunix
+    xmmDataFolder = [initialize_root_path,'LargeFiles/issiteam2017/'];
+    c4DataFolder = [initialize_root_path,'LargeFiles/issiteam2017/'];
+    omniH5FileStr = [initialize_root_path,'LargeFiles/omni/omni.h5'];
+end
 %% Inputs
 % Cropping time
-% timeMin = datenum('2000-02-16 00:00:00');
-timeMin = datenum('2009-12-16 00:00:00');
-timeMax = datenum('2012-08-30 23:00:00');
+% timeMinXMM = datenum('2000-02-16 21:16:00');
+% timeMaxXMM = datenum('2012-08-30 09:29:00');
+% timeMinC4 = datenum('2001-01-09 15:23:00');
+% timeMaxC4 = datenum('2015-04-30 23:59:00');
+
+timeMinXMM = datenum('2001-01-09 15:23:00');
+timeMaxXMM = datenum('2001-01-10 09:29:00');
+timeMinC4 = datenum('2001-01-09 15:23:00');
+timeMaxC4 = datenum('2001-01-10 09:29:00');
+
 
 %%
-c4DataFolder = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
-c4MatFile = [c4DataFolder,'Mat\cluster_all_records.mat'];
+c4MatFile = [c4DataFolder,'Mat',filesep,'cluster_all_records.mat'];
 if ~isfile(c4MatFile)
     c4CoordFile = 'cluster_omni_for_t96_allrecords.txt';
     if ~isfile([c4DataFolder,c4CoordFile,'.bak'])
@@ -36,9 +52,9 @@ else
 end
 disp('1/9 Done loading cluster4 coordinates...');
 %%
-xmmDataFolder = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
 
-xmmMatFile = [xmmDataFolder,'Mat\xmm_all_records.mat'];
+
+xmmMatFile = [xmmDataFolder,'Mat',filesep,'xmm_all_records.mat'];
 if ~isfile(xmmMatFile)
     xmmCoordFile = 'xmm_omni_for_t96_allrecords.txt';
     if ~isfile([xmmDataFolder,xmmCoordFile,'.bak'])
@@ -58,8 +74,8 @@ else
 end
 disp('2/9 Done loading XMM coordinates...');
 %%
-[spacecraft.c4.xGSE,spacecraft.c4.time] = crop_time(c4.xGSE,c4.time,timeMin,timeMax);
-[spacecraft.xmm.xGSE,spacecraft.xmm.time] = crop_time(xmm.xGSE,xmm.time,timeMin,timeMax);
+[spacecraft.c4.xGSE,spacecraft.c4.time] = crop_time(c4.xGSE,c4.time,timeMinC4,timeMaxC4);
+[spacecraft.xmm.xGSE,spacecraft.xmm.time] = crop_time(xmm.xGSE,xmm.time,timeMinXMM,timeMaxXMM);
 time = spacecraft.xmm.time;
 
 % Conversion from GSE to GEO
@@ -73,7 +89,7 @@ c4.maginput = zeros(length(c4.time),25);
 % c4.maginput(:,5) = c4.Pdyn;
 % c4.maginput(:,6) = c4.BYimf; 
 % c4.maginput(:,7) = c4.BZimf;
-[spacecraft.c4.maginput,spacecraft.c4.time] = crop_time(c4.maginput,c4.time,timeMin,timeMax);
+[spacecraft.c4.maginput,spacecraft.c4.time] = crop_time(c4.maginput,c4.time,timeMinC4,timeMaxC4);
 % xmm.Pdyn(1:5) = [1.93; 1.16; 1.15; 1.35; nan];
 xmm.maginput = zeros(length(xmm.time),25);
 % xmm.maginput(:,2) =xmm.Dst; 
@@ -81,28 +97,29 @@ xmm.maginput = zeros(length(xmm.time),25);
 % BimfXMM = onera_desp_lib_rotate([zeros(length(xmm.BYimf),1), xmm.BYimf, xmm.BZimf], 'gse2gsm', xmm.time);
 % xmm.maginput(:,6) = BimfXMM(:,2); 
 % xmm.maginput(:,7) = BimfXMM(:,3);
-[spacecraft.xmm.maginput,spacecraft.xmm.time] = crop_time(xmm.maginput,xmm.time,timeMin,timeMax);
+[spacecraft.xmm.maginput,spacecraft.xmm.time] = crop_time(xmm.maginput,xmm.time,timeMinXMM,timeMaxXMM);
 disp('3/9 Done converting coordinates from GSE to GEO...');
 %% OMNI Maginput
-nMonth = months(datestr(timeMin,'mmm dd yyyy'),datestr(timeMax,'mmm dd yyyy'))+1;
-dateVec = datevec(timeMin);
-dateVec(3) = 1; %setting day to 1st
-omniDataProcessTimes = datenum(dateVec);
-omniDataStorage='G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
-omnimaginput = [];
-omniTime = [];
-multiWaitbar('Generate OMNI Input',0);
-dmonth = 1./nMonth;
-    for iMonth = 1:1:nMonth
-        multiWaitbar('Generate OMNI Input','Increment',dmonth);
-        omniDataTemp = process_omni_data(datestr(omniDataProcessTimes,'yyyy mm dd'),omniDataStorage,true);
-        omnimaginput = [omnimaginput; omniDataTemp.minutely.maginput];
-        omniTime = [omniTime; omniDataTemp.minutely.time'];
-        omniDataProcessTimes = addtodate(omniDataProcessTimes,1,'month');
-    end
-multiWaitbar('Generate OMNI Input',1);
+[omnimaginput,omniTime] = generate_maginput(omniH5FileStr, timeMinXMM, timeMaxC4);
+% nMonth = months(datestr(timeMin,'mmm dd yyyy'),datestr(timeMax,'mmm dd yyyy'))+1;
+% dateVec = datevec(timeMin);
+% dateVec(3) = 1; %setting day to 1st
+% omniDataProcessTimes = datenum(dateVec);
+% omniDataStorage='G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
+% omnimaginput = [];
+% omniTime = [];
+% multiWaitbar('Generate OMNI Input',0);
+% dmonth = 1./nMonth;
+%     for iMonth = 1:1:nMonth
+%         multiWaitbar('Generate OMNI Input','Increment',dmonth);
+%         omniDataTemp = process_omni_data(datestr(omniDataProcessTimes,'yyyy mm dd'),omniDataStorage,true);
+%         omnimaginput = [omnimaginput; omniDataTemp.minutely.maginput];
+%         omniTime = [omniTime; omniDataTemp.minutely.time'];
+%         omniDataProcessTimes = addtodate(omniDataProcessTimes,1,'month');
+%     end
+% multiWaitbar('Generate OMNI Input',1);
 omniPdyn = omnimaginput(:,5);
-omniPdyn(omniPdyn>99.9) = nan;
+% omniPdyn(omniPdyn>99.9) = nan;
 omnimaginput(:,5) = interp_nans(omniPdyn);
 xmmMaginput = interp1(omniTime,omnimaginput,spacecraft.xmm.time);
 c4Maginput = interp1(omniTime,omnimaginput,spacecraft.c4.time);
@@ -283,7 +300,38 @@ disp('Done writing C4 magnetic coordinates output data file...');
 % probes.time = time;
 multiWaitbar('closeall');
 
-% Replace string in file
+%% Generate maginput from omni.h5
+function [maginput,time] = generate_maginput(omniH5FileStr, timeMin, timeMax)
+    omniTime = unixtime2matlab(h5read(omniH5FileStr,'/Time'));
+    omniIndx = 1:1:length(omniTime);
+    minTimeIndx = find_time(omniTime,datestr(timeMin));
+    maxTimeIndx = find_time(omniTime,datestr(timeMax));
+    deltaTimeIndx = maxTimeIndx - minTimeIndx +1;
+    timeIndx = minTimeIndx:1:maxTimeIndx;
+    
+    maginput(:,1) = h5read(omniH5FileStr, '/Indices/Kp', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,2) = h5read(omniH5FileStr, '/Indices/SYM_H', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,3) = h5read(omniH5FileStr, '/ProtonDensity', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,4) = h5read(omniH5FileStr, '/Velocity/V', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,5) = h5read(omniH5FileStr, '/FlowPressure', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,6) = h5read(omniH5FileStr, '/BField/ByGSM', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,7) = h5read(omniH5FileStr, '/BField/BzGSM', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,8) = h5read(omniH5FileStr, '/TSY/G1', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,9) = h5read(omniH5FileStr, '/TSY/G2', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,10) = h5read(omniH5FileStr, '/TSY/G3', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,11) = h5read(omniH5FileStr, '/TSY/W1', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,12) = h5read(omniH5FileStr, '/TSY/W2', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,13) = h5read(omniH5FileStr, '/TSY/W3', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,14) = h5read(omniH5FileStr, '/TSY/W4', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,15) = h5read(omniH5FileStr, '/TSY/W5', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,16) = h5read(omniH5FileStr, '/TSY/W6', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,17) = h5read(omniH5FileStr, '/Indices/AL', [1 minTimeIndx], [1 deltaTimeIndx]);
+    maginput(:,18:25) = nan(length(timeIndx),8);
+    
+    time = omniTime(timeIndx);
+end
+
+%% Replace string in file
 function [s, msg] = replaceinfile(str1, str2, infile, outfile)
 %REPLACEINFILE replaces characters in ASCII file using PERL
 %  
