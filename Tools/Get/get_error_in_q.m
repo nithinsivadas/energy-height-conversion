@@ -1,5 +1,6 @@
 function [ error_in_q, q, qTime ] = get_error_in_q( Ne, dNe, alt, time, mode, alpha)
-%% get_error_in_q.m Calculates the error in production rate q, from dNe.  
+%% get_error_in_q.m Calculates the error in production rate q, from dNe. 
+% Caution: Interpolates Ne and dNe across altitude
 %--------------------------------------------------------------------------
 %   Input
 %-----------
@@ -34,8 +35,10 @@ function [ error_in_q, q, qTime ] = get_error_in_q( Ne, dNe, alt, time, mode, al
     Ne = interp_nans(Ne);
     
     %% Interpolating Error NANs 
-    %     dNe = interp_nans(dNe);
-    dNe(isnan(dNe))=max(dNe(:)); 
+%         dNe = interp_nans(dNe);
+%         dNe = (interp_nans(dNe'))';
+    dNe(isnan(dNe))=max(dNe(:));
+    dNe(isinf(dNe))=max(dNe(:));
     %%
     
 	if nargin<6

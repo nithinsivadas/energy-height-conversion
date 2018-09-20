@@ -10,9 +10,9 @@ if isunix
     pfisrRootPath = [baseDir,'PFISR Processed/Sporadic04/'];
     dascRootPath = [baseDir,'DASC/'];
     outputH5FileStr = [baseDir,'PFISR Processed/Sporadic04/',...
-    pfisrExpFileName(1:regexp(pfisrExpFileName,'-fit')),'energyFlux_v7_1.h5'];
+    pfisrExpFileName(1:regexp(pfisrExpFileName,'-fit')),'energyFlux.h5'];
     outputFigureBaseDir = '/media/nithin/PFISR_002_006/PFISR Processed/Sporadic04/';
-    outputFigureFolderStr = ['Figures_v7_',pfisrExpFileName(1:8)];
+    outputFigureFolderStr = ['Figures_',pfisrExpFileName(1:8)];
 else
     baseDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Event 1\';
     pfisrRootPath = baseDir;
@@ -25,7 +25,7 @@ end
 % minTimeStr = [];
 % maxTimeStr = [];
 
-minTimeStr = '26 Mar 2008 11:20';
+minTimeStr = '26 Mar 2008 11:00';
 maxTimeStr = '26 Mar 2008 11:30';
 
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
@@ -46,8 +46,8 @@ projectionAltDASC = 110; %110 km
 %Images
 % energySlice = [3, 5, 10, 30, 100]; %keV
 % energyFluxLim = [10 13;9 11; 9 11; 8 10; 8 10];
-energySlice = 3;
-energyFluxLim = [10 13];
+energySlice = 100;
+energyFluxLim = [8 10];
 opticalLim = [300 600];
 timeMinStr = [];
 timeMaxStr = [];

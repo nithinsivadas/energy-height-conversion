@@ -1,13 +1,13 @@
 %%
 clear variables
-% magFieldModel=7; %TS96 
-% xmmOutputFileStr = 'xmm_eq_magnetic_point_TS96.dat';
-% c4OutputFileStr = 'c4_eq_magnetic_point_TS96.dat';
+magFieldModel=7; %TS96 
+xmmOutputFileStr = 'xmm_eq_magnetic_point_TS96.dat';
+c4OutputFileStr = 'c4_eq_magnetic_point_TS96.dat';
 % parobj=parpool;
 % 
-magFieldModel=9; %TS01 
-xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01.dat';
-c4OutputFileStr = 'c4_eq_magnetic_point_TS01.dat';
+% magFieldModel=9; %TS01 
+% xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01.dat';
+% c4OutputFileStr = 'c4_eq_magnetic_point_TS01.dat';
 
 if ispc
     xmmDataFolder = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
@@ -149,16 +149,30 @@ disp('5/9 Done calculating local Bfield data...');
 
 % Finding North foot point
 hemiFlag = +1;
-spacecraft.c4.GDZNorth=onera_desp_lib_find_foot_point(magFieldModel,options,...
+n=length(spacecraft.c4.time);
+indx1=1:round(n/2);
+
+parpool
+parfor i = 1:2
+    if i==1
+GDZNorthc41=onera_desp_lib_find_foot_point(magFieldModel,options,...
     sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
     spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
     stopAlt,hemiFlag,spacecraft.c4.maginput);
-
-spacecraft.xmm.GDZNorth=onera_desp_lib_find_foot_point(magFieldModel,options,...
+    else
+GDZNorthc42=onera_desp_lib_find_foot_point(magFieldModel,options,...
+    sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
+    spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
+    stopAlt,hemiFlag,spacecraft.c4.maginput);
+    end
+end
+GDZNorthxmm=onera_desp_lib_find_foot_point(magFieldModel,options,...
     sysaxes,spacecraft.xmm.time,spacecraft.xmm.GEO(:,1),...
     spacecraft.xmm.GEO(:,2),spacecraft.xmm.GEO(:,3),...
     stopAlt,hemiFlag,spacecraft.xmm.maginput);
-
+    
+spacecraft.c4.GDZNorth = GDZNorthc4;
+spacecraft.xmm.GDZNorth = GDZNorthxmm;
 disp('6/9 Done calculating Northern hemisphere foot point...');
 
 % Find south hemisphere foot point

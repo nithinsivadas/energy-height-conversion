@@ -25,8 +25,7 @@ function [dE,dEFrac] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, tim
 % Ref     : D. L. Hysell 2007
 %----------------------------------------------------------------------------
 %%
-
-
+    % interpolating dq so that dE errors can be calculated
 
     if nargin < 6
         Gamma = -1;

@@ -3,36 +3,31 @@ tic
 % PFISR
 
 % pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
-pfisrExpFileName = '20080326.001_bc_2min-fitcal.h5';
-pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-fit')-1);
-if isunix
-    baseDir = '/media/nithin/PFISR_002_006/';
-    pfisrRootPath = [baseDir,'PFISR Processed/Sporadic04/'];
-    dascRootPath = [baseDir,'DASC/'];
-    outputH5FileStr = [baseDir,'PFISR Processed/Sporadic04/',...
-    pfisrExpFileName(1:regexp(pfisrExpFileName,'-fit')),'energyFlux_v8.h5'];
-    outputFigureBaseDir = '/media/nithin/PFISR_002_006/PFISR Processed/Sporadic04/';
-    outputFigureFolderStr = ['Figures_v7_',pfisrExpFileName(1:8)];
-else
-    baseDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Event 1\';
-    pfisrRootPath = baseDir;
-    dascRootPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\';
-    outputH5FileStr = [baseDir,...
-        pfisrExpFileName(1:20),'-energyFlux_v1.h5'];
-    outputFiguresFolder = [baseDir,'Figures',pfisrExpFileName(1:8),'\'];
-end
+% pfisrExpFileName = '20080326.001_bc_2min-fitcal.h5';
+% pfisrExpFileName = '20100528.001_bc_2min-Ne-cal.h5';
+pfisrExpFileName = '20101018.001_bc_2min-Ne-cal.h5';
+pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-Ne')-1);
+
+baseDir = '/media/nithin/PFISR_002_006/';
+pfisrRootPath = [baseDir,'PFISR Processed/Event_List/'];
+dascRootPath = [baseDir,'DASC/'];
+outputH5FileStr = [baseDir,'PFISR Processed/Event_List/',...
+pfisrExpFileName(1:regexp(pfisrExpFileName,'-Ne')),'energyFlux.h5'];
+outputFigureBaseDir = '/media/nithin/PFISR_002_006/PFISR Processed/Event_List/';
+outputFigureFolderStr = ['Figures_',pfisrExpFileName(1:8)];
+
 
 % minTimeStr = [];
 % maxTimeStr = [];
 
-minTimeStr = '26-Mar-2008 11:41';
-maxTimeStr = '26-Mar-2008 11:44';
+minTimeStr = '18 Oct 2010 08:00';
+maxTimeStr = '18 Oct 2010 10:00';
 
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 minAlt = 60;
-maxAlt = 180;
+maxAlt = 200;
 projectionAltPFISR = 60; % km, altitude of origin of magnetic field aligned lines
-nEnergyBins = 25;
+nEnergyBins = 30;
 minE = 10^3;
 maxE = 10^6;
 
@@ -44,8 +39,11 @@ dascSetDownloadFlag = true;
 projectionAltDASC = 110; %110 km
 
 %Images
-energySlice = [3, 5, 10, 30, 100]; %keV
-energyFluxLim = [10 13;9 11; 9 11; 8 10; 8 10];
+% energySlice = [3, 5, 10, 30, 100]; %keV
+% energyFluxLim = [10 13;9 11; 9 11; 8 10; 8 10];
+energySlice = 100;
+energyFluxLim = [8 10];
+opticalLim = [300 600];
 timeMinStr = [];
 timeMaxStr = [];
 latLim = [];
@@ -72,7 +70,7 @@ for iEnergy = 1:1:nEnergy
     outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice(iEnergy)),'keV_',pfisrdTime,'.avi'];
     outputFiguresFolder = [outputFigureBaseDir,outputFigureFolderStr,'_',num2str(energySlice(iEnergy)),'keV_',pfisrdTime,'/'];
     create_energy_spectra_images(outputH5FileStr,...
-        outputFiguresFolder,outputVideoStr,energySlice(iEnergy),energyFluxLim(iEnergy,:),...
+        outputFiguresFolder,outputVideoStr,energySlice(iEnergy),energyFluxLim(iEnergy,:),opticalLim,...
         minTimeStr,maxTimeStr,latLim,lonLim,setStoreImage);
     multiWaitbar('Energy slice progress','Increment',1./nEnergy);
 end

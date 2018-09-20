@@ -117,7 +117,12 @@ function [data] = get_inverted_flux( q, dq, time, alt, energyBin, A, guessFlux, 
 
     data.flux = fluxNew; % Differential number flux [m-2 s^-1 eV^-1] (Isotropic flux)
     data.energyFlux = num_to_energy(fluxNew, time, energyBin); % Differential energy flux [eV m-2 sr-1 s-1 eV-1]
-    data.dEnergyFlux = get_error_in_energyFlux(dq',A,energyBin,data.energyFlux,time,-1); % max error
+    try
+        data.dEnergyFlux = get_error_in_energyFlux(dq',A,energyBin,data.energyFlux,time,-1); % max error
+    catch ME
+        data.dEnergyFlux = nan(size(data.energyFlux));
+    end
+        
     data.MSE = chi2./(length(alt)-length(energyBin)); % Reduced chi-squared, or mean-squared error
     data.qInverted = qNew'; % Production rate derived from the estimated flux - A*flux [m-3 s-1]
     data.maxIter = maxIter; % The maximum number of iterations before convergence
