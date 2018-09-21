@@ -1,6 +1,28 @@
 function [data] = read_amisr(fileNameStr)
-%READ_ Summary of this function goes here
-%   Detailed explanation goes here
+% read_amisr.m Reads the specific data in h5 format obtained from amisr.com
+% -------------------------------------------------------------------------
+% Input
+% -------------------------------------------------------------------------
+% fileNameStr : File path and name of the amisr h5 file
+% -------------------------------------------------------------------------
+% Output
+% -------------------------------------------------------------------------
+% data.electronDensity  : Electron density profile with no Tr [nhxnT] [m-3] 
+% data.altitude         : Altitude array [nhx1] [km]
+% data.range            : Range array [km]
+% data.time             : Time array [nTx1] [matlab units]
+% data.dNeFrac          : Fractional error in Ne [nhxnT]
+% data.site.latitude    : Latitude of the instrument [deg]
+% data.site.longitude   : Longitude of the instrument [deg]
+% data.site.altitude    : Altitude of the instrument [m]
+% data.magBeamNo        : If instrument is PFISR, identifies the magnetic field aligned beam number
+% data.nBeams           : Total number of beams available
+% data.az               : Azimuth of the data points
+% data.el               : Elevation of hte data points
+%---------------------------------------------------------------
+% Created by: Nithin Sivadas
+% Date      : 
+%---------------------------------------------------------------
 
 data.electronDensity = h5read(fileNameStr,'/NeFromPower/Ne_NoTr'); % in [m^-3]
 data.altitude = h5read(fileNameStr,'/NeFromPower/Altitude')/1000; % in [km]
@@ -26,8 +48,6 @@ end
 % data.slantHeight = data.altitude./sind(data.el);
 data.range = repmat(data.range,1,nBeams);
 data.nBeams = nBeams;
-
-
 
 end
 
