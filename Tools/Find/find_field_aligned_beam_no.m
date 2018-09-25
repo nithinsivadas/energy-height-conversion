@@ -2,7 +2,17 @@ function [magBeamNo] = find_field_aligned_beam_no(beamCodes,magFieldAlignedAz,ma
 %find_field_aligned_beam_no.m Finds the field aligned beam number given the
 %field aligned Az and Elev values, using the beamCodes matrix from
 %SRI-AMISR data sets
-
+%------------------------------------------------------------------
+% Input
+%--------
+% beamCodes             - [nPos x nBeams] Beam code for each azimuth and elevation coordinate.
+% magFieldAlignedAz     - The azimuth value of the field line from the radar center
+% magFieldAlignedElev   - The elevation value of the field line from the radar centre
+%-------------------------------------------------------------------
+% Output
+%--------
+% magBeamNo             - Field aligned beam number
+%-------------------------------------------------------------------
 % 24 Jan 2018
 
 %   Detailed explanation goes here
