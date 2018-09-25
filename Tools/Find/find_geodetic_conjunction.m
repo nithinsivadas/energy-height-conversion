@@ -6,13 +6,13 @@ function [flag,probeNames] = find_geodetic_conjunction(probes,conjunctionCoords,
 %   Input
 %   ------
 %   probes.(field).GDZ       - [lat, lon, alt] of a spacecraft
-%   conjunctionCoords.GDZ    - [lat, lon, alt] of probe/ground-location with which you wish to check magnetic conjunction.
+%   conjunctionCoords.GDZ    - [lat, lon, alt] of probe/ground-location with which you wish to check conjunction.
 %   conjunctionCoords.radius - [in km] The acceptable radius of conjunction
 %   stopAlt                  - [in km] Altitude at which conjunction is to be determined
 %   --------------------------------------------
 %   Output
 %   ------
-%   flag    "1" - magnetic conjunction
+%   flag    "1" - conjunction
 %           "0" - no conjunction
 %   probeNames  - fieldnames of probe.(field) 
 %   ----------------------------------------------
