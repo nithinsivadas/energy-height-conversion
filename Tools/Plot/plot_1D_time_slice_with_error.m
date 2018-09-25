@@ -1,4 +1,4 @@
-function p=plot_1D_time_slice(time, yAxis, zValue, zError, thisTime, mode)
+function p=plot_1D_time_slice_with_error(time, yAxis, zValue, zError, thisTime, mode)
 
 %% plot_1D_time_slice.m Plots the 1-D energy flux using an input data structure
 %--------------------------------------------------------------------------
