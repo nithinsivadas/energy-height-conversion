@@ -1,6 +1,6 @@
 function [probes] = find_magnetic_conjunctions(time,omniData,...
     spacecraft,groundstation,conjunction,stopAlt, hemiFlag, magFieldModel)
-%% find_magnetic_conjunctoin.m Calculates magnetic conjunction between 
+%% find_magnetic_conjunction.m Calculates magnetic conjunction between 
 %  spacecraft, groundstation and selected conjunction probe at stopAlt heights
 %--------------------------------------------------------------------------
 % Input
