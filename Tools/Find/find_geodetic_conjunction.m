@@ -1,13 +1,23 @@
 function [flag,probeNames] = find_geodetic_conjunction(probes,conjunctionCoords,stopAlt)
-%% find_geodetic_conjunctoin.m Calculates conjunction between geodetic coordinates at stopAlt heights
-%   Detailed explanation goes here
-%   probes.(field).GDZ (geodetic coordinates)
-%   conjunctionCoords.GDZ
-%   conjunctionCoords.radius - in km
-%   stopAlt - in km (altitude at which conjunction is to be determined)
-%   can add more decision parameters
+%% find_geodetic_conjunction.m Calculates conjunction between geodetic coordinates at stopAlt heights
+%   Step 1: Calculate geodetic distance
+%   Step 2: If distance is within the specified radius then flag = 1 else 0
+%   --------------------------------------------
+%   Input
+%   ------
+%   probes.(field).GDZ       - [lat, lon, alt] of a spacecraft
+%   conjunctionCoords.GDZ    - [lat, lon, alt] of probe/ground-location with which you wish to check magnetic conjunction.
+%   conjunctionCoords.radius - [in km] The acceptable radius of conjunction
+%   stopAlt                  - [in km] Altitude at which conjunction is to be determined
+%   --------------------------------------------
+%   Output
+%   ------
+%   flag    "1" - magnetic conjunction
+%           "0" - no conjunction
+%   probeNames  - fieldnames of probe.(field) 
+%   ----------------------------------------------
 
-%%
+%% Defining RE
 RE = (6371+stopAlt)*1000; %[m]
 probeNames = fieldnames(probes);
 nProbes = length(probeNames);
