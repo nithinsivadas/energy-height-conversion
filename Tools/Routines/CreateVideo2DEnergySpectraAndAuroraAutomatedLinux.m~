@@ -5,26 +5,24 @@ tic
 % pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
 % pfisrExpFileName = '20080326.001_bc_2min-fitcal.h5';
 % pfisrExpFileName = '20100528.001_bc_2min-Ne-cal.h5';
+'20080326.001_bc_15sec-fitcal.h5'
 pfisrExpFileName = '20101018.001_bc_2min-Ne-cal.h5';
-% pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
 pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-Ne')-1);
-% pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-fitcal')-1);
 
 baseDir = '/media/nithin/PFISR_002_006/';
 pfisrRootPath = [baseDir,'PFISR Processed/Event_List/'];
 dascRootPath = [baseDir,'DASC/'];
 outputH5FileStr = [baseDir,'PFISR Processed/Event_List/',...
 pfisrExpFileName(1:regexp(pfisrExpFileName,'-Ne')),'energyFlux.h5'];
-% pfisrExpFileName(1:regexp(pfisrExpFileName,'-fitcal')),'energyFlux.h5'];
 outputFigureBaseDir = '/media/nithin/PFISR_002_006/PFISR Processed/Event_List/';
 outputFigureFolderStr = ['Figures_',pfisrExpFileName(1:8)];
 
 
-minTimeStr = [];
-maxTimeStr = [];
+% minTimeStr = [];
+% maxTimeStr = [];
 
-% minTimeStr = '26 Mar 2008 11:04';
-% maxTimeStr = '26 Mar 2008 11:14';
+minTimeStr = '18 Oct 2010 08:00';
+maxTimeStr = '18 Oct 2010 10:00';
 
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 minAlt = 60;
