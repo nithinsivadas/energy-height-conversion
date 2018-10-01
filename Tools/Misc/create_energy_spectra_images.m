@@ -131,58 +131,7 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
 end
 
 
-%% Function to read h5 variable at a particular time index
-function varValue=readh5_variable_at_time(h5FileStr,varStr,address,thisTimeIndx)
-    array1DwithTimeVars = {'message'};
-    matrix2DwithTimeVars = {'MSE','maxIter','time'};
-    matrix3DwithTimeVars = {'dEnergyFlux','energyFlux','flux','qError',...
-        'qInput','qInverted','Ne','dNeFrac','ASI',};
-    matrix2D = {'azCalData','elCalData','az','el','lat','lon',...
-        'sensorloc','A','alt','energyBin','projectionAlt',...
-        'lowAzGradientFilter','minElFilter'};
-    matrix3D = {'magCartENU','magGeodeticLatLonAlt'};
-    totalAddress=[address,varStr];
-    if sum(strcmp(varStr,matrix2DwithTimeVars))==1
-        tempInfo=h5info(h5FileStr,totalAddress);
-        countIndx = tempInfo.Dataspace.Size;
-        if thisTimeIndx <= countIndx(2)
-            countIndx(2) = 1;
-            startIndx = [1 thisTimeIndx];
-        else
-            error('Time index exceeds the size of records in h5 file.');
-        end
-    elseif sum(strcmp(varStr,array1DwithTimeVars))==1
-        tempInfo=h5info(h5FileStr,totalAddress);
-        countIndx = tempInfo.Dataspace.Size;
-        if thisTimeIndx<=countIndx
-            countIndx = 1;
-            startIndx = thisTimeIndx;
-        else
-            error('Time index exceeds the size of records in h5 file.');
-        end
-    elseif sum(strcmp(varStr,matrix3DwithTimeVars))==1
-        tempInfo=h5info(h5FileStr,totalAddress);
-        countIndx = tempInfo.Dataspace.Size;
-        if thisTimeIndx <= countIndx(3)
-            countIndx(3) = 1;
-            startIndx = [1 1 thisTimeIndx];
-        else
-            error('Time index exceeds the size of records in h5 file.');
-        end
-    elseif sum(strcmp(varStr,matrix2D))==1
-        tempInfo=h5info(h5FileStr,totalAddress);
-        countIndx = tempInfo.Dataspace.Size;
-        startIndx = [1 1];
-    elseif sum(strcmp(varStr,matrix3D))==1
-        tempInfo=h5info(h5FileStr,totalAddress);
-        countIndx = tempInfo.Dataspace.Size;
-        startIndx = [1 1 1];
-    else
-        error('Variable not found in the HDF5 file');
-    end
-    varValue = h5read(h5FileStr,totalAddress,startIndx,countIndx);
 
-end
 
 %% Function to plot 2D energy slice overlaid with DASC 
 function plot_2D_energy_slice_with_DASC_v2018(figureHandle,thisTime,pfisrTime,...
