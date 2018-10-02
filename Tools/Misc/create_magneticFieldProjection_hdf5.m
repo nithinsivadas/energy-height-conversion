@@ -70,7 +70,7 @@ for i = 1:1:length(data(1,:))
             chunkSize = [3, 100, 2];
         case 2
             dataSize = fliplr(data{2,i});
-            chunkSize = [3, 100];
+            chunkSize = [1, 100];
     end
     try 
         h5create(inputH5FileStr,data{1,i},dataSize,'ChunkSize', chunkSize,'Deflate', 9); 
@@ -81,14 +81,17 @@ for i = 1:1:length(data(1,:))
     end
 end
 
-dkTime = 800; % To allow for low memory
-nkTime = ceil(nTime/dkTime);
+% dkTime = 800; % To allow for low memory
+% nkTime = ceil(nTime/dkTime);
+dkTime = 2;
+nkTime = 2;
 start{1} = 1; start{2} = [1 1]; start{3} = [1 1 1]; start{4} = [1 1 1 1]; 
 multiWaitbar('Creating magneticMap HDF5 section',0.2);
 multiWaitbar('Calculating Part 1',0);
 %% Write the variables in
 % Write the time-independent variable in
 h5write(inputH5FileStr,data{1,2},GDZ);
+h5write(inputH5FileStr,data{1,7},posixtime(datetime(time,'ConvertFrom','datenum')));
 % Write the time-dependent variable in
 for kTime = 1:nkTime
     
@@ -184,7 +187,11 @@ function data = get_hdf5_dataformat(nTime, nPixels, magFieldModelStr)
     data{4,6} = 'Derivatives of conjugate equatorial magnetic-field vector'; 
     data{5,6} = 'dBi/dBj in nT, i&j in GEO';
     
-    
+    data{1,7} = ['/magneticMap/',magFieldModelStr,'/time']; % HDF5 address
+    data{2,7} = [nTime, 1]; % Size
+    data{3,7} = 'nTime x 1'; % Dimensions 
+    data{4,7} = 'Time instances'; 
+    data{5,7} = 'POSIX';
 end
 
 
