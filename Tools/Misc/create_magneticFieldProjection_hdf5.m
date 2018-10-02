@@ -81,10 +81,10 @@ for i = 1:1:length(data(1,:))
     end
 end
 
-% dkTime = 800; % To allow for low memory
-% nkTime = ceil(nTime/dkTime);
-dkTime = 2;
-nkTime = 2;
+dkTime = 800; % To allow for low memory
+nkTime = ceil(nTime/dkTime);
+% dkTime = 2;
+% nkTime = 2;
 start{1} = 1; start{2} = [1 1]; start{3} = [1 1 1]; start{4} = [1 1 1 1]; 
 multiWaitbar('Creating magneticMap HDF5 section',0.2);
 multiWaitbar('Calculating Part 1',0);
