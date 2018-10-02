@@ -101,6 +101,13 @@ for kTime = 1:nkTime
     count{1} = 1; count{2} = [nPixels nTimeMag]; 
     count{3} = [3 nPixels nTimeMag]; count{4} = [3 3 nPixels nTimeMag];
     itimeTemp = 1;
+    
+    magEqPointGEO = zeros(nTimeMag, nPixels, 3);
+    Bgeo = magEqPointGEO;
+    B = zeros(nTimeMag, nPixels);
+    gradBmag = magEqPointGEO;
+    diffB = zeros(nTimeMag, nPixels, 3, 3);
+        
     for itime = timeStartIndx:1:timeEndIndx
         
         % Calculating the coordinates of the conjugate magnetic equatorial coordinate
@@ -116,7 +123,7 @@ for kTime = 1:nkTime
 
         magEqPointGEO(itimeTemp,:,:) = magEqPointGEOTemp;
         Bgeo(itimeTemp,:,:) = BgeoTemp;
-        B(itimeTemp,:,:) = BTemp;
+        B(itimeTemp,:) = BTemp;
         gradBmag(itimeTemp,:,:) = gradBmagTemp;
         diffB(itimeTemp,:,:,:) = diffBTemp;
         itimeTemp = itimeTemp + 1;
