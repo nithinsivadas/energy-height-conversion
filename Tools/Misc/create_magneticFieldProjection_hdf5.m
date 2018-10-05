@@ -107,7 +107,11 @@ for kTime = 1:nkTime
     B = zeros(nTimeMag, nPixels);
     gradBmag = magEqPointGEO;
     diffB = zeros(nTimeMag, nPixels, 3, 3);
-        
+    Lm = zeros(nTimeMag, nPixels);
+    Lstar = zeros(nTimeMag, nPixels);
+    Blocal = zeros(nTimeMag, nPixels);
+    MLT = zeros(nTimeMag, nPixels);
+    
     for itime = timeStartIndx:1:timeEndIndx
         
         % Calculating the coordinates of the conjugate magnetic equatorial coordinate
@@ -118,7 +122,9 @@ for kTime = 1:nkTime
         [BgeoTemp,BTemp,gradBmagTemp,diffBTemp] = onera_desp_lib_get_bderivs(magFieldModel,options,...
         1,time(itime),magEqPointGEOTemp(:,1),magEqPointGEOTemp(:,2),magEqPointGEOTemp(:,3),...
         maginputInterpolated(itime,:)); 
-
+        
+        [LmTemp,LstarTemp,BlocalTemp,~,~,MLTTemp] = onera_desp_lib_make_lstar(magFieldModel,...
+            options,sysaxes,time(itime),GDZ(1,:),GDZ(2,:),GDZ(3,:),maginputInterpolated(itime,:)); 
         % Storing these measurments in a media file 
 
         magEqPointGEO(itimeTemp,:,:) = magEqPointGEOTemp;
@@ -126,27 +132,37 @@ for kTime = 1:nkTime
         B(itimeTemp,:) = BTemp;
         gradBmag(itimeTemp,:,:) = gradBmagTemp;
         diffB(itimeTemp,:,:,:) = diffBTemp;
+        Lm(itimeTemp,:) = LmTemp;
+        Lstar(itimeTemp,:) = LstarTemp;
+        Blocal(itimeTemp,:) = BlocalTemp;
+        MLT(itimeTemp,:) = MLTTemp;
         itimeTemp = itimeTemp + 1;
         
         multiWaitbar('Calculating Part 2','Increment',1/nTimeMag);
     end
     
     % Write the variables in
-h5write(inputH5FileStr,data{1,1},...
-    permute(magEqPointGEO,[3 2 1]),start{3},count{3});
-h5write(inputH5FileStr,data{1,3},...
-    permute(Bgeo,[3 2 1]), start{3}, count{3});
-h5write(inputH5FileStr,data{1,4},...
-    B',start{2},count{2});
-h5write(inputH5FileStr,data{1,5},...
-    permute(gradBmag,[3 2 1]), start{3}, count{3});
-h5write(inputH5FileStr,data{1,6},...
-    permute(diffB,[4 3 2 1]), start{4}, count{4});
-    start{1} = 1; 
-    start{2} = [1 1] + [0 nTimeMag]; 
-    start{3} = [1 1 1] + [0 0 nTimeMag]; 
-    start{4} = [1 1 1 1] + [0 0 0 nTimeMag];  
-    multiWaitbar('Calculating Part 1','Increment',1/nkTime);
+    h5write(inputH5FileStr,data{1,1},...
+        permute(magEqPointGEO,[3 2 1]),start{3},count{3});
+    h5write(inputH5FileStr,data{1,3},...
+        permute(Bgeo,[3 2 1]), start{3}, count{3});
+    h5write(inputH5FileStr,data{1,4},...
+        B',start{2},count{2});
+    h5write(inputH5FileStr,data{1,5},...
+        permute(gradBmag,[3 2 1]), start{3}, count{3});
+    h5write(inputH5FileStr,data{1,6},...
+        permute(diffB,[4 3 2 1]), start{4}, count{4});
+    
+    h5write(inputH5FileStr,data{1,8},Lm',start{2},count{2});
+    h5write(inputH5FileStr,data{1,9},Lstar',start{2},count{2});
+    h5write(inputH5FileStr,data{1,10},Blocal',start{2},count{2});
+    h5write(inputH5FileStr,data{1,11},MLT',start{2},count{2});
+    
+        start{1} = 1; 
+        start{2} = [1 1] + [0 nTimeMag]; 
+        start{3} = [1 1 1] + [0 0 nTimeMag]; 
+        start{4} = [1 1 1 1] + [0 0 0 nTimeMag];  
+        multiWaitbar('Calculating Part 1','Increment',1/nkTime);
 end
 multiWaitbar('Calculating Part 1',1);
 multiWaitbar('Calculating Part 2',1);
@@ -199,10 +215,31 @@ function data = get_hdf5_dataformat(nTime, nPixels, magFieldModelStr)
     data{3,7} = 'nTime x 1'; % Dimensions 
     data{4,7} = 'Time instances'; 
     data{5,7} = 'POSIX';
+    
+    data{1,8} = ['/magneticMap/',magFieldModelStr,'/Lm']; % HDF5 address
+    data{2,8} = [nTime, nPixels]; % Size
+    data{3,8} = 'nTime x nPixels'; % Dimensions 
+    data{4,8} = 'L McIlwain '; 
+    data{5,8} = 'L in [RE]';
+    
+    data{1,9} = ['/magneticMap/',magFieldModelStr,'/Lstar']; % HDF5 address
+    data{2,9} = [nTime, nPixels]; % Size
+    data{3,9} = 'nTime x nPixels'; % Dimensions 
+    data{4,9} = 'L Roederer  or ?=2?*Bo*/Lstar [nT Re2] '; 
+    data{5,9} = 'L* in [RE]';
+    
+    data{1,10} = ['/magneticMap/',magFieldModelStr,'/BIonosphere']; % HDF5 address
+    data{2,10} = [nTime, nPixels]; % Size
+    data{3,10} = 'nTime x nPixels'; % Dimensions 
+    data{4,10} = 'Magnitude of Bfield at the ionosphere '; 
+    data{5,10} = '[nT]';
+    
+    data{1,11} = ['/magneticMap/',magFieldModelStr,'/MLT']; % HDF5 address
+    data{2,11} = [nTime, nPixels]; % Size
+    data{3,11} = 'nTime x nPixels'; % Dimensions 
+    data{4,11} = 'MLT of the Coordinate'; 
+    data{5,11} = '[Hr]';
 end
-
-
-
 
 
 

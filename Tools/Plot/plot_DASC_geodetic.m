@@ -26,8 +26,8 @@ nanFlags = isnan(lat) | isnan(lon) | isnan(dataNew);
 lat(nanFlags) = [];
 lon(nanFlags) = [];
 dataNew(nanFlags) = [];
-
-F = scatteredInterpolant(lat,lon,dataNew,'nearest','none');
+% lat, lon, dataNew have to be column vectors!
+F = scatteredInterpolant(lat',lon',dataNew','nearest','none'); %Modified on 3rd Oct 2018 - Transpose
 latq = linspace(latLim(1),latLim(2),imageSize);
 lonq = linspace(lonLim(1),lonLim(2),imageSize);
 [LAT, LON] = ndgrid(latq,lonq);
