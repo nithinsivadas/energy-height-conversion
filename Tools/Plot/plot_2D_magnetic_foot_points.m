@@ -1,5 +1,5 @@
 function [ax2, h2, c2] = plot_2D_magnetic_foot_points...
-    (magEqPointGEO, ionosphereCoord, varargin)
+    (plotVariable, ionosphereCoord, varargin)
 %plot_2D_magnetic_foot_points Given a matrix of magnetic conjugate points
 %at the equatorial plane, and their corresponding ionospheric foot points,
 %the function draws a contour plot of their equatorial radial distances.
@@ -18,15 +18,14 @@ addParameter(p,'setMapOn', true);
 addParameter(p,'thisTimeBfieldModel', datenum('9 September 9999'));
 addParameter(p,'BfieldModelStr','Unknown');
 
-addRequired(p,'magEqPointGEO');
+addRequired(p,'plotVariable'); % Can be L-shell, L*, or anything else
 addRequired(p,'ionosphereCoord');
 
-parse(p,magEqPointGEO, ionosphereCoord, varargin{:});
+parse(p,plotVariable, ionosphereCoord, varargin{:});
 
-RE=(magEqPointGEO(:,1).^2+magEqPointGEO(:,2).^2+magEqPointGEO(:,3).^2).^0.5;
 GDZ = ionosphereCoord;
 
-F = scatteredInterpolant(GDZ(:,2),GDZ(:,3),RE);
+F = scatteredInterpolant(GDZ(:,2),GDZ(:,3),plotVariable);
 
 if p.Results.lonLim == 0
     lonLim = [min(GDZ(:,3)) max(GDZ(:,3))];

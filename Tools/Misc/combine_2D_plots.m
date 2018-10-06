@@ -1,12 +1,13 @@
 function [p] = combine_2D_plots(inputH5FileStr,figureHandle,...
     varargin)
-%UNTITLED10 Summary of this function goes here
-%   Detailed explanation goes here
+%combine_2D_plots Plot optical images, energy flux maps, and or magnetic
+%field maps over one another.
 
 p = inputParser;
 
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 expectedMaps = {'OpticalImage','EnergyFluxMap','MagneticFieldMap','NoMap'};
+expectedMagMapContour = {'RE','Lm','Lstar'}; 
 expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
     'TS89','OP77quiet','OP88dynamic','TS96','OM97','TS01','TS01storm',...
     'TS04storm','Alexeev2000'};
@@ -17,6 +18,8 @@ addParameter(p,'map3','NoMap',@(x) any(validatestring(x,expectedMaps)));
 addParameter(p,'map1Data',struct());
 addParameter(p,'map2Data',struct());
 addParameter(p,'map3Data',struct());
+
+addParameter(p,'plotContours','RE',@(x) any(validatestring(x,expectedMagMapContour)));
 
 addParameter(p,'thisTime',datenum('26 Mar 2008 11:00'),validScalarPosNum);
 
@@ -107,8 +110,17 @@ for thisLayer = 1:3
                 'magFieldModelStr',p.Results.magneticFieldModel);
             axesHandle(thisLayer)=axes;
             magLayerNo = thisLayer;
+            
+            if strcmp(p.Results.plotContours,'RE')
+                 plotVariable = magFieldData.RE;
+            elseif strcmp(p.Results.plotContours,'Lm')
+                plotVariable = magFieldData.Lm;
+            elseif strcmp(p.Results.plotContours,'Lstar')
+                plotVariable = magFieldData.Lstar;
+            end
+            
             [axesmHandle(thisLayer), hMagnetic, cMagnetic] = plot_2D_magnetic_foot_points...
-                (magFieldData.magEqCoordGEO, magFieldData.ionosphereCoord,...
+                (plotVariable, magFieldData.ionosphereCoord,...
                 'BfieldModelStr',magFieldData.magFieldModelStr, 'thisTimeBfieldModel',magFieldData.thisTime,...
                 'setMapOn',true, 'latLim', p.Results.latLim,'lonLim', p.Results.lonLim,'contourLineArray', p.Results.contourLineArray,...
                 'setFieldLabelOn',false,'setTimeLabelOn', p.Results.setMagneticFieldTimeLabelOn);
