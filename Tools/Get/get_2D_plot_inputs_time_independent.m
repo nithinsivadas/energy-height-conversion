@@ -8,12 +8,12 @@ p = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 
 expectedMaps = {'OpticalImage','EnergyFluxMap','MagneticFieldMap','NoMap'};
-expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
-    'TS89','OP77quiet','OP88dynamic','TS96','OM97','TS01','TS01storm',...
-    'TS04storm','Alexeev2000'};
+% expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
+%     'TS89','OP77quiet','OP88dynamic','TS96','OM97','TS01','TS01storm',...
+%     'TS04storm','Alexeev2000'};
 
 addParameter(p,'plotModeStr','NoMap',@(x) any(validatestring(x,expectedMaps)));
-addParameter(p,'magFieldModelStr','TS96',@(x) any(validatestring(x,expectedMagFieldModels)));
+% addParameter(p,'magFieldModelStr','TS96',@(x) any(validatestring(x,expectedMagFieldModels)));
 addParameter(p,'timeNeutralAtmosphere',9999,validScalarPosNum);
 addParameter(p,'energySlice',100,validScalarPosNum); %In keV
 
@@ -70,8 +70,7 @@ switch p.Results.plotModeStr
     case 'MagneticFieldMap'
 
         plotData.ionosphereCoord = readh5_variable_at_time(inputH5FileStr,...
-            'ionosphereCoordGDZ',['/magneticMap/',p.Results.magFieldModelStr,'/'],[])';
-        plotData.magFieldModelStr = p.Results.magFieldModelStr;
+            'ionosphereCoordGDZ',['/magneticMap/',p.Results.magFieldModelStr,'/'],[])';        
         plotData.time = unix_to_matlab_time(h5read(inputH5FileStr,['/magneticMap/',p.Results.magFieldModelStr,'/time']))';
     otherwise
         error('No or incorrect plotMode');

@@ -19,7 +19,8 @@ function varValue=readh5_variable_at_time(h5FileStr,varStr,address,thisTimeIndx)
     % Create by   : Nithin Sivadas
     
     array1DwithTimeVars = {'message'};
-    matrix2DwithTimeVars = {'MSE','maxIter','time','BmagEq'};
+    matrix2DwithTimeVars = {'MSE','maxIter','time','BmagEq','Lm','Lstar',...
+        'MLT','BIonosphere'};
     matrix3DwithTimeVars = {'dEnergyFlux','energyFlux','flux','qError',...
         'qInput','qInverted','Ne','dNeFrac','ASI','BgeoEq','gradBmagEq',...
         'magEqCoordGEO'};

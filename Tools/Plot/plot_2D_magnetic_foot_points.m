@@ -17,7 +17,7 @@ addParameter(p,'lonLim', 0);
 addParameter(p,'setMapOn', true);
 addParameter(p,'thisTimeBfieldModel', datenum('9 September 9999'));
 addParameter(p,'BfieldModelStr','Unknown');
-
+addParameter(p,'plotVariableName','L-shell');
 addRequired(p,'plotVariable'); % Can be L-shell, L*, or anything else
 addRequired(p,'ionosphereCoord');
 
@@ -76,7 +76,7 @@ ax.YLim = ylim;
 
 if p.Results.setTimeLabelOn==true
     hold on;
-    textm(latLim(2)-0.75*latWidth, lonLim(2)-0.3*lonWidth, [p.Results.BfieldModelStr,' L-shell'],'color','c');
+    textm(latLim(2)-0.75*latWidth, lonLim(2)-0.3*lonWidth, [p.Results.BfieldModelStr,' ',p.Results.plotVariableName],'color','c');
     textm(latLim(2)-0.75*latWidth+latWidth/20, lonLim(2)-0.3*lonWidth,...
         [datestr(p.Results.thisTimeBfieldModel,'HH:MM:SS'),' UT'],'color', 'c');
     hold off;
