@@ -21,4 +21,7 @@ function [C] = define_universal_constants()
 
    C.RE = 6.371*10^6;
    C.info.RE = 'Average Radius of Earth [m]';
+   
+   C.me = 9.10938356*10^-31;
+   C.info.me = 'Electron mass [kg]';
 end

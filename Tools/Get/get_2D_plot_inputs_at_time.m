@@ -18,6 +18,8 @@ addParameter(p,'plotModeStr','NoMap',@(x) any(validatestring(x,expectedMaps)));
 addParameter(p,'magFieldModelStr','TS96',@(x) any(validatestring(x,expectedMagFieldModels)));
 addParameter(p,'thisTimeIndx',1,validScalarPosNum);
 addParameter(p,'plotData',struct());
+addParameter(p,'getKc',false);
+addParameter(p,'energySlice',100);
 
 addRequired(p,'inputH5FileStr',@(x)contains(x,{'.h5','.hdf5'}));
 
@@ -52,6 +54,20 @@ switch p.Results.plotModeStr
         end
         plotData.thisTime = unix_to_matlab_time(readh5_variable_at_time(inputH5FileStr,...
             'time',['/magneticMap/',p.Results.magFieldModelStr,'/'],p.Results.thisTimeIndx));
+
+        if p.Results.getKc
+            plotData.BgeoEq = readh5_variable_at_time(inputH5FileStr,...
+            'BgeoEq',['/magneticMap/',p.Results.magFieldModelStr,'/'],p.Results.thisTimeIndx)';
+            plotData.BmagEq = readh5_variable_at_time(inputH5FileStr,...
+            'BmagEq',['/magneticMap/',p.Results.magFieldModelStr,'/'],p.Results.thisTimeIndx);
+            plotData.gradBmagEq = readh5_variable_at_time(inputH5FileStr,...
+            'gradBmagEq',['/magneticMap/',p.Results.magFieldModelStr,'/'],p.Results.thisTimeIndx)';
+            plotData.diffBEq = permute(readh5_variable_at_time(inputH5FileStr,...
+            'diffBEq',['/magneticMap/',p.Results.magFieldModelStr,'/'],p.Results.thisTimeIndx),[3,2,1]);
+            plotData.Kc = get_isotropic_boundary(plotData.BgeoEq,plotData.BmagEq,...
+            plotData.gradBmagEq,plotData.diffBEq,p.Results.energySlice);
+        end
+        
     otherwise
         error('No maps or incorrect plotMode');
 end

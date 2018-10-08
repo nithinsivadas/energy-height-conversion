@@ -1,13 +1,24 @@
 function status = create_magneticFieldProjection_hdf5(...
-    magFieldModel,inputH5FileStr,omniH5FileStr)
+    magFieldModel,inputH5FileStr,omniH5FileStr,varargin)
 %create_magneticFieldProjection_hdf5 Calculates equatorial magnetic field
 %parameters of the magnetically conjugate ionospheric point represented by
 %a pixel in optical DASC image or the PFISR energy spectra. 
 
+p = inputParser;
+validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
+
+addRequired(p,'magFieldModel',validScalarPosNum);
+addRequired(p,'inputH5FileStr',@(x)contains(x,{'.h5','.hdf5'}));
+addRequired(p,'omniH5FileStr',@(x)contains(x,{'.h5','.hdf5'}));
+
+addParameter(p,'options',[0,0,0,0,0]);
+addParameter(p,'inputAxesNo',0);
+addParameter(p,'pixels',32);
+
 % Settings
-options = [0,0,0,0,0];
-sysaxes = 0; % GDZ Coordinates as Input 
-nPixels0 = 32; % Number of pixels to generate iso-magnetic-field lines in the ionosphere
+options = p.Results.options;
+sysaxes = p.Results.inputAxesNo; % GDZ Coordinates as Input 
+nPixels0 = p.Results.pixels; % Number of pixels to generate iso-magnetic-field lines in the ionosphere
 
 % Checking if DASC data is available in the energyFlux hdf5 input file
 info = h5info(inputH5FileStr); 

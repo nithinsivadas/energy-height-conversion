@@ -7,7 +7,7 @@ p = inputParser;
 
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 expectedMaps = {'OpticalImage','EnergyFluxMap','MagneticFieldMap','NoMap'};
-expectedMagMapContour = {'RE','Lm','Lstar'}; 
+expectedMagMapContour = {'RE','Lm','Lstar','Kc'}; 
 expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
     'TS89','OP77quiet','OP88dynamic','TS96','OM97','TS01','TS01storm',...
     'TS04storm','Alexeev2000'};
@@ -122,7 +122,9 @@ imageName = strcat('figure_',datestr(p.Results.thisTime,'HH_MM_SS'));
                     'plotModeStr',expectedMaps{3},...
                     'plotData',select_map_data(thisLayer,p.Results.map1Data,p.Results.map2Data,p.Results.map3Data),...
                     'thisTimeIndx', thisTimeIndx(thisLayer),...
-                    'magFieldModelStr',p.Results.magneticFieldModel);
+                    'magFieldModelStr',p.Results.magneticFieldModel,...
+                    'energySlice',p.Results.energySlice,...
+                    'getKc',strcmp(p.Results.plotContours,'Kc'));
                 axesHandle(thisLayer)=axes;
                 magLayerNo = thisLayer;
 
@@ -132,6 +134,8 @@ imageName = strcat('figure_',datestr(p.Results.thisTime,'HH_MM_SS'));
                     plotVariable = magFieldData.Lm;
                 elseif strcmp(p.Results.plotContours,'Lstar')
                     plotVariable = magFieldData.Lstar;
+                elseif strcmp(p.Results.plotContours,'Kc')
+                    plotVariable = abs(magFieldData.Kc);
                 end
 
                 [axesmHandle(thisLayer), hMagnetic, cMagnetic] = plot_2D_magnetic_foot_points...
