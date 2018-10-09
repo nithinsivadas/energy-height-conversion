@@ -15,6 +15,7 @@ addParameter(p,'options',[0,0,0,0,0]);
 addParameter(p,'inputAxesNo',0);
 addParameter(p,'pixels',32);
 
+parse(p,magFieldModel,inputH5FileStr,omniH5FileStr,varargin{:});
 % Settings
 options = p.Results.options;
 sysaxes = p.Results.inputAxesNo; % GDZ Coordinates as Input 
