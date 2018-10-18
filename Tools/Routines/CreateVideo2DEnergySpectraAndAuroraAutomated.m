@@ -3,7 +3,8 @@ tic
 % PFISR
 
 % pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
-pfisrExpFileName = '20080326.001_bc_2min-fitcal.h5';
+% pfisrExpFileName = '20080326.001_bc_2min-fitcal.h5';
+pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
 pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-fit')-1);
 if isunix
     baseDir = '/media/nithin/PFISR_002_006/';
@@ -18,15 +19,15 @@ else
     pfisrRootPath = baseDir;
     dascRootPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\';
     outputH5FileStr = [baseDir,...
-        pfisrExpFileName(1:20),'-energyFlux_v1.h5'];
-    outputFiguresFolder = [baseDir,'Figures_v1_',pfisrExpFileName(1:8),'\'];
+        pfisrExpFileName(1:20),'-energyFlux_v60km.h5'];
+    outputFiguresFolder = [baseDir,'Figures_v60km_',pfisrExpFileName(1:8),'\'];
 end
 
 % minTimeStr = [];
 % maxTimeStr = [];
 
-minTimeStr = '26 Mar 2008 11:00';
-maxTimeStr = '26 Mar 2008 11:30';
+minTimeStr = '26 Mar 2008 10:00';
+maxTimeStr = '26 Mar 2008 12:00';
 
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 minAlt = 60;
@@ -41,7 +42,7 @@ dascMinElevation = 0;
 dascCalFileAz = [];
 dascCalFileEl = [];
 dascSetDownloadFlag = true;
-projectionAltDASC = 110; %110 km
+projectionAltDASC = 60; %110 km
 
 %Images
 % energySlice = [3, 5, 10, 30, 100]; %keV
