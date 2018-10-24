@@ -53,17 +53,24 @@ switch p.Results.plotModeStr
         else
             timeNeutralAtmosphere=p.Resilts.timeNeutralAtmosphere;
         end
-        peakIonizationAlt = calculate_peak_altitude_of_ionization(p.Results.energySlice*1000,...
+        
+        for iEnergy = 1:1:size(plotData.zEnergyBin,2)
+        peakIonizationAlt(iEnergy) = calculate_peak_altitude_of_ionization(plotData.zEnergyBin(1,iEnergy),...
             timeNeutralAtmosphere,tempLatitude(1,:)',tempLongitude(1,:)',...
             tempAltitude(1,:)');
+        end
         fprintf(['PFISR Energy Flux Map projected at ',num2str(peakIonizationAlt),' km\n']);
         nBeams = size(tempLatitude,1);
-        for iBeam = 1:1:nBeams
-            pfisrLatitude(iBeam,1) = interp1(tempAltitude(iBeam,:),tempLatitude(iBeam,:),peakIonizationAlt,'linear','extrap');
-            pfisrLongitude(iBeam,1) = interp1(tempAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt,'linear','extrap');  
+        for iEnergy = 1:1:size(plotData.zEnergyBin,2)
+            for iBeam = 1:1:nBeams
+                pfisrLatitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLatitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');
+                pfisrLongitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');  
+            end
         end
-        plotData.latitude = repmat(pfisrLatitude,[1,size(plotData.zEnergyBin,2)]);
-        plotData.longitude = repmat(pfisrLongitude,[1,size(plotData.zEnergyBin,2)]);
+%         plotData.latitude = repmat(pfisrLatitude,[1,size(plotData.zEnergyBin,2)]);
+%         plotData.longitude = repmat(pfisrLongitude,[1,size(plotData.zEnergyBin,2)]);
+        plotData.latitude = pfisrLatitude;
+        plotData.longitude = pfisrLongitude;
         plotData.projectionAltitude = peakIonizationAlt; % in KM
         plotData.timeNeutralAtmosphere = timeNeutralAtmosphere;
         
