@@ -102,6 +102,8 @@ NPOSITPtr = libpointer('int32Ptr',NPOSIT);
 maginput = maginput';
 calllib('onera_desp_lib','trace_field_line2_1_',kext,options,sysaxes,iyear,idoy,UT,x1,x2,x3,maginput,R0,...
     LmPtr,BlocalPtr,BminPtr,JPtr,POSITPtr,NPOSITPtr);
+% calllib('onera_desp_lib','trace_field_line1_',kext,options,sysaxes,iyear,idoy,UT,x1,x2,x3,maginput,...
+%     LmPtr,BlocalPtr,BminPtr,JPtr,POSITPtr,NPOSITPtr);
 % have to do this next bit because Ptr's aren't really pointers
 Lm = get(LmPtr,'value');
 Blocal = get(BlocalPtr,'value');

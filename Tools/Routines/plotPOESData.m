@@ -4,8 +4,15 @@ clear all;
 %% Extracting data
 poesCDFPath = 'G:\My Drive\Research\Projects\Paper 2\Data\NOAA17';
 poesCDFName = 'poes_n17_20080326.cdf';
+poesnCDFName = 'POES_combinedSpectrum_n17_90_20080326.nc';
 omniH5FileStr = 'G:\My Drive\Research\Projects\Data\omni.h5';
 
+%% Opening netcdf
+
+ncid = netcdf.open([poesCDFPath,filesep,poesnCDFName]);
+
+
+%%
 [data,info] = cdfread([poesCDFPath,filesep,poesCDFName]);
 
 poesData.time = cellfun(@(x) todatenum(x),data(:,1));
@@ -26,34 +33,35 @@ poesData.pLabel = data{1,19};
 poesData.maginput = interp_nans(interp1(magtime',maginput,poesData.time));
 
 %%
-magFieldModel = 4;
-ntime = find_time(poesData.time,'26-Mar-2008 11:16');
+magFieldModel = 7;
+% ntime = find_time(poesData.time,'26-Mar-2008 11:32');
 tic
-% [Lm,Lstar,Blocal,Bmin,J,MLT] = onera_desp_lib_make_lstar(magFieldModel,[0,0,0,0,0],0,poesData.time(ntime,1),824*ones(size(poesData.lat(ntime,1))),poesData.lat(ntime,1),poesData.lon(ntime,1),poesData.maginput(ntime,:));
-% [Lm,Lstar,Blocal,Bmin,J,MLT] = onera_desp_lib_make_lstar(magFieldModel,[0,0,0,0,0],0,poesData.time,824*ones(size(poesData.lat)),poesData.lat,poesData.lon,poesData.maginput);
-[Xfoot, Bfoot, Bfootmag] = onera_desp_lib_find_foot_point(magFieldModel,[0,0,0,0,0],0,poesData.time,824*ones(size(poesData.lat)),poesData.lat,poesData.lon,110,+1,poesData.maginput);
+% [Lm,Lstar,Blocal,Bmin,J,MLT] = onera_desp_lib_make_lstar(magFieldModel,[1,0,7,7,0],0,poesData.time(ntime,1),802*ones(size(poesData.lat(ntime,1))),poesData.lat(ntime,1),poesData.lon(ntime,1),poesData.maginput(ntime,:));
+[Lm,Lstar,Blocal,Bmin,J,MLT] = onera_desp_lib_make_lstar(magFieldModel,[0,0,0,0,0],0,poesData.time,824*ones(size(poesData.lat)),poesData.lat,poesData.lon,poesData.maginput);
+% [Xfoot, Bfoot, Bfootmag] = onera_desp_lib_find_foot_point(magFieldModel,[1,0,7,7,0],0,poesData.time(ntime,1),802*ones(size(poesData.lat(ntime,1))),poesData.lat(ntime,1),poesData.lon(ntime,1),110,+1,poesData.maginput(ntime,:));
+% poesData.maginput(ntime,[5,2,6,7])
 toc
 %%
-figure;
-plot(datetime(datestr(poesData.time)),abs(Lstar),'.-'); hold on; 
-plot(datetime(datestr(poesData.time)),poesData.Lm);
-xlim([datetime('26-Mar-2008 11:00'),datetime('26-Mar-2008 11:30')]);
-legend([find_irbem_magFieldModelStr(magFieldModel),' Lstar'],'POES Lm');
+% figure;
+% plot(datetime(datestr(poesData.time)),abs(Lstar),'.-'); hold on; 
+% plot(datetime(datestr(poesData.time)),poesData.Lm);
+% xlim([datetime('26-Mar-2008 11:00'),datetime('26-Mar-2008 11:30')]);
+% legend([find_irbem_magFieldModelStr(magFieldModel),' Lstar'],'POES Lm');
 % tic
 % [Lm,Lstar,Blocal,Bmin,J,MLT] = onera_desp_lib_make_lstar(3,[0,0,0,0,0],0,poesData.time,824*ones(size(poesData.lat)),poesData.lat,poesData.lon,poesData.maginput);
 % toc
 %%
-timeMinStr = '26-Mar-2008 11:00';
-timeMaxStr = '26-Mar-2008 12:00';
-timeIndx = find_time(poesData.time,timeMinStr):1:find_time(poesData.time,timeMaxStr);
-figure('Color','w'); axesm('eqaazim','MapLatLimit',[30 90],'MapLonLimit',[-160 -135]); axis off; framem on; gridm on; mlabel on; plabel on; setm(gca, 'MLabelParallel',0); plotm(Xfoot(timeIndx,2),Xfoot(timeIndx,3));
-geoshow(coastlat,coastlon,'DisplayType','polygon');
+% timeMinStr = '26-Mar-2008 11:00';
+% timeMaxStr = '26-Mar-2008 12:00';
+% timeIndx = find_time(poesData.time,timeMinStr):1:find_time(poesData.time,timeMaxStr);
+% figure('Color','w'); axesm('eqaazim','MapLatLimit',[30 90],'MapLonLimit',[-160 -135]); axis off; framem on; gridm on; mlabel on; plabel on; setm(gca, 'MLabelParallel',0); plotm(Xfoot(timeIndx,2),Xfoot(timeIndx,3));
+% geoshow(coastlat,coastlon,'DisplayType','polygon');
 
 %%
-magFieldModel =4;
-options = [0,0,0,0,0];
-sysaxes = 0;
-timeID = find_time(poesData.time,'26-Mar-2008 11:40');
+% magFieldModel =4;
+% options = [0,0,0,0,0];
+% sysaxes = 0;
+% timeID = find_time(poesData.time,'26-Mar-2008 11:40');
 % [Lm,Blocal,Bmin,J,POSIT] = onera_desp_lib_trace_field_line(magFieldModel,options,sysaxes,poesData.time(timeID),824,poesData.lat(timeID,1),poesData.lon(timeID,1),poesData.maginput(timeID,:),1); 
 
 %% Initializing

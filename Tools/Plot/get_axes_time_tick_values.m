@@ -33,17 +33,19 @@ function [ TTick, DateNumBeg, DateNumEnd ] = get_axes_time_tick_values( time, ti
         dt/24:...
         floor(DateNumEnd)+(ceil((DateNumEnd-floor(DateNumEnd))/(dt/24))/(24/dt)));
     
-     if TTick(1) > DateNumBeg+0.25*dt/24
+     if TTick(1) > DateNumBeg+0.5*dt/24
          TTick(2:end+1)=TTick;
          TTick(1)=DateNumBeg;
      else
          TTick(1)=DateNumBeg;
      end
      
-     if TTick(end)<DateNumEnd-0.25*dt/24 && TTick(end)<DateNumEnd
+     if TTick(end)<DateNumEnd-0.5*dt/24 && TTick(end)<DateNumEnd
         TTick(end+1)=DateNumEnd;
-     else
+     elseif DateNumEnd>TTick(end-1)+0.5*dt/24
         TTick(end)=DateNumEnd;
+     else
+         TTick(end)=[];
      end
      
 end
