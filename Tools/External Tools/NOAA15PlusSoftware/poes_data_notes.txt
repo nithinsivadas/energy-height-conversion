@@ -1,0 +1,20 @@
+Trying to extract POES data
+1. Install gcc using MinGW in windows: https://blog.cs.wmich.edu/mingw-setup-guide/
+2. POES binary files: https://satdat.ngdc.noaa.gov/sem/poes/data/raw/swpc/ (upto 2014)
+3. POES bindary file extracter for NOAA15+: https://satdat.ngdc.noaa.gov/sem/poes/docs/SoftwareNOAA15+/
+4. POES binary file extracting documentation: https://satdat.ngdc.noaa.gov/sem/poes/docs/sem2_docs/2003/SEM2v1.2.pdf
+We decided to use g77 fortran Files
+in readArcSub_v2.f make the following changes
+line 1: program testRead(arcfile,outfile)
+--> line 1: program testRead
+After line 22, include
+--> call getarg(1,arcfile)
+--> call getarg(2,outfile)
+Change line 27: do rec = 1,3
+--> do rec = 1,5400
+
+After this compile by using the following lines:
+g77 -c readArcSub_v2.f
+g77 -c readPOES15Plus.f
+g77 -0 readPOES15Plus.exe readPOES15Plus.o readArcSub_v2.o
+./readPOES15Plus.exe inputFile.bin outputFile.txt

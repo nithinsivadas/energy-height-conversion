@@ -178,13 +178,16 @@ for idays=1:1:length(dayArray)
             'Calibration File Used',calFileEl);
         end
         multiWaitbar('Writing data','Increment',0.4/nkTime);
-        iField = nFields;
+        %Writing 'time'
+        iField = nFields; 
         h5write(outputH5FileStr,['/DASC/',fieldNames{iField}],...
                         (data.(fieldNames{iField}))',start5,count5);
         multiWaitbar('Writing data','Increment',0.5/nkTime);
+        %Writing image
         h5write(outputH5FileStr,['/DASC/','ASI'],...
                     permute(ASI,[3 2 1]),start,count);       
         multiWaitbar('Writing data','Value',kTime*1./nkTime);
+        % Writing error messages
         messageTotal(start5(2):1:start5(2)+nTimeASI-1) = message;
         multiWaitbar('Creating DASC HDF5 File','Increment',1/(length(dayArray)*kTime));    
         clearvars message;

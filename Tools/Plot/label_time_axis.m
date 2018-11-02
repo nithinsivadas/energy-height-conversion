@@ -1,4 +1,4 @@
-function label_time_axis(time, setLabel, timeTick, timeMinStr, timeMaxStr )
+function [TTick,TTickLim]=label_time_axis(time, setLabel, timeTick, timeMinStr, timeMaxStr )
 %% LABEL_TIME_AXIS Sets the time axis (x-axis) time-tick locations and labels
 %--------------------------------------------------------------------------
 % Input:

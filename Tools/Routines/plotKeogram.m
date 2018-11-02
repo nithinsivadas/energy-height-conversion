@@ -1,195 +1,155 @@
-%% Plot Keogram of Optical, Electron density and Energy
-
 clear all;
-close all;
-electronEnergy=100; %keV
+opengl('save', 'software');
+% h5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\EEA List\20080326.001_bc_15sec-energyFlux.h5';
+% h5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Temp\20101018.001_bc_2min-energyFlux.h5';
+h5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Temp\20080326.001_bc_15sec-energyFlux_v85.h5';
+omniH5FileStr = 'G:\My Drive\Research\Projects\Data\omni.h5';
 
-azStr='/home/nithin/Documents/git-repos/Largefiles/PokerFlat_DASC_08_03_26/PKR_Cal_before_2011/PKR_20111006_AZ_10deg.FITS';
-elStr='/home/nithin/Documents/git-repos/Largefiles/PokerFlat_DASC_08_03_26/PKR_Cal_before_2011/PKR_20111006_EL_10deg.FITS';
-% ASIDataStr = '/home/nithin/Documents/git-repos/Largefiles/PokerFlat_DASC_08_03_26/PKR_DASC_0000_20080326_114338.000.FITS';
-% azStr='/home/nithin/Documents/git-repos/Largefiles/Allsky_test/Cal_files_after_2011/PKR_DASC_20110112_AZ_10deg.fits';
-% elStr='/home/nithin/Documents/git-repos/Largefiles/Allsky_test/Cal_files_after_2011/PKR_DASC_20110112_EL_10deg.fits';
-% ASIDataStr = '/home/nithin/Documents/git-repos/Largefiles/Allsky_test/PKR_DASC_0558_20151007_073824.971.FITS';
-MSPDataStr = '/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 2/Data/msp_vvel.mat';
+%% Load data
+dascData = get_2D_plot_inputs_time_independent(h5FileStr,...
+    'plotModeStr','OpticalImage');
 
+pfisrData = get_2D_plot_inputs_time_independent(h5FileStr,...
+    'plotModeStr','EnergyFluxMap');
 
-
-azOldRes=fitsread(azStr);
-elOldRes=fitsread(elStr);
-
-% [dataNew, lat, lon, az_new, el_new, sensorloc, timeDASC] = DASC_aer_to_geodetic...
-%     (ASIDataStr, azOldRes, elOldRes,...
-%     512, 30, 110);
-%% Prepare the Energy Spectra
-load ('/home/nithin/Documents/git-repos/energy-height-conversion/Tools/Paper 2/Data/2D_energy_spectra_26032008_800_to_1300Hr.mat');
-[az,el,slant]=ned2aer(magcoords(:,2),magcoords(:,1),-magcoords(:,3));
-zUp = magcoords(:,3);
-aercoords = [az,el,slant,zUp];
-
-
-include_new_colormaps;
+energySlice = 100; %keV
+%%
+dascImage = permute(h5read(h5FileStr,'/DASC/ASI'),[3 2 1]);
+[dascKeo,dascLat,meridian] = create_keogram(dascImage,dascData.latitude,dascData.longitude);
+pfisrImage = permute(h5read(h5FileStr,'/energyFluxFromMaxEnt/energyFlux'),[3 2 1]);
 
 %%
-
-figureHandle = figure;
-
-timeMinStr = '26 Mar 2008 11:00';
-timeMaxStr = '26 Mar 2008 12:00';
-dataMSP = get_msp_data(MSPDataStr, timeMinStr, timeMaxStr);
+[pfisrImage150,pfisrLat150,pfisrLon150,projAlt150] = get_pfisr_energy_slice(pfisrImage,pfisrData,150,100); 
+[pfisrKeo150,pfisrPar150] = create_keogram(pfisrImage150,pfisrLat150,pfisrLon150,'meridian',meridian,'latPixelNum',6);
+[pfisrImage100,pfisrLat100,pfisrLon100,projAlt100] = get_pfisr_energy_slice(pfisrImage,pfisrData,100,100); 
+[pfisrKeo100,pfisrPar100] = create_keogram(pfisrImage100,pfisrLat100,pfisrLon100,'meridian',meridian,'latPixelNum',6);
+[pfisrImage70,pfisrLat70,pfisrLon70,projAlt70] = get_pfisr_energy_slice(pfisrImage,pfisrData,70,100); 
+[pfisrKeo70,pfisrPar70] = create_keogram(pfisrImage70,pfisrLat70,pfisrLon70,'meridian',meridian,'latPixelNum',6);
+[pfisrImage30,pfisrLat30,pfisrLon30,projAlt30] = get_pfisr_energy_slice(pfisrImage,pfisrData,30,100); 
+[pfisrKeo30,pfisrPar30] = create_keogram(pfisrImage30,pfisrLat30,pfisrLon30,'meridian',meridian,'latPixelNum',6);
 %%
-totalPanelNo=6;
-p=panel(figureHandle);
+[pfisrImageAll,pfisrLatAll,pfisrLonAll,projAltAll]=integrate_pfisr_energy(pfisrImage,pfisrData,100);
+[pfisrKeoAll,pfisrParAll] = create_keogram(pfisrImageAll,pfisrLatAll,pfisrLonAll,'meridian',meridian,'latPixelNum',6);
+multiWaitbar('CLOSEALL');
+%%
+timeMinStr = '26-Mar-2008 10:30';
+timeMaxStr = '26-Mar-2008 11:45';
 
-p=panel();
-p.pack(1);
+totalPanelNo=5;
+clf;
 
-panelSize = 30; %in mm
-demargin = 4;
-panelDefinition=cell(1,totalPanelNo);
-for i=1:1:totalPanelNo
-    panelDefinition(i)={{panelSize}}; 
-end;
-p(1).pack(panelDefinition);
+p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelSize',25);
 
-p.marginleft=35;
-p.marginright=25;
-p(1).de.margin=demargin;
-% p.fontsize=12;
-p.select('all');
-timeTick=0.5;
-  
-resize_figure(figureHandle, panelSize*totalPanelNo+4*(totalPanelNo+1)+20);
+q=p(1);
 
-dt=0.25;
- p(1,1).select();
- axPos1 = get(gca, 'position');
- plot_energyflux_keogram( data, aercoords, energyBin, nBeams, timeMinStr, timeMaxStr, 110, electronEnergy );
- ylabel({['PFISR ',num2str(electronEnergy),' keV'],'Electrons','Elevation [deg]'});
- redmap=[1,1,1
-     1,0.9,0.9
-     1,0.8,0.8
-     1,0.7,0.7
-     1,0.6,0.6
-     1,0.5,0.5
-     1,0.4,0.4
-     1,0.3,0.3
-     1,0.2,0.2
-     1,0.1,0.1
-     1,0,0];
- colormap(gca,redmap);
- c=colorbar('eastoutside');
-  ylabel(c,'log_1_0 [eV m^-^2 sr^-^1 s^-^1 eV^-^1]', 'FontSize',8);
- % reducing color bar thickness
- set(gca,'position',axPos1);
- cPos=get(c,'Position');
- cPos(3)=0.2*cPos(3);
- set(c, 'Position',cPos);
-  
- p(1,2).select();
- axPos = get(gca, 'position');
- plot_2D_time_series(dataMSP.time, dataMSP.el, log10(dataMSP.intensity4861), dt, 0, timeMinStr, timeMaxStr);
-  set(gca,'YScale','linear');
- ylabel({'MSP 4861 A^0','H_\beta','Elevation [deg]'});
- colormap(gca,'viridis');
- c=colorbar('eastoutside');
- ylabel(c,'log_1_0 Intensity [a.u.]','FontSize',8);
- % reducing color bar thickness
- set(gca,'position',axPos);
- cPos=get(c,'Position');
- cPos(3)=0.2*cPos(3);
-%  label_time_axis(dataMSP.time, true, dt, timeMinStr, timeMaxStr);
- % Overlaying 100 keV Electrons
- set(c, 'Position',cPos);
- axOverlay=axes('Position',get(gca,'Position'));
- h=plot_energyflux_keogram( data, aercoords, energyBin, nBeams, timeMinStr, timeMaxStr, 110, electronEnergy );
- alpha color;
- colormap(gca,redmap);
- set(gca,'visible','off')
- 
-  p(1,3).select();
- axPos = get(gca, 'position');
- plot_2D_time_series(dataMSP.time, dataMSP.el, log10(dataMSP.intensity5577), dt, 0, timeMinStr, timeMaxStr);
-  set(gca,'YScale','linear');
- ylabel({'MSP 5577 A^0','O I','Elevation [deg]'});
- colormap(gca,'viridis');
- c=colorbar('eastoutside');
- ylabel(c,'log_1_0 Intensity [a.u.]','FontSize',8);
- % reducing color bar thickness
- set(gca,'position',axPos);
- cPos=get(c,'Position');
- cPos(3)=0.2*cPos(3);
-%  label_time_axis(dataMSP.time, true, dt, timeMinStr, timeMaxStr);
- % Overlaying 100 keV Electrons
- set(c, 'Position',cPos);
- axOverlay=axes('Position',get(gca,'Position'));
- h=plot_energyflux_keogram( data, aercoords, energyBin, nBeams, timeMinStr, timeMaxStr, 110, electronEnergy );
- alpha color;
- colormap(gca,redmap);
- set(gca,'visible','off')
- 
-  p(1,4).select();
- axPos = get(gca, 'position');
- plot_2D_time_series(dataMSP.time, dataMSP.el, log10(dataMSP.intensity4278), dt, 0, timeMinStr, timeMaxStr);
-  set(gca,'YScale','linear');
- ylabel({'MSP 4278 A^0','N_2^+','Elevation [deg]'});
- colormap(gca,'viridis');
- c=colorbar('eastoutside');
-  ylabel(c,'log_1_0 Intensity [a.u.]','FontSize',8);
- % reducing color bar thickness
- set(gca,'position',axPos);
- cPos=get(c,'Position');
- cPos(3)=0.2*cPos(3);
-%  label_time_axis(dataMSP.time, true, dt, timeMinStr, timeMaxStr);
- % Overlaying 100 keV Electrons
- set(c, 'Position',cPos);
- axOverlay=axes('Position',get(gca,'Position'));
- h=plot_energyflux_keogram( data, aercoords, energyBin, nBeams, timeMinStr, timeMaxStr, 110, electronEnergy );
- alpha color;
- colormap(gca,redmap);
- set(gca,'visible','off')
- 
-  p(1,5).select();
- axPos = get(gca, 'position');
- plot_2D_time_series(dataMSP.time, dataMSP.el, log10(dataMSP.intensity6300), dt, 0, timeMinStr, timeMaxStr);
-  set(gca,'YScale','linear');
- ylabel({'MSP 6300 A^0','O I','Elevation [deg]'});
- colormap(gca,'viridis');
- c=colorbar('eastoutside');
-  ylabel(c,'log_1_0 Intensity [a.u.]','FontSize',8);
- % reducing color bar thickness
- set(gca,'position',axPos);
- cPos=get(c,'Position');
- cPos(3)=0.2*cPos(3);
- label_time_axis(dataMSP.time, true, dt, timeMinStr, timeMaxStr);
- % Overlaying 100 keV Electrons
- set(c, 'Position',cPos);
- axOverlay=axes('Position',get(gca,'Position'));
- h=plot_energyflux_keogram( data, aercoords, energyBin, nBeams, timeMinStr, timeMaxStr, 110, electronEnergy );
- alpha color;
- colormap(gca,redmap);
- set(gca,'visible','off')
- 
-   p(1,6).select();
- axPos = get(gca, 'position');
- plot_2D_time_series(dataMSP.time, dataMSP.el, (dataMSP.intensity4278./dataMSP.intensity5577), dt, 0, timeMinStr, timeMaxStr);
-  set(gca,'YScale','linear');
- ylabel({'Ratio 4278/5577 ','Hardness of Spectra','Elevation [deg]'});
- colormap(gca,'viridis');
- caxis([0 2]); 
- c=colorbar('eastoutside');
-  ylabel(c,'Ratio','FontSize',8);
- % reducing color bar thickness
- set(gca,'position',axPos);
- cPos=get(c,'Position');
- cPos(3)=0.2*cPos(3);
- label_time_axis(dataMSP.time, true, dt, timeMinStr, timeMaxStr);
- % Overlaying 100 keV Electrons
- set(c, 'Position',cPos);
- axOverlay=axes('Position',get(gca,'Position'));
- h=plot_energyflux_keogram( data, aercoords, energyBin, nBeams, timeMinStr, timeMaxStr, 110, electronEnergy );
- alpha color;
- colormap(gca,redmap);
- set(gca,'visible','off')
- 
+q(1).select();
+colormap(gca,'viridis');
+ax=plot_2D_time_series(dascData.time,dascLat,dascKeo,0.25,0,timeMinStr,timeMaxStr);
+% label_time_axis(time, true, 1/6,timeMinStr,timeMaxStr);
+hold on; 
+timeMinIndx = find_time(pfisrData.time,'26-Mar-2008 11:05');
+timeMaxIndx = find_time(pfisrData.time,'26-Mar-2008 11:30');
+peakLatitude150 = find_peak_latitude(pfisrKeo150,pfisrPar150);
+peakLatitude100 = find_peak_latitude(pfisrKeo100,pfisrPar100);
+peakLatitude70 = find_peak_latitude(pfisrKeo70,pfisrPar70);
+peakLatitude30 = find_peak_latitude(pfisrKeo30,pfisrPar30);
+% peakLatitude10 = find_peak_latitude(pfisrKeo10,pfisrPar10);
+h150 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-50),peakLatitude150(timeMinIndx:timeMaxIndx-50),'b'); %150
+h100 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-35),peakLatitude100(timeMinIndx:timeMaxIndx-35),'g'); %100
+h70  = plot(pfisrData.time(timeMinIndx:timeMaxIndx-30),peakLatitude70(timeMinIndx:timeMaxIndx-30),'y'); %70
+h30  = plot(pfisrData.time(timeMinIndx+35:timeMaxIndx-20),peakLatitude30(timeMinIndx+35:timeMaxIndx-20),'red'); %30
+% plot(pfisrData.time(timeMinIndx:timeMaxIndx),peakLatitude10(timeMinIndx:timeMaxIndx),'k');
+legend([h150 h100 h70 h30],'150 keV', '100 keV', '70 keV', '30 keV','Location','NorthWest');
+
+caxis([300 400]);
+axPos = get(gca, 'position');
+c = colorbar('eastoutside');
+
+set(gca,'position',axPos);
+
+% reducing color bar thickness
+cPos=get(c,'Position');
+cPos(3)=0.2*cPos(3);
+set(c, 'Position',cPos);
+ylim([64.9 65.6]);
+C = define_universal_constants();
+q(2).select();
+% plot_pfisr_energy_keogram(pfisrKeo150,pfisrPar150,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
+% ylabel('150 keV');
+plot_pfisr_energy_keogram(pfisrKeoAll*C.e*pi*1000,pfisrParAll,pfisrData,false,timeMinStr,timeMaxStr,'[mW/m^2]',[-2 1]);
+ylabel('1-300 keV');
+
+q(3).select();
+plot_pfisr_energy_keogram(pfisrKeo100,pfisrPar100,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
+ylabel('100 keV');
+
+q(4).select();
+plot_pfisr_energy_keogram(pfisrKeo70,pfisrPar70,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
+ylabel('50 keV');
+
+q(5).select();
+plot_pfisr_energy_keogram(pfisrKeo30,pfisrPar30,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
+label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr);
+ylabel('30 keV');
+%%
+function [image,lat,lon,projectionAltitude]=get_pfisr_energy_slice(pfisrImage,pfisrData,energySlice,projectionEnergySlice)
+    for i=1:1:length(pfisrData.time)
+        for ib = 1:1:size(pfisrData.latitude,1)
+        image(i,ib) = interp1(pfisrData.zEnergyBin(ib,:),reshape(pfisrImage(i,ib,:),1,[]),energySlice*1000);
+        end
+    end
+    projectionAltitude = calculate_peak_altitude_of_ionization(projectionEnergySlice*1000,pfisrData.timeNeutralAtmosphere);
+    for ib = 1:1:size(pfisrData.latitude,1)
+        lat(ib) = interp1(pfisrData.zEnergyBin(ib,:),pfisrData.latitude(ib,:),projectionEnergySlice*1000);
+        lon(ib) = interp1(pfisrData.zEnergyBin(ib,:),pfisrData.longitude(ib,:),projectionEnergySlice*1000);
+    end
+end
+function [image,lat,lon,projectionAltitude]=integrate_pfisr_energy(pfisrImage,pfisrData,projectionEnergySlice)
+    for i=1:1:length(pfisrData.time)
+        
+    image(i,:) = trapz(pfisrData.zEnergyBin(1,:),squeeze(pfisrImage(i,:,:)),2);     
+        
+    end
+    projectionAltitude = calculate_peak_altitude_of_ionization(projectionEnergySlice*1000,pfisrData.timeNeutralAtmosphere);
+    for ib = 1:1:size(pfisrData.latitude,1)
+        lat(ib) = interp1(pfisrData.zEnergyBin(ib,:),pfisrData.latitude(ib,:),projectionEnergySlice*1000);
+        lon(ib) = interp1(pfisrData.zEnergyBin(ib,:),pfisrData.longitude(ib,:),projectionEnergySlice*1000);
+    end
+end
+
+
+function plot_pfisr_energy_keogram(pfisrKeo,pfisrLat,pfisrData,setLabelTime,...
+    timeMinStr,timeMaxStr,cLabelStr,cLim)
+    pfisrKeo(isnan(pfisrKeo))=10^-3;
+    pfisrKeo(pfisrKeo<=0) = 10^-3;
+    colormap(gca,'inferno');
+    plot_2D_time_series(pfisrData.time,pfisrLat,log10(pfisrKeo),0.5,0,timeMinStr,timeMaxStr);
+    if setLabelTime==true
+        label_time_axis(pfisrData.time, true, 1/8,timeMinStr,timeMaxStr);
+    end
+    if nargin < 7
+        cLabelStr = '';
+    end
+    if nargin < 8
+        cLim = [7 10];
+    end
+    axPos = get(gca, 'position');
+    c1 = colorbar('eastoutside','Limits',cLim);
+    caxis(cLim);
+    set(gca,'position',axPos);
+    % set(ax1,'YLim',get(ax,'YLim'));
+    % reducing color bar thickness
+    cPos=get(c1,'Position');
+    cPos(3)=0.2*cPos(3);
+    set(c1, 'Position',cPos);
+    ylim([64.9 65.6]);
+    ylabel(c1,cLabelStr,'FontSize',8);
+    
+end
+
+function peakLatitude=find_peak_latitude(keo,lat)
+    [~,index] = max(keo,[],1);
+    peakLatitude = movmean(lat(index),12); 
+end
 
 
