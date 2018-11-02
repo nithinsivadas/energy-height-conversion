@@ -130,98 +130,6 @@ function [time,timePrimary] = create_energy_spectra_images(h5FileStr,...
     multiWaitbar('Store Images','Close');
 end
 
-%% Function to plot 2D energy slice overlaid with DASC
-% pfisrData.thisTime
-% pfisrData.diffEnergyFlux
-% pfisrData.latitude
-% pfisrData.longitude
-% pfisrData.zEnergyBin
-% pfisrData.energySlice
-% pfisrData.eFluxLim
-% dascData.opticalData
-% dascData.opticalLim
-% dascData.thisTime
-% dascData.latitude
-% dascData.longitude
-
-function combine_2D_plots_v2018(figureHandle,thisTime,pfisrData,...
-        dascData, magFieldData, storeImageDir,latLim,lonLim, setStoreImage)
-% Need to write script to provide choice between the several overlays
-% Store settings for the plot
-settings.energySlice.setTimeLabel = true;
-
-if nargin < 9
-    setStoreImage = false;
-end
-if nargin < 8
-    lonLim = [-153 -143];
-end
-if nargin < 7
-    latLim = [63 67];
-end
-%     eFluxLim = [8 10];
-%     eFluxLim = [300 600];
-
-    imageName = strcat('figure_',datestr(thisTime,'HH_MM_SS'));
-    if isfile(strcat(storeImageDir,imageName,'.png')) && setStoreImage==true
-    warning('Image file already exists, skipping calculation...');
-        % Create two axes
-    else
-    resize_figure(figureHandle,148,210); %A5 Paper Size
-
-    % Plot optical data
-    [axesHandleOptical, h1]=plot_DASC_geodetic(dascData.opticalData, dascData.thisTime,...
-        dascData.latitude, dascData.longitude, 512, latLim, lonLim);
-    % Zoomed coordinates: [64.85 65.05], [-147.95 -147.35]
-    % Total : [63 67], [-153 -143]
-    
-    % Plot magnetic field
-    [axesHandleMagnetic, h3] = plot_2D_magnetic_foot_points(magFieldData.magEqPointGEO,...
-        magFieldData.ionosphereCoord, magFieldData.BfieldModelStr, magFieldData.thisTime,...
-        magFieldData.setMapOn, latLim, lonLim, magFieldData.contourArray,...
-        magFieldData.setFieldLabelOn, magFieldData.setTimeLabelOn);
-        
-    % Plot energy data
-    axesHandleEnergy = axes;
-    axesm('lambertstd','MapLatLimit',getm(axesHandleOptical,'MapLatLimit'),...
-            'MapLonLimit',getm(axesHandleOptical,'MapLonLimit'),...
-        'Frame','on','Grid','off','MeridianLabel','off','ParallelLabel','off',...
-        'PLineVisible','off','MLineVisible','off')
-    axis off
-    latWidth = latLim(2)-latLim(1);
-    lonWidth = lonLim(2)-lonLim(1);
-%     pfisrData.diffEnergyFlux(pfisrData.diffEnergyFlux(:)<0)=nan;
-    pfisrData.diffEnergyFlux(imag(pfisrData.diffEnergyFlux(:))~=0)=nan;
-    [h2]=plot_2D_energy_slice_geodetic_v2018(pfisrData.diffEnergyFlux,...
-        pfisrData.latitude, pfisrData.longitude,...
-        pfisrData.zEnergyBin, pfisrData.thisTime,...
-        pfisrData.energySlice,latWidth,lonWidth,false,settings.energySlice.setTimeLabel);
-
-    colormap(axesHandleOptical,'viridis');
-    colormap(axesHandleEnergy,'inferno');
-    
-    cb1 = colorbar(axesHandleOptical,'eastoutside');
-    cb2 = colorbar(axesHandleEnergy,'westoutside');
-    ylabel(cb1, '[Rayleigh]');                  
-    ylabel(cb2, 'log_1_0 [eV m^-^2 s^-^1 sr^-^1 eV^-^1]');
-    caxis(axesHandleOptical,dascData.opticalLim); %clim for optical intensity
-    caxis(axesHandleEnergy,pfisrData.eFluxLim);     %clim for energy flux
-    % Making Energy spectra translucent
-    alpha(axesHandleEnergy,0.5);
-    % Linking axes together
-    set(axesHandleEnergy,'Position',get(axesHandleOptical,'Position'));
-    set(axesHandleMagnetic,'Position',get(axesHandleOptical,'Position'));
-    linkaxes([axesHandleOptical,axesHandleEnergy,axesHandleMagnetic]);
-
-% Storing image
-    if setStoreImage == true
-        export_fig(strcat(storeImageDir,imageName,'.png'),'-r300','-png','-nocrop');
-        close(figureHandle);
-    end
-    end
-end
-
-
 
 %% Function to plot 2D energy slice overlaid with DASC 
 function plot_2D_energy_slice_with_DASC_v2018(figureHandle,thisTime,pfisrTime,...
@@ -281,7 +189,7 @@ end
     
     cb1 = colorbar(axesHandleOptical,'eastoutside');
     cb2 = colorbar(axesHandleEnergy,'westoutside');
-    ylabel(cb1, '[Rayleigh]');                  
+    ylabel(cb1, '[Rayleigh]');
     ylabel(cb2, 'log_1_0 [eV m^-^2 s^-^1 sr^-^1 eV^-^1]');
     caxis(axesHandleOptical,opticalLim); %clim for optical intensity
     caxis(axesHandleEnergy,eFluxLim);     %clim for energy flux
@@ -398,4 +306,3 @@ if setTimeLabelOn==true
 end
 
 end
-
