@@ -1,4 +1,4 @@
-function create_thg_hdf5(siteName,outputH5FileStr,varargin)
+function status = create_thg_hdf5(siteName,outputH5FileStr,varargin)
 %create_thg_hdf5.m Downloads, and writes themis GBO ASI images for a
 %particular site to and HDF5 file. If time limits are set as default, then
 %the function will search the outputH5FileStr for a time array and use that
@@ -22,7 +22,7 @@ minTimeStr = p.Results.minTimeStr;
 if strcmp(minTimeStr,'default')
     if ish5dataset(outputH5FileStr,'/energyFluxFromMaxEnt/time')
         time = h5read(outputH5FileStr,'/energyFluxFromMaxEnt/time');
-        minTimeStr = datestr(time(1),p.Results.format);
+        minTimeStr = datestr(time(1),p.Results.dateFormat);
     else
         error('23: h5 file does not have time /energyFluxFromMaxEnt/time dataset \n must input minTimeStr');
     end
@@ -33,12 +33,12 @@ if strcmp(maxTimeStr,'default')
     if ~exist('time')
         if ish5dataset(outputH5FileStr,'/energyFluxFromMaxEnt/time')
             time = h5read(outputH5FileStr,'/energyFluxFromMaxEnt/time');
-            maxTimeStr = datestr(time(1),p.Results.format);
+            maxTimeStr = datestr(time(1),p.Results.dateFormat);
         else
             error('33: h5 file does not have time /energyFluxFromMaxEnt/time dataset \n must input maxTimeStr');
         end
     else
-        maxTimeStr = datestr(time(end),p.Results.format);
+        maxTimeStr = datestr(time(end),p.Results.dateFormat);
     end
 end
 
@@ -61,8 +61,10 @@ if isempty(siteID)
     error(['Site - ',siteName,' not in the sensorLocationFile: ',...
         sensorLocationFile]);
 end
-        
+multiWaitbar('Writing Themis GBO ASI to HDF5 Files',0);
+id = 1./nFiles;
 for iFile = 1:1:nFiles
+    multiWaitbar('Writing Themis GBO ASI to HDF5 Files','Increment',id);
     thgData = parse_thg_cdfData(char(cdfFileList(iFile)),char(cdfCalFile));
     if(iFile == 1)
         disp(['Choosing altitude to be ',...
@@ -74,7 +76,8 @@ for iFile = 1:1:nFiles
     'time',thgData.time,'sensorloc',[thgSites.glat(siteID),thgSites.glon(siteID),0],...
     'siteCode',siteName);        
 end
-    
+multiWaitbar('Writing Themis GBO ASI to HDF5 Files',1);
+status = 'complete';    
 end
 
 
