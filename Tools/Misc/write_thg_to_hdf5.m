@@ -87,12 +87,14 @@ function [input]=write_thg_to_hdf5(h5OutputFile,ASI,varargin)
     
     % Write ASI Images
     iField=find(strcmp(datasetNames(1,:),'ASI'));
-    start = start + datasetInfo.Datasets(iField).Dataspace.Size;
+    dataSize =datasetInfo.Datasets(iField).Dataspace.Size;
+    start = start + [0 0 dataSize(3)];
     h5write(h5OutputFile,[groupName,'ASI'],...
                     ASI,start,count);
     % Write time
     iField=find(strcmp(datasetNames(1,:),'time'));
-    start5 = start5 + datasetInfo.Datasets(iField).Dataspace.Size;
+    dataSize =datasetInfo.Datasets(iField).Dataspace.Size;
+    start5 = start5 + [0 dataSize(2)];
     h5write(h5OutputFile,[groupName,datasetNames{1,iField}],...
                         (input.time)',start5,count5);
     

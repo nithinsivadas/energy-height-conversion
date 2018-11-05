@@ -1,4 +1,5 @@
-function [ax1,h] = plot_DASC_geodetic( dataNew, time, lat, lon, imageSize, latLim, lonLim )
+function [ax1,h] = plot_DASC_geodetic( dataNew, time, lat, lon,...
+    imageSize, latLim, lonLim, deltaLat, deltaLon, label )
 %% plot_DASC_geodetic Plot DASC optical image in geodetic coordinates on a map
 %--------------------------------------------------------------------------
 % Input
@@ -22,27 +23,41 @@ function [ax1,h] = plot_DASC_geodetic( dataNew, time, lat, lon, imageSize, latLi
 % Author  : Nithin Sivadas
 % Ref     : 
 %--------------------------------------------------------------------------
+if nargin<8
+    deltaLat = 1;
+end
+
+if nargin<9
+    deltaLon = 5;
+end
+
+if nargin<10
+    label = 'DASC';
+elseif strcmp(label,'pokerFlat')
+    label = 'PKFT DASC';
+end
 nanFlags = isnan(lat) | isnan(lon) | isnan(dataNew);
 lat(nanFlags) = [];
 lon(nanFlags) = [];
 dataNew(nanFlags) = [];
 % lat, lon, dataNew have to be column vectors!
 F = scatteredInterpolant(lat',lon',dataNew','nearest','none'); %Modified on 3rd Oct 2018 - Transpose
-latq = linspace(latLim(1),latLim(2),imageSize);
-lonq = linspace(lonLim(1),lonLim(2),imageSize);
+% latq = linspace(latLim(1),latLim(2),imageSize);
+% lonq = linspace(lonLim(1),lonLim(2),imageSize);
+latq = linspace(min(lat),max(lat),imageSize);
+lonq = linspace(min(lon),max(lon),imageSize);
 [LAT, LON] = ndgrid(latq,lonq);
 Vq = F(LAT,LON);
-
 ax1=axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
     'Frame','on','Grid','on','MeridianLabel','on','ParallelLabel','on',...
-    'PLineLocation',1,'MLineLocation',5);
+    'PLineLocation',deltaLat,'MLineLocation',deltaLon);
 axis off
 load coastlines
 plotm(coastlat,coastlon)
 hold on;
 h=pcolorm(LAT,LON,(Vq)); 
 set(h,'EdgeColor','none');
-textm(latLim(2)+(latLim(2)-latLim(1))*0.05, lonLim(1) +(lonLim(2)-lonLim(1))*0.35, ['DASC: ',datestr(time,'HH:MM:SS'),' UT']);
+textm(latLim(2)+(latLim(2)-latLim(1))*0.05, lonLim(1) +(lonLim(2)-lonLim(1))*0.35, [char(upper(label)),': ',datestr(time,'HH:MM:SS'),' UT']);
 % textm(latLim(2)-0.19, lonLim(1)+0.1, ['DASC: ',datestr(time,'HH:MM:SS'),' UT']);
 end
 

@@ -44,7 +44,7 @@ function [ax2, h2] = plot_2D_energy_slice_geodetic_v2018( diffEnergyFlux,...
 %----------------------------------------------------------------------------
 %%
 if nargin < 11
-    imageSize = 512; %Hard coded? based on cal file
+    imageSize = 64; %Hard coded? based on cal file
 end
 if nargin < 10
     setTimeLabelOn = true;
@@ -62,7 +62,6 @@ end
 % diffEnergyFlux(energy,beams) - at a time instant
 % lat, lon, energyBin, diffenergyflux - for all data points
 %% Generating data slice
-
 F = scatteredInterpolant(latitude(:), longitude(:), zEnergyBin(:), diffEnergyFlux(:),'nearest','none');
 
 latLim = [min(latitude(:)) max(latitude(:))];
@@ -70,8 +69,12 @@ lonLim = [min(longitude(:)) max(longitude(:))];
 
 latq = linspace(latLim(1),latLim(2),imageSize);
 lonq = linspace(lonLim(1),lonLim(2),imageSize);
+
 Vq = F({latq,lonq,thisEnergy*1000});
 Vq(Vq<=0)=nan;
+
+
+
 if setMapOn==true
     ax2=axesm('lambertstd','MapLatLimit',[(latLim(1))-latWidth/2 (latLim(2))+latWidth/2],...
         'MapLonLimit',[(lonLim(1))-lonWidth/2 (lonLim(2))+lonWidth/2],...

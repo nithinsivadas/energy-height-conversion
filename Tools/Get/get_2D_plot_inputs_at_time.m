@@ -17,6 +17,7 @@ expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
 addParameter(p,'plotModeStr','NoMap',@(x) any(validatestring(x,expectedMaps)));
 addParameter(p,'magFieldModelStr','TS96',@(x) any(validatestring(x,expectedMagFieldModels)));
 addParameter(p,'thisTimeIndx',1,validScalarPosNum);
+addParameter(p,'site','DASC');
 addParameter(p,'plotData',struct());
 addParameter(p,'getKc',false);
 addParameter(p,'energySlice',100);
@@ -29,10 +30,16 @@ plotData = p.Results.plotData;
 
 switch p.Results.plotModeStr
     case 'OpticalImage'
+        if strcmp(p.Results.site,'pokerFlat')
+            site = '/DASC/';
+        else
+            site = ['/',upper(char(p.Results.site)),'/'];
+        end
+        
         plotData.image = readh5_variable_at_time(inputH5FileStr,'ASI',...
-            '/DASC/',p.Results.thisTimeIndx);
+            site,p.Results.thisTimeIndx);
         plotData.thisTime = unix_to_matlab_time(readh5_variable_at_time(inputH5FileStr,'time',...
-            '/DASC/',p.Results.thisTimeIndx));
+            site,p.Results.thisTimeIndx));
     case 'EnergyFluxMap'
         plotData.diffEnergyFlux = readh5_variable_at_time(inputH5FileStr,...
             'energyFlux','/energyFluxFromMaxEnt/',p.Results.thisTimeIndx)';

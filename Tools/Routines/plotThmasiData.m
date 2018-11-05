@@ -1,28 +1,48 @@
 
 %% THEMIS ASI plotting script
-clear all;
+% clear all;
 
-%% Initializing
-thmasiCDFPath = 'G:\My Drive\Research\Projects\Paper 2\Data\ThemisASI';
+inputH5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Temp\20080326.001_bc_15sec-energyFlux_v85.h5';
+h = figure;
+timeStr = '26-Mar-2008 11:00:00';
+energySlice = 100;
 
-thmasiDataFile = 'thg_l1_asf_gako_2008032611_v01.cdf';
-thmasiCalFile = 'thg_l2_asc_gako_19700101_v01.cdf';
-locFile = ['C:\Users\nithin\Documents\GitHub\energy-height-conversion\',...
-    'Tools\External Tools\thmasi\THEMIS_ASI_Station_List_Nov_2011.xls'];
-% [data,dataInfo] = spdfcdfread([thmasiCDFPath,filesep,thmasiDataFile]);
-% [cal,calInfo] = spdfcdfread([thmasiCDFPath,filesep,thmasiCalFile]);
-fileinfo = parse_thg_filename(thmasiDataFile);
-h5OutputFile = 'temp.h5';
+% pfisrData = get_2D_plot_inputs_time_independent(inputH5FileStr,...
+%     'plotModeStr','EnergyFluxMap','energySlice',100);
+dascData = get_2D_plot_inputs_time_independent(inputH5FileStr,...
+    'plotModeStr','OpticalImage');
 
-%% 
-thgdata = parse_thg_cdfData([thmasiCDFPath,filesep,thmasiDataFile],[thmasiCDFPath,filesep,thmasiCalFile]);
+p = combine_2D_plots(inputH5FileStr,h,...
+        'map1','OpticalImage','map2','EnergyFluxMap',...
+    'map1Data',dascData,'map2Data',pfisrData,...
+    'energySlice',energySlice,...
+    'thisTime',datenum(timeStr),...
+    'latLim',[63 67],...
+    'lonLim',[-153 -143],...
+    'opticalLim',[300 450],...
+    'setStoreImage',false);
 
-site=parse_thg_location_xls(locFile);
-
-siteID=find(strcmpi(site.code,fileinfo.site));
-%%
-write_thg_to_hdf5(h5OutputFile,thgdata.ASI,'lat',thgdata.glat,...
-    'lon',thgdata.glon,'az',thgdata.az,'el',thgdata.el,'alt',thgdata.alt,...
-    'altIndx',2,'mlat',thgdata.mlat,'mlon',thgdata.mlon,...
-    'time',thgdata.time,'sensorloc',[site.glat(siteID),site.glon(siteID),0],...
-    'siteCode',fileinfo.site);
+% %% Initializing
+% thmasiCDFPath = 'G:\My Drive\Research\Projects\Paper 2\Data\ThemisASI';
+% 
+% thmasiDataFile = 'thg_l1_asf_gako_2008032611_v01.cdf';
+% thmasiCalFile = 'thg_l2_asc_gako_19700101_v01.cdf';
+% locFile = ['C:\Users\nithin\Documents\GitHub\energy-height-conversion\',...
+%     'Tools\External Tools\thmasi\THEMIS_ASI_Station_List_Nov_2011.xls'];
+% % [data,dataInfo] = spdfcdfread([thmasiCDFPath,filesep,thmasiDataFile]);
+% % [cal,calInfo] = spdfcdfread([thmasiCDFPath,filesep,thmasiCalFile]);
+% fileinfo = parse_thg_filename(thmasiDataFile);
+% h5OutputFile = 'temp.h5';
+% 
+% %% 
+% thgdata = parse_thg_cdfData([thmasiCDFPath,filesep,thmasiDataFile],[thmasiCDFPath,filesep,thmasiCalFile]);
+% 
+% site=parse_thg_location_xls(locFile);
+% 
+% siteID=find(strcmpi(site.code,fileinfo.site));
+% %%
+% write_thg_to_hdf5(h5OutputFile,thgdata.ASI,'lat',thgdata.glat,...
+%     'lon',thgdata.glon,'az',thgdata.az,'el',thgdata.el,'alt',thgdata.alt,...
+%     'altIndx',2,'mlat',thgdata.mlat,'mlon',thgdata.mlon,...
+%     'time',thgdata.time,'sensorloc',[site.glat(siteID),site.glon(siteID),0],...
+%     'siteCode',fileinfo.site);

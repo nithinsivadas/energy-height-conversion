@@ -11,12 +11,14 @@ expectedMaps = {'OpticalImage','EnergyFluxMap','MagneticFieldMap','NoMap'};
 expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
     'TS89','OP77quiet','OP88dynamic','TS96','OM97','TS01','TS01storm',...
     'TS04storm','Alexeev2000'};
+expectedSites = {'gako','fykn','dasc','pokerFlat'};
 
 addParameter(p,'plotModeStr','NoMap',@(x) any(validatestring(x,expectedMaps)));
+addParameter(p,'site','pokerFlat',@(x) any(validatestring(x,expectedSites)));
 addParameter(p,'magFieldModelStr','TS96',@(x) any(strcmp(x,expectedMagFieldModels)));
-addParameter(p,'timeNeutralAtmosphere',9999,validScalarPosNum);
+addParameter(p,'timeNeutralAtmosphere',nan,validScalarPosNum);
 addParameter(p,'energySlice',100,validScalarPosNum); %In keV
-
+addParameter(p,'peakIonizationAltitude',nan,validScalarPosNum); %In Km
 addRequired(p,'inputH5FileStr',@(x)contains(x,{'.h5','.hdf5'}));
 
 parse(p,inputH5FileStr,varargin{:});
@@ -29,10 +31,16 @@ end
 
 switch p.Results.plotModeStr
     case 'OpticalImage'
+        if strcmp(p.Results.site,'pokerFlat')
+            siteStr = 'dasc';
+        else
+            siteStr = p.Results.site;
+        end
+        siteStr = ['/',upper(siteStr),'/'];
         plotData.latitude = readh5_variable_at_time(inputH5FileStr,'lat',...
-            '/DASC/',[]);
+            siteStr,[]);
         plotData.longitude = readh5_variable_at_time(inputH5FileStr,'lon',...
-            '/DASC/',[]);
+            siteStr,[]);
         plotData.time = unix_to_matlab_time(h5read(inputH5FileStr,'/DASC/time'))';
     case 'EnergyFluxMap'
         
@@ -48,25 +56,43 @@ switch p.Results.plotModeStr
             'energyBin','/energyFluxFromMaxEnt/',[])',nBeams,1);
         
         plotData.time = h5read(inputH5FileStr,'/energyFluxFromMaxEnt/time')';
-        if p.Results.timeNeutralAtmosphere == 9999
-            timeNeutralAtmosphere=median(plotData.time);
-        else
-            timeNeutralAtmosphere=p.Resilts.timeNeutralAtmosphere;
-        end
         
-        for iEnergy = 1:1:size(plotData.zEnergyBin,2)
-        peakIonizationAlt(iEnergy) = calculate_peak_altitude_of_ionization(plotData.zEnergyBin(1,iEnergy),...
-            timeNeutralAtmosphere,tempLatitude(1,:)',tempLongitude(1,:)',...
-            tempAltitude(1,:)');
-        end
-        fprintf(['PFISR Energy Flux Map projected at ',num2str(peakIonizationAlt),' km\n']);
-        nBeams = size(tempLatitude,1);
-        for iEnergy = 1:1:size(plotData.zEnergyBin,2)
+        if isnan(p.Results.peakIonizationAltitude)
+        
+            if isnan(p.Results.timeNeutralAtmosphere)
+                timeNeutralAtmosphere=median(plotData.time);
+            else
+                timeNeutralAtmosphere=p.Resilts.timeNeutralAtmosphere;
+            end
+
+            for iEnergy = 1:1:size(plotData.zEnergyBin,2)
+            peakIonizationAlt(iEnergy) = calculate_peak_altitude_of_ionization(plotData.zEnergyBin(1,iEnergy),...
+                timeNeutralAtmosphere,tempLatitude(1,:)',tempLongitude(1,:)',...
+                tempAltitude(1,:)');
+            end
+            fprintf(['PFISR Energy Flux Map projected at ',num2str(peakIonizationAlt),' km\n']);
+            nBeams = size(tempLatitude,1);
+            for iEnergy = 1:1:size(plotData.zEnergyBin,2)
+                for iBeam = 1:1:nBeams
+                    pfisrLatitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLatitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');
+                    pfisrLongitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');  
+                end
+            end
+        else
+            timeNeutralAtmosphere = nan;
+            peakIonizationAlt = p.Results.peakIonizationAltitude*ones(1,size(plotData.zEnergyBin,2));
+            
+            nBeams = size(tempLatitude,1);
+            iEnergy = 1;
             for iBeam = 1:1:nBeams
                 pfisrLatitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLatitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');
                 pfisrLongitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');  
             end
+            pfisrLatitude = repmat(pfisrLatitude,1,size(plotData.zEnergyBin,2));
+            pfisrLongitude = repmat(pfisrLongitude,1,size(plotData.zEnergyBin,2));
+            
         end
+        
 %         plotData.latitude = repmat(pfisrLatitude,[1,size(plotData.zEnergyBin,2)]);
 %         plotData.longitude = repmat(pfisrLongitude,[1,size(plotData.zEnergyBin,2)]);
         plotData.latitude = pfisrLatitude;

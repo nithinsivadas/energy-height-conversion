@@ -37,8 +37,8 @@ addParameter(p,'setEnergyTimeLabelOn',true);
 
 addParameter(p,'contourLineArray',1:1:30);
 addParameter(p,'contourLabelArray',[1,5:5:30]);
-addParameter(p,'setMagneticFieldTimeLabelOn',true);
-addParameter(p,'setFieldLabelOn',true);
+addParameter(p,'setMagneticFieldTimeLabelOn',false);
+addParameter(p,'setFieldLabelOn',false);
 
 addParameter(p,'figureLength',148,validScalarPosNum);
 addParameter(p,'figureBreadth',210,validScalarPosNum);
@@ -80,6 +80,8 @@ imageName = strcat('figure_',datestr(p.Results.thisTime,'HH_MM_SS'));
         resize_figure(figureHandle,p.Results.figureLength,p.Results.figureBreadth); %A5 Paper Size, 148 cm vert, 210 cm horizontal
 
         for thisLayer = 1:3
+            expectedMaps(layer(thisLayer))
+            
         switch layer(thisLayer)
             case 1 %Plot optical image
                 dascData = get_2D_plot_inputs_at_time(inputH5FileStr,...
@@ -95,27 +97,31 @@ imageName = strcat('figure_',datestr(p.Results.thisTime,'HH_MM_SS'));
                     ylabel(cb(thisLayer),'[a.u.]');
                     caxis(axesHandle(thisLayer),p.Results.opticalLim);
             case 2 %Plot EnergyFlux Map
+                
                 pfisrData = get_2D_plot_inputs_at_time(inputH5FileStr,...
                     'plotModeStr',expectedMaps{2},...
                     'plotData',select_map_data(thisLayer,p.Results.map1Data,p.Results.map2Data,p.Results.map3Data),...
                     'thisTimeIndx', thisTimeIndx(thisLayer));
-
+                
+                
                 latWidth = p.Results.latLim(2)-p.Results.latLim(1);
                 lonWidth = p.Results.lonLim(2)-p.Results.lonLim(1);
-
                 pfisrData.diffEnergyFlux(imag(pfisrData.diffEnergyFlux(:))~=0)=nan;
                 axesHandle(thisLayer)=axes;
+                
                 [axesmHandle(thisLayer),hEnergy]=plot_2D_energy_slice_geodetic_v2018...
                     (pfisrData.diffEnergyFlux,...
                 pfisrData.latitude, pfisrData.longitude,...
                 pfisrData.zEnergyBin, pfisrData.thisTime,...
                 p.Results.energySlice,latWidth,lonWidth,true,...
                 p.Results.setEnergyTimeLabelOn);
-
+                
+                
                 colormap(axesHandle(thisLayer),'inferno');
                 cb(thisLayer) = colorbar(axesHandle(thisLayer),'westoutside');
                 ylabel(cb(thisLayer),'log_1_0 [eV m^-^2 s^-^1 sr^-^1 eV^-^1]');
                 caxis(axesHandle(thisLayer),p.Results.eFluxLim);
+                
 
             case 3
                 magFieldData = get_2D_plot_inputs_at_time(inputH5FileStr,...
@@ -147,8 +153,10 @@ imageName = strcat('figure_',datestr(p.Results.thisTime,'HH_MM_SS'));
             case 4
                 warning(['No map in layer ',num2str(thisLayer)]);
         end
+        
         end
-
+        disp('Axes stuff')
+        
         nAxes = length(axesHandle);
         if nAxes == 2
             linkaxes([axesHandle(1),axesHandle(2)]);
@@ -192,8 +200,8 @@ imageName = strcat('figure_',datestr(p.Results.thisTime,'HH_MM_SS'));
             alpha(axesHandle(3), 0.5);
 
         end
-
-            if layer(1)||layer(2)||layer(3)==3 && p.Results.setFieldLabelOn        
+            
+            if (layer(1)||layer(2)||layer(3)==3) && p.Results.setFieldLabelOn        
             htext = clabelm(cMagnetic,hMagnetic,p.Results.contourLabelArray,...
                 'LabelSpacing',723);
             set(htext,'BackgroundColor','cyan','margin',2);
@@ -208,7 +216,7 @@ imageName = strcat('figure_',datestr(p.Results.thisTime,'HH_MM_SS'));
                 close(figureHandle);
             end
     end
-
+    
 end
 
 function OK = isfigure(h)
