@@ -1,11 +1,13 @@
 function [dataInv,coords,inputInv] = get_2D_energy_spectra(amisrData,energyBin,...
-    timeMinStr,timeMaxStr,altLim,setTypeofCoords)
+    timeMinStr,timeMaxStr,altLim,setTypeofCoords,neutralTimeNum)
 %get_2D_energy_spectra Converts electron density to energy spectra and
 %prepares a struct variable which can be used to plot 2D energy flux slices
 %   Input
 %   setTypeofCoords = 'magnetic' or 'original'
 %   energyBin [nE x 1] -- important
-
+if nargin < 7
+    neutralTimeNum = nan;
+end
 if nargin < 6
     setTypeofCoords = 'magnetic';
 end
@@ -30,6 +32,9 @@ timeMaxIndx = find_time(amisrData.time(1,:),timeMaxStr);
 nBeams = amisrData.nBeams;
 timeRange = timeMinIndx:1:timeMaxIndx;
 time = amisrData.time(1,timeRange);
+if isnan(neutralTimeNum)
+    neutralTimeNum = time(round(length(time)/2));
+end
 multiWaitbar('get_2D_energy_spectra()',0);
 dBeams = 1./nBeams;
 
@@ -48,7 +53,7 @@ if strcmp(setTypeofCoords,'magnetic')
         lon = amisrData.magGeodeticCoords.lon(coordRange,iBeam);
 %         q = get_production_rate(Ne,alt,time,2); 
         [dq,q] = get_error_in_q(Ne,dNeFrac.*Ne,alt,time,2);
-        A = get_energy_dep_matrix(alt,energyBin,lat,lon,time(round(length(time)/2)));% Approximation - should iterate time
+        A = get_energy_dep_matrix(alt,energyBin,lat,lon,neutralTimeNum);% Approximation - should iterate time
         dataInv(iBeam) = get_inverted_flux(q,dq,time,alt,energyBin,A);
         coords(:,iBeam,:) = [amisrData.magCartCoords.xEast(coordRange,iBeam),amisrData.magCartCoords.yNorth(coordRange,iBeam),amisrData.magCartCoords.zUp(coordRange,iBeam)];
         disp(['avg.MSE = ',num2str(mean(dataInv(iBeam).MSE)),...
@@ -68,7 +73,7 @@ elseif strcmp(setTypeofCoords,'original') %Need to work on making uniform altitu
         Ne = squeeze(amisrData.electronDensity(coordRange,iBeam,timeRange));
         alt = amisrData.altitude(coordRange,iBeam);
         q = get_production_rate(Ne,alt,time,2); 
-        A = get_energy_dep_matrix(alt,energyBin,lat,lon,time(round(length(time)/2)));% Approximation - should iterate time
+        A = get_energy_dep_matrix(alt,energyBin,lat,lon,neutralTimeNum);% Approximation - should iterate time
         dataInv(iBeam) = get_inverted_flux(q,time,alt,energyBin,A);
         coords(:,iBeam,:) = [amisrData.cartCoords.xEast(coordRange,iBeam),amisrData.cartCoords.yNorth(coordRange,iBeam),amisrData.cartCoords.zUp(coordRange,iBeam)];
     end

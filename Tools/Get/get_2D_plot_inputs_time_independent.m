@@ -41,6 +41,10 @@ switch p.Results.plotModeStr
             siteStr,[]);
         plotData.longitude = readh5_variable_at_time(inputH5FileStr,'lon',...
             siteStr,[]);
+        plotData.azimuth = readh5_variable_at_time(inputH5FileStr,'az',...
+            siteStr,[]);
+        plotData.elevation = readh5_variable_at_time(inputH5FileStr,'el',...
+            siteStr,[]);
         plotData.time = unix_to_matlab_time(h5read(inputH5FileStr,'/DASC/time'))';
     case 'EnergyFluxMap'
         

@@ -28,6 +28,7 @@ addParameter(p,'showComments',false,@(x) islogical(x));
 
 addParameter(p,'latLim',[63 67]);
 addParameter(p,'lonLim',[-153 -143]);
+addParameter(p,'elCutoff',30,validScalarPosNum);
 addParameter(p,'imageSize', 512, validScalarPosNum);
 
 addParameter(p, 'opticalLim', [300 600]);
@@ -115,10 +116,15 @@ for iTime = 1:1:nTime
                     'plotData',maps.opticalData(i),...
                     'thisTimeIndx', thisTimeIndx,...
                     'site', p.Results.sites{maps.optical(i)});
+            % Cutting-off elevation below the specified
+            dascData.image(maps.opticalData(i).elevation<p.Results.elCutoff) = nan;
+            dascData.image(isnan(maps.opticalData(i).elevation))=nan;
                 if i==1
+                nightsky(i) = nanmedian(dascData.image(:)); %Correcting all cameras (rudimentary method); nightsky background intensity
+                intensityScale = max(dascData.image(:))-nightsky(1); %Scale size of the intensities measured
                 axesHandleOptical=axes;
-                [axesmHandleOptical, hOptical] = plot_DASC_geodetic(dascData.image',...
-                    dascData.thisTime, dascData.latitude', dascData.longitude',...
+                [axesmHandleOptical, hOptical] = plot_DASC_geodetic((dascData.image(:)'-nightsky(i))./intensityScale,...
+                    dascData.thisTime, dascData.latitude(:)', dascData.longitude(:)',...
                     p.Results.imageSize, p.Results.latLim, p.Results.lonLim, ...
                     p.Results.deltaLat,p.Results.deltaLon, p.Results.sites(maps.optical(i)));
                     colormap(axesHandleOptical,'viridis');
@@ -129,8 +135,10 @@ for iTime = 1:1:nTime
 %                     plotm([60, 59, 58],[-150, -147, -145],'*');
                 else
                 hold on;
-                plot_DASC_geodetic(dascData.image',...
-                    dascData.thisTime, dascData.latitude', dascData.longitude',...
+                nightsky(i) = nanmedian(dascData.image(:));
+                intensityScale = max(dascData.image(:))-nightsky(1);
+                plot_DASC_geodetic((dascData.image(:)'-nightsky(i))./intensityScale,...
+                    dascData.thisTime, dascData.latitude(:)', dascData.longitude(:)',...
                     p.Results.imageSize, p.Results.latLim, p.Results.lonLim, ...
                     p.Results.deltaLat,p.Results.deltaLon, p.Results.sites(maps.optical(i)));
                     colormap(axesHandleOptical,'viridis');
@@ -334,3 +342,11 @@ function OK = isfigure(h)
  end
      
 end
+
+% function minElFilter = elevation_cut_off(dascData,minEl)
+%     if nargin<2
+%         minEl = 30;
+%     end
+%     minElFilter = ones(size(dascData.elevation));
+%     minElFilter(find(dascData.elevation<minEl)) = 0;
+% end

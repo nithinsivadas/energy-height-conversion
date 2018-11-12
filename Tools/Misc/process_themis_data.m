@@ -1,6 +1,6 @@
 function [themisData, matFilePath] = process_themis_data(dateStr,dataStoreDir,probeStr,dataType)
-%UNTITLED2 Summary of this function goes here
-%   Process and download themis data for a month
+%process_themis_data.m Process and download themis data for a month
+
 f=filesep;
  if nargin < 4
         dataType = 'state';
@@ -27,7 +27,7 @@ f=filesep;
             download_themis(dateStr,dataStoreDir,probeStr,dataType);
         end
         
-        varNames = [{'XYZ_GSM'};{'XYZ_GEO'}];
+        varNames = [{'XYZ_GSM'};{'XYZ_GEO'};{'XYZ_GSE'}];
         themisData.(thisProbe).state.time = spdfcdfread...
             ([cdfLocalDir,cdfFileStr],'Variables',{'Epoch'},...
             'ConvertEpochToDatenum', true);
@@ -35,6 +35,8 @@ f=filesep;
             [cdfLocalDir,cdfFileStr],'Variables',{'XYZ_GSM'});
         themisData.(thisProbe).state.XYZ_GEO = spdfcdfread(...
             [cdfLocalDir,cdfFileStr],'Variables',{'XYZ_GEO'});
+        themisData.(thisProbe).state.XYZ_GSE = spdfcdfread(...
+            [cdfLocalDir,cdfFileStr],'Variables',{'XYZ_GSE'});
 
         info = spdfcdfinfo([cdfLocalDir,cdfFileStr]);
         [tf, loc] = ismember(info.VariableAttributes.UNITS(:,1),varNames');

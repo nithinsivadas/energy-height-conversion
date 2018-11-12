@@ -71,6 +71,9 @@ function [input]=write_thg_to_hdf5(h5OutputFile,ASI,varargin)
                 sizeData1,'ChunkSize',chunkSize1,'Deflate',9);
             h5writeatt(h5OutputFile,[groupName,fieldNames{iField}],...
                 'Dimensions','nImageSize x nImageSize');
+            % Write coordinates, if they don't already exists
+            h5write(h5OutputFile,[groupName,fieldNames{iField}],...
+                (input.(fieldNames{iField})));  
         end
         
         iField = find(strcmp(fieldNames,'time'));
@@ -97,17 +100,7 @@ function [input]=write_thg_to_hdf5(h5OutputFile,ASI,varargin)
     start5 = start5 + [0 dataSize(2)];
     h5write(h5OutputFile,[groupName,datasetNames{1,iField}],...
                         (input.time)',start5,count5);
-    
-   % Write coordinates, if they don't already exists
-   [~,fields2D] =  intersect(fieldNames,{'lat','lon','az','el',...
-            'mlat','mlon','alt'});
-    for iField = fields2D'
-        if ~ish5dataset(h5OutputFile,[groupName,fieldNames{iField}])
-        h5write(h5OutputFile,[groupName,fieldNames{iField}],...
-                (input.(fieldNames{iField})));  
-        end
-    end 
-    
+        
     % Write sensor location, if they already don't exist
     if ~ish5dataset(h5OutputFile,[groupName,'sensorloc'])
     dset = input.sensorloc;
