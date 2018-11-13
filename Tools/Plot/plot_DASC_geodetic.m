@@ -42,8 +42,6 @@ lon(nanFlags) = [];
 dataNew(nanFlags) = [];
 % lat, lon, dataNew have to be column vectors!
 F = scatteredInterpolant(lat',lon',dataNew','nearest','none'); %Modified on 3rd Oct 2018 - Transpose
-% latq = linspace(latLim(1),latLim(2),imageSize);
-% lonq = linspace(lonLim(1),lonLim(2),imageSize);
 latq = linspace(min(lat),max(lat),imageSize);
 lonq = linspace(min(lon),max(lon),imageSize);
 [LAT, LON] = ndgrid(latq,lonq);
@@ -57,7 +55,9 @@ plotm(coastlat,coastlon)
 hold on;
 h=pcolorm(LAT,LON,(Vq)); 
 set(h,'EdgeColor','none');
-textm(latLim(2)+(latLim(2)-latLim(1))*0.05, lonLim(1) +(lonLim(2)-lonLim(1))*0.35, [char(upper(label)),': ',datestr(time,'HH:MM:SS'),' UT']);
+if nargin>9
+    textm(latLim(2)+(latLim(2)-latLim(1))*0.05, lonLim(1) +(lonLim(2)-lonLim(1))*0.35, [char(upper(label)),': ',datestr(time,'HH:MM:SS'),' UT']);
+end
 % textm(latLim(2)-0.19, lonLim(1)+0.1, ['DASC: ',datestr(time,'HH:MM:SS'),' UT']);
 end
 

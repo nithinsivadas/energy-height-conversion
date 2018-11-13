@@ -7,7 +7,7 @@ p = inputParser;
 
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 expectedMaps = {'OpticalImage','EnergyFluxMap','MagneticFieldMap','NoMap'};
-expectedSites = {'gako','fykn','dasc','pokerFlat'};
+expectedSites = {'gako','fykn','mcgr','whit','inuv','kian','dasc','pokerFlat'};
 expectedMagMapContour = {'RE','Lm','Lstar','Kc'}; 
 expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
     'TS89','OP77quiet','OP88dynamic','TS96','OM97','TS01','TS01storm',...
@@ -29,6 +29,8 @@ addParameter(p,'showComments',false,@(x) islogical(x));
 addParameter(p,'latLim',[63 67]);
 addParameter(p,'lonLim',[-153 -143]);
 addParameter(p,'elCutoff',30,validScalarPosNum);
+addParameter(p,'transparency',0.8,validScalarPosNum);
+addParameter(p,'setOpticalLabel',false, @(x) islogical(x));
 addParameter(p,'imageSize', 512, validScalarPosNum);
 
 addParameter(p, 'opticalLim', [300 600]);
@@ -116,44 +118,61 @@ for iTime = 1:1:nTime
                     'plotData',maps.opticalData(i),...
                     'thisTimeIndx', thisTimeIndx,...
                     'site', p.Results.sites{maps.optical(i)});
+            
+            if strcmpi(p.Results.sites(maps.optical(i)),'pokerFlat')
+                intensityScale = 250./(dascData.background-25); % Custom scaling
+            else
+                intensityScale = 250./dascData.background; %Scale size of the intensities measured
+            end
             % Cutting-off elevation below the specified
             dascData.image(maps.opticalData(i).elevation<p.Results.elCutoff) = nan;
             dascData.image(isnan(maps.opticalData(i).elevation))=nan;
+            if sum(~isnan(dascData.image(:)))>0
 %             if strcmp(p.Results.sites{maps.optical(i)},'pokerFlat')
 %                 dascData.image((dascData.image(:)>=30000))=nan;
 %             end
                 if i==1
                 dascData.image(dascData.image>=65536)=nan; % Remove saturated pixels (16Bit)
                 %Correcting all cameras (rudimentary method); nightsky background intensity
-                intensityScale = 250./dascData.background; %Scale size of the intensities measured
+                
 %                 maxMedianMarker = nightsky(i)./max(dascData.image(:));
                 axesHandleOptical=axes;
-                [axesmHandleOptical, hOptical] = plot_DASC_geodetic((dascData.image(:)').*intensityScale,...
+                [axesmHandleOptical, hOptical(i)] = plot_DASC_geodetic((dascData.image(:)').*intensityScale,...
                     dascData.thisTime, dascData.latitude(:)', dascData.longitude(:)',...
                     p.Results.imageSize, p.Results.latLim, p.Results.lonLim, ...
-                    p.Results.deltaLat,p.Results.deltaLon, p.Results.sites(maps.optical(i)));
+                    p.Results.deltaLat,p.Results.deltaLon);
                     colormap(axesHandleOptical,'viridis');
                     cbOptical = colorbar(axesHandleOptical,'eastoutside');
                     ylabel(cbOptical,'[a.u.]');
                     caxis(axesHandleOptical,p.Results.opticalLim);
+                    
 %                     hold on;
 %                     plotm([60, 59, 58],[-150, -147, -145],'*');
                 else
                 hold on;
 %                 dascData.image(dascData.image>=65536)=nan; % Remove saturated pixels (16Bit)
                 
-                intensityScale = 250./dascData.background;
-                plot_DASC_geodetic((dascData.image(:)').*intensityScale,...
+                [~,hOptical(i)]=plot_DASC_geodetic((dascData.image(:)').*intensityScale,...
                     dascData.thisTime, dascData.latitude(:)', dascData.longitude(:)',...
                     p.Results.imageSize, p.Results.latLim, p.Results.lonLim, ...
-                    p.Results.deltaLat,p.Results.deltaLon, p.Results.sites(maps.optical(i)));
+                    p.Results.deltaLat,p.Results.deltaLon);
                     colormap(axesHandleOptical,'viridis');
                     caxis(axesHandleOptical,p.Results.opticalLim);
+                
                 end
-            dascData.background    
+                if p.Results.setOpticalLabel
+                    textm(maps.opticalData(i).sensorloc(1), maps.opticalData(i).sensorloc(2),...
+                       {char(upper(p.Results.sites(maps.optical(i)))),[datestr(dascData.thisTime,'HH:MM:SS'),' UT']});
+                end
+                alpha(hOptical(i),p.Results.transparency);         
+            else
+                if i==1
+                axesHandleOptical=axes;
+                end
+            end
             end
         end
-             
+        
         if nEnergy>0 % Plot energyFluxMaps
             comment('Plotting energy flux maps...',p.Results.showComments);
             for i=1:1:nEnergy
@@ -329,6 +348,7 @@ for iTime = 1:1:nTime
         end
     
     end
+title(datestr(p.Results.thisTime(iTime)));
 comment('Done...',p.Results.showComments);       
 end
    

@@ -11,14 +11,14 @@ expectedMaps = {'OpticalImage','EnergyFluxMap','MagneticFieldMap','NoMap'};
 expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
     'TS89','OP77quiet','OP88dynamic','TS96','OM97','TS01','TS01storm',...
     'TS04storm','Alexeev2000'};
-expectedSites = {'gako','fykn','dasc','pokerFlat'};
+expectedSites = {'gako','fykn','mcgr','whit','inuv','kian','dasc','pokerFlat'};
 
 addParameter(p,'plotModeStr','NoMap',@(x) any(validatestring(x,expectedMaps)));
 addParameter(p,'site','pokerFlat',@(x) any(validatestring(x,expectedSites)));
 addParameter(p,'magFieldModelStr','TS96',@(x) any(strcmp(x,expectedMagFieldModels)));
 addParameter(p,'timeNeutralAtmosphere',nan,validScalarPosNum);
 addParameter(p,'energySlice',100,validScalarPosNum); %In keV
-addParameter(p,'peakIonizationAltitude',nan,validScalarPosNum); %In Km
+addParameter(p,'peakIonizationAltitude',nan); %In Km
 addRequired(p,'inputH5FileStr',@(x)contains(x,{'.h5','.hdf5'}));
 
 parse(p,inputH5FileStr,varargin{:});
@@ -47,6 +47,7 @@ switch p.Results.plotModeStr
             siteStr,[]);
         plotData.time = unix_to_matlab_time(h5read(inputH5FileStr,['/',upper(siteStr),'/time']))';
         plotData.background = h5read(inputH5FileStr,['/',upper(siteStr),'/background']);
+        plotData.sensorloc = h5read(inputH5FileStr,['/',upper(siteStr),'/sensorloc']);
     case 'EnergyFluxMap'
         
         magcoords = permute(readh5_variable_at_time(inputH5FileStr,...
