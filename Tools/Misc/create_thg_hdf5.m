@@ -24,7 +24,7 @@ if strcmp(minTimeStr,'default')
         time = h5read(outputH5FileStr,'/energyFluxFromMaxEnt/time');
         minTimeStr = datestr(time(1),p.Results.dateFormat);
     else
-        error('23: h5 file does not have time /energyFluxFromMaxEnt/time dataset \n must input minTimeStr');
+        error('23: h5 file does not have time /energyFluxFromMaxEnt/time dataset. Must input minTimeStr');
     end
 end
 
