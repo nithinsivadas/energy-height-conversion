@@ -76,6 +76,7 @@ for iFile = 1:1:nFiles
     'time',thgData.time,'sensorloc',[thgSites.glat(siteID),thgSites.glon(siteID),0],...
     'siteCode',siteName);        
 end
+add_ASI_background_to_hdf5(siteName,outputH5FileStr); % Adding the backgroud
 multiWaitbar('Writing Themis GBO ASI to HDF5 Files',1);
 status = 'complete';    
 end

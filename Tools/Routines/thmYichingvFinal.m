@@ -1,4 +1,5 @@
 %% Generating themis spacecraft data
+%% Need to add a function to find the trapped particles!
 clear all;
 multiWaitbar('CloseAll');
 %% Load data
@@ -89,6 +90,8 @@ for iProbe = 1:1:nProbes
     padData.(probes{iProbe}).pitchAngleDistributionFunctionAr = padFunArtemyev;
     padData.(probes{iProbe}).Units.lcEflux = 'eV cm-2 s-1 eV-1';
     padData.(probes{iProbe}).Units.lcDiffEflux = 'eV cm-2 sr-1 s-1 eV-1';
+    padData.(probes{iProbe}).Units.lcNflux = 'cm-2 s-1 eV-1';
+    padData.(probes{iProbe}).Units.lcDiffNflux = 'cm-2 s-1 sr-1 eV-1';
     padData.(probes{iProbe}).Units.la = 'deg';
     padData.(probes{iProbe}).Units.pa = 'deg';
     padData.(probes{iProbe}).Description.lossConeAngle = ['Loss cone angle, calulated using: ',...
@@ -129,6 +132,12 @@ for iProbe = 1:1:nProbes
             padData.(probes{iProbe}).lcEfluxLi(iTime,iEnergy) = lcEfluxLi;
             padData.(probes{iProbe}).lcDiffEfluxLi(iTime,iEnergy) = lcEfluxLi./laSr;
         end
+    padData.(probes{iProbe}).lcNfluxYi(iTime,:) = padData.(probes{iProbe}).lcEfluxYi(iTime,:)./padData.(probes{iProbe}).energyBin';
+    padData.(probes{iProbe}).lcDiffNfluxYi(iTime,:) = padData.(probes{iProbe}).lcDiffEfluxYi(iTime,:)./padData.(probes{iProbe}).energyBin';
+    padData.(probes{iProbe}).lcNfluxAr(iTime,:) = padData.(probes{iProbe}).lcEfluxAr(iTime,:)./padData.(probes{iProbe}).energyBin';
+    padData.(probes{iProbe}).lcDiffNfluxAr(iTime,:) = padData.(probes{iProbe}).lcDiffEfluxAr(iTime,:)./padData.(probes{iProbe}).energyBin';
+    padData.(probes{iProbe}).lcNfluxLi(iTime,:) = padData.(probes{iProbe}).lcEfluxLi(iTime,:)./padData.(probes{iProbe}).energyBin';
+    padData.(probes{iProbe}).lcDiffNfluxLi(iTime,:) = padData.(probes{iProbe}).lcDiffEfluxLi(iTime,:)./padData.(probes{iProbe}).energyBin';
     multiWaitbar('3.Calculating Loss-cone-Flux','Increment',dt);    
     end
 
@@ -159,13 +168,13 @@ function write_data(fileID, padData, probes, iProbe, lossConeFluxEstimatorStr)
     
    if strcmp(lossConeFluxEstimatorStr,'Ar')
         funcStr = func2str(padData.(probes{iProbe}).pitchAngleDistributionFunctionAr);
-        lcEflux = padData.(probes{iProbe}).lcDiffEfluxAr;
+        lcEflux = padData.(probes{iProbe}).lcNfluxAr;
     elseif strcmp(lossConeFluxEstimatorStr,'Yi')
         funcStr = func2str(padData.(probes{iProbe}).pitchAngleDistributionFunctionYi);
-        lcEflux = padData.(probes{iProbe}).lcDiffEfluxYi;
+        lcEflux = padData.(probes{iProbe}).lcNfluxYi;
     elseif strcmp(lossConeFluxEstimatorStr,'Li')
         funcStr = 'Linear Extrapolation';
-        lcEflux = padData.(probes{iProbe}).lcDiffEfluxLi;
+        lcEflux = padData.(probes{iProbe}).lcNfluxLi;
     else
         error('Unknown lossConeFluxEstimatorStr');
     end
@@ -202,7 +211,7 @@ function write_data(fileID, padData, probes, iProbe, lossConeFluxEstimatorStr)
     
     % Units
     fprintf(fileID,unitHeaderFormat,'dd-MMM-yyyy HH:mm:ss','Posix[s]','[RE]','[RE]','[RE]','[nT]',...
-        '[nT]','[nT]','[deg]',string(repmat('eV/cm2 sr s eV',42,1)));
+        '[nT]','[nT]','[deg]',string(repmat('[#/cm2 s eV]',42,1)));
    
     % Data 
     fprintf(fileID,dataFormat,[string(padData.(probes{iProbe}).timeStr),...
@@ -222,7 +231,7 @@ end
 
 function fileID = create_file(rootPath,probes,iProbe,lossConeFluxEstimatorStr)
     
-    fileName =  ['lc_',probes{iProbe},'_',lossConeFluxEstimatorStr,'_diffEflux_nithin.dat'];
+    fileName =  ['lc_',probes{iProbe},'_',lossConeFluxEstimatorStr,'_Nflux_nithin.dat'];
     filePath = [rootPath,fileName];
     fileID = fopen(filePath,'w');
     

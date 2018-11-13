@@ -45,7 +45,8 @@ switch p.Results.plotModeStr
             siteStr,[]);
         plotData.elevation = readh5_variable_at_time(inputH5FileStr,'el',...
             siteStr,[]);
-        plotData.time = unix_to_matlab_time(h5read(inputH5FileStr,'/DASC/time'))';
+        plotData.time = unix_to_matlab_time(h5read(inputH5FileStr,['/',upper(siteStr),'/time']))';
+        plotData.background = h5read(inputH5FileStr,['/',upper(siteStr),'/background']);
     case 'EnergyFluxMap'
         
         magcoords = permute(readh5_variable_at_time(inputH5FileStr,...

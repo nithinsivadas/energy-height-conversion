@@ -1,4 +1,5 @@
 %% Predicting THEMIS-D magnetic field values using magnetic field models
+% and comparing it with measured values. 
 clear all;
 %% Magnetic field model paramters
 dateStr = '26 Mar 2008';

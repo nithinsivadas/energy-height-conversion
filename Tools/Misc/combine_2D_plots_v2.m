@@ -119,11 +119,16 @@ for iTime = 1:1:nTime
             % Cutting-off elevation below the specified
             dascData.image(maps.opticalData(i).elevation<p.Results.elCutoff) = nan;
             dascData.image(isnan(maps.opticalData(i).elevation))=nan;
+%             if strcmp(p.Results.sites{maps.optical(i)},'pokerFlat')
+%                 dascData.image((dascData.image(:)>=30000))=nan;
+%             end
                 if i==1
-                nightsky(i) = nanmedian(dascData.image(:)); %Correcting all cameras (rudimentary method); nightsky background intensity
-                intensityScale = max(dascData.image(:))-nightsky(1); %Scale size of the intensities measured
+                dascData.image(dascData.image>=65536)=nan; % Remove saturated pixels (16Bit)
+                %Correcting all cameras (rudimentary method); nightsky background intensity
+                intensityScale = 250./dascData.background; %Scale size of the intensities measured
+%                 maxMedianMarker = nightsky(i)./max(dascData.image(:));
                 axesHandleOptical=axes;
-                [axesmHandleOptical, hOptical] = plot_DASC_geodetic((dascData.image(:)'-nightsky(i))./intensityScale,...
+                [axesmHandleOptical, hOptical] = plot_DASC_geodetic((dascData.image(:)').*intensityScale,...
                     dascData.thisTime, dascData.latitude(:)', dascData.longitude(:)',...
                     p.Results.imageSize, p.Results.latLim, p.Results.lonLim, ...
                     p.Results.deltaLat,p.Results.deltaLon, p.Results.sites(maps.optical(i)));
@@ -135,19 +140,20 @@ for iTime = 1:1:nTime
 %                     plotm([60, 59, 58],[-150, -147, -145],'*');
                 else
                 hold on;
-                nightsky(i) = nanmedian(dascData.image(:));
-                intensityScale = max(dascData.image(:))-nightsky(1);
-                plot_DASC_geodetic((dascData.image(:)'-nightsky(i))./intensityScale,...
+%                 dascData.image(dascData.image>=65536)=nan; % Remove saturated pixels (16Bit)
+                
+                intensityScale = 250./dascData.background;
+                plot_DASC_geodetic((dascData.image(:)').*intensityScale,...
                     dascData.thisTime, dascData.latitude(:)', dascData.longitude(:)',...
                     p.Results.imageSize, p.Results.latLim, p.Results.lonLim, ...
                     p.Results.deltaLat,p.Results.deltaLon, p.Results.sites(maps.optical(i)));
                     colormap(axesHandleOptical,'viridis');
                     caxis(axesHandleOptical,p.Results.opticalLim);
                 end
+            dascData.background    
             end
         end
-        
-        
+             
         if nEnergy>0 % Plot energyFluxMaps
             comment('Plotting energy flux maps...',p.Results.showComments);
             for i=1:1:nEnergy
