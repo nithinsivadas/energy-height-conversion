@@ -5,17 +5,21 @@ tic
 % pfisrExpFileName = '20080215.005_bc_2min-Ne-cal.h5';
 % pfisrExpFileName = '20080326.001_bc_2min-fitcal.h5';
 % pfisrExpFileName = '20100528.001_bc_2min-Ne-cal.h5';
-pfisrExpFileName = '20101018.001_bc_2min-Ne-cal.h5';
+% pfisrExpFileName = '20101018.001_bc_2min-Ne-cal.h5';
+pfisrExpFileName = '20180911.001_bc_1min-fitcal.h5';
 % pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
-pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-Ne')-1);
-% pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-fitcal')-1);
+% pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-Ne')-1);
+pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-fitcal')-1);
 
 baseDir = '/media/nithin/PFISR_002_006/';
-pfisrRootPath = [baseDir,'PFISR Processed/Event_List/'];
+% base2Dir = 'PFISR Processed/Event_List/';
+base2Dir = 'PFISR Processed/ThemisD1.v01/20180911.001/';
+pfisrRootPath = [baseDir,base2Dir];
 dascRootPath = [baseDir,'DASC/'];
-outputH5FileStr = [baseDir,'PFISR Processed/Event_List/',...
-pfisrExpFileName(1:regexp(pfisrExpFileName,'-Ne')),'energyFlux.h5'];
-% pfisrExpFileName(1:regexp(pfisrExpFileName,'-fitcal')),'energyFlux.h5'];
+outputH5FileStr = [baseDir,base2Dir,...
+pfisrExpFileName(1:regexp(pfisrExpFileName,'-fitcal')),'energyFlux.h5'];
+% pfisrExpFileName(1:regexp(pfisrExpFileName,'-Ne')),'energyFlux.h5'];
+
 outputFigureBaseDir = '/media/nithin/PFISR_002_006/PFISR Processed/Event_List/';
 outputFigureFolderStr = ['Figures_',pfisrExpFileName(1:8)];
 
@@ -27,8 +31,9 @@ maxTimeStr = [];
 % maxTimeStr = '26 Mar 2008 11:14';
 
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
-minAlt = 60;
-maxAlt = 200;
+minAlt = 50;
+% maxAlt = 200;
+maxAlt = 120;
 projectionAltPFISR = 60; % km, altitude of origin of magnetic field aligned lines
 nEnergyBins = 30;
 minE = 10^3;
@@ -65,18 +70,18 @@ if ~isfile(outputH5FileStr)
         [minAlt maxAlt], outputH5FileStr, minTimeStr, maxTimeStr,...
         dascMinElevation,dascCalFileAz,dascCalFileEl, dascSetDownloadFlag);
 end
-set(0, 'DefaultFigureVisible', 'off');
-multiWaitbar('Energy slice progress',0);
-nEnergy = length(energySlice);
-for iEnergy = 1:1:nEnergy 
-% Plotting/Videos
-    outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice(iEnergy)),'keV_',pfisrdTime,'.avi'];
-    outputFiguresFolder = [outputFigureBaseDir,outputFigureFolderStr,'_',num2str(energySlice(iEnergy)),'keV_',pfisrdTime,'/'];
-    create_energy_spectra_images(outputH5FileStr,...
-        outputFiguresFolder,outputVideoStr,energySlice(iEnergy),energyFluxLim(iEnergy,:),opticalLim,...
-        minTimeStr,maxTimeStr,latLim,lonLim,setStoreImage);
-    multiWaitbar('Energy slice progress','Increment',1./nEnergy);
-end
-
-set(0, 'DefaultFigureVisible', 'on');
+% set(0, 'DefaultFigureVisible', 'off');
+% multiWaitbar('Energy slice progress',0);
+% nEnergy = length(energySlice);
+% for iEnergy = 1:1:nEnergy 
+% % Plotting/Videos
+%     outputVideoStr = [pfisrExpFileName(1:8),'_energyFlux_',num2str(energySlice(iEnergy)),'keV_',pfisrdTime,'.avi'];
+%     outputFiguresFolder = [outputFigureBaseDir,outputFigureFolderStr,'_',num2str(energySlice(iEnergy)),'keV_',pfisrdTime,'/'];
+%     create_energy_spectra_images(outputH5FileStr,...
+%         outputFiguresFolder,outputVideoStr,energySlice(iEnergy),energyFluxLim(iEnergy,:),opticalLim,...
+%         minTimeStr,maxTimeStr,latLim,lonLim,setStoreImage);
+%     multiWaitbar('Energy slice progress','Increment',1./nEnergy);
+% end
+% 
+% set(0, 'DefaultFigureVisible', 'on');
 toc
