@@ -230,6 +230,8 @@ h5writeatt(outputH5FileStr,'/DASC/',...
 h5writeatt(outputH5FileStr,'/DASC/',...
     'duration_contained_in_file',[datestr(startTime),' - ',datestr(endTime)]);
 
+add_ASI_background_to_hdf5('dasc',outputH5FileStr); % Adding the backgroud
+
 multiWaitbar('Creating DASC HDF5 File','Reset');
 dataASILastDay = data;
 end

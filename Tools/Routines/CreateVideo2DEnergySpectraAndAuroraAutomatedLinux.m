@@ -6,34 +6,34 @@ tic
 % pfisrExpFileName = '20080326.001_bc_2min-fitcal.h5';
 % pfisrExpFileName = '20100528.001_bc_2min-Ne-cal.h5';
 % pfisrExpFileName = '20101018.001_bc_2min-Ne-cal.h5';
-pfisrExpFileName = '20180911.001_bc_1min-fitcal.h5';
-% pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
+% pfisrExpFileName = '20180911.001_bc_1min-fitcal.h5';
+pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
 % pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-Ne')-1);
 pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-fitcal')-1);
 
 baseDir = '/media/nithin/PFISR_002_006/';
-% base2Dir = 'PFISR Processed/Event_List/';
-base2Dir = 'PFISR Processed/ThemisD1.v01/20180911.001/';
+base2Dir = 'PFISR Processed/Event_List/';
+% base2Dir = 'PFISR Processed/ThemisD1.v01/20180911.001/';
 pfisrRootPath = [baseDir,base2Dir];
 dascRootPath = [baseDir,'DASC/'];
 outputH5FileStr = [baseDir,base2Dir,...
-pfisrExpFileName(1:regexp(pfisrExpFileName,'-fitcal')),'energyFlux.h5'];
+pfisrExpFileName(1:regexp(pfisrExpFileName,'-fitcal')),'energyFlux_v110.h5'];
 % pfisrExpFileName(1:regexp(pfisrExpFileName,'-Ne')),'energyFlux.h5'];
 
 outputFigureBaseDir = '/media/nithin/PFISR_002_006/PFISR Processed/Event_List/';
 outputFigureFolderStr = ['Figures_',pfisrExpFileName(1:8)];
 
 
-minTimeStr = [];
-maxTimeStr = [];
+% minTimeStr = [];
+% maxTimeStr = [];
 
-% minTimeStr = '26 Mar 2008 11:04';
-% maxTimeStr = '26 Mar 2008 11:14';
+minTimeStr = '26 Mar 2008 11:04';
+maxTimeStr = '26 Mar 2008 11:14';
 
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
-minAlt = 50;
-% maxAlt = 200;
-maxAlt = 120;
+minAlt = 60;
+maxAlt = 200;
+% maxAlt = 120;
 projectionAltPFISR = 60; % km, altitude of origin of magnetic field aligned lines
 nEnergyBins = 30;
 minE = 10^3;
@@ -70,6 +70,19 @@ if ~isfile(outputH5FileStr)
         [minAlt maxAlt], outputH5FileStr, minTimeStr, maxTimeStr,...
         dascMinElevation,dascCalFileAz,dascCalFileEl, dascSetDownloadFlag);
 end
+
+% sites = {'gako'};
+sites={'gako','fykn','inuv','whit','mcgr','kian'};
+multiWaitbar('Processing different cameras',0);
+for i=1:1:length(sites)
+multiWaitbar('Processing different cameras','Increment',1./length(sites));
+% outputFileStr ='/media/nithin/PFISR_002_006/PFISR Processed/Event_List/20080326.001_bc_15sec-energyFlux_v85.h5';
+siteName = sites{i};
+disp(['Processing ',upper(siteName)]);
+status = create_thg_hdf5(siteName,outputFileStr);
+end
+multiWaitbar('Close All');
+
 % set(0, 'DefaultFigureVisible', 'off');
 % multiWaitbar('Energy slice progress',0);
 % nEnergy = length(energySlice);

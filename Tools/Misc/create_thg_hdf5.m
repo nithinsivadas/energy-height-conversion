@@ -10,7 +10,7 @@ addParameter(p,'minTimeStr','default',@(x) isstring(x)||ischar(x));
 addParameter(p,'maxTimeStr','default',@(x) isstring(x)||ischar(x));
 addParameter(p,'localStorePath','default',@(x) isstring(x)||ischar(x));
 addParameter(p,'sensorLocationFile','default',@(x) isstring(x)||ischar(x));
-addParameter(p,'altIndx',2,@(x) x>=1&&x<=3&&(ceil(x)-x)==0);
+addParameter(p,'altIndx',2,@(x) x>=1&&x<=3&&(ceil(x)-x)==0); %Choosing Altitude to be 110 km
 
 addRequired(p,'outputH5FileStr',@(x)contains(x,{'.h5','.hdf5'})); 
 addRequired(p,'siteName', @(x) isstring(x)||ischar(x));
