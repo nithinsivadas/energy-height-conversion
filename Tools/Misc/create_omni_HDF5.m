@@ -154,11 +154,11 @@ function data=select_required_parameters(omni1, omni2, time1, time2, yyyy, setCa
         data(:,16) = omni1{1,30};data(data(:,16)==999.99,16)=nan; % Plasma Beta
         data(:,17) = omni1{1,31};data(data(:,17)==999.9,17)=nan; % Alfven Mach Number
         data(:,18) = interp1(ptime2,omni2{1,28},data(:,1),'nearest'); data(data(:,18)==9.999,18)=nan; % Alpha Proton Ratio
-        data(:,19) = omni1{1,32};data(data(:,19)==9999.99,19)=nan; % AE-Index
-        data(:,20) = omni1{1,33};data(data(:,20)==9999.99,20)=nan; % AL-Index
-        data(:,21) = omni1{1,34};data(data(:,21)==9999.99,21)=nan; % AU-Index
-        data(:,22) = omni1{1,35};data(data(:,22)==9999.99,22)=nan; % SYM/D-Index
-        data(:,23) = omni1{1,36};data(data(:,23)==9999.99,23)=nan; % SYM/H-Index
+        data(:,19) = omni1{1,38};data(data(:,19)==9999.99,19)=nan; % AE-Index
+        data(:,20) = omni1{1,39};data(data(:,20)==9999.99,20)=nan; % AL-Index
+        data(:,21) = omni1{1,40};data(data(:,21)==9999.99,21)=nan; % AU-Index
+        data(:,22) = omni1{1,41};data(data(:,22)==9999.99,22)=nan; % SYM/D-Index
+        data(:,23) = omni1{1,42};data(data(:,23)==9999.99,23)=nan; % SYM/H-Index
         data(:,24) = interp1(ptime2,double(omni2{1,39}),data(:,1),'nearest');data(data(:,24)==99.0,24)=nan; % Kp Index
         data(:,25) = interp1(ptime2,omni2{1,30},data(:,1),'nearest'); data(data(:,25)==9999999.0,25)=nan; % Sigma T
         data(:,26) = interp1(ptime2,omni2{1,31},data(:,1),'nearest'); data(data(:,26)==999.9,26)=nan; % Sigma N
