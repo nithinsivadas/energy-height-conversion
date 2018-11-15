@@ -208,15 +208,15 @@ if (IY < 1965),
     %      *'**** RECALC WARNS: YEAR IS OUT OF INTERVAL 1965-2005: IYEAR=',I4,
     %      * /,6X,'CALCULATIONS WILL BE DONE FOR IYEAR=',I4,/)
     %       WRITE (*,10) IYEAR,IY
-    disp(sprintf(['**** RECALC WARNS: YEAR IS OUT OF INTERVAL 1965-2005: IYEAR=%d', ...
-            'CALCULATIONS WILL BE DONE FOR IYEAR=%d'],IYEAR,IY));
+%     disp(sprintf(['**** RECALC WARNS: YEAR IS OUT OF INTERVAL 1965-2005: IYEAR=%d', ...
+%             'CALCULATIONS WILL BE DONE FOR IYEAR=%d'],IYEAR,IY));
 end
 
 if(IY > 2005) ,
     IY=2005;
     %       WRITE (*,10) IYEAR,IY
-    disp(sprintf(['**** RECALC WARNS: YEAR IS OUT OF INTERVAL 1965-2005: IYEAR=%d', ...
-            'CALCULATIONS WILL BE DONE FOR IYEAR=%d'],IYEAR,IY));
+%     disp(sprintf(['**** RECALC WARNS: YEAR IS OUT OF INTERVAL 1965-2005: IYEAR=%d', ...
+%             'CALCULATIONS WILL BE DONE FOR IYEAR=%d'],IYEAR,IY));
 end
 
 % C
