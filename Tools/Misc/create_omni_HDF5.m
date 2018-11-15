@@ -1,4 +1,4 @@
-function [data,status] = create_omni_HDF5(h5FileStr,localStorePath,setCalculateGW)
+function [status] = create_omni_HDF5(h5FileStr,localStorePath,setCalculateGW)
 %create_omni_HDF5
 %
 if nargin<3
