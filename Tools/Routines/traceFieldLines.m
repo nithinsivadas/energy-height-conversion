@@ -10,15 +10,29 @@ omniHDF5File = 'C:\Users\nithin\Documents\GitHub\LargeFiles\omni\omni.h5';
 [maginput,timeMaginput]=generate_maginput(omniHDF5File,'26 Mar 2008 09:00','26 Mar 2008 12:00');
 
 %%
-
+timeArr = datenum('26-Mar-2008 11:00'):1/(60*24):datenum('26-Mar-2008 11:30');
 tic
-timeStr = '26-Mar-2008 09:30:00';
-% viewArr = [180,0];%Side
-viewArr = [180,90];%Top
+for i=1:1:length(timeArr)
+timeStr = datestr(timeArr(i));
+az = 180;
+el = 0; %side
+% el = 90; %top
+fontsize = 14;
+if el == 90
+    viewStr = 'Top';
+elseif el == 0
+    viewStr = 'Side';
+end
+
+viewArr = [az,el];
+storeImageDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Figures\';
+imageName = ['TS96_',viewStr,datestr(datenum(timeStr),'HH_MM')];
 
 t = datetime(timeStr,'InputFormat','dd-MMM-yyyy HH:mm:ss');
 
 GEOPACK_RECALC(year(t),day(t,'dayofyear'),hour(t),minute(t),second(t));
+global GEOPACK1;
+C = define_universal_constants;
 
 thisTime = datenum(timeStr);
 thisMaginput = interp1(timeMaginput',maginput,thisTime);
@@ -47,12 +61,24 @@ for i = 1:1:nLat
     
     Kc{i} = geopack_find_curvature(XX{i},YY{i},ZZ{i});
     
-    [~,indx] = max(Kc{i});
-    magEq{i} = [XX{i}(indx),YY{i}(indx),ZZ{i}(indx)];
     
+    [maxKc,indx] = max(Kc{i});
+    minRc = 1./maxKc;
+    magEq{i} = [XX{i}(indx),YY{i}(indx),ZZ{i}(indx)];
+    [BX,BY,BZ] = T96(0,PARMODT96,GEOPACK1.PSI,magEq{i}(1),magEq{i}(2),magEq{i}(3));
+    KE(i) = ((((minRc.*C.RE ).*(C.e).*(BZ*10^-9)).^2).*(2^-7).*(C.me).^-1).*(10^-3).*(C.e).^-1; %keV
+    if KE(i) < 1
+        KEstr(i) = string([num2str(KE(i),'%3.2f'),' keV']);
+    elseif KE(i) >= 1000
+        KEstr(i) = string([num2str(KE(i)/1000,'%3.0f'),' MeV']);
+    else
+        KEstr(i) = string([num2str(KE(i),'%3.0f'),' keV']);
+    end
 end
+
+
 % POES trajectory
-poesTimeMinStr = '26-Mar-2008 11:28';
+poesTimeMinStr = '26-Mar-2008 11:27';
 poesTimeMaxStr = '26-Mar-2008 11:33';
 poesTimeIndx = find_time(poes.time,poesTimeMinStr):1:find_time(poes.time,poesTimeMaxStr);
 poestime = poes.time(poesTimeIndx);
@@ -84,18 +110,23 @@ theGSM = interp1(thmData.the.state.time,thmData.the.state.XYZ_GSM,theTime);
 theColor = interp1(padData.the.energyBin,padData.the.lcEfluxLi(theTIndx,:)',energy*1000)';
 
 % Magnetic Field Lines
-h=figure;
+% set(0,'Display
+h=figure('visible','off');
 ax1=axes;
 ax1.Color = 'none';
 colormap(ax1,copper);
 for i = 1:1:nLat
 %     plot3(XX{i}',YY{i}',ZZ{i}');
     patch([XX{i} nan],[YY{i} nan],[ZZ{i} nan],[1./Kc{i} nan],...
-        'FaceColor','none','EdgeColor','interp','LineWidth',1);
+        'FaceColor','none','EdgeColor','interp','LineWidth',2);
     hold on;
     plot3(magEq{i}(1),magEq{i}(2),magEq{i}(3),'.r');
     text(magEq{i}(1),magEq{i}(2),magEq{i}(3)+((-1).^i)*0.2,...
         strcat(string(num2str(lat(i)')),'^0N'),'HorizontalAlignment','left');
+    if strcmp(viewStr,'Side')
+        text(magEq{i}(1),magEq{i}(2),2+((-1).^i)*0.2,...
+            KEstr(i),'HorizontalAlignment','left','Color',[0.5 0.5 0.5]);
+    end
 end
 cb = colorbar();
 ax1.XLim = [-40 0];
@@ -135,7 +166,7 @@ ax2.CLim = [0 200];
     thisTIndx = find_time(thaTime,'26-Mar-2008 12:00');
     time_label_3D(thaGSM(thisTIndx,1),thaGSM(thisTIndx,2),thaGSM(thisTIndx,3),thaTime(thisTIndx));
     thisTIndx = find_time(thaTime,datestr(thisTime));
-    time_label_3D(thaGSM(thisTIndx,1),thaGSM(thisTIndx,2),thaGSM(thisTIndx,3),thaTime(thisTIndx),'HH:MM','r');
+    plot3(thaGSM(thisTIndx,1),thaGSM(thisTIndx,2),thaGSM(thisTIndx,3),'*m');
 
     cb3 = colorbar('Location','southoutside');
     cb3.Position = cb2.Position;
@@ -151,7 +182,7 @@ ax2.CLim = [0 200];
     hold on;
   
     thisTIndx = find_time(thdTime,thisTime);
-    text(thdGSM(thisTIndx,1),thdGSM(thisTIndx,2),thdGSM(thisTIndx,3),'^|','Color','r');
+    plot3(thdGSM(thisTIndx,1),thdGSM(thisTIndx,2),thdGSM(thisTIndx,3),'*m');
     
     
     cb4 = colorbar('Location','southoutside');
@@ -169,7 +200,7 @@ ax2.CLim = [0 200];
     hold on;
   
     thisTIndx = find_time(theTime,thisTime);
-    text(theGSM(thisTIndx,1),theGSM(thisTIndx,2),theGSM(thisTIndx,3),'^|','Color','r');     
+    plot3(theGSM(thisTIndx,1),theGSM(thisTIndx,2),theGSM(thisTIndx,3),'*m');     
 
     cb5 = colorbar('Location','southoutside');
     cb5.Position = cb2.Position;
@@ -186,6 +217,11 @@ ax2 = copy_axes_properties(ax1,ax2);
 ax3 = copy_axes_properties(ax1,ax3);
 ax4 = copy_axes_properties(ax1,ax4);
 ax5 = copy_axes_properties(ax1,ax5);
+
+set(findall(gcf,'-property','FontSize'),'FontSize',fontsize);
+export_fig(strcat(storeImageDir,imageName,'.png'),'-r300','-png','-nocrop');
+end
+toc
 
 function time_label_3D(x,y,z,time,format,color,verticalAlignment)
 

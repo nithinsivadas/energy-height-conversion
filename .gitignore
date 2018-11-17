@@ -50,6 +50,8 @@ Temporary Items
 *.asc
 *.d
 *.cdf
+*.dat
+*.h5
 
 # Image files
 *.fig
@@ -62,4 +64,7 @@ Temporary Items
 spdf/
 spdf_linux/
 Tsyganenko_Parameters/
+scottclowe-matlab-schemer-2156bb9/
+irbem/
+__pycache__/
 
