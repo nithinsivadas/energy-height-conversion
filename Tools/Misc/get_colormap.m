@@ -1,8 +1,18 @@
 function cmap = get_colormap(lowerColor,upperColor)
 %UNTITLED8 Summary of this function goes here
 %   Detailed explanation goes here
-rgb1 = get_rgb_triplet(lowerColor);
-rgb2 = get_rgb_triplet(upperColor);
+if isstring(lowerColor)||ischar(lowerColor)
+    rgb1 = get_rgb_triplet(lowerColor);
+else
+    rgb1 = lowerColor;
+end
+
+if isstring(upperColor)||ischar(upperColor)
+    rgb2 = get_rgb_triplet(upperColor);
+else
+    rgb2 = upperColor;
+end
+
 L=64;
 cmap(:,1) = linspace(rgb1(1),rgb2(1),L);
 cmap(:,2) = linspace(rgb1(2),rgb2(2),L);

@@ -1,4 +1,5 @@
 function arrayYYMM=parse_yy_mm(minTimeStr, maxTimeStr,varargin)
+%     Produces array of YY,MM between the minTimeStr and maxTimeStr
     p = inputParser;
     addParameter(p,'Format','dd-mm-yyyy',@(x) isstring(x)||ischar(x));
     addRequired(p,'minTimeStr',@(x) isstring(x)||ischar(x));

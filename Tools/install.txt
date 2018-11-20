@@ -21,4 +21,27 @@ Listing several things to track:
 	Install the linux version of the SPDF, and add folder to .gitignore
 
 	3.4 IRBEM
-	Download IRBEM, and install according to instructions. And add it to MATLAB 		path file.
+	Download IRBEM, and install according to instructions. And add it to MATLAB path file.
+	If one cannot edit MATLAB path file, use setup.m in MATLAB folder.
+
+	3.5 Python
+	MATLAB can access python with limited functionality. Check version of Python
+	that matlab has access to using 'pyversion' command. If you want to change the
+	python version, add pyversion(locationOfPythonExecutable) to the matlab setup.m
+
+	3.6 AACGMv2
+	Install aacgmv2 by following instructions on https://aacgmv2.readthedocs.io/en/stable/installation.html
+	AACGM - Altitude-adjusted corrected geomagnetic coordinates. https://aacgmv2.readthedocs.io/en/stable/readme.html
+	In order to pass matlab time variables to the functions, you need to modify the respective
+	aacgm function to accept matlab time input, and convert the number to python datetime format.
+	In order to do this, I have created matpy.py that can be found in External Tools folder. .
+
+	3.7 IRI2016 (for iri, Michael Hirsh's tools)
+	create a conda environment with py36
+	shell>> conda create -n py36 python==3.6
+	matlab>>pyversion(path to py3.6 in matlab)
+	shell>> git clone https://github.com/scivision/IRI2016.git
+	Go into the repository and install
+	shell>> pip install -e .
+
+	3.8 Financial Toolbox for MATLAB (to run f107_aph.m)

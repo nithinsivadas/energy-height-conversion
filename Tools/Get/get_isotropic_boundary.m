@@ -1,7 +1,7 @@
 function [Kc] = get_isotropic_boundary(Bgeo,Bmag,...
     gradBmag,diffB,energy)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%GET_ISOTROPIC_BOUNDARY Gets the ratio of the Rcurve to Gyroraidus of electron, 
+% which if ~ 8 defines the isotropic boundary
 
 %% Calculating G
 C = define_universal_constants; 
