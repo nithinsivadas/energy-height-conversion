@@ -76,11 +76,11 @@ msisData.N2 = msisData.N2 * 10^6; % m^-3
 msisData.Ar = msisData.Ar * 10^6; % m^-3
 msisData.H = msisData.H * 10^6; % m^-3
 msisData.N = msisData.N * 10^6; % m^-3
-msisData.AnomalousOxygen = msisData.AnomalousOxygen * 10^6; % m^-3
-msisData.TotalMass = msisData.TotalMass * 10^3; % kg/m^-3
-msisData.TotalNumberDensity = msisData.He + msisData.O + msisData.N2 + ...
+msisData.anomalousOxygen = msisData.AnomalousOxygen * 10^6; % m^-3
+msisData.totalMass = msisData.TotalMass * 10^3; % kg/m^-3
+msisData.totalNumberDensity = msisData.He + msisData.O + msisData.N2 + ...
     msisData.Ar + msisData.H + msisData.N + msisData.O2 + ...
-    msisData.AnomalousOxygen;    
+    msisData.anomalousOxygen;    
 msisData.Description = 'He,O,N2,O2,Ar,H,N, are all in number densities m-3; Total Mass is in Kg m-3; Temperatures in K';
 end
 

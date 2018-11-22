@@ -1,7 +1,8 @@
-function [ outputArguments ] = get_conductivity_v2( alt, electronDensity, latitude, longitude, time, mode )
+function [ data, input ] = get_conductivity_v2( alt, electronDensity,...
+    latitude, longitude, time, mode, outputs, setPlotConductivity )
 %get_conductivity_v2.m returns the hall and pederson conductivity given an
 %input electron density value, along with some other output parameters.
-%Uses msis and iri models that run locally, instead on online servers. 
+%Uses msis and iri models that run locally, instead on online servers.
 %-------------------------------------------------------------------------
 % Input
 %------
@@ -24,72 +25,71 @@ function [ outputArguments ] = get_conductivity_v2( alt, electronDensity, latitu
 % Created : 27th Sep 2017
 % Author  : Nithin Sivadas
 % Ref     :
-% Comments: The formulae needs to be looked at carefully. [Pending]
+% Comments: 1. The formulae needs to be looked at carefully. [Pending]
+%           2. Speed up the code using matrix multiplication instead of
+%              for-loops
+%           3. Inputs only one lat, and lon, check if this is acceptable assumption. 
 %----------------------------------------------------------------------------
 
 % Initilization
+    if nargin<8
+        setPlotConductivity = false;
+    end
 
-	if nargin<6
+    if nargin<7 || isempty(outputs)
+        outputs = {'default'}; % uses input electronDensity to estimate conductivity
+    end
+
+	if nargin<6 || isempty(mode)
         mode = 0; % uses input electronDensity to estimate conductivity
-  end
+    end
 
-	if nargin<5
+	if nargin<5 || isempty(time)
 	    time        = datenum([2008 03 26 10 00 00]);
 	end
 
-	if nargin<4
+	if nargin<4 || isempty(longitude)
 	    longitude   = -147.5; % Degrees.
 	end
 
-	if nargin<3
+	if nargin<3 || isempty(latitude)
 	    latitude    = 65; % Degrees.
-  end
+    end
 
-  coordinateSystem = 'geodetic';
-  curlDir='C:\Users\Nithin\Documents\GitHub\energy-height-conversion\Tools\External Tools';
+% IRI2016
+    iriData = iri2016f90(time, alt, latitude, longitude);
+    Ti = iriData.Ti';
+    Te = iriData.Te';
+
+% Concentration of ion species
+    C = [iriData.nOI',... %C(:,1) = [O+]
+        iriData.nNOI',... %C(:,2) = [NO+]
+        iriData.nO2I',... %C(:,3) = [O2+]
+        iriData.nNI',...  %C(:,4) = [N+]
+        iriData.nHI',...  %C(:,5) = [H+]
+        iriData.nHeI']... %C(:,6) = [He+]
+        ./iriData.totalIonDensity';
+
+% Correcting IRI [If concentrations are negative]
+    C(C<0)=0;
+
 
 % MSIS
 	alt1=alt(:)';
     lat1=latitude*ones(size(alt1));
     lon1=longitude*ones(size(alt1));
-	msisData = msis_irbem(time, [alt1',lat1',lon1']);
-    
+	
+    msisData = msis_irbem(time, [alt1',lat1',lon1']);
+        
     Nn(:,1)     = msisData.O; %O
 	Nn(:,2)     = msisData.N2; %N2
 	Nn(:,3)     = msisData.O2; %O2
 
-    N = msisData.TotalNumberDensity; % Total Number Density
-
-% IRI2016
-  
-  IRI=iri2012(time, latitude, longitude, alt1, true, coordinateSystem,curlDir, [], [], [], [], [], [], [], [], [], [] ,[] ,[], [], [], 'RBV10/TTS03' );
-  %iri2012 function modified to use iri2016
-
-  Tn = T(:,1); % Neutral temperature from MSIS
-  Ti = IRI(:,4);
-  Te = Ti;
-
-% Concentration of ion species
-  C(:,1) = IRI(:,6)/100.000;  %OI
-  C(:,2) = IRI(:,10)/100.000; %NOI
-  C(:,3) = IRI(:,9)/100.000;  %O2I
-  C(:,4) = IRI(:,12)/100.000; %N+
-  C(:,5) = IRI(:,7)/100.000;  %H+
-% C(:,6) = IRI(:,8)/100.000;  %He+
-
-% Correcting IRI [The discrepancy in the sum of the ion concentrations]
-  C(C<0)=0;
-  C_Sum = sum(C,2);
-  C(:,1) = C(:,1)./C_Sum;
-  C(:,2) = C(:,2)./C_Sum;
-  C(:,3) = C(:,3)./C_Sum;
-  C(:,4) = C(:,4)./C_Sum;
-  C(:,5) = C(:,5)./C_Sum;
-
+  Tn = msisData.AltTemp;
 
 % B field
-  [Bx, By, Bz] = igrf(time, latitude, longitude, alt1, coordinateSystem);
-  B = ((Bx(:).^2 + By(:).^2 + Bz(:).^2).^0.5)*10^-9;
+    [Bx, By, Bz] = igrf(time, latitude, longitude, alt1, 'geodetic');
+    B = ((Bx(:).^2 + By(:).^2 + Bz(:).^2).^0.5)*10^-9;
 
 % Coefficients of ion-neutral interactions % Shunk and Negy, Table 4.4
            %   O       N2      O2
@@ -100,28 +100,20 @@ function [ outputArguments ] = get_conductivity_v2( alt, electronDensity, latitu
                0   ,   33.6,   32.0;]; % HI
 
 % Converting to SI units
-  C_in = C_in*10^-16;
+    C_in = C_in*10^-16;
 
-% Reduced mass
-  m_e = 9.11*10^-31; % Electron mass
-  m_p = 1.673*10^-27; % Proton mass
-  Z_n = [16; 28; 32];
-  m_n = Z_n*m_p; % Mass of neurtrals[kg]
-  Z_i = [16; 30; 32; 14]; % Ion mass in proton mass units
-  m_i = Z_i*m_p;
-  q_i = [1;1;1; 1]; % Ion charge
-
-  for thisIon=1:length(m_i)
-      for thisNeutral=1:length(m_n)
-          u_in(thisIon,thisNeutral) = m_i(thisIon).*m_n(thisNeutral)./...
-              (m_i(thisIon)+m_n(thisNeutral));
-      end
-  end
-
+% Necessary Constants
+    konst = define_universal_constants();
+    m_e = konst.me; % Electron mass
+    m_p = konst.mp; % Proton mass
+    Z_n = [16; 28; 32];
+    m_n = Z_n*m_p; % Mass of neurtrals[kg]
+    Z_i = [16; 30; 32; 14]; % Ion mass in proton mass units
+    m_i = Z_i*m_p;
+    q_i = [1;1;1; 1]; % Ion charge
 
 % Gyro frequencies
-    q = 1.6*10^-19;
-    k = 1.28*10^-23;
+    q = konst.e;
     w_e  = q.*B./m_e;
     w_p = q.*B./m_p;
 
@@ -166,16 +158,17 @@ function [ outputArguments ] = get_conductivity_v2( alt, electronDensity, latitu
 
 % Electron density assignment
     if mode==0
-        ne = electronDensity;
+        ne = electronDensity(:);
     else
-        ne = IRI(:,1);
+        ne = iriData.Ne(:);
     end
-    ne(ne<=0)=10^6;
+%     ne(ne<=0)=nan;
+%     ne = interp_nans(ne);
 
 % Electron-ion collision frequency
 %   v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(34 + 4.18.*log(((Te.^3)./(ne.*(10^-6))))); % Michael C Kelley
-    v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(59 + 4.18.*log10(((Te.^3).*(ne)).^3));
-    v_ei_1=  54.5*(ne.*(10^-6).*Te.^-1.5).*(C(:,1).*q_i(1).^2 + C(:,2).*q_i(2).^2 + C(:,3).*q_i(3).^2);
+    v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(59 + 4.18.*log10(((Te.^3).*(ne)).^3)); %Michel C Kelley?
+%     v_ei_1=  54.5*(ne.*(10^-6).*Te.^-1.5).*(C(:,1).*q_i(1).^2 + C(:,2).*q_i(2).^2 + C(:,3).*q_i(3).^2);
 
 % Electron collision frequency
     v_e   = v_en+v_ei;
@@ -199,17 +192,70 @@ function [ outputArguments ] = get_conductivity_v2( alt, electronDensity, latitu
     sigma_H = (q*ne./B).*abs((sigma_H1 - (k_e.^2)./(1+k_e.^2)));
 
 % Storing output
-    data.B=B; data.Tn=Tn; data.Ti=Ti; data.C=C; data.Nn=Nn; data.N=N;
-    data.w_i = w_i; data.w_e = w_e; data.v_e = v_e; data.v_in = v_in;
-    data.v_i = v_i;
-    data.sigma_P = sigma_P; data.sigma_H = sigma_H; data.alt = alt1;
-    data.C_in=C_in;
-    data.k_e = k_e;
-    data.k_i = k_i;
-    data.ne = ne;
-    data.v_en=v_en;
-    data.v_ei=v_ei; data.v_ei_1=v_ei_1;
-    data.Te=Te;
-    outputArguments = data;
+
+    if any(strcmp(outputs,'input')) || any(strcmp(outputs,'all'))
+        input.Bmag=B; input.description.Bmag = {'IGRF Field |B|','[nT]'};
+        input.Tn=Tn; input.description.Tn = {'MSIS Neutral Temperature','[K]'};
+        input.Ti=Ti; input.description.Ti = {'IRI Ion Temperature','[K]'};
+        input.Te=Te; input.description.Te = {'IRI Electron Temperature','[K]'};
+
+        input.ionConcentration=C;
+        input.description.ionConcentration{1} = {'[O+] Concentration','ratio'};
+        input.description.ionConcentration{2} = {'[NO+] Concentration','ratio'};
+        input.description.ionConcentration{3} = {'[O2+] Concentration','ratio'};
+        input.description.ionConcentration{4} = {'[N+] Concentration','ratio'};
+        input.description.ionConcentration{5} = {'[H+] Concentration','ratio'};
+        input.description.ionConcentration{6} = {'[He+] Concentration','ratio'};
+
+        input.neutralNumberDensity=Nn;
+        input.description.neutralNumberDensity{1}={'O','#/m^3'};
+        input.description.neutralNumberDensity{2}={'N_2','#/m^3'};
+        input.description.neutralNumberDensity{3}={'O_2','#/m^3'};
+
+        input.totalNeutralNumberDensity=msisData.totalNumberDensity;
+        input.description.totalNeutralNumberDensity={'Total neutral density','#/m^3'};
+
+        input.electronDensity = ne;
+        input.description.electronDensity = {'Ne','#/m^3'};
+    end
+
+    if any(strcmp(outputs,'all'))
+        data.ionGyroFrequency = w_i; %rad/s
+        data.electronGyroFrequency = w_e; %rad/s
+        data.electronCollisionFrequency = v_e; %Hz
+        data.electronNeutralCollisionFrequency=v_en;
+        data.electronIonCollisionFrequency=v_ei; %Hz
+        data.ionNeutralCollisionFrequency = v_i; %Hz
+        data.electronMobility = k_e;
+        data.ionMobility = k_i;
+    end
+
+    data.pedersonConductivity = sigma_P; % Pedersen Conductivity S/m
+    data.hallConductivity = sigma_H; % Hall Conductivity Conductivity S/m
+    data.altitude = alt1; % Altitude [km]
+
+    if setPlotConductivity
+    plot_conductivity(data, mode);
+    end
+
+end
+
+function plot_conductivity(data, mode)
+
+resize_figure(figure,100,100);
+
+plot(data.pedersonConductivity,data.altitude,'k');
+hold on;
+plot(data.hallConductivity,data.altitude,'r');
+set(gca,'XScale','log');
+ylabel('Km');
+xlabel('S/m');
+
+if mode == 1
+    modeStr = 'IRI';
+else
+    modeStr = '';
+end
+legend([modeStr,' \sigma_P'],[modeStr,' \sigma_H']);
 
 end

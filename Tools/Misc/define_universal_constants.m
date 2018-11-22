@@ -24,4 +24,7 @@ function [C] = define_universal_constants()
    
    C.me = 9.10938356*10^-31;
    C.info.me = 'Electron mass [kg]';
+   
+   C.mp = 1.672621898*10^-27;
+   C.info.me = 'Proton mass [kg]';
 end
