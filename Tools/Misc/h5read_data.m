@@ -1,5 +1,6 @@
 function [data,h5DataLoc]=h5read_data(h5FilePath)
 % Reads all h5 data from an h5 file into a structure data.
+% no longer needs to be in use. See read_h5_data.m
 info=h5info(h5FilePath);
 nGroups=length(info.Groups);
 for thisGroup=1:1:nGroups

@@ -1,7 +1,7 @@
 %% Function to read h5 variable at a particular time index
 function varValue=readh5_variable_at_time(h5FileStr,varStr,address,thisTimeIndx)
     % readh5_variable_at_time.m Reads variable name ( in varStr) of the hdf5
-    % file ****_energyFlux.h5. 
+    % file ****_energyFlux.h5. [NOT IN USE, See read_h5_variable_at_time_v2]
     %----------------------------------------------------------------------
     % Input
     %--------     
