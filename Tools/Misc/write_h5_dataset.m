@@ -18,20 +18,29 @@ setAppendOriginal = setAppend;
 [status, info, ~] = ish5dataset(h5FileStr, datasetPath);
 
 dataSize = size(varValue);
-nTime = dataSize(timeDim);
-nDim = length(dataSize);
-varValue = permute(varValue,fliplr(1:1:nDim));
-dataSize = size(varValue);
-timeDim = find(dataSize == nTime);
+if timeDim > 0
+    nTime = dataSize(timeDim);
+    nDim = length(dataSize);
+    varValue = permute(varValue,fliplr(1:1:nDim));
+    dataSize = size(varValue);
+    timeDim = find(dataSize == nTime);
+else
+    nDim = length(dataSize);
+    varValue = permute(varValue,fliplr(1:1:nDim));
+    dataSize = size(varValue);
+end
 
 if timeDim>0
           
     if ~status
         setAppend = true;
         comment('Creating a new variable \n',setComment);
-        dataMaxSize = Inf*ones(1,nDim);
-        chunkSize = ceil(dataSize/2);
-        h5create(h5FileStr, datasetPath, dataMaxSize, 'ChunkSize', chunkSize, 'Deflate', 9);
+        dataMaxSize = dataSize;
+        dataMaxSize(timeDim) = Inf;
+        chunkSize = dataSize;
+        chunkSize(timeDim) = 1;
+        h5create(h5FileStr, datasetPath, dataMaxSize, 'ChunkSize', chunkSize,...
+            'Deflate', 9);
         [status, info, ~] = ish5dataset(h5FileStr, datasetPath);
         dataMaxSizeOld = info.Dataspace.MaxSize;
         dataSizeOld = info.Dataspace.Size;
@@ -72,12 +81,11 @@ else
     if ~status
         comment('Creating a new variable \n',setComment);
         dataMaxSize = dataSize;
-        chunkSize = ceil(dataSize/2);
+        chunkSize = ceil(dataSize/4);
         h5create(h5FileStr, datasetPath, dataMaxSize, 'ChunkSize', chunkSize, 'Deflate', 9);        
-    else
-        comment('Rewriting the variable, since variable time independent \n',setComment);
-        h5write(h5FileStr,datasetPath,varValue);
     end
+    comment('Rewriting the variable, since variable time independent \n',setComment);
+    h5write(h5FileStr,datasetPath,varValue);
 end
 
 comment(['Succeeded in writing ',datasetPath,' \n'],setComment);

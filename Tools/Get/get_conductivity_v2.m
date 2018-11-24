@@ -1,5 +1,6 @@
 function [ data, input ] = get_conductivity_v2( alt, electronDensity,...
-    latitude, longitude, time, mode, outputs, setPlotConductivity )
+    latitude, longitude, time, mode, outputs, setPlotConductivity,...
+    iriData, msisData)
 %get_conductivity_v2.m returns the hall and pederson conductivity given an
 %input electron density value, along with some other output parameters.
 %Uses msis and iri models that run locally, instead on online servers.
@@ -32,6 +33,14 @@ function [ data, input ] = get_conductivity_v2( alt, electronDensity,...
 %----------------------------------------------------------------------------
 
 % Initilization
+    if nargin <10
+        msisData = [];
+    end
+    
+    if nargin < 9
+        iriData = [];
+    end
+    
     if nargin<8
         setPlotConductivity = false;
     end
@@ -57,7 +66,9 @@ function [ data, input ] = get_conductivity_v2( alt, electronDensity,...
     end
 
 % IRI2016
-    iriData = iri2016f90(time, alt, latitude, longitude);
+    if isempty(iriData)
+        iriData = iri2016f90(time, alt, latitude, longitude);
+    end
     Ti = iriData.Ti';
     Te = iriData.Te';
 
@@ -79,8 +90,10 @@ function [ data, input ] = get_conductivity_v2( alt, electronDensity,...
     lat1=latitude*ones(size(alt1));
     lon1=longitude*ones(size(alt1));
 	
-    msisData = msis_irbem(time, [alt1',lat1',lon1']);
-        
+    if isempty(msisData)
+        msisData = msis_irbem(time, [alt1',lat1',lon1']);
+    end
+    
     Nn(:,1)     = msisData.O; %O
 	Nn(:,2)     = msisData.N2; %N2
 	Nn(:,3)     = msisData.O2; %O2

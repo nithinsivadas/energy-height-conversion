@@ -26,6 +26,10 @@ function [out, in] = add_conductivity_hdf5(inputH5Str,outputH5Str,setInterpNe)
 % 
 %----------------------------------------------------------------------------
 
+% Max time instances that can be recorded to HDF5 file at once
+% to avoid memory errors
+nTimeMax = 1000;
+
 % Extracting Data from InputH5File
 time = h5read(inputH5Str,'/energyFluxFromMaxEnt/time'); 
 Ne = h5read(inputH5Str,'/inputData/Ne');
@@ -39,12 +43,19 @@ lon = mean(reshape(squeeze(coords(:,:,2)),1,[]));
 
 % Numbers necessary to convert the array back to matrix
 nBeams = size(coords,2);
-nAlt = size(coords,1);
 nTime = length(time);
-pTimeIndx = find_time(time,'26-Mar-2008 11:08');
+
+% nTime = 3;
+% pTimeIndx = find_time(time,'26-Mar-2008 11:08');
+
 % Calculating conductivity
-tic
-for iTime = pTimeIndx:1:pTimeIndx
+multiWaitbar('Calculating conductivity...',0);
+di = 1./nTime;
+for iTime = 1:1:nTime
+    alt1 = linspace(min(alt(:)),max(alt(:)),2*length(alt(:,1)));
+    lat1 = lat*ones(size(alt1));
+    lon1 = lon*ones(size(alt1));
+    msisData = msis_irbem(time(iTime), [alt1',lat1',lon1']);
    for iBeam = 1:1:nBeams
        
         inputNe = squeeze(Ne(:,iBeam,iTime));
@@ -54,32 +65,53 @@ for iTime = pTimeIndx:1:pTimeIndx
         end
        inputAlt = squeeze(alt(:,iBeam));
        
-       [data, input] = get_conductivity_v2(inputAlt, inputNe, lat, lon,...
-           time(iTime), 0, {'all'}, false);
+       % Compromise to increase the code-speed by 10 times. 
+       inputMsisData.AltTemp = interp1(alt1,msisData.AltTemp,inputAlt);
+       inputMsisData.O = interp1(alt1,msisData.O,inputAlt);
+       inputMsisData.N2 = interp1(alt1,msisData.N2,inputAlt);
+       inputMsisData.O2 = interp1(alt1,msisData.O2,inputAlt);
+       inputMsisData.totalNumberDensity = interp1(alt1,msisData.totalNumberDensity,inputAlt);
        
-       out.sigma_P(:,iBeam,iTime) = data.pedersonConductivity;
-       out.sigma_H(:,iBeam,iTime) = data.hallConductivity;
-       out.alt(:,iBeam,iTime) = data.altitude;
-       out.time(iTime) = time(iTime);
+       [data, input] = get_conductivity_v2(inputAlt, inputNe, lat, lon,...
+           time(iTime), 0, {'all'}, false,[],inputMsisData);
+       
+       out.sigma_P(:,iBeam,iTime) = real(data.pedersonConductivity);
+       out.sigma_H(:,iBeam,iTime) = real(data.hallConductivity);
+       out.alt(:,iBeam,1) = data.altitude;
+       out.time(iTime) = posixtime(datetime(time(iTime),'ConvertFrom','datenum'));
        in.Ne(:,iBeam,iTime) = input.electronDensity;
-       in.Ne0(:,iBeam,iTime) = inputNe;
+%        in.Ne0(:,iBeam,iTime) = inputNe;
    end
-end
-toc
-figure; 
-semilogx(squeeze(out.sigma_P(:,13,iTime)),squeeze(out.alt(:,13,iTime))); 
-hold on; 
-semilogx(squeeze(out.sigma_H(:,13,iTime)),squeeze(out.alt(:,13,iTime)),'-');
-title(datestr(time(iTime)));
-% alt1 = convert_array_to_3D(alt,nAlt,nBeams); %Converting
-
+   multiWaitbar('Calculating conductivity...','Increment',di);
 end
 
-function matrix = convert_array_to_3D(array,nAlt,nBeams)
-matrix = reshape(array,nAlt,nBeams); %Converting
-end
+multiWaitbar('Writing to HDF5...',0);
 
-function array = convert_matrix_to_1D(matrix)
-array = reshape(matrix,1,[]); %Converting
+for iTimeMax = 1:1:ceil(nTime./nTimeMax)
+    multiWaitbar('Writing to HDF5...',0.5);
+    timeIndx = 1 + (iTimeMax-1)*nTimeMax:1:min(iTimeMax*nTimeMax,nTime);
+    write_h5_dataset(outputH5Str,'/conductivity/time',...
+        time(timeIndx)',1);
+    write_h5_dataset(outputH5Str,'/conductivity/sigmaP',...
+        permute(out.sigma_P(:,:,timeIndx),[3 2 1]),1);
+    write_h5_dataset(outputH5Str,'/conductivity/sigmaH',...
+        permute(out.sigma_H(:,:,timeIndx),[3 2 1]),1);
+    write_h5_dataset(outputH5Str,'/conductivity/inputNe',...
+        permute(in.Ne(:,:,timeIndx),[3 2 1]),1);
 end
+write_h5_dataset(outputH5Str,'/conductivity/alt',...
+        out.alt',0);
 
+write_h5_dataset_attribute(outputH5Str,'/conductivity/time',...
+    [],[],[],'time');
+write_h5_dataset_attribute(outputH5Str,'/conductivity/sigmaP',...
+    'Peserson conductivity profiles','[nTime x nBeams x nAlt]','[S m^-^1]');
+write_h5_dataset_attribute(outputH5Str,'/conductivity/sigmaH',...
+    'Hall conductivity profiles','[nTime x nBeams x nAlt]','[S m^-^1]');
+write_h5_dataset_attribute(outputH5Str,'/conductivity/inputNe',...
+    'Electron density profile used to calculate conductivity','[nTime x nBeams x nAlt]','[m^-^3]');
+write_h5_dataset_attribute(outputH5Str,'/conductivity/alt',...
+    'Altitude','[nBeams x nAlt]','[km]');
+multiWaitbar('Writing to HDF5...',1);
+
+end
