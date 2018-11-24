@@ -1,0 +1,11 @@
+%% Research log
+24th Nov 2018
+C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\Routines\Test\conductivity20080326.mlx
+G:\My Drive\Research\Projects\Yiqun Yu\PFISR\conductance....png
+
+Here D-region is considered to be from 70-97 km (> 30 keV electrons)
+Conductance contribution of D-region is about ~30% in EEA and ~50% in onset for Hall conductances
+                                          and ~ 5% in EEA and ~10% in onset for Pedersen conductances
+The total conductance of the EEA (D+E-region) is about 1/2 that of the conductance during Onset.
+
+25th Nov 2018                                           

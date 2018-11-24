@@ -43,5 +43,14 @@ Listing several things to track:
 	shell>> git clone https://github.com/scivision/IRI2016.git
 	Go into the repository and install
 	shell>> pip install -e .
+	
+	However, python has some errors. So we can separately compile the fortan code, 
+	and use iri2016_driver.for to generate text that can be parsed by MATLAB. 
+	shell>> git pull
+	shell>> cd /IRI2016/bin
+	shell>> cmake ../src
+	shell>> make
+
+	Once the fortran is compiled, you can use /IRI2016/matlab/iri2016.m function to generate IRI data. 
 
 	3.8 Financial Toolbox for MATLAB (to run f107_aph.m)
