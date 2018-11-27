@@ -13,6 +13,11 @@ Listing several things to track:
 	Fix errors here:
 	http://seanelvidge.com/2017/01/install-g77-on-ubuntu-14-04/
 
+	3.10 MinGW
+	MinGW has the FORTRAN compiler necessary to compile IRI2016
+	https://www.scivision.co/windows-gcc-gfortran-cmake-make-install/
+	This might conflict with G77 path, and hence was removed. 
+
 	3.2 MagParameterProgram
 	Compile the fortran code
 	Add folder to .gitignore
@@ -23,6 +28,10 @@ Listing several things to track:
 	3.4 IRBEM
 	Download IRBEM, and install according to instructions. And add it to MATLAB path file.
 	If one cannot edit MATLAB path file, use setup.m in MATLAB folder.
+
+	3.8 Financial Toolbox for MATLAB (to run f107_aph.m)
+
+	3.9 MATLAB mapping Toolbox
 
 	3.5 Python
 	MATLAB can access python with limited functionality. Check version of Python
@@ -43,14 +52,12 @@ Listing several things to track:
 	shell>> git clone https://github.com/scivision/IRI2016.git
 	Go into the repository and install
 	shell>> pip install -e .
-	
-	However, python has some errors. So we can separately compile the fortan code, 
-	and use iri2016_driver.for to generate text that can be parsed by MATLAB. 
+
+	However, python has some errors. So we can separately compile the fortan code,
+	and use iri2016_driver.for to generate text that can be parsed by MATLAB.
 	shell>> git pull
 	shell>> cd /IRI2016/bin
 	shell>> cmake ../src
 	shell>> make
 
-	Once the fortran is compiled, you can use /IRI2016/matlab/iri2016.m function to generate IRI data. 
-
-	3.8 Financial Toolbox for MATLAB (to run f107_aph.m)
+	Once the fortran is compiled, you can use /IRI2016/matlab/iri2016.m function to generate IRI data.

@@ -16,7 +16,7 @@ function dataset = read_h5_data (h5FilePath, groupPath)
 %
 % created by: Nithin Sivadas
 % DATE: 23-Nov-2018
-%
+% UPDATE: 25-Nov-2018
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if nargin<2
         groupPath = '/';
@@ -39,8 +39,10 @@ function dataset = read_h5_data (h5FilePath, groupPath)
         dataset{thisDataset,8} = string({info.Attributes.Value}); % Attribute Values
         
         % Permuting H5 data, to resolve the matlab/hdf5 conversion problem
-        permuteVar = fliplr(1:1:length(info.Dataspace.Size));
-        dataset{thisDataset,3} = ipermute(dataset{thisDataset,3},permuteVar);
+        permuteVar = fliplr(1:1:length(size(dataset{thisDataset,3})));
+        if ~isempty(permuteVar)
+            dataset{thisDataset,3} = ipermute(dataset{thisDataset,3},permuteVar);
+        end
         dataset{thisDataset,4} = fliplr(dataset{thisDataset,4});
         dataset{thisDataset,5} = fliplr(dataset{thisDataset,5});
         dataset{thisDataset,6} = fliplr(dataset{thisDataset,6});
