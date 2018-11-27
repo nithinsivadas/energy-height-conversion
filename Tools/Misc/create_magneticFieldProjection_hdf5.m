@@ -62,7 +62,13 @@ end
 nTime = length(time);
 
 [maginput,timeMaginput] = generate_maginput(omniH5FileStr,time(1),time(end));
-maginputInterpolated = interp1(timeMaginput,maginput,time,'nearest','extrap');
+if size(timeMaginput)>1
+    maginputInterpolated = interp1(timeMaginput,maginput,time,'nearest','extrap');
+else
+    maginputInterpolated = maginput;
+end
+maginputInterpolated = filter_irbem_maginput(magFieldModel,maginputInterpolated);
+
 GDZ(2,:)=latNew(~isnan(latNew));
 GDZ(3,:)=lonNew(~isnan(latNew));
 GDZ(1,:)=altNew(~isnan(latNew));
@@ -76,10 +82,10 @@ for i = 1:1:length(data(1,:))
     switch length(data{2,i})
         case 4
             dataSize = fliplr(data{2,i});
-            chunkSize = [3, 3, 100, 2];
+            chunkSize = [3, 3, 100, 1];
         case 3
             dataSize = fliplr(data{2,i});
-            chunkSize = [3, 100, 2];
+            chunkSize = [3, 100, 1];
         case 2
             dataSize = fliplr(data{2,i});
             chunkSize = [1, 100];

@@ -36,29 +36,30 @@ groupName = ['/',upper(siteName),'/'];
 
 [datasetExists, datasetInfo]=ish5dataset(outputH5FileStr,groupName);
 if ~datasetExists
-    error(['Dataset ',groupName,' does not exist']);
+    warning(['Dataset ',groupName,' does not exist']);
+    background = nan;
+else
+    tempData = (h5read(outputH5FileStr,[groupName,'ASI']));
+    tempData(tempData>10000) = nan; % Removing all bright objects (like the moon)
+
+    background = nanmedian(tempData(:)); % Taking the median of pixels in all time
+                                         % and since most of the time, there is no aurora
+                                         % you can expect the result to be the background
+                                         % night-time pixel intensity.
+                                         % (Or at least that is what this assumes.)
+
+    [datasetExists, datasetInfo]=ish5dataset(outputH5FileStr,[groupName,'background']);
+    if ~datasetExists
+        h5create(outputH5FileStr,[groupName,'background'],1);
+        h5writeatt(outputH5FileStr,[groupName,'background'],...
+                'Dimensions','1 - estimated pixel intensity value of background');
+        h5writeatt(outputH5FileStr,[groupName,'background'],...
+                'Units','1 - estimated pixel intensity value of background');
+        h5writeatt(outputH5FileStr,[groupName,'background'],...
+                'updated_date',datestr(now));
+    end
+    h5write(outputH5FileStr,[groupName,'background'],background);
 end
-
-tempData = (h5read(outputH5FileStr,[groupName,'ASI']));
-tempData(tempData>10000) = nan; % Removing all bright objects (like the moon)
-
-background = nanmedian(tempData(:)); % Taking the median of pixels in all time
-                                     % and since most of the time, there is no aurora
-                                     % you can expect the result to be the background
-                                     % night-time pixel intensity.
-                                     % (Or at least that is what this assumes.)
-
-[datasetExists, datasetInfo]=ish5dataset(outputH5FileStr,[groupName,'background']);
-if ~datasetExists
-    h5create(outputH5FileStr,[groupName,'background'],1);
-    h5writeatt(outputH5FileStr,[groupName,'background'],...
-            'Dimensions','1 - estimated pixel intensity value of background');
-    h5writeatt(outputH5FileStr,[groupName,'background'],...
-            'Units','1 - estimated pixel intensity value of background');
-    h5writeatt(outputH5FileStr,[groupName,'background'],...
-            'updated_date',datestr(now));
-end
-h5write(outputH5FileStr,[groupName,'background'],background);
 
 end
 %------------- END CODE --------------
