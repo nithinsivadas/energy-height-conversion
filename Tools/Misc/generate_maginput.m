@@ -1,8 +1,8 @@
-function [maginput,time,header,units] = generate_maginput(omniH5FileStr, timeMin, timeMax)
+function [maginput,time,header,units] = generate_maginput(omniH5FileStr, timeMinStr, timeMaxStr)
     %% Generate maginput from omni.h5
     omniTime = unixtime2matlab(h5read(omniH5FileStr,'/Time'));
-    minTimeIndx = find_time(omniTime,datestr(timeMin));
-    maxTimeIndx = find_time(omniTime,datestr(timeMax));
+    minTimeIndx = find_time(omniTime,datestr(timeMinStr));
+    maxTimeIndx = find_time(omniTime,datestr(timeMaxStr));
     deltaTimeIndx = maxTimeIndx - minTimeIndx +1;
     timeIndx = minTimeIndx:1:maxTimeIndx;
     header = ["Kp","SYM_H(Dst)","ProtonDensity",...

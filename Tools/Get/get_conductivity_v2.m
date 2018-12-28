@@ -202,7 +202,7 @@ function [ data, input ] = get_conductivity_v2( alt, electronDensity,...
         sigma_H1 =  sigma_H1 + C(:,i).*(k_i(:,i).^2)./(1+(k_i(:,i).^2));
     end
     sigma_P = (q*ne./B).*(sigma_P + (k_e)./(1+k_e.^2));
-    sigma_H = (q*ne./B).*abs((sigma_H1 - (k_e.^2)./(1+k_e.^2)));
+    sigma_H = -1*(q*ne./B).*(sigma_H1 - (k_e.^2)./(1+k_e.^2)); % The negative sign is important
 
 % Storing output
 

@@ -59,7 +59,7 @@ mlat = padData.tha.mlatFoot;
 mlt = padData.tha.mltFoot;
 Lm = padData.tha.Lm;
 yAxis = padData.tha.energyBin/1000; % Converting to keV
-zValue = padData.tha.lcDiffEfluxAr' * 10^4; % Converting to eV/m2 sr s eV
+zValue = padData.tha.lcDiffEfluxLi' * 10^4; % Converting to eV/m2 sr s eV
 zValue(zValue<0) = 10^3;
 p(1,1).select();
 title('THEMIS Loss cone flux : 26 Mar 2008');
@@ -82,7 +82,7 @@ mlat = padData.thd.mlatFoot;
 mlt = padData.thd.mltFoot;
 Lm = padData.thd.Lm;
 yAxis = padData.thd.energyBin/1000;
-zValue = padData.thd.lcDiffEfluxAr' * 10^4;
+zValue = padData.thd.lcDiffEfluxLi' * 10^4;
 zValue(zValue<0) = 10^3;
 p(1,2).select();
 plot_2D_time_series(time,yAxis,log10(zValue),0.5,0);
@@ -98,13 +98,22 @@ cb2.Label.String = '[eV m^-^2 s^-^1 sr^-^1 eV^-^1]';
 add_horizontal_axes(TTick,TTickLim,time,mlat,'MLAT',1);
 add_horizontal_axes(TTick,TTickLim,time,mlt,'MLT',2);
 add_horizontal_axes(TTick,TTickLim,time,Lm,'Lm',3);
+cumEnergyFlux = diff_to_cumu_flux(zValue(30:end,:),yAxis(30:end));
+medianIndx = find_median_energy(cumEnergyFlux,1);
+cumEnergyBin = yAxis(30:end);
+plot(time,cumEnergyBin(medianIndx),'c');
+
+cumEnergyFluxLow = diff_to_cumu_flux(zValue(1:30,:),yAxis(1:30));
+medianIndx = find_median_energy(cumEnergyFluxLow,1);
+cumEnergyBinLow = yAxis(1:30);
+plot(time,cumEnergyBinLow(medianIndx),'m');
 
 time = padData.the.time;
 mlat = padData.the.mlatFoot;
 mlt = padData.the.mltFoot;
 Lm = padData.the.Lm;
 yAxis = padData.the.energyBin/1000;
-zValue = padData.the.lcDiffEfluxAr' * 10^4;
+zValue = padData.the.lcDiffEfluxLi' * 10^4;
 zValue(zValue<0) = 10^3;
 p(1,3).select();
 plot_2D_time_series(time,yAxis,log10(zValue),0.5,0);
@@ -120,3 +129,12 @@ cb3.Label.String = '[eV m^-^2 s^-^1 sr^-^1 eV^-^1]';
 add_horizontal_axes(TTick,TTickLim,time,mlat,'MLAT',2);
 add_horizontal_axes(TTick,TTickLim,time,mlt,'MLT',3);
 add_horizontal_axes(TTick,TTickLim,time,Lm,'Lm',4);
+cumEnergyFlux = diff_to_cumu_flux(zValue(30:end,:),yAxis(30:end));
+medianIndx = find_median_energy(cumEnergyFlux,1);
+cumEnergyBin = yAxis(30:end);
+plot(time,cumEnergyBin(medianIndx),'c');
+
+cumEnergyFluxLow = diff_to_cumu_flux(zValue(1:30,:),yAxis(1:30));
+medianIndx = find_median_energy(cumEnergyFluxLow,1);
+cumEnergyBinLow = yAxis(1:30);
+plot(time,cumEnergyBinLow(medianIndx),'m');

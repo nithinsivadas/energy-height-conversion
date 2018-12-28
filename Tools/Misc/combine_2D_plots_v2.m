@@ -1,4 +1,4 @@
-function [p] = combine_2D_plots_v2(inputH5FileStr,figureHandle,...
+function [axesHandleOptical,axesmHandleOptical] = combine_2D_plots_v2(inputH5FileStr,figureHandle,...
     varargin)
 %combine_2D_plots Plot optical images, energy flux maps, and or magnetic
 %field maps over one another.
@@ -118,12 +118,38 @@ for iTime = 1:1:nTime
                     'plotData',maps.opticalData(i),...
                     'thisTimeIndx', thisTimeIndx,...
                     'site', p.Results.sites{maps.optical(i)});
-            
+              bias = 0;
+              intensityScale = 250./dascData.background;
             if strcmpi(p.Results.sites(maps.optical(i)),'pokerFlat')
-                intensityScale = 250./(dascData.background-25); % Custom scaling
+                intensityScale = intensityScale.*4; % Custom scaling
+                bias = -250;
+                %                 bias = -1*dascData.background + 250;
+            elseif strcmpi(p.Results.sites(maps.optical(i)),'fykn')
+%                 intensityScale = 1; % Custom scaling 1.5
+%                 bias = -1*dascData.background ; %+1000
+                  intensityScale = intensityScale*4.2;
+                  bias = -2000;
+                  
+            elseif strcmpi(p.Results.sites(maps.optical(i)),'gako')
+%                 intensityScale = 1; % Custom scaling 0.8
+%                 bias = -1*dascData.background ; %250
+            elseif strcmpi(p.Results.sites(maps.optical(i)),'mcgr')
+%                 intensityScale = 1; % Custom scaling 0.4
+%                 bias = -1*dascData.background ; %+750
+            elseif strcmpi(p.Results.sites(maps.optical(i)),'kian')
+%                 intensityScale = 1; % Custom scaling 0.4
+%                 bias = -1*dascData.background ; %250
+            elseif  strcmpi(p.Results.sites(maps.optical(i)),'inuv')
+%                 intensityScale = 1; % Custom scaling 1.5
+%                 bias = -1*dascData.background ; %250
+            elseif  strcmpi(p.Results.sites(maps.optical(i)),'whit')
+%                 intensityScale = 1; % Custom scaling 0.4
+%                 bias = -1*dascData.background ; %150
             else
-                intensityScale = 250./dascData.background; %Scale size of the intensities measured
+%                 intensityScale = 1; %Scale size of the intensities measured
+%                 bias = -1*dascData.background ; %250
             end
+            
             % Cutting-off elevation below the specified
             dascData.image(maps.opticalData(i).elevation<p.Results.elCutoff) = nan;
             dascData.image(isnan(maps.opticalData(i).elevation))=nan;
@@ -137,11 +163,12 @@ for iTime = 1:1:nTime
                 
 %                 maxMedianMarker = nightsky(i)./max(dascData.image(:));
                 axesHandleOptical=axes;
-                [axesmHandleOptical, hOptical(i)] = plot_DASC_geodetic((dascData.image(:)').*intensityScale,...
+                [axesmHandleOptical, hOptical(i)] = plot_DASC_geodetic((dascData.image(:)'+ bias).*intensityScale ,...
                     dascData.thisTime, dascData.latitude(:)', dascData.longitude(:)',...
                     p.Results.imageSize, p.Results.latLim, p.Results.lonLim, ...
                     p.Results.deltaLat,p.Results.deltaLon);
-                    colormap(axesHandleOptical,'viridis');
+                    cm=get_colormap('w',[0,0.2,0]);
+                    colormap(axesHandleOptical,cm);
                     cbOptical = colorbar(axesHandleOptical,'eastoutside');
                     ylabel(cbOptical,'[a.u.]');
                     caxis(axesHandleOptical,p.Results.opticalLim);
@@ -152,11 +179,12 @@ for iTime = 1:1:nTime
                 hold on;
 %                 dascData.image(dascData.image>=65536)=nan; % Remove saturated pixels (16Bit)
                 
-                [~,hOptical(i)]=plot_DASC_geodetic((dascData.image(:)').*intensityScale,...
+                [~,hOptical(i)]=plot_DASC_geodetic((dascData.image(:)'+ bias).*intensityScale ,...
                     dascData.thisTime, dascData.latitude(:)', dascData.longitude(:)',...
                     p.Results.imageSize, p.Results.latLim, p.Results.lonLim, ...
                     p.Results.deltaLat,p.Results.deltaLon);
-                    colormap(axesHandleOptical,'viridis');
+                    cm=get_colormap('w',[0,0.2,0]);
+                    colormap(axesHandleOptical,cm);
                     caxis(axesHandleOptical,p.Results.opticalLim);
                 
                 end

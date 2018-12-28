@@ -34,8 +34,12 @@ function [ medianIndex ] = find_median_energy( array, dim )
   
   for thisCol=1:1:size(array,2)
       array(:,thisCol)=100*array(:,thisCol)/max(array(:,thisCol));
-      medianIndex(thisCol) = find(array(:,thisCol)>50,1);
-  end;
+      try
+        medianIndex(thisCol) = find(array(:,thisCol)>50,1);
+      catch
+        medianIndex(thisCol) = 1;
+      end
+  end
 
 end
 

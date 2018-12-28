@@ -17,7 +17,8 @@ energySlice = 100; %keV
 dascImage = permute(h5read(h5FileStr,'/DASC/ASI'),[3 2 1]);
 [dascKeo,dascLat,meridian] = create_keogram(dascImage,dascData.latitude,dascData.longitude);
 pfisrImage = permute(h5read(h5FileStr,'/energyFluxFromMaxEnt/energyFlux'),[3 2 1]);
-
+%%
+pfisrImageNumF = pfisrImage./permute(repmat(pfisrData.zEnergyBin,1,1,size(pfisrImage,1)),[3,1,2]);
 %%
 [pfisrImage150,pfisrLat150,pfisrLon150,projAlt150] = get_pfisr_energy_slice(pfisrImage,pfisrData,150,100); 
 [pfisrKeo150,pfisrPar150] = create_keogram(pfisrImage150,pfisrLat150,pfisrLon150,'meridian',meridian,'latPixelNum',6);
@@ -30,15 +31,29 @@ pfisrImage = permute(h5read(h5FileStr,'/energyFluxFromMaxEnt/energyFlux'),[3 2 1
 %%
 [pfisrImageAll,pfisrLatAll,pfisrLonAll,projAltAll]=integrate_pfisr_energy(pfisrImage,pfisrData,100);
 [pfisrKeoAll,pfisrParAll] = create_keogram(pfisrImageAll,pfisrLatAll,pfisrLonAll,'meridian',meridian,'latPixelNum',6);
+%%
+[pfisrImageLE,pfisrLatLE,pfisrLonLE,projAltLE]=integrate_pfisr_energy(pfisrImage,pfisrData,15,[1,50].*1000);
+[pfisrKeoLE,pfisrParLE] = create_keogram(pfisrImageLE,pfisrLatLE,pfisrLonLE,'meridian',meridian,'latPixelNum',6);
+
+[pfisrImageHE,pfisrLatHE,pfisrLonHE,projAltHE]=integrate_pfisr_energy(pfisrImage,pfisrData,100,[50,300].*1000);
+[pfisrKeoHE,pfisrParHE] = create_keogram(pfisrImageHE,pfisrLatHE,pfisrLonHE,'meridian',meridian,'latPixelNum',6);
+
+%% pfisr diff number density
+[pfisrImageLENumF,pfisrLatLENumF,pfisrLonLENumF,projAltLENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,15,[1,50].*1000);
+[pfisrKeoLENumF,pfisrParLENumF] = create_keogram(pfisrImageLENumF,pfisrLatLENumF,pfisrLonLENumF,'meridian',meridian,'latPixelNum',6);
+
+[pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,projAltHENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,100,[50,300].*1000);
+[pfisrKeoHENumF,pfisrParHENumF] = create_keogram(pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,'meridian',meridian,'latPixelNum',6);
+
 multiWaitbar('CLOSEALL');
 %%
 timeMinStr = '26-Mar-2008 10:30';
 timeMaxStr = '26-Mar-2008 11:45';
 
-totalPanelNo=5;
+totalPanelNo=7;
 clf;
 
-p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelSize',25);
+p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
 
 q=p(1);
 
@@ -80,17 +95,49 @@ plot_pfisr_energy_keogram(pfisrKeoAll*C.e*pi*1000,pfisrParAll,pfisrData,false,ti
 ylabel('1-300 keV');
 
 q(3).select();
+plot(pfisrData.time,pfisrKeoLE(3,:)*C.e*pi*(1e+7).*(1e-4),'k'); 
+hold on; 
+plot(pfisrData.time,pfisrKeoHE(3,:)*C.e*pi*(1e+7).*(1e-4),'r');
+set(gca,'XTickLabel','');
+xlim([datenum(timeMinStr), datenum(timeMaxStr)]);
+legend('1-50 keV','50-300 keV');
+ylabel('[mW/m^2]');
+ylim([0,3]);
+
+q(4).select();
+% plot(pfisrData.time,pfisrKeoLENumF(3,:)*pi.*(1e-4),'k'); 
+% hold on; 
+plot(pfisrData.time,pfisrKeoHENumF(3,:)*pi.*(1e-4),'r'); % convert Sr, and m2 to cm2
+set(gca,'XTickLabel','');
+xlim([datenum(timeMinStr), datenum(timeMaxStr)]);
+legend('50-300 keV');
+ylabel('F_a_t_m [cm^-^2 s^-^1]');
+ylim([10^5,10^7]);
+
+% q(5).select();
+% % plot(pfisrData.time,pfisrKeoLENumF(3,:)*pi.*(1e-4),'k'); 
+% % hold on; 
+% plot(pfisrData.time,(pfisrKeo150(3,:)*pi.*(1e-4)./(150e+3))*70*1000,'r');
+% set(gca,'XTickLabel','');
+% xlim([datenum(timeMinStr), datenum(timeMaxStr)]);
+% legend('150 keV');
+% ylabel('F_a_t_m [cm^-^2 s^-^1]');
+% % ylim([10^5,10^7]);
+
+q(5).select();
 plot_pfisr_energy_keogram(pfisrKeo100,pfisrPar100,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
 ylabel('100 keV');
 
-q(4).select();
+q(6).select();
 plot_pfisr_energy_keogram(pfisrKeo70,pfisrPar70,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
 ylabel('50 keV');
 
-q(5).select();
+q(7).select();
 plot_pfisr_energy_keogram(pfisrKeo30,pfisrPar30,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
 label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr);
 ylabel('30 keV');
+
+
 %%
 function [image,lat,lon,projectionAltitude]=get_pfisr_energy_slice(pfisrImage,pfisrData,energySlice,projectionEnergySlice)
     for i=1:1:length(pfisrData.time)
@@ -104,19 +151,27 @@ function [image,lat,lon,projectionAltitude]=get_pfisr_energy_slice(pfisrImage,pf
         lon(ib) = interp1(pfisrData.zEnergyBin(ib,:),pfisrData.longitude(ib,:),projectionEnergySlice*1000);
     end
 end
-function [image,lat,lon,projectionAltitude]=integrate_pfisr_energy(pfisrImage,pfisrData,projectionEnergySlice)
+function [image,lat,lon,projectionAltitude]=integrate_pfisr_energy(pfisrImage,...
+    pfisrData,projectionEnergySlice,energyLim)
+    if nargin <4
+        energyLim = [1,1000].*1000;
+    end
+    energyMinIndx =  interp1(pfisrData.zEnergyBin(1,:),...
+        1:1:length(pfisrData.zEnergyBin(1,:)),energyLim(1),'nearest');
+    energyMaxIndx =  interp1(pfisrData.zEnergyBin(1,:),...
+        1:1:length(pfisrData.zEnergyBin(1,:)),energyLim(2),'nearest');
+    energyIndx = energyMinIndx:1:energyMaxIndx;
     for i=1:1:length(pfisrData.time)
         
-    image(i,:) = trapz(pfisrData.zEnergyBin(1,:),squeeze(pfisrImage(i,:,:)),2);     
+    image(i,:) = trapz(pfisrData.zEnergyBin(1,energyIndx),squeeze(pfisrImage(i,:,energyIndx)),2);     
         
     end
     projectionAltitude = calculate_peak_altitude_of_ionization(projectionEnergySlice*1000,pfisrData.timeNeutralAtmosphere);
     for ib = 1:1:size(pfisrData.latitude,1)
-        lat(ib) = interp1(pfisrData.zEnergyBin(ib,:),pfisrData.latitude(ib,:),projectionEnergySlice*1000);
-        lon(ib) = interp1(pfisrData.zEnergyBin(ib,:),pfisrData.longitude(ib,:),projectionEnergySlice*1000);
+        lat(ib) = interp1(pfisrData.zEnergyBin(ib,energyIndx),pfisrData.latitude(ib,energyIndx),projectionEnergySlice*1000);
+        lon(ib) = interp1(pfisrData.zEnergyBin(ib,energyIndx),pfisrData.longitude(ib,energyIndx),projectionEnergySlice*1000);
     end
 end
-
 
 function plot_pfisr_energy_keogram(pfisrKeo,pfisrLat,pfisrData,setLabelTime,...
     timeMinStr,timeMaxStr,cLabelStr,cLim)
