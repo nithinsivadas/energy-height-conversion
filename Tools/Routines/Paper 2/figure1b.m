@@ -83,7 +83,7 @@ deltaLon = 10;
 storeImageDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Figures\Draft\Figure1b\';
 for i = 1:1:nTime
 h=figure('visible','on');
-[ax1,axm1]=combine_2D_plots_v2(fileStr,h,...
+[ax1]=combine_2D_plots_v2(fileStr,h,...
     'maps',{'OpticalImage','OpticalImage','OpticalImage','OpticalImage','OpticalImage','OpticalImage'},...
     'sites',{'inuv','pokerFlat','fykn','gako','whit','mcgr'},...
     'thisTime',time(i),...
@@ -159,7 +159,7 @@ scatterm(poesNFoot(:,2)',poesNFoot(:,3)',...
     5,log10(poesColor'),'filled');
 
 hold on;
-plotm(thisPoesNFoot(:,2),thisPoesNFoot(:,3),'or');    
+plotm(thisPoesNFoot(:,2),thisPoesNFoot(:,3),'or');
 
 cb3 = colorbar('Location','southoutside');
 cb3.Position(1) = 0.5;
@@ -191,7 +191,7 @@ function plot_time_markers(time,lat,lon,markTimeArr,orientation,tickColor,textCo
     if nargin <6
         tickColor = 'k';
     end
-        
+
     if strcmpi(orientation(1:5),'North')
 %         dlat = +0.2;
         dlat = +0.05;
@@ -205,8 +205,8 @@ function plot_time_markers(time,lat,lon,markTimeArr,orientation,tickColor,textCo
     elseif strcmpi(orientation(6:9),'West')
 %         dlon = -3;
         dlon = -1;
-    end 
-    
+    end
+
     for i = 1:length(markTimeArr)
         thisTimeIndx = find_time(time,datestr(markTimeArr(i)));
         plotm(lat(thisTimeIndx),lon(thisTimeIndx),'.','Color',tickColor);
@@ -215,20 +215,20 @@ function plot_time_markers(time,lat,lon,markTimeArr,orientation,tickColor,textCo
             'Color',textColor);
                 %         create_perp_line(lat,lon,thisTimeIndx,orientation(1:5));
     end
-    
+
 end
 
 function create_perp_line(lat,lon,markTimeArrIndx,orientation,tickLength)
     if nargin<6
         tickLength = 0.1;
     end
-    
+
     if strcmpi(orientation(1:5),'North')
         dlat = 1;
     elseif strcmpi(orientation(1:5),'South')
         dlat = -1;
     end
-    
+
     for i = length(markTimeArrIndx)
         thisTimeIndx = markTimeArrIndx(i);
         lat1 = lat(thisTimeIndx);
@@ -242,5 +242,5 @@ function create_perp_line(lat,lon,markTimeArrIndx,orientation,tickLength)
         hold on;
         plotm([lat1,lat2],[lon1,lon2],'k');
     end
-    
+
 end

@@ -13,9 +13,9 @@ timeMaxIndx = find_time(time,'26-Mar-2008 11:45');
 
 pfisrData = get_2D_plot_inputs_time_independent(h5FileStr,...
     'plotModeStr','EnergyFluxMap');
-
+%%
 ibeam = 13;
-energySlice = 1:1:500; %keV
+energySlice = pfisrData.zEnergyBin(ibeam,:)/1000; %keV
 
 %%
 k=1;
@@ -97,7 +97,7 @@ for iTime = 1:1:length(thisTimeDASC)-dTimeIndx-1
 end
 
 %%
-totalPanelNo=1;
+totalPanelNo=2;
 p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
 q=p(1);
 q(1).select();
@@ -127,9 +127,33 @@ scatter(peakEnergytime(tindx1:tindx2,1)...
     ,peakEnergy(tindx1:tindx2),(sz*5).^3,...
     'filled','MarkerFaceColor','r', 'MarkerFaceAlpha',.5);
 set(gca,'ycolor','r','YTick',[0,30,50,100,150],'Ygrid','on')
-label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr);
+label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
 ylim([0 150]);
 ylabel({'Max e^- energy','that correlates','with emissions','[keV]'});
+
+% 4e correlation with
+q(2).select();
+plot_2D_time_series(peakEnergytime(:,1),energySlice,real(rArray)',0.5,0,timeMinStr,timeMaxStr);
+label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr);
+% colormap(viridis);
+colormap(get_colormap('w','r'));
+set(gca,'YScale','log','YTick',[1,10,30,100,300,1000],'YGrid','on','YMinorGrid','off');
+caxis([0 +1]);
+ylabel({'e^- energy flux','correlation','with emissions','[keV]'});
+
+% reducing color bar thickness
+c=colorbar_thin('Width',0.2,'YLabel','r_0_0 [a.u.]');
+% axPos = get(gca, 'position');
+% c = colorbar('eastoutside');
+% set(gca,'position',axPos);
+% 
+% cPos=get(c,'Position');
+% cPos(3)=0.2*cPos(3);
+% set(c, 'Position',cPos);
+% ylabel(c,'r_0_0 [a.u.]')
+scatter(peakEnergytime(tindx1:tindx2,1)...
+    ,peakEnergy(tindx1:tindx2),8,...
+    'filled','MarkerFaceColor','k', 'MarkerFaceAlpha',.4);
 
 % %% Find correlation
 % for i=1:1:length(energySlice)

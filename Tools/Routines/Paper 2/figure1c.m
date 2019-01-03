@@ -8,26 +8,33 @@ fileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\EEA List\20080326.001_bc_1
 dataMSP = get_msp_data('C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 2\Data\msp_vvel.mat','26 Mar 2008 10:00','26 Mar 2008 12:00');
 pkrMLAT = 65.2639;
 pkrMLON = -94.1995; 
+pkrGLAT = 65.126;
+pkrGLON = -147.47;
 h0=0.693;
 elCutOff = 22.5;
 el=fliplr(dataMSP.el+90);
+az = ones(size(el)).*18.2; 
+
+Hbeta_Alt = 116; % 1969 Miller and Sheperd Hydrogen aurora https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/JA074i021p04987
+N2I_Alt = 110; % 
+OI_Alt = 110;
 
 %% Initalize
 
-timeMinStr = '26 Mar 2008 11:20:18';
-timeMaxStr = '26 Mar 2008 11:20:18';
+timeMinStr = '26 Mar 2008 10:35:25';
+timeMaxStr = '26 Mar 2008 11:47:00';
 time = datenum(timeMinStr):5/(24*60*60):datenum(timeMaxStr);
 nTime = length(time);
 latLim = [63,67];
 lonLim = [-153,-141];
 deltaLat = 1;
 deltaLon = 5;
-storeImageDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Figures\Draft\Figure1b\';
+storeImageDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Figures\Draft\Figure1c\';
 for i = 1:1:nTime
-h=figure('visible','on');
-% resize_figure(h,250,250);
-[ax1,axm1]=combine_2D_plots_v2(fileStr,h,...
-    'maps',{'OpticalImage','EnergyFluxMap'},...
+h=figure('visible','off');
+
+[ax1]=combine_2D_plots_v2(fileStr,h,...
+    'maps',{'OpticalImage'},...
     'sites',{'pokerFlat','pokerFlat'},...
     'thisTime',time(i),...
     'latLim',latLim,...
@@ -40,8 +47,13 @@ h=figure('visible','on');
     'setStoreImage',false);
 
 % Proton MSP Emissions
-projMAlt = 110-h0; %km
-[glat,glon,galt] = convert_mlatlon_to_glatlon(zeros(size(el)),el,projMAlt,pkrMLAT,pkrMLON,h0,time(i));
+projMAlt = Hbeta_Alt-h0; %km
+% [glat,glon,galt] = convert_mlatlon_to_glatlon(zeros(size(el)),el,projMAlt,pkrMLAT,pkrMLON,h0,time(i));
+[glat,glon,galt] = convert_azel_to_glatlon(az,el,projMAlt,pkrGLAT,pkrGLON,h0,time(i));
+glatNew = 63:0.05:67;
+glonNew = interp1(glat,glon,glatNew);
+zValue = dataMSP.intensity4861(:,thisTimeIndxMSP)';
+zValueNew = interp1(glat,zValue,glatNew);
 
 ax2=axes;
 axm2 = axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
@@ -54,20 +66,23 @@ cmap1 = colormap(ax2,get_colormap('w','m'));
 
 thisTimeStr = datestr(time(i));
 thisTimeIndxMSP = find_time(dataMSP.time,thisTimeStr);
-scatterm(glat',glon'+0.7...
-    ,7,dataMSP.intensity4861(:,thisTimeIndxMSP)','filled');
+scatterm(glatNew',glonNew'...
+    ,7,zValueNew,'filled');
 
 cb2 = colorbar('Location','southoutside');
 cb2.Position(2) = 0.1;
 cb2.Position(3) = 0.1;
 cb2.Position(4) = 0.01;
 cb2.Label.String = {'H_\beta 4861 A^0'};
-ax2.CLim = [10 40];
+ax2.CLim = [20 40];
 
 % Blue emissions
-projMAlt = 110-h0; %km
-[glat,glon,galt] = convert_mlatlon_to_glatlon(zeros(size(el)),el,projMAlt,pkrMLAT,pkrMLON,h0,time(i));
-
+projMAlt = N2I_Alt-h0; %km
+% [glat,glon,galt] = convert_mlatlon_to_glatlon(zeros(size(el)),el,projMAlt,pkrMLAT,pkrMLON,h0,time(i));
+[glat,glon,galt] = convert_azel_to_glatlon(az,el,projMAlt,pkrGLAT,pkrGLON,h0,time(i));
+glonNew = interp1(glat,glon,glatNew);
+zValue = dataMSP.intensity4278(:,thisTimeIndxMSP)'./(dataMSP.intensity5577(:,thisTimeIndxMSP)');
+zValueNew = interp1(glat,zValue,glatNew);
 ax3=axes;
 axm3 = axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
     'Frame','on','Grid','on','MeridianLabel','on','ParallelLabel','on',...
@@ -75,10 +90,10 @@ axm3 = axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
 
 ax3.Color = 'none';
 ax3.Visible = 'off';
-cmap2 = colormap(ax3,get_colormap('w','r'));
+cmap2 = colormap(ax3,get_colormap('w','b'));
 
-scatterm(glat',glon'+0.5,...
-    7,dataMSP.intensity4278(:,thisTimeIndxMSP)'./(dataMSP.intensity5577(:,thisTimeIndxMSP)'),...
+scatterm(glatNew'-0.0707,glonNew'+0.0707,...
+    7,zValueNew,...
     'MarkerFaceAlpha',.5,'MarkerEdgeAlpha',.5);
 
 cb3 = colorbar('Location','southoutside');
@@ -87,7 +102,7 @@ cb3.Position(2) = 0.1;
 cb3.Position(3) = 0.1;
 cb3.Position(4) = 0.01;
 cb3.Label.String = {'N_2^+/O^+'};
-ax3.CLim = [0.1 0.3];
+ax3.CLim = [0.15 0.35];
 
 ax4=axes;
 axm4 = axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
@@ -96,10 +111,13 @@ axm4 = axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
 
 ax4.Color = 'none';
 ax4.Visible = 'off';
-cmap3 = colormap(ax4,get_colormap('w','b'));
+cmap3 = colormap(ax4,get_colormap('w','r'));
 
-scatterm(glat',glon'+0.5,...
-    6,dataMSP.intensity4278(:,thisTimeIndxMSP)',...
+zValue = dataMSP.intensity4278(:,thisTimeIndxMSP)';
+zValueNew = interp1(glat,zValue,glatNew);
+
+scatterm(glatNew'-0.0707,glonNew'+0.0707,...
+    6,zValueNew,...
     'filled','MarkerFaceAlpha',.5,'MarkerEdgeAlpha',.5);
 
 cb4 = colorbar('Location','southoutside');
@@ -108,11 +126,15 @@ cb4.Position(2) = 0.1;
 cb4.Position(3) = 0.1;
 cb4.Position(4) = 0.01;
 cb4.Label.String = {'N_2^+ 4278 A^0'};
-ax4.CLim = [0 200];
+ax4.CLim = [100 200];
 
 % Green emissions
-projMAlt = 110-h0; %km
-[glat,glon,galt] = convert_mlatlon_to_glatlon(zeros(size(el)),el,projMAlt,pkrMLAT,pkrMLON,h0,time(i));
+projMAlt = OI_Alt-h0; %km
+% [glat,glon,galt] = convert_mlatlon_to_glatlon(zeros(size(el)),el,projMAlt,pkrMLAT,pkrMLON,h0,time(i));
+[glat,glon,galt] = convert_azel_to_glatlon(az,el,projMAlt,pkrGLAT,pkrGLON,h0,time(i));
+glonNew = interp1(glat,glon,glatNew);
+zValue = dataMSP.intensity5577(:,thisTimeIndxMSP)';
+zValueNew = interp1(glat,zValue,glatNew);
 
 ax5=axes;
 axm5 = axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
@@ -123,8 +145,8 @@ ax5.Color = 'none';
 ax5.Visible = 'off';
 cmap2 = colormap(ax5,get_colormap('w','k'));
 
-scatterm(glat',glon'+0.6,...
-    7,dataMSP.intensity5577(:,thisTimeIndxMSP)',...
+scatterm(glatNew'+0.0707,glonNew'-0.0707,...
+    7,zValueNew,...
     'filled','MarkerFaceAlpha',.5,'MarkerEdgeAlpha',.5);
 
 cb5 = colorbar('Location','southoutside');
@@ -135,14 +157,15 @@ cb5.Position(4) = 0.01;
 cb5.Label.String = {'O^+ 5577 A^0'};
 ax5.CLim = [200 1000];
 
+resize_figure(h,150,200);
 ax2 = copy_axes_properties(ax1,ax2);
 ax3 = copy_axes_properties(ax1,ax3);
 ax4 = copy_axes_properties(ax1,ax4);
 ax5 = copy_axes_properties(ax1,ax5);
 
 
-imageName = ['figure1b_',datestr(time(i),'HH_MM_SS')];
-% export_fig(strcat(storeImageDir,imageName,'_with_POES.png'),'-r600','-png','-nocrop');
+imageName = ['figure1c_',datestr(time(i),'HH_MM_SS')];
+export_fig(strcat(storeImageDir,imageName,'.png'),'-r600','-png','-nocrop');
 end
 
 
@@ -236,4 +259,14 @@ function [glat,glon,galt] = convert_mlatlon_to_glatlon(az,el,malt,mlat0,mlon0,h0
     glat = double(py.array.array('d',py.numpy.nditer(tup{1})));
     glon = double(py.array.array('d',py.numpy.nditer(tup{2})));
     galt = double(py.array.array('d',py.numpy.nditer(tup{3})));
+end
+
+function [glat,glon,galt] = convert_azel_to_glatlon(az,el,galt,glat0,glon0,h0,time0)
+    C = define_universal_constants;
+%     slantRange = -C.RE.*sind(el) + modSign(el).*sqrt((C.RE^2).*(sind(el)).^2 + galt.*1000.*(galt.*1000+2.*C.RE)); 
+    slantRange = galt.*1000./sind(el);
+    slantRange(isinf(slantRange)) =slantRange(2);
+% slant Range = RE*sin(el) +/- sqrt(RE^2 sin^2(el) + H(H+2RE); RE - radius
+% of earth, H- altitude, el - elevation
+    [glat,glon,galt] = aer2geodetic(az,el,slantRange./1000,glat0,glon0,h0,wgs84Ellipsoid('km'));    
 end
