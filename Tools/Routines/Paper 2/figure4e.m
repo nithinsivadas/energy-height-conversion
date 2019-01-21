@@ -105,40 +105,45 @@ q(1).select();
 % 4e. Correlation 
 timeMinStr = '26-Mar-2008 10:30:00';
 timeMaxStr = '26-Mar-2008 11:40:00';
-tindx1 = find_time(peakEnergytime(:,1),timeMinStr);
-tindx2 = find_time(peakEnergytime(:,1),timeMaxStr);
+midEnergytime = (peakEnergytime(:,1)+peakEnergytime(:,2))./2;
+tindx1 = find_time(midEnergytime(:,1),timeMinStr);
+tindx2 = find_time(midEnergytime(:,1),timeMaxStr);
+% tindx1 = find_time(peakEnergytime(:,1),timeMinStr);
+% tindx2 = find_time(peakEnergytime(:,1),timeMaxStr);
 sz=max(rArray(tindx1:tindx2,:)');
 sz(sz<=0.01)=0.01;
 
 yyaxis right    
-area(peakEnergytime(tindx1:tindx2,1),...
+area(midEnergytime(tindx1:tindx2,1),...
     sz,'FaceColor',[0.8,0.8,0.8],'EdgeColor',[0.8,0.8,0.8],...
     'FaceAlpha',0.5,'EdgeAlpha',0.5);
 ylim([0 1]);
 ylabel({'Correlation','coefficient','[a.u.]'});
 % grid on;
 set(gca,'ycolor',[0.5,0.5,0.5],'YTick',[0,0.5,1],'Ygrid','on');
-label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
+label_time_axis(midEnergytime,false,1/6,timeMinStr,timeMaxStr);
 hold on;
-line([peakEnergytime(tindx1,1),peakEnergytime(tindx2)],...
+line([midEnergytime(tindx1,1),midEnergytime(tindx2)],...
     [0.5,0.5],'Color',[0.8,0.8,0.8]);
 yyaxis left
-scatter(peakEnergytime(tindx1:tindx2,1)...
+scatter(midEnergytime(tindx1:tindx2,1)...
     ,peakEnergy(tindx1:tindx2),(sz*5).^3,...
     'filled','MarkerFaceColor','r', 'MarkerFaceAlpha',.5);
 set(gca,'ycolor','r','YTick',[0,30,50,100,150],'Ygrid','on')
-label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
+label_time_axis(midEnergytime,false,1/6,timeMinStr,timeMaxStr);
+xlim([datenum('26 Mar 2008 10:30'),datenum('26 Mar 2008 11:40')]);
 ylim([0 150]);
 ylabel({'Max e^- energy','that correlates','with emissions','[keV]'});
 
 % 4e correlation with
 q(2).select();
-plot_2D_time_series(peakEnergytime(:,1),energySlice,real(rArray)',0.5,0,timeMinStr,timeMaxStr);
-label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr);
+plot_2D_time_series(midEnergytime(:,1),energySlice,real(rArray)',0.5,0,timeMinStr,timeMaxStr);
+label_time_axis(midEnergytime,true,1/6,timeMinStr,timeMaxStr);
 % colormap(viridis);
 colormap(get_colormap('w','r'));
 set(gca,'YScale','log','YTick',[1,10,30,100,300,1000],'YGrid','on','YMinorGrid','off');
 caxis([0 +1]);
+xlim([datenum('26 Mar 2008 10:30'),datenum('26 Mar 2008 11:40')]);
 ylabel({'e^- energy flux','correlation','with emissions','[keV]'});
 
 % reducing color bar thickness
@@ -151,7 +156,7 @@ c=colorbar_thin('Width',0.2,'YLabel','r_0_0 [a.u.]');
 % cPos(3)=0.2*cPos(3);
 % set(c, 'Position',cPos);
 % ylabel(c,'r_0_0 [a.u.]')
-scatter(peakEnergytime(tindx1:tindx2,1)...
+scatter(midEnergytime(tindx1:tindx2,1)...
     ,peakEnergy(tindx1:tindx2),8,...
     'filled','MarkerFaceColor','k', 'MarkerFaceAlpha',.4);
 
@@ -162,14 +167,19 @@ scatter(peakEnergytime(tindx1:tindx2,1)...
 % [~,indx] = max(r1');
 % peakEnergy = energySlice(indx);
 %% Plot
-figure;
+% figure;
 hold on;
-indx1 = find_time(peakEnergytime(:,1),'26-Mar-2008 11:16:18');
+timeNow = '26-Mar-2008 11:22:18';
+indx1 = find_time(midEnergytime(:,1),timeNow);
 plot(energySlice,rArray(indx1,:));
+title(timeNow);
 ylabel('Correlation coefficient r_0_0');
 xlabel('Electron Energy [keV]');
-xlim([0,150]);
+xlim([0,1000]);
+set(gca,'XScale','log','XTick',[1,30,50,100,300,1000]);
 ylim([0,1]);
+%%
+legend(timeNow)
 % timeCorr = time(timeMinIndx:timeMaxIndx);
 % figure; plot(datetime(datevec(timeCorr)),peakEnergy(91:-1:1));
 % xlim([datetime('2008-03-26 11:00'), datetime('2008-03-26 11:20')]);

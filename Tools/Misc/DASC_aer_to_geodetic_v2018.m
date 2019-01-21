@@ -51,6 +51,9 @@ end
 
 %% Specifying the slant range for altitude specified by ProjectAltitude
 slantRange = projectionAltitude*1000./sind(el);
+% RE = 6.371*10^6;
+% slantRange = -RE.*sind(el) + modSign(el).*sqrt((RE^2).*(sind(el)).^2 + projectionAltitude.*1000.*(projectionAltitude.*1000+2.*RE)); 
+
 %% 
 % dataloc = [slantRange(:),az_new(:),el_new(:)];
 % [lat,lon,h] = aer2geodetic(dataloc(:,2),dataloc(:,3),dataloc(:,1),sensorLoc(1),sensorLoc(2),sensorLoc(3),wgs84Ellipsoid('m'));

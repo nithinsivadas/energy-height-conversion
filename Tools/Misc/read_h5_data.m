@@ -48,5 +48,6 @@ function dataset = read_h5_data (h5FilePath, groupPath)
         dataset{thisDataset,6} = fliplr(dataset{thisDataset,6});
         
     end
-dataset = array2table(dataset,'VariableNames',{'Path','Name','Data','Size','MaxSize','ChunkSize','Attribute_Names','Attribute_Values'});
+dataset = array2table(dataset,'VariableNames',...
+    {'Path','Name','Data','Size','MaxSize','ChunkSize','Attribute_Names','Attribute_Values'});
 end

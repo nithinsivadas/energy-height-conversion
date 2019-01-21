@@ -33,7 +33,7 @@ pfisrImageNumF = pfisrImage./permute(repmat(pfisrData.zEnergyBin,1,1,size(pfisrI
 [pfisrImageAll,pfisrLatAll,pfisrLonAll,projAltAll]=integrate_pfisr_energy(pfisrImage,pfisrData,100);
 [pfisrKeoAll,pfisrParAll] = create_keogram(pfisrImageAll,pfisrLatAll,pfisrLonAll,'meridian',meridian,'latPixelNum',6);
 %%
-[pfisrImageLE,pfisrLatLE,pfisrLonLE,projAltLE]=integrate_pfisr_energy(pfisrImage,pfisrData,15,[1,50].*1000);
+[pfisrImageLE,pfisrLatLE,pfisrLonLE,projAltLE]=integrate_pfisr_energy(pfisrImage,pfisrData,15,[5,50].*1000);
 [pfisrKeoLE,pfisrParLE] = create_keogram(pfisrImageLE,pfisrLatLE,pfisrLonLE,'meridian',meridian,'latPixelNum',6);
 
 [pfisrImageHE,pfisrLatHE,pfisrLonHE,projAltHE]=integrate_pfisr_energy(pfisrImage,pfisrData,100,[50,300].*1000);
@@ -63,35 +63,35 @@ q(1).select();
 colormap(gca,get_colormap('w',[0,0.2,0]));
 
 % Keogram MSP
-% pkrGLAT = 65.126;
-% pkrGLON = -147.47;
-% h0=0.693;
-% elCutOff = 22.5;
-% el=fliplr(dataMSP.el+90);
-% az = ones(size(el)).*18.2; 
-% N2I_Alt = 110;
-% projMAlt = N2I_Alt-h0; %km
-% [msplat,msplon,mspalt] = convert_azel_to_glatlon(az,el,projMAlt,pkrGLAT,pkrGLON,h0);
-% mspKeo = dataMSP.intensity4278'./dataMSP.intensity5577';
-% ax=plot_2D_time_series(dataMSP.time,msplat,mspKeo',0.25,0,timeMinStr,timeMaxStr);
-% label_time_axis(time, true, 1/6,timeMinStr,timeMaxStr);
+pkrGLAT = 65.126;
+pkrGLON = -147.47;
+h0=0.693;
+elCutOff = 22.5;
+el=fliplr(dataMSP.el+90);
+az = ones(size(el)).*18.2; 
+N2I_Alt = 110;
+projMAlt = N2I_Alt-h0; %km
+[msplat,msplon,mspalt] = convert_azel_to_glatlon(az,el,projMAlt,pkrGLAT,pkrGLON,h0);
+mspKeo = dataMSP.intensity4278'./dataMSP.intensity5577';
+ax=plot_2D_time_series(dataMSP.time,msplat,mspKeo',0.25,0,timeMinStr,timeMaxStr);
+label_time_axis(time, true, 1/6,timeMinStr,timeMaxStr);
 
-ax=plot_2D_time_series(dascData.time,dascLat,dascKeo,0.25,0,timeMinStr,timeMaxStr);
-hold on; 
-timeMinIndx = find_time(pfisrData.time,'26-Mar-2008 11:05');
-timeMaxIndx = find_time(pfisrData.time,'26-Mar-2008 11:30');
-peakLatitude150 = find_peak_latitude(pfisrKeo150,pfisrPar150);
-peakLatitude100 = find_peak_latitude(pfisrKeo100,pfisrPar100);
-peakLatitude70 = find_peak_latitude(pfisrKeo70,pfisrPar70);
-peakLatitude30 = find_peak_latitude(pfisrKeo30,pfisrPar30);
+% ax=plot_2D_time_series(dascData.time,dascLat,dascKeo,0.25,0,timeMinStr,timeMaxStr);
+% hold on; 
+% timeMinIndx = find_time(pfisrData.time,'26-Mar-2008 11:05');
+% timeMaxIndx = find_time(pfisrData.time,'26-Mar-2008 11:30');
+% peakLatitude150 = find_peak_latitude(pfisrKeo150,pfisrPar150);
+% peakLatitude100 = find_peak_latitude(pfisrKeo100,pfisrPar100);
+% peakLatitude70 = find_peak_latitude(pfisrKeo70,pfisrPar70);
+% peakLatitude30 = find_peak_latitude(pfisrKeo30,pfisrPar30);
+% 
+% h150 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-50),peakLatitude150(timeMinIndx:timeMaxIndx-50),'b','LineWidth',1); %150
+% h100 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-35),peakLatitude100(timeMinIndx:timeMaxIndx-35),'k','LineWidth',1); %100
+% h70  = plot(pfisrData.time(timeMinIndx:timeMaxIndx-30),peakLatitude70(timeMinIndx:timeMaxIndx-30),'m','LineWidth',1); %70
+% h30  = plot(pfisrData.time(timeMinIndx+35:timeMaxIndx-20),peakLatitude30(timeMinIndx+35:timeMaxIndx-20),'red','LineWidth',1); %30
 
-h150 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-50),peakLatitude150(timeMinIndx:timeMaxIndx-50),'b','LineWidth',1); %150
-h100 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-35),peakLatitude100(timeMinIndx:timeMaxIndx-35),'k','LineWidth',1); %100
-h70  = plot(pfisrData.time(timeMinIndx:timeMaxIndx-30),peakLatitude70(timeMinIndx:timeMaxIndx-30),'m','LineWidth',1); %70
-h30  = plot(pfisrData.time(timeMinIndx+35:timeMaxIndx-20),peakLatitude30(timeMinIndx+35:timeMaxIndx-20),'red','LineWidth',1); %30
-
-legend([h150 h100 h70 h30],'150 keV', '100 keV', '70 keV', '30 keV','Location','NorthWest');
-caxis([350 400]);
+% legend([h150 h100 h70 h30],'150 keV', '100 keV', '70 keV', '30 keV','Location','NorthWest');
+caxis([0.15 0.35]);
 axPos = get(gca, 'position');
 c = colorbar('eastoutside');
 set(gca,'position',axPos);
@@ -100,7 +100,7 @@ set(gca,'position',axPos);
 cPos=get(c,'Position');
 cPos(3)=0.2*cPos(3);
 set(c, 'Position',cPos);
-ylim([64.9 65.6]);
+ylim([63 67]);
 
 ylabel({'White light','emission','lat [N^0]'});
 
@@ -121,7 +121,7 @@ hold on;
 plot(pfisrData.time,pfisrKeoHE(3,:)*C.e*pi*(1e+7).*(1e-4),'r');
 set(gca,'XTickLabel','');
 xlim([datenum(timeMinStr), datenum(timeMaxStr)]);
-legend('1-50 keV','50-300 keV','Location','NorthWest');
+legend('5-50 keV','50-300 keV','Location','NorthWest');
 ylabel({'e^- Energy Flux','[mW/m^2]'});
 ylim([0,3]);
 label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr);

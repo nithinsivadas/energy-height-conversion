@@ -17,9 +17,11 @@ function plot_DASC_aer( dataNew, az, el, imageSize )
 % colormap(viridis);
 
 % Rotating az data 90 deg counter-clockwise [Very Important]
-x = (90-el).*sind(rotate_array(az(:),-90));
-y = (90-el).*cosd(rotate_array(az(:),-90)); 
+% x = (90-el).*sind(rotate_array(az,-90));
+% y = (90-el).*cosd(rotate_array(az,-90)); 
 
+x = (90-el).*sind(az);
+y = (90-el).*cosd(az);
 
 F1 = scatteredInterpolant(x,y,dataNew,'linear','none');
 
