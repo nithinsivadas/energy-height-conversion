@@ -66,9 +66,13 @@ lonCal=interp_nans(lonCal)';
 fclose(fileLonID);
 
 sensorloc=[65.1260,-147.4789,689 ]; %poker flat location
-
+elLim = 5;
 [azCal,elCal]=geodetic2aer(latCal,lonCal,110,sensorloc(1),sensorloc(2),sensorloc(3)/1000,wgs84Ellipsoid('km'));
-
+latCal(elCal<elLim) = nan;
+lonCal(elCal<elLim) = nan;
+azCal(elCal<elLim) = nan;
+elCal(elCal<elLim) = nan;
+lonCal = convert_longitude(lonCal,'360to180');
 for idays=1:1:length(dayArray)
     if setDownloadDASCFlag == true
         fprintf(['Status: Downloading FITS files ',datestr(dayArray(idays),'dd-mmm-yyyy')]);

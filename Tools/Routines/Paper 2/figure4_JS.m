@@ -1,4 +1,4 @@
-%% Paper 2: Figure 4
+%% Paper 2: Figure 4 ver 2
 clear all;
 opengl('save', 'software');
 h5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Temp\20080326.001_bc_15sec-energyFlux_v85.h5';

@@ -36,22 +36,35 @@ if nargin<10
 elseif strcmp(label,'pokerFlat')
     label = 'PKFT DASC';
 end
-nanFlags = isnan(lat) | isnan(lon) | isnan(dataNew);
-lat(nanFlags) = [];
-lon(nanFlags) = [];
-dataNew(nanFlags) = [];
-% lat, lon, dataNew have to be column vectors!
-F = scatteredInterpolant(lat',lon',dataNew','nearest','none'); %Modified on 3rd Oct 2018 - Transpose
-latq = linspace(min(lat),max(lat),imageSize);
-lonq = linspace(min(lon),max(lon),imageSize);
-[LAT, LON] = ndgrid(latq,lonq);
-Vq = F(LAT,LON);
+
+if imageSize == size(dataNew,1) 
+    LAT = interp_nans(lat);
+    LON = interp_nans(lon);
+    Vq = dataNew; 
+elseif imageSize == sqrt(length(dataNew))
+    LAT = reshape(interp_nans(lat),imageSize,imageSize);
+    LON = reshape(interp_nans(lon),imageSize,imageSize);
+    Vq = reshape(dateNew,imageSize,imageSize);
+else
+    nanFlags = isnan(lat) | isnan(lon) | isnan(dataNew);
+    lat(nanFlags) = [];
+    lon(nanFlags) = [];
+    dataNew(nanFlags) = [];
+    % lat, lon, dataNew have to be column vectors!
+    F = scatteredInterpolant(lat',lon',dataNew','nearest','none'); %Modified on 3rd Oct 2018 - Transpose
+    latq = linspace(min(lat),max(lat),imageSize);
+    lonq = linspace(min(lon),max(lon),imageSize);
+    [LAT, LON] = ndgrid(latq,lonq);
+    Vq = F(LAT,LON);
+end
+
+% Plotting
 ax1=axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
     'Frame','on','Grid','on','MeridianLabel','on','ParallelLabel','on',...
     'PLineLocation',deltaLat,'MLineLocation',deltaLon);
 axis off
 load coastlines
-plotm(coastlat,coastlon)
+plotm(coastlat,coastlon,'Color',[0.5 0.5 0.5]);
 hold on;
 h=pcolorm(LAT,LON,(Vq)); 
 set(h,'EdgeColor','none');

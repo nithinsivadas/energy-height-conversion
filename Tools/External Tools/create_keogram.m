@@ -27,7 +27,7 @@ lon   = reshape(p.Results.longitude,1,[])';
 
 latPixelNum = p.Results.latPixelNum; 
 
-if isnan(latPixelNum) % Chosing the keogram meridian to be the center longitude
+if isnan(latPixelNum) % Choosing the keogram meridian to be the center longitude
     latPixelNum = ceil(sqrt(length(lat)));
 end
 
