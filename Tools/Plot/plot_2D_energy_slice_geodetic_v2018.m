@@ -73,8 +73,6 @@ lonq = linspace(lonLim(1),lonLim(2),imageSize);
 Vq = F({latq,lonq,thisEnergy*1000});
 Vq(Vq<=0)=nan;
 
-
-
 if setMapOn==true
     ax2=axesm('lambertstd','MapLatLimit',[(latLim(1))-latWidth/2 (latLim(2))+latWidth/2],...
         'MapLonLimit',[(lonLim(1))-lonWidth/2 (lonLim(2))+lonWidth/2],...
@@ -85,9 +83,13 @@ if setMapOn==true
     load coastlines
     plotm(coastlat,coastlon)
     hold on;
+    h2=pcolorm(latq,lonq,log10(Vq)); 
+else
+    h2=pcolor(latq',lonq',log10(Vq)'); 
+    
 end
 
-h2=pcolorm(latq,lonq,log10(Vq)); 
+
 set(h2,'EdgeColor','none');
 
 if setTimeLabelOn==true
