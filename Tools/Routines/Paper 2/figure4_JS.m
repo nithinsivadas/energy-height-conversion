@@ -1,8 +1,8 @@
 %% Paper 2: Figure 4 ver 2
 clear all;
 opengl('save', 'software');
-h5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Temp\20080326.001_bc_15sec-energyFlux_v85.h5';
-h5FileStrDASC = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3_smaller_time_range.h5';
+h5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3.h5';
+h5FileStrDASC = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3.h5';
 omniH5FileStr = 'G:\My Drive\Research\Projects\Data\omni.h5';
 %%
 mspFileStr = 'C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 2\Data\msp_vvel.mat';
@@ -15,38 +15,85 @@ pfisrData = get_2D_plot_inputs_time_independent(h5FileStr,...
     'plotModeStr','EnergyFluxMap');
 
 energySlice = 100; %keV
-%% Keogram DASC
+
+%% 
 dascImage = permute(h5read(h5FileStrDASC,'/DASC/ASI'),[3 2 1]);
-[dascKeo,dascLat,meridian] = create_keogram(dascImage,dascData.latitude,dascData.longitude);
+%% Cropping DASC
+minTimeStr = '26 Mar 2008 10:30';
+maxTimeStr = '26 Mar 2008 12:00';
+timeMinIndx = find_time(dascData.time,minTimeStr);
+timeMaxIndx = find_time(dascData.time,maxTimeStr);
+dascTime  = dascData.time(timeMinIndx:timeMaxIndx);
+dascImage1 = dascImage(timeMinIndx:timeMaxIndx,:,:);
+
+%% Keogram DASC
+[dascKeo,dascLat,meridian] = create_keogram(dascImage1,dascData.latitude,dascData.longitude,...
+    'time',datenum('26 Mar 2008 11:00'));
 %% PFISR Keogram
 pfisrImage = permute(h5read(h5FileStr,'/energyFluxFromMaxEnt/energyFlux'),[3 2 1]);
 pfisrImageNumF = pfisrImage./permute(repmat(pfisrData.zEnergyBin,1,1,size(pfisrImage,1)),[3,1,2]);
 %%
-meridian = convert_longitude(meridian);
-[pfisrImage150,pfisrLat150,pfisrLon150,projAlt150] = get_pfisr_energy_slice(pfisrImage,pfisrData,150,100); 
-[pfisrKeo150,pfisrPar150] = create_keogram(pfisrImage150,pfisrLat150,pfisrLon150,'meridian',meridian,'latPixelNum',6);
-[pfisrImage100,pfisrLat100,pfisrLon100,projAlt100] = get_pfisr_energy_slice(pfisrImage,pfisrData,100,100); 
-[pfisrKeo100,pfisrPar100] = create_keogram(pfisrImage100,pfisrLat100,pfisrLon100,'meridian',meridian,'latPixelNum',6);
-[pfisrImage70,pfisrLat70,pfisrLon70,projAlt70] = get_pfisr_energy_slice(pfisrImage,pfisrData,70,100); 
-[pfisrKeo70,pfisrPar70] = create_keogram(pfisrImage70,pfisrLat70,pfisrLon70,'meridian',meridian,'latPixelNum',6);
-[pfisrImage30,pfisrLat30,pfisrLon30,projAlt30] = get_pfisr_energy_slice(pfisrImage,pfisrData,30,100); 
-[pfisrKeo30,pfisrPar30] = create_keogram(pfisrImage30,pfisrLat30,pfisrLon30,'meridian',meridian,'latPixelNum',6);
+% timeMinIndx = find_time(dascData.time,minTimeStr);
+% timeMaxIndx = find_time(dascData.time,maxTimeStr);
+% pfisrImage1 = pfisrImage(timeMinIndx:timeMaxIndx,:,:);
+% pfisrImageNumF1 = pfisrImageNumF(timeMinIndx:timeMaxIndx,:,:);
 %%
-[pfisrImageAll,pfisrLatAll,pfisrLonAll,projAltAll]=integrate_pfisr_energy(pfisrImage,pfisrData,100);
-[pfisrKeoAll,pfisrParAll] = create_keogram(pfisrImageAll,pfisrLatAll,pfisrLonAll,'meridian',meridian,'latPixelNum',6);
+% E = 200;
+% projAlt = pfisrData.projectionAltitude(find_altitude(pfisrData.zEnergyBin(1,:),E*1000));
+% [pfisrImage150,pfisrLat150,pfisrLon150,projAlt150] = get_pfisr_energy_slice(pfisrImage,pfisrData,E,projAlt); 
+% [pfisrKeo150,pfisrPar150] = create_keogram(pfisrImage150,pfisrLat150,pfisrLon150,'latPixelNum',6);
 %%
-[pfisrImageLE,pfisrLatLE,pfisrLonLE,projAltLE]=integrate_pfisr_energy(pfisrImage,pfisrData,15,[5,50].*1000);
-[pfisrKeoLE,pfisrParLE] = create_keogram(pfisrImageLE,pfisrLatLE,pfisrLonLE,'meridian',meridian,'latPixelNum',6);
+E = 100;
+projAlt = pfisrData.projectionAltitude(find_altitude(pfisrData.zEnergyBin(1,:),E*1000));
+[pfisrImage100,pfisrLat100,pfisrLon100,projAlt100] = get_pfisr_energy_slice(pfisrImage,pfisrData,E,projAlt); 
+[pfisrKeo100,pfisrPar100] = create_keogram(pfisrImage100,pfisrLat100,pfisrLon100,'latPixelNum',6);
+
+E = 70;
+projAlt = pfisrData.projectionAltitude(find_altitude(pfisrData.zEnergyBin(1,:),E*1000));
+[pfisrImage70,pfisrLat70,pfisrLon70,projAlt70] = get_pfisr_energy_slice(pfisrImage,pfisrData,E,projAlt); 
+[pfisrKeo70,pfisrPar70] = create_keogram(pfisrImage70,pfisrLat70,pfisrLon70,'latPixelNum',6);
+
+E = 30;
+projAlt = pfisrData.projectionAltitude(find_altitude(pfisrData.zEnergyBin(1,:),E*1000));
+[pfisrImage30,pfisrLat30,pfisrLon30,projAlt30] = get_pfisr_energy_slice(pfisrImage,pfisrData,E,projAlt); 
+[pfisrKeo30,pfisrPar30] = create_keogram(pfisrImage30,pfisrLat30,pfisrLon30,'latPixelNum',6);
+
+%%
+% meridian = convert_longitude(meridian);
+% [pfisrImage150,pfisrLat150,pfisrLon150,projAlt150] = get_pfisr_energy_slice(pfisrImage,pfisrData,150,100); 
+% [pfisrKeo150,pfisrPar150] = create_keogram(pfisrImage150,pfisrLat150,pfisrLon150,'meridian',meridian,'latPixelNum',6);
+% [pfisrImage100,pfisrLat100,pfisrLon100,projAlt100] = get_pfisr_energy_slice(pfisrImage,pfisrData,100,100); 
+% [pfisrKeo100,pfisrPar100] = create_keogram(pfisrImage100,pfisrLat100,pfisrLon100,'meridian',meridian,'latPixelNum',6);
+% [pfisrImage70,pfisrLat70,pfisrLon70,projAlt70] = get_pfisr_energy_slice(pfisrImage,pfisrData,70,100); 
+% [pfisrKeo70,pfisrPar70] = create_keogram(pfisrImage70,pfisrLat70,pfisrLon70,'meridian',meridian,'latPixelNum',6);
+% [pfisrImage30,pfisrLat30,pfisrLon30,projAlt30] = get_pfisr_energy_slice(pfisrImage,pfisrData,30,100); 
+% [pfisrKeo30,pfisrPar30] = create_keogram(pfisrImage30,pfisrLat30,pfisrLon30,'meridian',meridian,'latPixelNum',6);
+%%
+[pfisrImageAll,pfisrLatAll,pfisrLonAll,projAltAll]=integrate_pfisr_energy(pfisrImage,pfisrData,110);
+[pfisrKeoAll,pfisrParAll] = create_keogram(pfisrImageAll,pfisrLatAll,pfisrLonAll,'latPixelNum',6);
+%%
+[pfisrImageLE,pfisrLatLE,pfisrLonLE,projAltLE]=integrate_pfisr_energy(pfisrImage,pfisrData,5,[1,10].*1000);
+[pfisrKeoLE,pfisrParLE] = create_keogram(pfisrImageLE,pfisrLatLE,pfisrLonLE,'latPixelNum',6);
+%%
+[pfisrImageME1,pfisrLatME1,pfisrLonME1,projAltME1]=integrate_pfisr_energy(pfisrImage,pfisrData,20,[10,30].*1000);
+[pfisrKeoME1,pfisrParME1] = create_keogram(pfisrImageME1,pfisrLatME1,pfisrLonME1,'latPixelNum',6);
+%%
+% 
+[pfisrImageME,pfisrLatME,pfisrLonME,projAltME]=integrate_pfisr_energy(pfisrImage,pfisrData,70,[30,300].*1000);
+[pfisrKeoME,pfisrParME] = create_keogram(pfisrImageME,pfisrLatME,pfisrLonME,'latPixelNum',6);
 
 [pfisrImageHE,pfisrLatHE,pfisrLonHE,projAltHE]=integrate_pfisr_energy(pfisrImage,pfisrData,100,[50,300].*1000);
-[pfisrKeoHE,pfisrParHE] = create_keogram(pfisrImageHE,pfisrLatHE,pfisrLonHE,'meridian',meridian,'latPixelNum',6);
+[pfisrKeoHE,pfisrParHE] = create_keogram(pfisrImageHE,pfisrLatHE,pfisrLonHE,'latPixelNum',6);
 
 %% pfisr diff number density
-[pfisrImageLENumF,pfisrLatLENumF,pfisrLonLENumF,projAltLENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,15,[1,50].*1000);
-[pfisrKeoLENumF,pfisrParLENumF] = create_keogram(pfisrImageLENumF,pfisrLatLENumF,pfisrLonLENumF,'meridian',meridian,'latPixelNum',6);
-
-[pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,projAltHENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,100,[50,300].*1000);
-[pfisrKeoHENumF,pfisrParHENumF] = create_keogram(pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,'meridian',meridian,'latPixelNum',6);
+% [pfisrImageLENumF,pfisrLatLENumF,pfisrLonLENumF,projAltLENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,15,[5,30].*1000);
+% [pfisrKeoLENumF,pfisrParLENumF] = create_keogram(pfisrImageLENumF,pfisrLatLENumF,pfisrLonLENumF,'latPixelNum',6);
+% 
+% [pfisrImageMENumF,pfisrLatMENumF,pfisrLonMENumF,projAltMENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,70,[50,1000].*1000);
+% [pfisrKeoMENumF,pfisrParMENumF] = create_keogram(pfisrImageMENumF,pfisrLatMENumF,pfisrLonMENumF,'latPixelNum',6);
+% 
+% [pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,projAltHENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,100,[50,300].*1000);
+% [pfisrKeoHENumF,pfisrParHENumF] = create_keogram(pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,'latPixelNum',6);
 
 multiWaitbar('CLOSEALL');
 %%
@@ -64,37 +111,23 @@ q=p(1);
 q(1).select();
 colormap(gca,get_colormap('k',[0,1,0]));
 
-% Keogram MSP
-% pkrGLAT = 65.126;
-% pkrGLON = -147.47;
-% h0=0.693;
-% elCutOff = 22.5;
-% el=fliplr(dataMSP.el+90);
-% az = ones(size(el)).*18.2; 
-% N2I_Alt = 110;
-% projMAlt = N2I_Alt-h0; %km
-% [msplat,msplon,mspalt] = convert_azel_to_glatlon(az,el,projMAlt,pkrGLAT,pkrGLON,h0);
-% mspKeo = dataMSP.intensity4278'./dataMSP.intensity5577';
-% ax=plot_2D_time_series(dataMSP.time,msplat,mspKeo',0.25,0,timeMinStr,timeMaxStr);
-% label_time_axis(time, true, 1/6,timeMinStr,timeMaxStr);
-
-ax=plot_2D_time_series(dascData.time,dascLat,dascKeo,0.25,0,timeMinStr,timeMaxStr);
+ax=plot_2D_time_series(dascTime,dascLat,dascKeo,0.25,0,timeMinStr,timeMaxStr);
 hold on; 
-timeMinIndx = find_time(pfisrData.time,'26-Mar-2008 11:05');
-timeMaxIndx = find_time(pfisrData.time,'26-Mar-2008 11:30');
-peakLatitude150 = find_peak_latitude(pfisrKeo150,pfisrPar150);
+timeMinIndx = find_time(pfisrData.time,'26-Mar-2008 11:15');
+timeMaxIndx = find_time(pfisrData.time,'26-Mar-2008 11:24');
+% peakLatitude150 = find_peak_latitude(pfisrKeo150,pfisrPar150);
 peakLatitude100 = find_peak_latitude(pfisrKeo100,pfisrPar100);
 peakLatitude70 = find_peak_latitude(pfisrKeo70,pfisrPar70);
 peakLatitude30 = find_peak_latitude(pfisrKeo30,pfisrPar30);
 
-h150 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-50),peakLatitude150(timeMinIndx:timeMaxIndx-50),'b','LineWidth',1); %150
-h100 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-35),peakLatitude100(timeMinIndx:timeMaxIndx-35),'w','LineWidth',1); %100
-h70  = plot(pfisrData.time(timeMinIndx:timeMaxIndx-30),peakLatitude70(timeMinIndx:timeMaxIndx-30),'k','LineWidth',1); %70
-h30  = plot(pfisrData.time(timeMinIndx+35:timeMaxIndx-20),peakLatitude30(timeMinIndx+35:timeMaxIndx-20),'red','LineWidth',1); %30
+% h150 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-50),peakLatitude150(timeMinIndx:timeMaxIndx-50),'b','LineWidth',1); %150
+h100 = plot(pfisrData.time(timeMinIndx-10:timeMaxIndx-15),peakLatitude100(timeMinIndx-10:timeMaxIndx-15),'b','LineWidth',1); %100
+h70  = plot(pfisrData.time(timeMinIndx-5:timeMaxIndx-10),peakLatitude70(timeMinIndx-5:timeMaxIndx-10),'c','LineWidth',1); %70
+h30  = plot(pfisrData.time(timeMinIndx+8:timeMaxIndx),peakLatitude30(timeMinIndx+8:timeMaxIndx),'r','LineWidth',1); %30
 
-legend([h150 h100 h70 h30],'150 keV', '100 keV', '70 keV', '30 keV','Location','NorthWest');
+legend([h100 h70 h30], '100 keV', '70 keV', '30 keV','Location','NorthWest');
 % caxis([0.15 0.35]);
-caxis([340 380]);
+caxis([350 380]);
 axPos = get(gca, 'position');
 c = colorbar('eastoutside');
 set(gca,'position',axPos);
@@ -104,31 +137,52 @@ cPos=get(c,'Position');
 cPos(3)=0.2*cPos(3);
 set(c, 'Position',cPos);
 ylim([64.8 65.6]);
-% ylim([63 67]);
+% ylim([64.7 65.6]);
 
 ylabel({'White light','emission','lat [N^0]'});
+label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
 
 % Figure 4b 100 keV Electron Energy Flux
 q(2).select();
 plot_pfisr_energy_keogram(pfisrKeo100,pfisrPar100,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
 ylabel({'e^- Energy Flux','100 keV','lat [N^0]'});
+label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
 
 % Figure 4c 1-300 keV Total energy flux 
 q(3).select();
 C = define_universal_constants();
-plot_pfisr_energy_keogram(pfisrKeoAll*C.e*pi*1000,pfisrParAll,pfisrData,false,timeMinStr,timeMaxStr,'[mW/m^2]',[-2 1]);
+plot_pfisr_energy_keogram(pfisrKeoAll*C.e*pi*1000,pfisrParAll,pfisrData,false,timeMinStr,timeMaxStr,'[mW/m^2]',[-1 1]);
 ylabel({'e^- Energy Flux','1-300 keV','lat [N^0]'});
+label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
 
 q(4).select();
-plot(pfisrData.time,pfisrKeoLE(3,:)*C.e*pi*(1e+7).*(1e-4),'k'); 
-hold on; 
-plot(pfisrData.time,pfisrKeoHE(3,:)*C.e*pi*(1e+7).*(1e-4),'r');
+x = pfisrData.time;
+y = [pfisrKeoHE(3,:);pfisrKeoME(3,:)-pfisrKeoHE(3,:);pfisrKeoME1(3,:);pfisrKeoLE(3,:)].*C.e*pi*(1e+7).*(1e-4);
+dascLatIndx = find_altitude(dascLat,pfisrParHE(3));
+
+b = area(x,y');
+b(1).FaceColor = 'm';
+b(2).FaceColor = 'y';
+b(3).FaceColor = [0.5, 0.8, 0];
+b(4).FaceColor = [0.5, 0.5, 0.5];
+b(1).EdgeColor = 'none';
+b(2).EdgeColor = 'none';
+b(3).EdgeColor = 'none';
+b(4).EdgeColor = 'none';
 set(gca,'XTickLabel','');
+
+% yyaxis right;
+% a=plot(dascTime, dascKeo(dascLatIndx,:),'b');
+% ylim([350,380]);
+
+% yyaxis left;
 xlim([datenum(timeMinStr), datenum(timeMaxStr)]);
-legend('5-50 keV','50-300 keV','Location','NorthWest');
+% legend([b(4),b(3),b(2),b(1),a],{'1-10','10-30 keV','30-50 keV','50-300 keV','Intensity'},'Location','NorthWest');
+legend([b(4),b(3),b(2),b(1)],{'1-10','10-30 keV','30-50 keV','50-300 keV'},'Location','NorthWest');
 ylabel({'e^- Energy Flux','[mW/m^2]'});
-ylim([0,3]);
+ylim([0,2]);
 label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr);
+
 
 
 

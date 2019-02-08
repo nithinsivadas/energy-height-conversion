@@ -45,13 +45,17 @@ p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight'
 q=p(1);
 q(1).select();
 scatter(padData.thd.time,padData.thd.KE,10,'filled','MarkerFaceColor','b', 'MarkerFaceAlpha',.4);
-fthd=fit(padData.thd.time,padData.thd.KE','smoothingspline','SmoothingParam',0.99991);
+% fthd=fit(padData.thd.time,padData.thd.KE','smoothingspline','SmoothingParam',0.99991);
+% hold on;
+% ax1=plot(padData.thd.time,fthd(padData.thd.time),'b','LineWidth',1);
 hold on;
-ax1=plot(padData.thd.time,fthd(padData.thd.time),'b','LineWidth',1);
+ax1=plot(padData.thd.time,movmean(padData.thd.KE,10),'b','LineWidth',1);
 
-fthe=fit(padData.the.time,padData.the.KE','smoothingspline','SmoothingParam',0.999999);
+% fthe=fit(padData.the.time,padData.the.KE','smoothingspline','SmoothingParam',0.999999);
 scatter(padData.the.time,padData.the.KE,10,'filled','MarkerFaceColor','c', 'MarkerFaceAlpha',.4);
-ax2=plot(padData.the.time,fthe(padData.the.time),'c','LineWidth',1);
+% ax2=plot(padData.the.time,fthe(padData.the.time),'c','LineWidth',1);
+hold on;
+ax2=plot(padData.the.time,movmean(padData.the.KE,10),'c','LineWidth',1);
 
 set(gca,'YScale','log','YTick',[1,10,100,300],...
     'YGrid','on','YMinorGrid','off','YLim',[1 1000]);

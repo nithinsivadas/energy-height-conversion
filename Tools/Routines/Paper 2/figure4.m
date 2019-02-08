@@ -17,7 +17,8 @@ pfisrData = get_2D_plot_inputs_time_independent(h5FileStr,...
 energySlice = 100; %keV
 %% Keogram DASC
 dascImage = permute(h5read(h5FileStrDASC,'/DASC/ASI'),[3 2 1]);
-[dascKeo,dascLat,meridian] = create_keogram(dascImage,dascData.latitude,dascData.longitude);
+[dascKeo,dascLat,meridian] = create_keogram(dascImage,dascData.latitude,dascData.longitude,...
+    'time',datenum('26 Mar 2008 11:00'));
 %% PFISR Keogram
 pfisrImage = permute(h5read(h5FileStr,'/energyFluxFromMaxEnt/energyFlux'),[3 2 1]);
 pfisrImageNumF = pfisrImage./permute(repmat(pfisrData.zEnergyBin,1,1,size(pfisrImage,1)),[3,1,2]);

@@ -142,39 +142,44 @@ asi.ne = get_undersampled_asi(asi.data,i_ne,j_ne);
 % asi.ne0 = get_undersampled_asi(asi.data,i_ne0,j_ne0);
 %%
 % asi.ne0 = asi.ne0(:,:,altIndx);
+
+%% Global plotting variables
+
+gl.timeArrayStr = string(['26 Mar 2008 11:04:35';...
+                       '26 Mar 2008 11:08:11';...
+                       '26 Mar 2008 11:18:31';...
+                       '26 Mar 2008 11:23:55';...
+                       '26 Mar 2008 11:26:00']);
+gl.energyArray = [3,8,30,100];
+gl.altitudeArray = [120,108,95,85];
+
 %% Figure of Energy Flux 
 h1 = figure;
 resize_figure(h1,125,200);
-timeArrayStr = string(['26 Mar 2008 11:04:00';...
-                       '26 Mar 2008 11:08:00';...
-                       '26 Mar 2008 11:16:00';...
-                       '26 Mar 2008 11:24:00';...
-                       '26 Mar 2008 11:28:00']);
-zValueBinArray = [3,8,30,100];
-cLimArray = [9,11;...
-            9,11;...
+timeArrayStr = gl.timeArrayStr;
+zValueBinArray = gl.energyArray;
+cLimArray = [10,12;...
+            10,12;...
             9,11;...
             8,10];
 zUnitStr = 'keV';
 colorUnitStr = '[eV/m^2 sr s eV]';
-titleStr = 'Energy Flux from PFISR';
+titleStr = 'Energy flux from PFISR';
+
 generate_panels(h1,log10(pfisr.energyFlux),pfisr.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),...
     pfisr.zEnergyBin(1,:,:)/1000,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
 colormap('inferno');
 
+
 %% Electron density (descrepancy between the coordinates of electron density and energy flux)
 h2 = figure;
 resize_figure(h2,125,200);
-timeArrayStr = string(['26 Mar 2008 11:04:00';...
-                       '26 Mar 2008 11:08:00';...
-                       '26 Mar 2008 11:16:00';...
-                       '26 Mar 2008 11:24:00';...
-                       '26 Mar 2008 11:28:00']);
-zValueBinArray = [120,105,95,85];
-cLimArray = [10,12;...
-            10,12;...
-            10,12;...
-            10,12];
+timeArrayStr = gl.timeArrayStr;
+zValueBinArray = gl.altitudeArray;
+cLimArray = [10.5,11.5;...
+            10.5,11.5;...
+            10.5,11.5;...
+            10.5,11.5];
 zUnitStr = 'km';
 colorUnitStr = '[m^-^3]';
 % uniformAlt = repmat(mean(pfisrNe.alt(1,:,:),2),1,size(pfisrNe.data,2),1).*1000;
@@ -182,45 +187,13 @@ titleStr = 'Ne from PFISR';
 pfisrNe.data(pfisrNe.data<=0) = nan;
 generate_panels(h2,log10(pfisrNe.data),pfisr.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
     pfisrNe.alt(1,:,:),timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
-colormap(magma);
-%% Electron density (descrepancy between the coordinates of electron density and energy flux)
-% h2 = figure;
-% resize_figure(h2,125,200);
-% timeArrayStr = string(['26 Mar 2008 11:04:00';...
-%                        '26 Mar 2008 11:08:00';...
-%                        '26 Mar 2008 11:16:00';...
-%                        '26 Mar 2008 11:24:00';...
-%                        '26 Mar 2008 11:28:00']);
-% zValueBinArray = [120,105,95,85];
-% cLimArray = [10,12;...
-%             10,12;...
-%             10,12;...
-%             10,12];
-% zUnitStr = 'km';
-% colorUnitStr = '[m^-^3]';
-% titleStr = 'Ne from PFISR';
-% uniformAlt = repmat(mean(pfisrNe0.alt,1),size(pfisrNe0.alt,1),1);
-% generate_panels(h2,pfisrNe0.data,pfisrNe0.time,pfisrNe0.lat,pfisrNe0.lon,...
-%     uniformAlt*1000,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,...
-%     titleStr,[64.6,66.2],[-149,-146]);
-% colormap(magma);
-
-%%
-figure;
-plot_slice(pfisrNe0.data,pfisrNe0.time,pfisrNe0.lat,pfisrNe0.lon,...
-    pfisrNe0.alt*1000,'26 Mar 2008 11:00',100);
-colormap(inferno);
-colorbar; 
+colormap(viridis);
 
 %% Figure of asi undersampled/ energy flux
 h3 = figure;
 resize_figure(h3,125,200);
-timeArrayStr = string(['26 Mar 2008 11:04:00';...
-                       '26 Mar 2008 11:08:00';...
-                       '26 Mar 2008 11:16:00';...
-                       '26 Mar 2008 11:24:00';...
-                       '26 Mar 2008 11:28:00']);
-zValueBinArray = [3,8,30,100];
+timeArrayStr = gl.timeArrayStr;
+zValueBinArray = gl.energyArray;
 cLimArray = [350,370;...
             350,370;...
             350,370;...
@@ -229,24 +202,14 @@ zUnitStr = 'keV';
 colorUnitStr = '[a.u.]';
 titleStr = 'ASI undersampled at PFISR energy flux coords';
 generate_panels(h3,asi.eflux,asi.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),...
-    pfisrData.zEnergyBin,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
-colormap(viridis);
+    pfisrData.zEnergyBin/1000,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
+colormap(get_colormap('k','g'));
 
-%%
-figure; scatter(pfisr.lat(1,:,1),pfisr.lon(1,:,1));
-hold on; 
-scatter(pfisrNe.lat(1,:,120),pfisrNe.lon(1,:,120));
-xlim([64.8,65.5]);
-ylim([-148.2 -146.8]);
 %% Figure of asi undersampled/ Ne
 h4 = figure;
 resize_figure(h4,125,200);
-timeArrayStr = string(['26 Mar 2008 11:04:00';...
-                       '26 Mar 2008 11:08:00';...
-                       '26 Mar 2008 11:16:00';...
-                       '26 Mar 2008 11:24:00';...
-                       '26 Mar 2008 11:28:00']);
-zValueBinArray = [120,105,95,85];
+timeArrayStr = gl.timeArrayStr;
+zValueBinArray = gl.altitudeArray;
 cLimArray = [350,370;...
             350,370;...
             350,370;...
@@ -254,58 +217,57 @@ cLimArray = [350,370;...
 zUnitStr = 'km';
 colorUnitStr = '[a.u.]';
 titleStr = 'ASI undersampled at PFISR Ne coords';
-uniformAlt = repmat((pfisrNe.alt(1,13,:)),1,size(pfisrNe.data,2),1).*1000;
-generate_panels_asi(h4,asi.ne,asi.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
-    uniformAlt,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
+% uniformAlt = repmat((pfisrNe.alt(1,13,:)),1,size(pfisrNe.data,2),1).*1000;
+generate_panels(h4,asi.ne,asi.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
+    pfisrNe.alt(1,:,:),timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
 
-colormap(viridis);
+colormap(get_colormap('k','g'));
 
-%% Testing
-figure;
-% elIndx = asi.el(1,:,:)>30;
-i = 170;
-plot_DASC_aer_v1(squeeze(asi.data(i,:,:)),squeeze(asi.az(1,:,:)),squeeze(asi.el(1,:,:)));
-hold on;
-plot_scatter_aer(diag(asiaz(vi_eflux(:,1),vj_eflux(:,1))),diag(asiel(vi_eflux(:,1),vj_eflux(:,1))));
-hold on;
-plot_scatter_aer(diag(asiaz(vi_eflux(:,30),vj_eflux(:,30))),diag(asiel(vi_eflux(:,30),vj_eflux(:,30))),'c');
-hold on;
-linearInd = calculate_linear_index (size(asiaz), i_eflux, j_eflux, 10, 1);
-% iE = 1;
-% % linearInd = [];
-% for iB = 1:26
-%     linearInd = [linearInd;squeeze(sub2ind(size(asiaz),i_eflux(iB,iE,i_eflux(iB,iE,:)>0),j_eflux(iB,iE,j_eflux(iB,iE,:)>0)))];
-% end
-plot_scatter_aer(asiaz(linearInd),asiel(linearInd),'y');
-plot_grid_aer(90,30,'r');
-% iE = 1;
-% plot_scatter_aer(diag(asiaz(i_eflux(iB,iE,i_eflux(iB,iE,:)>0),j_eflux(iB,iE,j_eflux(iB,iE,:)>0))),diag(asiel(i_eflux(iB,iE,i_eflux(iB,iE,:)>0),j_eflux(iB,iE,j_eflux(iB,iE,:)>0))),'y');
-% scatter(90*vi_eflux(i,:)./1024,90*vj_eflux(i,:)./1024);
-title(datestr(asi.time(i)));
-%%
-% figure;
-% plot_DASC_aer_v1(squeeze(asi.az(1,:,:)),squeeze(asi.az(1,:,:)),squeeze(asi.el(1,:,:)));
+%% Figure of asi/energy flux with high resolution
+h5=figure; 
+resize_figure(h5,125,200);
+timeArrayStr = gl.timeArrayStr;
+zValueBinArray = gl.energyArray;
+cLimArray = [340,380;...
+            340,380;...
+            340,380;...
+            340,380];
+zUnitStr = 'keV';
+colorUnitStr = '[a.u.]';
+titleStr = ' ASI in PFISR Field of View / Energy Flux';
+generate_panels_asi(h7, asi.data, asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
+    pfisr.lat(1,:,:),pfisr.lon(1,:,:),pfisr.zEnergyBin(1,1,:)./1000,timeArrayStr,...
+    zValueBinArray, cLimArray, zUnitStr, colorUnitStr, titleStr);
+colormap(get_colormap('k','g'));
 
-figure;
-% plot_2D_energy_slice_geodetic_v2018(pfisr.energyFlux(1,:,:),...
-%     pfisr.lat(1,:,:),pfisr.lon(1,:,:),pfisrData.zEnergyBin,...
-%     [],10,2,4,false,false,256);
-plot_slice(pfisr.energyFlux,pfisr.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),...
-    pfisrData.zEnergyBin,'26 Mar 2008 11:00',5);
-colormap(inferno);
-colorbar; 
 
-%% Find Correlation 
-[r_eflux,time_r_eflux, time2_r_eflux] = calculate_correlation_v2(pfisr.energyFlux,pfisr.time(:,1,1),asi.eflux,asi.time(:,1,1));
-[r_ne,time_r_ne, time2_r_ne] = calculate_correlation_v2(pfisrNe.data,pfisr.time(:,1,1),asi.ne,asi.time(:,1,1));
-%%
+%% Figure of asi/energy flux with high resolution
+h5=figure; 
+resize_figure(h5,125,200);
+timeArrayStr = gl.timeArrayStr;
+zValueBinArray = gl.altitudeArray;
+cLimArray = [340,380;...
+            340,380;...
+            340,380;...
+            340,380];
+zUnitStr = 'km';
+colorUnitStr = '[a.u.]';
+titleStr = ' ASI in PFISR Field of View / Ne';
+generate_panels_asi(h7, asi.data, asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
+    pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),pfisrNe.alt(1,1,:),timeArrayStr,...
+    zValueBinArray, cLimArray, zUnitStr, colorUnitStr, titleStr);
+colormap(get_colormap('k','g'));
+
+%% Find Correlation between ASI pixels and Ne/energy flux
+[r_eflux,time_r_eflux, time2_r_eflux] = calculate_correlation_v2((pfisr.energyFlux),pfisr.time(:,1,1),(asi.eflux),asi.time(:,1,1));
+[r_ne,time_r_ne, time2_r_ne] = calculate_correlation_v2((pfisrNe.data),pfisr.time(:,1,1),(asi.ne).^0.5,asi.time(:,1,1));
+
+%% Find Correlation between Ne_@80km and the rest
 altIndx = find_altitude(pfisrNe.alt(1,13,:),80);
 pfisrne80km = repmat(interp_nans(pfisrNe.data(:,:,altIndx)')',1,1,size(pfisrNe.data,3));
 [r_ne_ne,time_r_ne_ne] = calculate_correlation_v2(pfisrNe.data,pfisr.time(:,1,1),pfisrne80km,pfisr.time(:,1,1));
 
-%%
-% [r_ne0,time_r_ne0] = calculate_correlation(pfisrNe0.data,pfisrNe0.time,asi.ne0,asi.time(:,1,1));
-%%
+%%  Plot correlation between ASI pixels and Ne/ energy flux
 totalPanelNo=2;
 p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
 q=p(1);
@@ -317,7 +279,6 @@ set(gca,'YScale','log','YTick',[10,30,100,300],'YTickLabel',[10,30,100,300]);
 ylabel('[keV]');
 colormap(gca,get_colormap('w','r'));
 grid on;
-% colormap(jet);
 colorbar_thin('YLabel',{'r_0','Eflux & Optical'});
 caxis([0,1]);
 
@@ -333,7 +294,7 @@ ylabel('[Km]');
 colorbar_thin('YLabel',{'r_0 (N_e & Optical)'});
 caxis([0,1]);
 
-%%
+%% Plot correlation between N_e@80 km and that at all other altitudes
 totalPanelNo=1;
 p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
 q=p(1);
@@ -348,54 +309,352 @@ colormap(gca,get_colormap('w','k'));
 ylabel('[Km]');
 colorbar_thin('YLabel',{'r_0 (N_e@80km & N_e)'});
 caxis([0,1]);
-%%
+%% Testing if there is any time delay between the two images being correlated
 figure;
 plot(time_r_ne,(time2_r_ne(:)-time_r_ne(:))*24*3600);
 label_time_axis(time_r_ne, true, 10/60);
-% figure;
-% plot_2D_time_series(time_r_ne0,mean(pfisrNe0.alt,1),r_ne0',0.1,-1);
-% label_time_axis(time_r_ne0, true, 0.1);
-% set(gca,'YScale','log');
-% colormap(get_colormap('w','k'));
-% title('Correlation of Ne with ASI');
-% ylabel('[Km]');
-% colorbar;
-% caxis([0,1]);
 
-%% Test plotting slice
+%% Defining a polygon of radar field of view
 figure;
-scatter(pfisrNe.lat(1,:,86),pfisrNe.lon(1,:,86)); hold on; scatter(pfisr.lat(1,:,6),pfisr.lon(1,:,6));
-plot_slice(pfisrNe.data,pfisr.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),pfisrNe.alt(1,:,:),'26 Mar 2008 11:00',122);
+beamlat = pfisr.lat(1,:,1);
+beamlon = pfisr.lon(1,:,1);
+scatter(beamlon',beamlat',15,1:26,'filled');
+cmap = viridis(26);
+b = num2str((1:26)');
+hold 
+text(beamlon,beamlat,cellstr(b),'Fontsize',10);
+% cmap = flipud(cmap(1:10,:));
+% cmap(1,:) = [1,1,1];
+colormap(cmap);
 colorbar;
 
+beamIndx = [13,5,7,4,1,13];
+xv = beamlon(beamIndx);
+yv = beamlat(beamIndx);
+x0 = mean(beamlon);
+y0 = mean(beamlat);
+[xv,yv] = push_point_away_from_center(xv,yv,x0,y0,0.1);
+hold on;
+plot(xv,yv);
 
 %%
-figure;
-scatter(pfisrNe.lat(1,:,86),pfisrNe.lon(1,:,86)); hold on; scatter(pfisr.lat(1,:,6),pfisr.lon(1,:,6));
-plot_slice(log10(pfisr.energyFlux),pfisr.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),pfisr.zEnergyBin(1,:,:)/1000,'26 Mar 2008 11:00',3);
-colorbar;
-% caxis([64.99 65]);
+[in, on, pfisrFOV.lon, pfisrFOV.lat] = pfisr_field_of_view(asi.lat(1,:,:), asi.lon(1,:,:),...
+            pfisrNe.lat(1,:,:), pfisrNe.lon(1,:,:),...
+        pfisrNe.alt(1,1,:),85,0.1);
+%%
+correlation.r_eflux = r_eflux;
+correlation.time_r_eflux = time_r_eflux;
+correlation.r_ne = r_ne;
+correlation.time_r_ne = time_r_ne;
+%%
+clc;
+time = asi.time(:,1,1);
+for iTime = 15:1:length(time)
+    h=figure('visible','off');
+    create_figure_sx(h,pfisr,pfisrNe,asi,correlation,pfisrFOV,gl,datestr(time(iTime)),...
+        true,'G:\My Drive\Research\Projects\Paper 2\InternalReview1\Figure_edits\SliceMatrix\');
+end
+%%
+create_video('G:\My Drive\Research\Projects\Paper 2\InternalReview1\Figure_edits\','SliceMatrix\','Paper2_S1_Video.avi');
+%%
+clc;
+h=figure('visible','on');
+create_figure_sx(h,pfisr,pfisrNe,asi,correlation,pfisrFOV,gl,'26 Mar 2008 11:00',...
+        false,'G:\My Drive\Research\Projects\Paper 2\InternalReview1\Figure_edits\SliceMatrix\');
+
+function h=create_figure_sx(h,pfisr,pfisrNe,asi,correlation,pfisrFOV,globalVar,timeStr,...
+    setStoreImage,imageStoreDir)
+resize_figure(h,215,325);
+nZ = 4;
+nT = 4;
+p = panel();
+p.pack({{80} {80}},{{150} {125}});
+
+panelHeight = 20; %mm
+panelBreadth = 20; %mm
+rowHeights = repmat({{panelHeight}},1,nZ);
+colBreadths = repmat({{panelBreadth}},1,nT);
+
+p(1,2).pack(rowHeights,colBreadths);
+p(1,2).de.margin = 4;
+p(1,2).marginleft = 15;
+p(1).de.margin = 4;
+p.marginleft = 25;
+p.margintop = 20;
+
+p(2,1).pack({{30} {30}},{{125}});
+p(2,1).de.margin = 4;
+p(2,1,1).marginleft = 20;
+
+p(2,2).pack({{50} },{{50} {50}});
+p(2,2).marginleft = 20;
+p(2,2).marginbottom = 10;
+p(2,2).de.margin = 10;
+p(2).margintop = 35;
+p.select('all');
+
+
+p(1,1).select();
+
+time = asi.time(:,1,1);
+iT = find_time(time,timeStr);
+image = squeeze(asi.data(iT,:,:));
+image = image.*2^-16;
+avg = 367.*2^-16;
+n=1.5;  
+sigma = std2(image);
+lowerLim = avg - n*sigma;
+if lowerLim <=0
+  lowerLim=0;
+end
+upperLim = avg + n*sigma;
+if upperLim >=1
+  upperLim=1;
+end
+image = imadjust(image, [lowerLim upperLim],[]);              
+plot_DASC_geodetic(image, [], squeeze(asi.lat(iT,:,:)),squeeze(asi.lon(iT,:,:)),...
+    1024,[63,67],[-153,-143],1,5);
+colormap(get_colormap('k','g'));
+% caxis([250 400]);
+colorbar_thin('YLabel','[a.u.]');
+
 hold on;
+plotm(pfisrFOV.lat,pfisrFOV.lon,'r');
 
-
-function [r,time,time2_corr] = calculate_correlation(data1,time1,data2,time2)
-    
-    time = time1; 
-    nTime = length(time1);
-    time2_corr = zeros(nTime,1);
-    nZ = size(data1,3);
-    if size(data1,3)~=size(data2,3)
-        error('nZ values are not the same');
+% ASI - High resolution
+zValueBinArray  = globalVar.altitudeArray;
+zUnitStr = 'km';
+cLimArray = [340,380;...
+            340,380;...
+            340,380;...
+            340,380];
+xLimArr = [-148.2 -146.8]; 
+yLimArr = [64.8 65.5];
+colorUnitStr = '[Counts]';
+titleStr ={'ASI',colorUnitStr,datestr(asi.time(iT,1,1),'HH:MM:ss')};
+for iZ = 1:1:nZ
+    p(1,2,iZ).de.margin = 12;
+    p(1,2,iZ,1).select();
+    try
+    [in, ~] = pfisr_field_of_view(asi.lat(1,:,:), asi.lon(1,:,:),...
+        pfisrNe.lat(1,:,:), pfisrNe.lon(1,:,:),...
+        squeeze(pfisrNe.alt(1,1,:)),zValueBinArray(iZ),0.05);
+    plot_slice_asi(asi.data,asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
+        timeStr,in);
+    catch
     end
-    for iTime = 1:1:nTime
-        iTime2 = find_time(time2,datestr(time(iTime)));
-        for iZ = 1:1:nZ
-            r(iTime,iZ) =  corr2(data1(iTime,:,iZ),data2(iTime2,:,iZ));
+    caxis(cLimArray(iZ,:));
+    xlim(xLimArr);
+    ylim(yLimArr);
+    set(gca,'XTickMode','manual','YTickMode','manual',...
+            'XTick',[-148,-147],'YTick',[65,65.5],'TickLength',[0.05 0.035]); 
+    colorbar_thin('Location','eastoutside','Width',0.5);
+    ylabel([num2str(zValueBinArray(iZ)),' ',zUnitStr]);
+        if iZ ~= nZ
+            set(gca,'XTickLabel',[]);
         end
-        time2_corr(iTime) = time2(iTime2);
+        if iZ == 1
+            title(titleStr);
+        end
+end
+
+% ASI - Low resolution
+zValueBinArray  = globalVar.altitudeArray;
+zUnitStr = 'km';
+cLimArray = [350,370;...
+            350,370;...
+            350,370;...
+            350,370];
+colorUnitStr = '[Counts]';
+titleStr ={'ASI-Undersampled',colorUnitStr,datestr(asi.time(iT,1,1),'HH:MM:ss')};
+for iZ = 1:1:nZ
+    p(1,2,iZ,2).select();
+    try
+    plot_slice(asi.ne,asi.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
+        pfisrNe.alt(1,:,:),timeStr,zValueBinArray(iZ));
+    catch
     end
+    caxis(cLimArray(iZ,:));
+    xlim(xLimArr);
+    ylim(yLimArr);
+    set(gca,'XTickMode','manual','YTickMode','manual',...
+            'XTick',[-148,-147],'YTick',[65,65.5],'YTickLabel',[],'TickLength',[0.05 0.035]); 
+    colorbar_thin('Location','eastoutside','Width',0.5);
+        if iZ ~= nZ
+            set(gca,'XTickLabel',[]);
+        end
+        if iZ == 1
+            title(titleStr);
+        end
+end
+
+% PFISR Ne
+zValueBinArray  = globalVar.altitudeArray;
+zUnitStr = 'km';
+cLimArray = [10.5,11.5;...
+            10.5,11.5;...
+            10.5,11.5;...
+            10.5,11.5];
+colorUnitStr = '[m^-^3]';
+iT1 = find_time(pfisr.time(:,1,1),timeStr);
+titleStr ={'N_e',colorUnitStr,datestr(pfisr.time(iT1,1,1),'HH:MM:ss')};
+for iZ = 1:1:nZ
+    p(1,2,iZ,3).select();
+%     iax = gca;
+    plot_slice(real(log10(pfisrNe.data)),pfisr.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
+        pfisrNe.alt(1,:,:),timeStr,zValueBinArray(iZ));
+    caxis(cLimArray(iZ,:));
+    xlim(xLimArr);
+    ylim(yLimArr);
+    set(gca,'XTickMode','manual','YTickMode','manual',...
+            'XTick',[-148,-147],'YTick',[65,65.5],'YTickLabel',[],'TickLength',[0.05 0.035]); 
+    colormap(gca,viridis);
+    colorbar_thin('Location','eastoutside','Width',0.5);
+        if iZ ~= nZ
+            set(gca,'XTickLabel',[]);
+        end
+        if iZ == 1
+            title(titleStr);
+        end
+end
+
+% PFISR energyFLux
+zValueBinArray  = globalVar.energyArray;
+zUnitStr = 'keV';
+cLimArray = [10,12;...
+            10,12;...
+            9,11;...
+            8,10];
+colorUnitStr = '[eV/m^2 sr s eV]';
+titleStr ={'\phi(E)',colorUnitStr,datestr(pfisr.time(iT1,1,1),'HH:MM:ss')};
+for iZ = 1:1:nZ
+    p(1,2,iZ,4).marginleft = 15;
+    p(1,2,iZ,4).select();
+    plot_slice(real(log10(pfisr.energyFlux)),pfisr.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),...
+        pfisr.zEnergyBin(1,:,:)/1000,timeStr,zValueBinArray(iZ));
+    caxis(cLimArray(iZ,:));
+    xlim(xLimArr);
+    ylim(yLimArr);
+    set(gca,'XTickMode','manual','YTickMode','manual',...
+            'XTick',[-148,-147],'YTick',[65,65.5],'YTickLabel',[],'TickLength',[0.05 0.035]); 
+    colormap(gca,inferno);
+    colorbar_thin('Location','eastoutside','YLabel',[num2str(zValueBinArray(iZ)),' ',zUnitStr],'Width',0.5);
+        if iZ ~= nZ
+            set(gca,'XTickLabel',[]);
+        end
+        if iZ == 1
+            title(titleStr);
+        end
+end
+
+% Correlation
+timeIndx1 = find_time(correlation.time_r_eflux,timeStr);
+timeIndx2 = find_time(correlation.time_r_ne,timeStr);
+
+p(2,1,1,1).select();
+plot_2D_time_series(correlation.time_r_eflux,pfisr.zEnergyBin(1,1,:)./1000,correlation.r_eflux',10/60,-1);
+label_time_axis(correlation.time_r_eflux, false, 10/60);
+set(gca,'YScale','log','YTick',[10,30,100,300],'YTickLabel',[10,30,100,300]);
+ylabel('[keV]');
+colormap(gca,get_colormap('w','r'));
+grid on;
+colorbar_thin('YLabel',{'r_0 (\phi(E) & Optical)'});
+caxis([0,1]);
+x = [correlation.time_r_eflux(timeIndx1) , correlation.time_r_eflux(timeIndx1)];
+y = [min(pfisr.zEnergyBin(1,1,:)./1000), max(pfisr.zEnergyBin(1,1,:)./1000)];
+hold on;
+line(x,y,'Color','blue');
+
+p(2,1,2,1).select();
+uniformAlt = repmat(mean(pfisrNe.alt(1,:,:),2),1,size(pfisrNe.data,2),1);
+plot_2D_time_series(correlation.time_r_ne,uniformAlt(1,1,:),correlation.r_ne',0.1,-1);
+label_time_axis(correlation.time_r_ne, true, 10/60);
+set(gca,'YScale','log','YTick',[70,80,100,120,200]);
+colormap(gca,get_colormap('w','k'));
+% title('Correlation of Ne (mag-field-aligned) with ASI');
+ylabel('[Km]');
+colorbar_thin('YLabel',{'r_0 (N_e & Optical)'});
+caxis([0,1]);
+x = [correlation.time_r_ne(timeIndx2) , correlation.time_r_ne(timeIndx2)];
+y = [min(uniformAlt(1,1,:)), max(uniformAlt(1,1,:))];
+hold on;
+line(x,y,'Color','blue');
+
+p(2,2,1,1).select();
+
+plot(squeeze(pfisr.zEnergyBin(1,1,:)/1000),correlation.r_eflux(timeIndx1,:),'r');
+set(gca,'XScale','log','XTick',[10,30,100,300],'XTickLabel',[10,30,100,300],...
+    'TickLength',[0.05 0.035]);
+xlim([1 1000]);
+ylim([0 1]);
+ylabel('r_0 (\phi(E) & Optical)');
+xlabel('[keV]');
+title(datestr(correlation.time_r_eflux(timeIndx1),'HH:MM:ss'));
+
+p(2,2,1,2).select();
+
+plot(squeeze(uniformAlt(1,1,:)),correlation.r_ne(timeIndx2,:),'k');
+set(gca,'XScale','linear','XTick',[60,85,100,120,200],'XTickLabel',[60,85,100,120,200],...
+    'TickLength',[0.05 0.035]);
+ylim([0 1]);
+xlim([60 200]);
+ylabel('r_0 (N_e & Optical)');
+xlabel('[km]');
+title(datestr(correlation.time_r_ne(timeIndx2),'HH:MM:ss'));
+
+    if setStoreImage == true
+        export_fig(strcat(imageStoreDir,'Figure_',datestr(timeStr,'HH_MM_ss'),'.png'),...
+            '-r300','-png','-nocrop');
+        close(h);
+    end
+
+end
+
+function [in,on,xv,yv] = pfisr_field_of_view(lat,lon,pfisrlat,pfisrlon,zAxis,zValue,dr)
+
+zIndx = find_altitude(zAxis,zValue);
+pfisrlat = pfisrlat(1,:,zIndx);
+pfisrlon = pfisrlon(1,:,zIndx);
+
+beamIndx = [13,5,7,4,1,13];
+xv = pfisrlon(beamIndx);
+yv = pfisrlat(beamIndx);
+x0 = mean(pfisrlon);
+y0 = mean(pfisrlat);
+[xv,yv] = push_point_away_from_center(xv,yv,x0,y0,dr);
+[in,on] = inpolygon(lon,lat,xv,yv);
+end
+
+function [x,y] = push_point_away_from_center(x,y,x0,y0,dr)
+    x1 = x-x0;
+    y1 = y-y0;
+    
+    [theta,rho] = cart2pol(x1,y1);
+    [x,y] = pol2cart(theta,rho+dr);
+    x = x+x0;
+    y = y+y0;
     
 end
+
+
+% function [r,time,time2_corr] = calculate_correlation(data1,time1,data2,time2)
+%     
+%     time = time1; 
+%     nTime = length(time1);
+%     time2_corr = zeros(nTime,1);
+%     nZ = size(data1,3);
+%     if size(data1,3)~=size(data2,3)
+%         error('nZ values are not the same');
+%     end
+%     for iTime = 1:1:nTime
+%         iTime2 = find_time(time2,datestr(time(iTime)));
+%         for iZ = 1:1:nZ
+%             r(iTime,iZ) =  corr2(data1(iTime,:,iZ),data2(iTime2,:,iZ));
+%         end
+%         time2_corr(iTime) = time2(iTime2);
+%     end
+%     
+% end
 
 function [r,time,time2_corr] = calculate_correlation_v2(data1,time1,data2,time2)
     
@@ -425,7 +684,7 @@ function generate_panels(h,data,time,lat,lon,zAxis,timeArrayStr,...
 %  [m]                        [km]
 
 if nargin < 14
-    yLimArr = [64.8 65.6];
+    yLimArr = [64.8 65.5];
 end
 
 if nargin < 13
@@ -476,7 +735,8 @@ for iTime = 1:1:nT
         caxis(cLimArray(iZ,:));
         xlim(xLimArr);
         ylim(yLimArr);
-        set(gca,'XTick',[-148,-147],'YTick',[65,65.5]);
+        set(gca,'XTickMode','manual','YTickMode','manual',...
+            'XTick',[-148,-147],'YTick',[65,65.5],'TickLength',[0.05 0.035]);
         if iTime == nT
         colorbar_thin('Location','eastoutside','YLabel',colorUnitStr,'Width',1);
         end
@@ -486,15 +746,15 @@ end
    
 end
 
-function generate_panels_asi(h,data,time,lat,lon,zAxis,timeArrayStr,...
+function generate_panels_asi(h,data,time,lat,lon,pfisrlat,pfisrlon,zAxis,timeArrayStr,...
     zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr,xLimArr,yLimArr)
 
-if nargin < 14
-    yLimArr = [-148.2 -146.8];
+if nargin < 16
+    yLimArr = [64.8 65.5];
 end
 
-if nargin < 13
-    xLimArr = [64.8 65.6];
+if nargin < 15
+    xLimArr = [-148.2 -146.8];
 end
 
 % zAxis should be 1/1000 of zValueBinArray
@@ -539,13 +799,18 @@ for iTime = 1:1:nT
             xlabel(datestr(timeBinArray(iTime),'HH:MM:ss'));
         end
         
-           
-        plot_slice_asi(data,time,lat,lon,zAxis,...
-            datestr(timeBinArray(iTime)),zValueBinArray(iZ));
+        [in, ~] = pfisr_field_of_view(lat, lon,...
+            pfisrlat(1,:,:), pfisrlon(1,:,:),...
+        zAxis,zValueBinArray(iZ),0.05);
+    
+        plot_slice_asi(data,time,lat(1,:,:),lon(1,:,:),...
+        datestr(timeBinArray(iTime)),in);   
+        
         caxis(cLimArray(iZ,:));
         xlim(xLimArr);
         ylim(yLimArr);
-        set(gca,'YTick',[-148,-147],'XTick',[65,65.5]);
+        set(gca,'XTickMode','manual','YTickMode','manual',...
+            'XTick',[-148,-147],'YTick',[65,65.5],'TickLength',[0.05 0.035]);
         if iTime == nT
         colorbar_thin('Location','eastoutside','YLabel',colorUnitStr,'Width',1);
         end
@@ -565,13 +830,14 @@ plot_2D_energy_slice_geodetic_v2019_v1(squeeze(dataSlice),...
 
 end
 
-function plot_slice_asi(data,time,lat,lon,zAxis,timeStr,zAxisValue)
+function plot_slice_asi(data,time,lat,lon,timeStr,in)
 
 timeIndx = find_time(time,timeStr);
-dataSlice = data(timeIndx,:,:);
-plot_2D_energy_slice_geodetic_v2019(dataSlice,...
-    lat,lon,zAxis,...
-    [],zAxisValue,[],[],false,false,256);
+dataSlice = squeeze(data(timeIndx,:,:));
+imagelat = squeeze(lat);
+imagelon = squeeze(lon);
+plot_DASC_geodetic_v1(dataSlice(squeeze(in))', [], imagelat(squeeze(in))', imagelon(squeeze(in))',...
+    256,[],[],1,1);
 
 end
 
@@ -878,4 +1144,82 @@ if setTimeLabelOn==true
 end
 
 end
+
+function [ax1,h] = plot_DASC_geodetic_v1( dataNew, time, lat, lon,...
+    imageSize, latLim, lonLim, deltaLat, deltaLon, label )
+%% plot_DASC_geodetic Plot DASC optical image in geodetic coordinates on a map
+%--------------------------------------------------------------------------
+% Input
+%------
+% dataNew - 2-D optical data from DASC in geodetic coordinates [nCoordinates]
+%           produced from DASC_aer_to_geodetic.m
+% time    - Matlab time of the particular DASC image [nCoordinates]
+% lat     - latitude coordinates [nCoordinates]
+% lon     - longitude coordinates [nCoordinates]
+% imageSize - the total pixel size of the output image e.g. 1024 
+% latLim    - latitude limits e.g. [61 65]
+% lonLim    - longitude limits e.g. [141.5 144.5]
+%--------------------------------------------------------------------------
+% Output
+%-------
+% ax1 - map axes
+% h   - pcolor handle of color plot of the optical data
+%--------------------------------------------------------------------------
+% Modified: 24th Jan 2017 
+% Created : 24th Jan 2017
+% Author  : Nithin Sivadas
+% Ref     : 
+%--------------------------------------------------------------------------
+if nargin<8
+    deltaLat = 1;
+end
+
+if nargin<9
+    deltaLon = 5;
+end
+
+if nargin<10
+    label = 'DASC';
+elseif strcmp(label,'pokerFlat')
+    label = 'PKFT DASC';
+end
+
+if imageSize == size(dataNew,1) 
+    LAT = interp_nans(lat);
+    LON = interp_nans(lon);
+    Vq = dataNew; 
+elseif imageSize == sqrt(length(dataNew))
+    LAT = reshape(interp_nans(lat),imageSize,imageSize);
+    LON = reshape(interp_nans(lon),imageSize,imageSize);
+    Vq = reshape(dateNew,imageSize,imageSize);
+else
+    nanFlags = isnan(lat) | isnan(lon) | isnan(dataNew);
+    lat(nanFlags) = [];
+    lon(nanFlags) = [];
+    dataNew(nanFlags) = [];
+    % lat, lon, dataNew have to be column vectors!
+    F = scatteredInterpolant(lat',lon',dataNew','natural','none'); %Modified on 3rd Oct 2018 - Transpose
+    latq = linspace(min(lat),max(lat),imageSize);
+    lonq = linspace(min(lon),max(lon),imageSize);
+    [LAT, LON] = ndgrid(latq,lonq);
+    Vq = F(LAT,LON);
+end
+
+% Plotting
+% ax1=axesm('lambertstd','MapLatLimit',latLim,'MapLonLimit',lonLim,...
+%     'Frame','on','Grid','on','MeridianLabel','on','ParallelLabel','on',...
+%     'PLineLocation',deltaLat,'MLineLocation',deltaLon);
+% axis off
+% load coastlines
+% plotm(coastlat,coastlon,'Color',[0.5 0.5 0.5]);
+% hold on;
+h=pcolor(LON,LAT,(Vq)); 
+set(h,'EdgeColor','none');
+% if nargin>9
+%     textm(latLim(2)+(latLim(2)-latLim(1))*0.05, lonLim(1) +(lonLim(2)-lonLim(1))*0.35, [char(upper(label)),': ',datestr(time,'HH:MM:SS'),' UT']);
+% end
+% textm(latLim(2)-0.19, lonLim(1)+0.1, ['DASC: ',datestr(time,'HH:MM:SS'),' UT']);
+end
+
+
 

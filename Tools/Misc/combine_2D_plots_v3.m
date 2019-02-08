@@ -140,11 +140,11 @@ for iTime = 1:1:nTime
             elseif strcmpi(p.Results.sites(maps.optical(i)),'gako')
 %                 intensityScale = intensityScale*1.2; % Custom scaling 0.8
 %                 bias = -1*dascData.background ; %250
-                  n=3; % n=2
+                  n=2; % n=2
             elseif strcmpi(p.Results.sites(maps.optical(i)),'mcgr')
 %                 intensityScale = 1; % Custom scaling 0.4
 %                 bias = -1*dascData.background ; %+750
-                  n=1;
+                  n=0.5;
             elseif strcmpi(p.Results.sites(maps.optical(i)),'kian')
 %                 intensityScale = 1; % Custom scaling 0.4
 %                 bias = -1*dascData.background ; %250
@@ -154,7 +154,7 @@ for iTime = 1:1:nTime
             elseif  strcmpi(p.Results.sites(maps.optical(i)),'whit')
 %                 intensityScale = intensityScale*1.2; % Custom scaling 0.4
 %                 bias = -1*dascData.background ; %150
-                  n=1.5;
+                  n=1;
             else
 %                 intensityScale = 1; %Scale size of the intensities measured
 %                 bias = -1*dascData.background ; %250

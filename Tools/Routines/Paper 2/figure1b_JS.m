@@ -72,24 +72,24 @@ timeMaxIndx = find_time(timeThe,timeMaxStr);
 tIndxThe = timeMinIndx:timeMaxIndx;
 %% Initalize
 
-timeMinStr = '26 Mar 2008 11:30:50';
-timeMaxStr = '26 Mar 2008 11:30:50';
+timeMinStr = '26 Mar 2008 11:29:30';
+timeMaxStr = '26 Mar 2008 11:29:30';
 time = datenum(timeMinStr):5/(24*60*60):datenum(timeMaxStr);
 nTime = length(time);
-latLim = [58,69];
-lonLim = [-160,-130];
+latLim = [57,67];
+lonLim = [-165,-125];
 deltaLat = 2;
 deltaLon = 10;
 storeImageDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Figures\Draft\Figure1b\';
 for i = 1:1:nTime
 h=figure('visible','on');
 [ax1]=combine_2D_plots_v3(fileStr,h,...
-    'maps',{'OpticalImage','OpticalImage','OpticalImage','OpticalImage','OpticalImage','OpticalImage'},...
-    'sites',{'mcgr','inuv','fykn','pokerFlat','gako','whit'},...
+    'maps',{'OpticalImage','OpticalImage','OpticalImage'},...
+    'sites',{'whit','gako','mcgr'},...
     'thisTime',time(i),...
     'latLim',latLim,...
     'lonLim',lonLim,...
-    'elCutOff',20,...
+    'elCutOff',15,...
     'deltaLat',deltaLat,...
     'deltaLon',deltaLon,...
     'opticalLim',[0 1],... %[250 450]
@@ -98,8 +98,7 @@ h=figure('visible','on');
     'setStoreImage',false);
 cm=get_colormap('k',[0,1,0]);
 colormap(cm);
-hold on;
-
+caxis([0.3,1]);
 % THD
 % scatterm(latThd(tIndxThd),lonThd(tIndxThd),6,'b','filled');
 hold on;
@@ -135,8 +134,8 @@ cmap1 = colormap(ax2,get_colormap('w','b'));
 
 
 
-scatterm(poesNFoot(:,2)',poesNFoot(:,3)'...
-    ,6,poesAnisotropy');
+scatterm(poesNFoot(:,2)'-0.15,poesNFoot(:,3)'+0.05...
+    ,10,poesAnisotropy','filled');
 thisPoesNFoot = interp1(poestime,poesNFoot,time(i));
 
 cb2 = colorbar('Location','southoutside');
@@ -157,7 +156,7 @@ ax3.Visible = 'off';
 cmap3 = colormap(ax3,get_colormap('w','r'));
 
 scatterm(poesNFoot(:,2)',poesNFoot(:,3)',...
-    5,log10(poesColor'),'filled');
+    10,log10(poesColor'),'filled');
 
 hold on;
 plotm(thisPoesNFoot(:,2),thisPoesNFoot(:,3),'or');
@@ -170,7 +169,7 @@ cb3.Position(4) = 0.01;
 cb3.Label.String = {'NOAA17 precipitating electrons 30-300 keV','log10 [Counts/s]'};
 ax3.CLim = [2.5 3.5];
 
-resize_figure(h,200,250);
+resize_figure(h,200,300);
 ax2 = copy_axes_properties(ax1,ax2);
 ax3 = copy_axes_properties(ax1,ax3);
 
