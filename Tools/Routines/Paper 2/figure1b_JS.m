@@ -70,22 +70,23 @@ lonTheL = conv(padData.the.lonFoot,ones(8,1)/8,'same');
 timeMinIndx = find_time(timeThe,timeMinStr);
 timeMaxIndx = find_time(timeThe,timeMaxStr);
 tIndxThe = timeMinIndx:timeMaxIndx;
-%% Initalize
 
+%% Initalize
+[fov] = create_dasc_fov(fileStr, 22.5, 110);
 timeMinStr = '26 Mar 2008 11:29:30';
 timeMaxStr = '26 Mar 2008 11:29:30';
 time = datenum(timeMinStr):5/(24*60*60):datenum(timeMaxStr);
 nTime = length(time);
-latLim = [57,67];
-lonLim = [-165,-125];
+latLim = [56,68];
+lonLim = [-170,-120];
 deltaLat = 2;
 deltaLon = 10;
 storeImageDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Figures\Draft\Figure1b\';
 for i = 1:1:nTime
 h=figure('visible','on');
 [ax1]=combine_2D_plots_v3(fileStr,h,...
-    'maps',{'OpticalImage','OpticalImage','OpticalImage'},...
-    'sites',{'whit','gako','mcgr'},...
+    'maps',{'OpticalImage','OpticalImage','OpticalImage','OpticalImage'},...
+    'sites',{'pokerFlat','whit','gako','mcgr'},...
     'thisTime',time(i),...
     'latLim',latLim,...
     'lonLim',lonLim,...
@@ -96,9 +97,12 @@ h=figure('visible','on');
     'peakIonizationAltitude',85,...
     'transparency',0.9,...
     'setStoreImage',false);
-cm=get_colormap('k',[0,1,0]);
-colormap(cm);
-caxis([0.3,1]);
+cm=get_colormap('k',[0.9,1,0.9]);
+colormap(viridis);
+caxis([0.5,1]);
+
+hold on;
+plotm(fov.lat,fov.lon,'Color',[0.5,0.5,0.5]);
 % THD
 % scatterm(latThd(tIndxThd),lonThd(tIndxThd),6,'b','filled');
 hold on;
@@ -169,7 +173,7 @@ cb3.Position(4) = 0.01;
 cb3.Label.String = {'NOAA17 precipitating electrons 30-300 keV','log10 [Counts/s]'};
 ax3.CLim = [2.5 3.5];
 
-resize_figure(h,200,300);
+resize_figure(h,200,350);
 ax2 = copy_axes_properties(ax1,ax2);
 ax3 = copy_axes_properties(ax1,ax3);
 
@@ -243,4 +247,18 @@ function create_perp_line(lat,lon,markTimeArrIndx,orientation,tickLength)
         plotm([lat1,lat2],[lon1,lon2],'k');
     end
 
+end
+
+function [fov] = create_dasc_fov(fileStr, elCutOff, projectionAltitude)
+
+    dascData = get_2D_plot_inputs_time_independent(fileStr,'plotModeStr','OpticalImage','site','pokerFlat');
+    az = 0:0.1:360;
+    el = elCutOff*ones(size(az));
+    alt = projectionAltitude;
+    C = define_universal_constants;
+    slantRange = (-C.RE.*sind(el) + sqrt((C.RE^2).*(sind(el)).^2 + alt.*1000.*(alt.*1000+2.*C.RE)))./1000; 
+    
+%     slantRange = alt./sind(el);
+    [fov.lat,fov.lon,fov.alt] = aer2geodetic(az,el,slantRange,dascData.sensorloc(1),dascData.sensorloc(2),dascData.sensorloc(3)./1000,wgs84Ellipsoid('km'));
+    
 end

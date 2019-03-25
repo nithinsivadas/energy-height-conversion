@@ -195,8 +195,8 @@ for iTime = 1:1:nTime
                     dascData.thisTime, dascData.latitude, dascData.longitude,...
                     size(dascData.image,1), p.Results.latLim, p.Results.lonLim, ...
                     p.Results.deltaLat,p.Results.deltaLon);
-                    cm=get_colormap('k',[0,1,0]);
-                    colormap(axesHandleOptical,cm);
+%                     cm=get_colormap('k',[0,1,0]);
+                    colormap(axesHandleOptical,viridis);
                     cbOptical = colorbar(axesHandleOptical,'eastoutside');
                     ylabel(cbOptical,'[a.u.]');
                     caxis(axesHandleOptical,p.Results.opticalLim);
@@ -211,8 +211,8 @@ for iTime = 1:1:nTime
                     dascData.thisTime, dascData.latitude, dascData.longitude,...
                     size(dascData.image,1), p.Results.latLim, p.Results.lonLim, ...
                     p.Results.deltaLat,p.Results.deltaLon);
-                    cm=get_colormap('k',[0,1,0]);
-                    colormap(axesHandleOptical,cm);
+%                     cm=get_colormap('k',[0,1,0]);
+                    colormap(axesHandleOptical,viridis);
                     caxis(axesHandleOptical,p.Results.opticalLim);
                 
                 end

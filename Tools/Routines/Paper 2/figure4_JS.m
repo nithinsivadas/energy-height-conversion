@@ -77,12 +77,12 @@ projAlt = pfisrData.projectionAltitude(find_altitude(pfisrData.zEnergyBin(1,:),E
 %%
 [pfisrImageME1,pfisrLatME1,pfisrLonME1,projAltME1]=integrate_pfisr_energy(pfisrImage,pfisrData,20,[10,30].*1000);
 [pfisrKeoME1,pfisrParME1] = create_keogram(pfisrImageME1,pfisrLatME1,pfisrLonME1,'latPixelNum',6);
-%%
-% 
-[pfisrImageME,pfisrLatME,pfisrLonME,projAltME]=integrate_pfisr_energy(pfisrImage,pfisrData,70,[30,300].*1000);
-[pfisrKeoME,pfisrParME] = create_keogram(pfisrImageME,pfisrLatME,pfisrLonME,'latPixelNum',6);
 
-[pfisrImageHE,pfisrLatHE,pfisrLonHE,projAltHE]=integrate_pfisr_energy(pfisrImage,pfisrData,100,[50,300].*1000);
+%% 
+[pfisrImageME,pfisrLatME,pfisrLonME,projAltME]=integrate_pfisr_energy(pfisrImage,pfisrData,70,[30,100].*1000);
+[pfisrKeoME,pfisrParME] = create_keogram(pfisrImageME,pfisrLatME,pfisrLonME,'latPixelNum',6);
+%%
+[pfisrImageHE,pfisrLatHE,pfisrLonHE,projAltHE]=integrate_pfisr_energy(pfisrImage,pfisrData,150,[100,300].*1000);
 [pfisrKeoHE,pfisrParHE] = create_keogram(pfisrImageHE,pfisrLatHE,pfisrLonHE,'latPixelNum',6);
 
 %% pfisr diff number density
@@ -92,15 +92,15 @@ projAlt = pfisrData.projectionAltitude(find_altitude(pfisrData.zEnergyBin(1,:),E
 % [pfisrImageMENumF,pfisrLatMENumF,pfisrLonMENumF,projAltMENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,70,[50,1000].*1000);
 % [pfisrKeoMENumF,pfisrParMENumF] = create_keogram(pfisrImageMENumF,pfisrLatMENumF,pfisrLonMENumF,'latPixelNum',6);
 % 
-% [pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,projAltHENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,100,[50,300].*1000);
-% [pfisrKeoHENumF,pfisrParHENumF] = create_keogram(pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,'latPixelNum',6);
+[pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,projAltHENumF]=integrate_pfisr_energy(pfisrImageNumF,pfisrData,150,[100,300].*1000);
+[pfisrKeoHENumF,pfisrParHENumF] = create_keogram(pfisrImageHENumF,pfisrLatHENumF,pfisrLonHENumF,'latPixelNum',6);
 
 multiWaitbar('CLOSEALL');
 %%
 timeMinStr = '26-Mar-2008 10:30';
 timeMaxStr = '26-Mar-2008 11:40';
 
-totalPanelNo=4;
+totalPanelNo=3;
 % clf;
 
 p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
@@ -109,7 +109,8 @@ q=p(1);
 
 % 4a. Keogram, White light image
 q(1).select();
-colormap(gca,get_colormap('k',[0,1,0]));
+% colormap(gca,get_colormap('k',[0,1,0]));
+colormap(gca,viridis);
 
 ax=plot_2D_time_series(dascTime,dascLat,dascKeo,0.25,0,timeMinStr,timeMaxStr);
 hold on; 
@@ -121,9 +122,9 @@ peakLatitude70 = find_peak_latitude(pfisrKeo70,pfisrPar70);
 peakLatitude30 = find_peak_latitude(pfisrKeo30,pfisrPar30);
 
 % h150 = plot(pfisrData.time(timeMinIndx:timeMaxIndx-50),peakLatitude150(timeMinIndx:timeMaxIndx-50),'b','LineWidth',1); %150
-h100 = plot(pfisrData.time(timeMinIndx-10:timeMaxIndx-15),peakLatitude100(timeMinIndx-10:timeMaxIndx-15),'b','LineWidth',1); %100
-h70  = plot(pfisrData.time(timeMinIndx-5:timeMaxIndx-10),peakLatitude70(timeMinIndx-5:timeMaxIndx-10),'c','LineWidth',1); %70
-h30  = plot(pfisrData.time(timeMinIndx+8:timeMaxIndx),peakLatitude30(timeMinIndx+8:timeMaxIndx),'r','LineWidth',1); %30
+h100 = plot(pfisrData.time(timeMinIndx-10:timeMaxIndx-15),peakLatitude100(timeMinIndx-10:timeMaxIndx-15),'c','LineWidth',1); %100
+h70  = plot(pfisrData.time(timeMinIndx-5:timeMaxIndx-10),peakLatitude70(timeMinIndx-5:timeMaxIndx-10),'Color',[0.9,0.9,1],'LineWidth',1); %70
+h30  = plot(pfisrData.time(timeMinIndx+8:timeMaxIndx),peakLatitude30(timeMinIndx+8:timeMaxIndx),'Color',[1,0.7,0.7],'LineWidth',1); %30
 
 legend([h100 h70 h30], '100 keV', '70 keV', '30 keV','Location','NorthWest');
 % caxis([0.15 0.35]);
@@ -139,26 +140,30 @@ set(c, 'Position',cPos);
 ylim([64.8 65.6]);
 % ylim([64.7 65.6]);
 
-ylabel({'White light','emission','lat [N^0]'});
+ylabel({'White light','emission',['lat [N',char(176),']']});
 label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
 
 % Figure 4b 100 keV Electron Energy Flux
 q(2).select();
 plot_pfisr_energy_keogram(pfisrKeo100,pfisrPar100,pfisrData,false,timeMinStr,timeMaxStr,'[eV/m^2 sr s eV]');
-ylabel({'e^- Energy Flux','100 keV','lat [N^0]'});
+ylabel({'e^- Energy Flux','100 keV',['lat [N',char(176),']']});
 label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
 
-% Figure 4c 1-300 keV Total energy flux 
-q(3).select();
+% % Figure 4c 1-300 keV Total energy flux 
+% q(3).select();
 C = define_universal_constants();
-plot_pfisr_energy_keogram(pfisrKeoAll*C.e*pi*1000,pfisrParAll,pfisrData,false,timeMinStr,timeMaxStr,'[mW/m^2]',[-1 1]);
-ylabel({'e^- Energy Flux','1-300 keV','lat [N^0]'});
-label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
+% plot_pfisr_energy_keogram(pfisrKeoAll*C.e*pi*1000,pfisrParAll,pfisrData,false,timeMinStr,timeMaxStr,'[mW/m^2]',[-1 1]);
+% ylabel({'e^- Energy Flux','1-300 keV','lat [N^0]'});
+% label_time_axis(pfisrData.time,false,1/6,timeMinStr,timeMaxStr);
 
-q(4).select();
+q(3).select();
 x = pfisrData.time;
-y = [pfisrKeoHE(3,:);pfisrKeoME(3,:)-pfisrKeoHE(3,:);pfisrKeoME1(3,:);pfisrKeoLE(3,:)].*C.e*pi*(1e+7).*(1e-4);
-dascLatIndx = find_altitude(dascLat,pfisrParHE(3));
+iLat = 5;
+y = [pfisrKeoHE(iLat,:);...
+    pfisrKeoME(iLat,:)-pfisrKeoHE(iLat,:);...
+    pfisrKeoME1(iLat,:);...
+    pfisrKeoLE(iLat,:)].*C.e*pi*(1e+7).*(1e-4); % It is pi and not 2pi, cause you are only looking at downgoing electrons
+dascLatIndx = find_altitude(dascLat,pfisrParHE(iLat));
 
 b = area(x,y');
 b(1).FaceColor = 'm';
@@ -178,13 +183,28 @@ set(gca,'XTickLabel','');
 % yyaxis left;
 xlim([datenum(timeMinStr), datenum(timeMaxStr)]);
 % legend([b(4),b(3),b(2),b(1),a],{'1-10','10-30 keV','30-50 keV','50-300 keV','Intensity'},'Location','NorthWest');
-legend([b(4),b(3),b(2),b(1)],{'1-10','10-30 keV','30-50 keV','50-300 keV'},'Location','NorthWest');
+legend([b(4),b(3),b(2),b(1)],{'1-10','10-30 keV','30-100 keV','100-300 keV'},'Location','NorthWest');
 ylabel({'e^- Energy Flux','[mW/m^2]'});
 ylim([0,2]);
 label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr);
 
+%% Plot the net power of electron > 30 keV
+figure; 
+plot(pfisrData.time,(pfisrKeoHE(5,:)+pfisrKeoME(5,:)).*C.e*pi*(1e+7).*(1e-4)); 
+xlim([datenum(timeMinStr), datenum(timeMaxStr)]); 
+label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr); 
+ylim([0 1]);
+title('Energy Flux >30 keV');
+ylabel('Power [mW/m^2]');
 
-
+%% Plot the net diff flux of electron > 100 keV
+figure; 
+plot(pfisrData.time,(pfisrKeoHENumF(5,:)).*pi*(1e-4)); 
+xlim([datenum(timeMinStr), datenum(timeMaxStr)]); 
+label_time_axis(pfisrData.time,true,1/6,timeMinStr,timeMaxStr); 
+% ylim([0 1]);
+title('Differential Number Flux >100 keV');
+ylabel('[m-2 s-1]');
 
 
 %%
