@@ -54,6 +54,7 @@ end
     download_thg(minTimeStr, maxTimeStr, siteName,...
     'dateFormat',p.Results.dateFormat);
 
+if status ~=-1
 nFiles = length(cdfFileList);
 thgSites =  parse_thg_location_xls(sensorLocationFile);
 siteID = find(strcmpi(thgSites.code,siteName));
@@ -78,7 +79,12 @@ for iFile = 1:1:nFiles
 end
 add_ASI_background_to_hdf5(siteName,outputH5FileStr); % Adding the backgroud
 multiWaitbar('Writing Themis GBO ASI to HDF5 Files',1);
-status = 'complete';    
+status = 'complete';
+else
+    multiWaitbar('Writing Themis GBO ASI to HDF5 Files',1);
+    status = 'File not available online';
+    fprintf([status,'\n']);
+end
 end
 
 

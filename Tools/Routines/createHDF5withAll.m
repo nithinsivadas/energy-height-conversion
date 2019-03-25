@@ -5,7 +5,8 @@
 % Conductivity
 
 %% Initialization
-pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
+% pfisrExpFileName = '20080326.001_bc_15sec-fitcal.h5';
+pfisrExpFileName = '20101018.001_bc_15sec-fitcal.h5';
 pfisrdTime = pfisrExpFileName(regexp(pfisrExpFileName,'bc_')+3:regexp(pfisrExpFileName,'-fitcal')-1);
 
 baseDir = '/media/nithin/PFISR_002_006/';
@@ -18,8 +19,8 @@ pfisrExpFileName(1:regexp(pfisrExpFileName,'-fitcal')),'full_v1.h5'];
 pfisrFileNameStr = [pfisrRootPath,pfisrExpFileName];
 
 % Time
-minTimeStr = '26 Mar 2008 06:00';
-maxTimeStr = '26 Mar 2008 15:00';
+minTimeStr = '18 Oct 2010 02:00';
+maxTimeStr = '18 Oct 2010 18:00';
 dateFormat = 'dd mmm yyyy HH:SS';
 % Altitude
 minAlt = 60;
@@ -39,7 +40,7 @@ dascSetDownloadFlag = true;
 projectionAltDASC = 110; %110 km
 
 % NOAA Mat File
-noaaMatFileStr = '/media/nithin/PFISR_002_006/Nithin/NOAA17/n1720080326.mat';
+% noaaMatFileStr = '/media/nithin/PFISR_002_006/Nithin/NOAA17/n1720080326.mat';
 omniH5FileStr = '/home/nithin/Documents/git-repos/LargeFiles/omni/omni.h5';
 
 %% Write PFISR Energy Spectra, and DASC data
@@ -48,18 +49,19 @@ omniH5FileStr = '/home/nithin/Documents/git-repos/LargeFiles/omni/omni.h5';
         [minAlt maxAlt], outputH5FileStr, minTimeStr, maxTimeStr,...
         dascMinElevation,dascCalFileAz,dascCalFileEl, dascSetDownloadFlag);
 fprintf('PFISR Energy & DASC Images: Done \n');
+
 %% Write THM ASI
 % sites={'gako','fykn','inuv','whit','mcgr','kian'};
-% multiWaitbar('Processing different cameras',0);
-% id = 1./length(sites);
-% for i=1:1:length(sites)
-% multiWaitbar('Processing different cameras','Increment',id);
-% siteName = sites{i};
-% disp(['Processing ',upper(siteName)]);
-% status = create_thg_hdf5(siteName,outputH5FileStr);
-% end
-% 
-% fprintf('THM ASIs: Done \n');
+sites = {'mcgr','kian'};
+multiWaitbar('Processing different cameras',0);
+id = 1./length(sites);
+for i=1:1:length(sites)
+multiWaitbar('Processing different cameras','Increment',id);
+siteName = sites{i};
+disp(['Processing ',upper(siteName)]);
+status = create_thg_hdf5(siteName,outputH5FileStr);
+end
+fprintf('THM ASIs: Done \n');
 
 %% [Write a better version, that has a better chunkSize and dataSize definition]
 % Write Magnetic Field Model 
@@ -85,13 +87,13 @@ end
 
 fprintf('THEMIS State Data: Done \n');
 %% Write noaa17
-add_temp_noaa17_hdf5(noaaMatFileStr, outputH5FileStr, omniH5FileStr,...
-        'minTimeStr',minTimeStr,...
-        'maxTimeStr',maxTimeStr,...
-        'dateFormat',dateFormat,...
-        'magneticFieldModel','TS89'); 
-    
-fprintf('NOAA17 State Data: Done \n');
+% add_temp_noaa17_hdf5(noaaMatFileStr, outputH5FileStr, omniH5FileStr,...
+%         'minTimeStr',minTimeStr,...
+%         'maxTimeStr',maxTimeStr,...
+%         'dateFormat',dateFormat,...
+%         'magneticFieldModel','TS89'); 
+%     
+% fprintf('NOAA17 State Data: Done \n');
 %% Write conductivity
 add_conductivity_hdf5(outputH5FileStr,outputH5FileStr,true);
 

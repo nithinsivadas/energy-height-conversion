@@ -78,7 +78,12 @@ function [cdfFileList, cdfCalFile, status, cmdout] = download_thg(minTimeStr, ma
         end
     
     catch ME
-        error('Possibly no files online during this time period.');
+        warning('Possibly no files online during this time period.');
+        status = -1;
+        cdfFileList = 'None';
+        cdfCalFile  = 'None';
+        cmdout = 'None';
+        
     end
 end
 

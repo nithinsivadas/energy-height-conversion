@@ -41,8 +41,12 @@ if ~datasetExists
 else
     tempData = (h5read(outputH5FileStr,[groupName,'ASI']));
     tempData(tempData>10000) = nan; % Removing all bright objects (like the moon)
-
-    background = nanmedian(tempData(:)); % Taking the median of pixels in all time
+    if length(tempData(:))>1e8
+        nTemp = 1e8;
+    else
+        nTemp = length(tempData(:));
+    end
+    background = nanmedian(tempData(1:nTemp)); % Taking the median of pixels in all time
                                          % and since most of the time, there is no aurora
                                          % you can expect the result to be the background
                                          % night-time pixel intensity.
