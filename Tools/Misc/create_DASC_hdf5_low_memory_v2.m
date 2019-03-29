@@ -92,7 +92,7 @@ for idays=1:1:length(dayArray)
     end
     
     nTimeASITotal = length(timeASI);
-    dkTime = 800; % To allow for low memory
+    dkTime = 200; % To allow for low memory
     nkTime = ceil(nTimeASITotal/dkTime);
     multiWaitbar('Reading data',0);
     multiWaitbar('Writing data',0);
