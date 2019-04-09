@@ -1,2 +1,26 @@
 %% Event 2: 18 Oct 2010
 
+%% Load PFISR Data
+h5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\EEA List\20101018.001_bc_15sec-full_v110.h5';
+data.Ne = h5read(h5FileStr,'/inputData/Ne'); % in [m^-3]
+data.altitude = h5read(h5FileStr,'/energyFluxFromMaxEnt/alt');
+%%
+h= figure;
+timeMinStr = '18 Oct 2010 07:30';
+timeMaxStr = '18 Oct 2010 13:00';
+% resize_figure(h,
+iB =7;
+electronDensity = data.Ne;
+electronDensity(electronDensity<=0) = 1;
+plot_2D_time_series(data.time(1,:),data.altitude(:,iB),...
+    log10(squeeze(electronDensity(:,iB,:))),1,0,timeMinStr, timeMaxStr);
+colormap(inferno);
+c=colorbar_thin();
+ylabel(c,['log_1_0(N_e) Zenith Beam (No.',num2str(iB),')']);
+ylabel({'PFISR N_e Densities','Altitude [km]'});
+% label_time_axis(data.time(1,:),false,1,timeMinStr,timeMaxStr);
+ylim([80 105]);
+caxis([10 12]);
+grid on;
+title(datestr(floor(datenum(timeMinStr))));
+
