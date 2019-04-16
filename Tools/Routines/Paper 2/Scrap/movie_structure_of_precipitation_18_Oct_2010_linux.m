@@ -22,11 +22,11 @@ temp = dascImage(:,:,asi.indx);
 clear dascImage;
 asi.data = permute(temp,[3,2,1]);
 clear temp;
-asi.lat = permute(reshape(repmat(dascData.latitude(:),1,length(asi.indx)),size(asi.data,2),size(asi.data,3),length(asi.indx)),[3,2,1]);
-asi.lon = permute(reshape(repmat(dascData.longitude(:),1,length(asi.indx)),size(asi.data,2),size(asi.data,3),length(asi.indx)),[3,2,1]);
-asi.az = permute(reshape(repmat(dascData.azimuth(:),1,length(asi.indx)),size(asi.data,2),size(asi.data,3),length(asi.indx)),[3,2,1]);
-asi.el = permute(reshape(repmat(dascData.elevation(:),1,length(asi.indx)),size(asi.data,2),size(asi.data,3),length(asi.indx)),[3,2,1]);
-asi.time = repmat(dascData.time(asi.indx),1,size(asi.data,2),size(asi.data,3));
+asi.lat = permute(reshape(repmat(dascData.latitude(:),1,1),size(asi.data,2),size(asi.data,3),1),[3,2,1]);
+asi.lon = permute(reshape(repmat(dascData.longitude(:),1,1),size(asi.data,2),size(asi.data,3),1),[3,2,1]);
+asi.az = permute(reshape(repmat(dascData.azimuth(:),1,1),size(asi.data,2),size(asi.data,3),1),[3,2,1]);
+asi.el = permute(reshape(repmat(dascData.elevation(:),1,1),size(asi.data,2),size(asi.data,3),1),[3,2,1]);
+asi.time = repmat(dascData.time(asi.indx),1,1,1);
 %%
 pfisr.indx = (find_time(pfisrData.time,timeMinStr):1:find_time(pfisrData.time,timeMaxStr))';
 pfisr.energyFlux = pfisrEnergyFluxImage(pfisr.indx,:,:);
@@ -261,7 +261,7 @@ cLimArray = [340,380;...
 zUnitStr = 'km';
 colorUnitStr = '[a.u.]';
 titleStr = ' ASI in PFISR Field of View / Ne';
-generate_panels_asi(h7, asi.data, asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
+generate_panels_asi(h6, asi.data, asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
     pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),pfisrNe.alt(1,1,:),timeArrayStr,...
     zValueBinArray, cLimArray, zUnitStr, colorUnitStr, titleStr);
 % colormap(get_colormap('k','g'));
@@ -364,10 +364,10 @@ for iTime = 1:1:length(time)
     100.*iTime./length(time)
     h=figure('visible','off');
     create_figure_sx(h,pfisr,pfisrNe,asi,correlation,pfisrFOV,gl,datestr(time(iTime)),...
-        true,'/media/nithin/PFISR_002_006/PFISR Processed/Event_List/Oct18_2010\Figures\');
+        true,'/media/nithin/PFISR_002_006/PFISR Processed/Event_List/Videos/Oct18_2010/Figures/');
 end
 %%
-create_video('G:\My Drive\Research\Projects\Paper 2\Videos\Oct18_2010\','Figures\','Movie_S1.avi');
+create_video('/media/nithin/PFISR_002_006/PFISR Processed/Event_List/Videos/Oct18_2010/','Figures/','Movie_S1.avi');
 %%
 % clc;
 % h=figure('visible','on');
@@ -424,7 +424,7 @@ if upperLim >=1
   upperLim=1;
 end
 image = imadjust(image, [lowerLim upperLim],[]);              
-plot_DASC_geodetic(image, [], squeeze(asi.lat(iT,:,:)),squeeze(asi.lon(iT,:,:)),...
+plot_DASC_geodetic(image, [], squeeze(asi.lat(1,:,:)),squeeze(asi.lon(1,:,:)),...
     1024,[63,67],[-153,-143],1,5);
 colormap(get_colormap('k','g'));
 caxis([0.3 1]);
