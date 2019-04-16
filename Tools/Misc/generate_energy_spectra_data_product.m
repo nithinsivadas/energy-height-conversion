@@ -16,7 +16,7 @@ if nargin<12 || isempty(dascCalFileLon)
         '20080326',filesep,'Toshi_Cal',filesep,'200803261040uafdasc_pkr_glon.dat'];
 if nargin<11 || isempty(dascCalFileLat)
     dascCalFileLat = [initialize_root_path,'LargeFiles',filesep,'DASC',filesep,...
-        '20080326',filesep,'Toshi_Cal',filesep,'200803261040uafdasc_pkr_glon.dat'];
+        '20080326',filesep,'Toshi_Cal',filesep,'200803261040uafdasc_pkr_glat.dat'];
 end
 if nargin < 10
     dascMinElevation = 30;
