@@ -1,3 +1,4 @@
+%% To test Luisa's results of radius of curvature at the equatorial plane
 
 dataFile = 'G:\My Drive\Research\Projects\Collaborations\Capannolo Luisa\IRBEM_Test\n18_coords_interpolated.txt';
 fileID = fopen(dataFile);
