@@ -1,7 +1,7 @@
-%% For Paper 2, Figure 1b
+%% For Paper 2, Figure 1b; Reviewer 2 - Checking mapping of NOAA-17 using measurements of 0.05 - 20 keV
 % Generate figure with satellite tracks, and Themis All Sky Cameras
 %% Load Data
-load('G:\My Drive\Research\Projects\Collaborations\Yiqun Yu\Data\Final\TS96\lossConeFluxTHMADE_20080326_TS96_with_footpoints.mat');
+% load('G:\My Drive\Research\Projects\Collaborations\Yiqun Yu\Data\Final\TS96\lossConeFluxTHMADE_20080326_TS96_with_footpoints.mat');
 omnih5 = 'G:\My Drive\Research\Projects\Data\omni.h5';
 fileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3.h5';
 poesMatFile = 'G:\My Drive\Research\Projects\Paper 2\Data\NOAA17\n1720080326.mat';
@@ -27,49 +27,61 @@ for i = 1:1:length(poestime)
 %         2,poestime(i),poesGSM(i,1),poesGSM(i,2),poesGSM(i,3),110,+1,thisMaginput);
 end
 %%
-poesColor = poes.mep0E1(poesTimeIndx)-poes.mep0E3(poesTimeIndx);
-poesColorTrapped = poes.mep90E1(poesTimeIndx)-poes.mep90E3(poesTimeIndx);
+tIndxOffset = -10;
+poesColor = poes.mep0E1(poesTimeIndx+tIndxOffset)-poes.mep0E3(poesTimeIndx+tIndxOffset);
+poesColorTrapped = poes.mep90E1(poesTimeIndx+tIndxOffset)-poes.mep90E3(poesTimeIndx+tIndxOffset);
 poesAnisotropy = poesColor./poesColorTrapped;
 
+poesColor1 = poes.ted01(poesTimeIndx+tIndxOffset);
+poesColor2 = poes.ted03(poesTimeIndx+tIndxOffset);
+poesColor3 = poes.tedfx5(poesTimeIndx);
+poesColor4 = poesColor1.*(1.756*10^-6)+poesColor2.*(5.328*10^-5);
 % Find northern footpoint
 
+figure; 
+semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor4); 
+ylim([0.01,10]);
+set(gca,'YTick',[0.01,0.1,1,10]);
+ylabel({'TED','0.05-20 keV','mW/m^2'});
+
+
 %% thd
-timeThd = padData.thd.time;
-timeMinStr = '26 Mar 2008 08:00';
-timeMaxStr = '26 Mar 2008 12:00';
+% timeThd = padData.thd.time;
+% timeMinStr = '26 Mar 2008 08:00';
+% timeMaxStr = '26 Mar 2008 12:00';
 
 % latThd = conv(padData.thd.latFoot,ones(5,1)/5,'same');
 % lonThd = conv(padData.thd.lonFoot,ones(5,1)/5,'same');
 
-latThd = padData.thd.latFoot;
-lonThd = padData.thd.lonFoot;
+% latThd = padData.thd.latFoot;
+% lonThd = padData.thd.lonFoot;
 
-latThdL = conv(padData.thd.latFoot,ones(8,1)/8,'same');
-lonThdL = conv(padData.thd.lonFoot,ones(8,1)/8,'same');
+% latThdL = conv(padData.thd.latFoot,ones(8,1)/8,'same');
+% lonThdL = conv(padData.thd.lonFoot,ones(8,1)/8,'same');
 
 
-timeMinIndx = find_time(timeThd,timeMinStr);
-timeMaxIndx = find_time(timeThd,timeMaxStr);
-tIndxThd = timeMinIndx:timeMaxIndx;
+% timeMinIndx = find_time(timeThd,timeMinStr);
+% timeMaxIndx = find_time(timeThd,timeMaxStr);
+% tIndxThd = timeMinIndx:timeMaxIndx;
 
 %% the
-timeThe = padData.the.time;
-timeMinStr = '26 Mar 2008 08:00';
-timeMaxStr = '26 Mar 2008 12:00';
+% timeThe = padData.the.time;
+% timeMinStr = '26 Mar 2008 08:00';
+% timeMaxStr = '26 Mar 2008 12:00';
 
 % latThd = conv(padData.the.latFoot,ones(5,1)/5,'same');
 % lonThd = conv(padData.the.lonFoot,ones(5,1)/5,'same');
 
-latThe = padData.the.latFoot;
-lonThe = padData.the.lonFoot;
+% latThe = padData.the.latFoot;
+% lonThe = padData.the.lonFoot;
 
-latTheL = conv(padData.the.latFoot,ones(8,1)/8,'same');
-lonTheL = conv(padData.the.lonFoot,ones(8,1)/8,'same');
+% latTheL = conv(padData.the.latFoot,ones(8,1)/8,'same');
+% lonTheL = conv(padData.the.lonFoot,ones(8,1)/8,'same');
 
 
-timeMinIndx = find_time(timeThe,timeMinStr);
-timeMaxIndx = find_time(timeThe,timeMaxStr);
-tIndxThe = timeMinIndx:timeMaxIndx;
+% timeMinIndx = find_time(timeThe,timeMinStr);
+% timeMaxIndx = find_time(timeThe,timeMaxStr);
+% tIndxThe = timeMinIndx:timeMaxIndx;
 
 %% Initalize
 [fov] = create_dasc_fov(fileStr, 22.5, 110);
@@ -77,20 +89,20 @@ timeMinStr = '26 Mar 2008 11:29:30';
 timeMaxStr = '26 Mar 2008 11:29:30';
 time = datenum(timeMinStr):5/(24*60*60):datenum(timeMaxStr);
 nTime = length(time);
-latLim = [56,68];
-lonLim = [-170,-120];
+latLim = [56,72];
+lonLim = [-170,-130];
 deltaLat = 2;
 deltaLon = 10;
 storeImageDir = 'G:\My Drive\Research\Projects\Paper 2\Data\Figures\Draft\Figure1b\';
 for i = 1:1:nTime
 h=figure('visible','on');
 [ax1]=combine_2D_plots_v3(fileStr,h,...
-    'maps',{'OpticalImage','OpticalImage','OpticalImage','OpticalImage'},...
-    'sites',{'pokerFlat','whit','gako','mcgr'},...
+    'maps',{'OpticalImage','OpticalImage'},...
+    'sites',{'pokerFlat','mcgr'},...
     'thisTime',time(i),...
     'latLim',latLim,...
     'lonLim',lonLim,...
-    'elCutOff',15,...
+    'elCutOff',5,...
     'deltaLat',deltaLat,...
     'deltaLon',deltaLon,...
     'opticalLim',[0 1],... %[250 450]
@@ -105,22 +117,22 @@ hold on;
 plotm(fov.lat,fov.lon,'Color',[0.5,0.5,0.5]);
 % THD
 % scatterm(latThd(tIndxThd),lonThd(tIndxThd),6,'b','filled');
-hold on;
-plotm(latThdL(tIndxThd),lonThdL(tIndxThd),'b','LineWidth',1);
-thisTimeStr = datestr(time(i));
-thisTimeIndxThd = find_time(timeThd,thisTimeStr);
-scatterm(latThd(thisTimeIndxThd),lonThd(thisTimeIndxThd),7,'b');
-hhmm = {'08:00','09:00','10:00','10:30'};
-tArrayThd = datenum(strcat('26 Mar 2008'," ",hhmm));
+% hold on;
+% plotm(latThdL(tIndxThd),lonThdL(tIndxThd),'b','LineWidth',1);
+% thisTimeStr = datestr(time(i));
+% thisTimeIndxThd = find_time(timeThd,thisTimeStr);
+% scatterm(latThd(thisTimeIndxThd),lonThd(thisTimeIndxThd),7,'b');
+% hhmm = {'08:00','09:00','10:00','10:30'};
+% tArrayThd = datenum(strcat('26 Mar 2008'," ",hhmm));
 % plot_time_markers(timeThd,latThd,lonThd,tArrayThd,'Northeast','k',[0 0 0]);
 
 % THE
 % scatterm(latThe(tIndxThe),lonThe(tIndxThe),6,'c','filled');
-hold on;
-plotm(latTheL(tIndxThe),lonTheL(tIndxThe),'c','LineWidth',1);
-thisTimeStr = datestr(time(i));
-thisTimeIndxThe = find_time(timeThe,thisTimeStr);
-scatterm(latThe(thisTimeIndxThe),lonThe(thisTimeIndxThe),7,'c');
+% hold on;
+% plotm(latTheL(tIndxThe),lonTheL(tIndxThe),'c','LineWidth',1);
+% thisTimeStr = datestr(time(i));
+% thisTimeIndxThe = find_time(timeThe,thisTimeStr);
+% scatterm(latThe(thisTimeIndxThe),lonThe(thisTimeIndxThe),7,'c');
 hhmm = {'08:00','09:00','10:00','10:30'};
 tArrayThe = datenum(strcat('26 Mar 2008'," ",hhmm));
 % plot_time_markers(timeThe,latThe,lonThe,tArrayThe,'Southwest','k',[0 0 0]);
@@ -138,16 +150,21 @@ cmap1 = colormap(ax2,get_colormap('w','b'));
 
 
 
-scatterm(poesNFoot(:,2)'-0.15,poesNFoot(:,3)'+0.05...
-    ,10,poesAnisotropy','filled');
+% scatterm(poesNFoot(:,2)'-0.15,poesNFoot(:,3)'+0.05...
+%     ,10,poesAnisotropy','filled');
+scatterm(poesNFoot(:,2)'-0.15,poesNFoot(:,3)'+0.05,...
+    10,log10(poesColor'),'filled');
+
 thisPoesNFoot = interp1(poestime,poesNFoot,time(i));
 
 cb2 = colorbar('Location','southoutside');
 cb2.Position(2) = 0.2;
 cb2.Position(3) = 0.25;
 cb2.Position(4) = 0.01;
-cb2.Label.String = {'NOAA17 electrons 30-300 keV','Anisotropy (\phi_|_|/\phi_\perp) [a.u.]'};
-ax2.CLim = [0.5 1];
+% cb2.Label.String = {'NOAA17 electrons 30-300 keV','Anisotropy (\phi_|_|/\phi_\perp) [a.u.]'};
+cb2.Label.String = {'NOAA17 precipitating electrons 30-300 keV','log10 [Counts/s]'};
+% ax2.CLim = [0.5 1];
+ax2.CLim = [2.5 3.5];
 
 % Flux
 ax3=axes;
@@ -159,8 +176,11 @@ ax3.Color = 'none';
 ax3.Visible = 'off';
 cmap3 = colormap(ax3,get_colormap('w','r'));
 
+% scatterm(poesNFoot(:,2)',poesNFoot(:,3)',...
+%     10,log10(poesColor4'),'filled');
+
 scatterm(poesNFoot(:,2)',poesNFoot(:,3)',...
-    10,log10(poesColor'),'filled');
+    10,(poesColor4'),'filled');
 
 hold on;
 plotm(thisPoesNFoot(:,2),thisPoesNFoot(:,3),'or');
@@ -170,8 +190,10 @@ cb3.Position(1) = 0.5;
 cb3.Position(2) = 0.2;
 cb3.Position(3) = 0.25;
 cb3.Position(4) = 0.01;
-cb3.Label.String = {'NOAA17 precipitating electrons 30-300 keV','log10 [Counts/s]'};
-ax3.CLim = [2.5 3.5];
+cb3.Label.String = {'NOAA17 precipitating electrons 1-20 keV','[mW/m^2 sr]'};
+% ax3.CLim = [2.5 3.5];
+% ax3.CLim = [-2 0];
+ax3.CLim = [0.1 0.5];
 
 resize_figure(h,200,350);
 ax2 = copy_axes_properties(ax1,ax2);
