@@ -31,7 +31,11 @@ function add_horizontal_axes( TTick, TTickLim, newAxisTime, newAxisValue, newAxi
     
     for iTick=1:1:length(TTick)
         thisTick = normalizedTTick(iTick);
+        if iscell(newAxisValue(iState(iTick)))
+        txtHandle = text(thisTick, delta, newAxisValue{iState(iTick)},'Units','normalized');
+        else
         txtHandle = text(thisTick, delta, num2str(round(newAxisValue(iState(iTick)),1)),'Units','normalized');
+        end
         set(txtHandle, 'HorizontalAlignment','center','VerticalAlignment','middle');
     end
     

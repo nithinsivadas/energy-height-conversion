@@ -50,8 +50,9 @@
               min = (ihd(4,j) - hr*3600000)/60000
               sec = (ihd(4,j) - hr*3600000 - min*60000)/1000
               do k=1,4
-              write(11,200),ihd(2,j),ihd(3,j),hr,min,sec,
-     +                  head(2,j),head(3,j),ihd(5,j),ihd(6,j),
+              alt = REAL(ihd(5,j))
+              write(11,200)ihd(2,j),ihd(3,j),hr,min,sec,
+     +                  head(2,j),head(3,j),alt,ihd(6,j),
      +                  mep0(1,l),mep0(2,l),mep0(3,l),mep0(4,l),
      +          mep0(5,l),mep0(6,l),mep0(7,l),mep0(8,l),mep0(9,l),
      +          mep90(1,l),mep90(2,l),mep90(3,l),
@@ -77,7 +78,7 @@
           enddo
       enddo
 
-  200 format(i4,1x,i3,3(1x,i2),3(1x,f8.3),1x,i7,69(1x,f8.2))
+  200 format(i4,1x,i3,3(1x,i2),3(1x,f8.3),1x,i7,69(1x,f10.2))
   300 format(A)
   100 close(7)
       close(11)

@@ -1,5 +1,7 @@
 %% To test Luisa's results of radius of curvature at the equatorial plane
 
+clear all;
+
 dataFile = 'G:\My Drive\Research\Projects\Collaborations\Capannolo Luisa\IRBEM_Test\n18_coords_interpolated.txt';
 fileID = fopen(dataFile);
 A = textscan(fileID, '%26q %f %f %f','HeaderLines',1,'Delimiter','\t');
@@ -17,56 +19,75 @@ omniH5='G:\My Drive\Research\Projects\Data\omni.h5';
 
 %% Calculate L-shell or equatorial parameters
 disp('Filtering...');
-smoothFactor = 10;
 kext = find_irbem_magFieldModelNo('TS89');
+% kext = find_irbem_magFieldModelNo('TS04storm');
+
 maginput = interp_nans(maginput);
 maginput=filter_irbem_maginput(kext,maginput);
 
-%% Coordinate transform
-for iTime = 1:1:length(time)
-    thisTime = time(iTime);
-    xGEO(iTime,:) = onera_desp_lib_coord_trans([alt(iTime),lat(iTime),...
-        convert_longitude(lon(iTime),'360to180')],'gdz2geo',thisTime);
-end
+%%
+xGDZ = [alt, lat, convert_longitude(lon)];
 %% Calculate Rc
-[~, minRc] = get_min_scatter_energy(time,magTime,maginput,xGEO,kext); 
+% for i = 1:100
+%     maginput(1,1) = i;
+    [timeRc, Rc, divBArr, data] = get_radius_of_curvature(time,magTime,maginput,xGDZ,kext); 
+%     kp(i) = i;
+%     kpRc(i) = Rc;
+%     kpPOSIT(:,i) = data.POSIT;
+end
+%% Plot
+h=figure;
+p=create_panels(h,'totalPanelNo',2,'demargin',15,'panelHeight',50);
+
+p(1,1).select();
+title(find_irbem_magFieldModelStr(kext));
+t = datetime(datevec(datestr(timeRc)));
+plot(t,Rc);
+ylim([0,20]);
+ylabel('R_curve [R_E]');
+
+p(1,2).select();
+plot(t,divBArr);
+ylim([-300,300]);
+ylabel('divB');
 %% Function 
 %         PARMOD = get_parmod(kext,thisMaginput);
-function [minRc]=get_min_scatter_energy(time,magTime,maginput,xGEO,kext)
-    global GEOPACK1;
-    C = define_universal_constants;
-    PARMOD = zeros(10,1);
-    PARMODT96 = zeros(10,1);
+function [timeRc, Rc, divBArr, data]=get_radius_of_curvature(time,magTime,maginput,xGDZ,kext)
+    options = [0,0,0,0,0];
+    multiWaitbar('Processing...',0);
+    dt = 1./length(time);
     for iTime = 1:1:length(time)
+%     for iTime = 1:1:1
+        multiWaitbar('Processing...','Increment',dt);
         thisTime = time(iTime);
         t = datetime(datevec(time(iTime)));
         thisMaginput = interp1(magTime,maginput,thisTime,'nearest');
-        GEOPACK_RECALC(year(t),day(t,'dayofyear'),hour(t),minute(t),second(t));
-        PARMODT96 = get_parmod(find_irbem_magFieldModelNo('TS96'),thisMaginput);
-%         PARMODT96(1) = thisMaginput(5);
-%         PARMODT96(2) = thisMaginput(2);
-%         PARMODT96(3) = thisMaginput(6);
-%         PARMODT96(4) = thisMaginput(7);
-
-        xGSM = onera_desp_lib_coord_trans(xGEO(iTime,:),'geo2gsm',thisTime);
-        [~,~,~,X1,Y1,Z1,~] = GEOPACK_TRACE (xGSM(1),xGSM(2),xGSM(3),...
-            1.0,50,(6371.2+110)/6371.2,0,PARMODT96,'T96','GEOPACK_IGRF_GSM');
-
-        [~,~,~,X2,Y2,Z2,~] = GEOPACK_TRACE (xGSM(1),xGSM(2),xGSM(3),...
-            -1.0,50,(6371.2+110)/6371.2,0,PARMODT96,'T96','GEOPACK_IGRF_GSM');
-
-        XX{iTime} = [fliplr(X1),X2];
-        YY{iTime} = [fliplr(Y1),Y2];
-        ZZ{iTime} = [fliplr(Z1),Z2];
-
-        Kc{iTime} = geopack_find_curvature(XX{iTime},YY{iTime},ZZ{iTime});
-
-        [maxKc,indx] = max(Kc{iTime});
-        minRc(iTime) = 1./maxKc;
-        magEq{iTime} = [XX{iTime}(indx),YY{iTime}(indx),ZZ{iTime}(indx)];
+        
+%         [~,~,~,~,POSIT] = onera_desp_lib_trace_field_line(kext,options,...
+%             0,thisTime,xGDZ(iTime,1),xGDZ(iTime,2),xGDZ(iTime,3),...
+%             thisMaginput,(6371.2+110)/6371.2);
+        
+        [Bmin, POSIT] = onera_desp_lib_find_magequator(kext, options, 0,...
+            thisTime, xGDZ(iTime,1), xGDZ(iTime,2), xGDZ(iTime,3), thisMaginput);
+            
+        [Bgeo, B, gradBmag, diffB] = onera_desp_lib_get_bderivs(kext,...
+            options, 1, thisTime, POSIT(1), POSIT(2), POSIT(3), thisMaginput);
+        
+        [grad_par,grad_perp,grad_drift,curvature,Rcurv,curv_drift,curlB,divB] =....
+            onera_desp_lib_compute_grad_curv_curl(Bgeo,B,gradBmag,diffB); 
+        divBArr(iTime) = divB; 
+        Rc(iTime) = Rcurv;
+        timeRc(iTime) = thisTime;
+        
+        data.Bmin(iTime) = Bmin;
+        data.POSIT(:,iTime) = POSIT;
+        data.Bmag(iTime) = B;
+        data.curvDrift(:,iTime) = curv_drift;
+    end
 %         [BX,BY,BZ] = T96(0,PARMODT96,GEOPACK1.PSI,magEq{iTime}(1),magEq{iTime}(2),magEq{iTime}(3));
 %         KE(iTime) = ((((minRc(iTime).*C.RE ).*(C.e).*(BZ*10^-9)).^2).*(2^-7).*(C.me).^-1).*(10^-3).*(C.e).^-1; %keV
-    end
+    
+    multiWaitbar('Processing...',1);
 end
 
 function [PARMOD,IOPT,magStr] = get_parmod(magFieldNo,maginput)

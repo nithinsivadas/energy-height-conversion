@@ -1,4 +1,5 @@
 %% Temp
+clear all;
 load('G:\My Drive\Research\Projects\Paper 2\Data\NOAA17\n1720080326_table.mat');
 n=size(n1720080326,1);
 di = 1./n;
@@ -39,3 +40,12 @@ poes.mep90P6 = n1720080326{:,24};
 poes.mep90E1 = n1720080326{:,25};
 poes.mep90E2 = n1720080326{:,26};
 poes.mep90E3 = n1720080326{:,27};
+%mlat
+%mlt
+%mlon
+%ted03
+%tedfx1
+%tedfx2
+%tedfx5
+%ted01
+%Description
