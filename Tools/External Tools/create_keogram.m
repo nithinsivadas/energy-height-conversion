@@ -57,9 +57,8 @@ if isnan(meridian) % Chosing the keogram meridian to be the magnetic meridian
     end
 %     meridian = (min(longitude(:))+max(longitude(:)))/2;
     meridian = get_magnetic_meridian(sensorLoc,time,parallels,projectionAlt);
-    
-else
-    meridian = meridian*ones(size(parallels));
+elseif numel(meridian)==1
+    meridian = meridian.*ones(size(parallels));
 end
 
 multiWaitbar('Keogramming...',0);  

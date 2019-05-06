@@ -48,6 +48,10 @@ switch p.Results.plotModeStr
         plotData.time = unix_to_matlab_time(h5read(inputH5FileStr,['/',upper(siteStr),'/time']))';
         plotData.background = h5read(inputH5FileStr,['/',upper(siteStr),'/background']);
         plotData.sensorloc = h5read(inputH5FileStr,['/',upper(siteStr),'/sensorloc']);
+        if ~strcmp(siteStr,'/DASC/')
+            plotData.sensorloc(2) = convert_longitude(plotData.sensorloc(2),'360to180');
+            plotData.longitude = convert_longitude(plotData.longitude,'360to180');
+        end
     case 'EnergyFluxMap'
         
         magcoords = permute(readh5_variable_at_time(inputH5FileStr,...

@@ -1,4 +1,4 @@
-function [meridian] = get_magnetic_meridian(sensorLoc,time,parallel,projectionAltitude)
+function [meridian] = get_magnetic_meridian(sensorLoc,time,parallel,projectionAltitude,declination)
 % Input
 % sensorLoc - [lat(deg), lon(deg), alt(km)
 % time      - matlab time
@@ -6,11 +6,14 @@ function [meridian] = get_magnetic_meridian(sensorLoc,time,parallel,projectionAl
 %             the longitude values of the magnetic meridian
 % meridian  - the meridian values of the magnetic meridian for the input
 %             parallels
+% declination - azimuth from true north
 % projectionAltitude - km;
 
 [Bx, By] = igrf(time,sensorLoc(1),sensorLoc(2),projectionAltitude);
 % calculating declination: the azimuth from true north (East +ve)
+if nargin<5
 declination = rad2deg(atan2(By,Bx));
+end
 
 elevation = 0:0.1:90;
 
