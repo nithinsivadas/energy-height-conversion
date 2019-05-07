@@ -4,9 +4,18 @@
 
 clear all;
 opengl('save', 'software');
-h5FileStrMCGR = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3.h5';
-h5FileStrDASC = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3_smaller_time_range.h5';
-omniH5FileStr = 'G:\My Drive\Research\Projects\Data\omni.h5';
+if ispc
+    h5FileStrMCGR = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3.h5';
+    h5FileStrDASC = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3_smaller_time_range.h5';
+    omniH5FileStr = 'G:\My Drive\Research\Projects\Data\omni.h5';
+else
+    h5FileStrMCGR = '/media/nithin/PFISR_002_006/PFISR Processed/Event_List/20080326.001_bc_15sec-full_v2.h5';
+    omniH5FileStr = '/home/nithin/Documents/git-repos/LargeFiles/omni/omni.h5';
+end
+
+%%
+timeMinStr = '26 Mar 2008 10:30';
+timeMaxStr = '26 Mar 2008 11:44';
 
 siteStr = 'gako';
 meridianAngle = -21; %Az from true north
@@ -38,9 +47,6 @@ plot(dascData.meridian,dasc_parallels);
 hold on;
 plot(gboData.meridian,gbo_parallels);
 legend('PokerFlat','GAKO');
-%%
-timeMinStr = '26 Mar 2008 11:00';
-timeMaxStr = '26 Mar 2008 11:05';
 %% Crop Image
 minIndx = find_time(dascData.time,timeMinStr);
 maxIndx = find_time(dascData.time,timeMaxStr);
@@ -70,15 +76,16 @@ gboTime = gboData.time(minIndx:maxIndx);
 %%
 match = 0.05;
 gboKeo = match*(gboKeo1-gboData.background)+dascData.background-10;
-
-finalLat = [gboLat,dascLat];
-finalLon = [gboMeridian,dascMeridian];
+dascLatIndx = find_altitude(dascLat,63):find_altitude(dascLat,68);
+gboLatIndx = find_altitude(gboLat,58):find_altitude(gboLat,63);
+finalLat = [gboLat(gboLatIndx),dascLat(dascLatIndx)];
+finalLon = [gboMeridian(gboLatIndx),dascMeridian(dascLatIndx)];
 [~,index] = sortrows(finalLat');
-finalParallels = linspace(min(finalLat),max(finalLat),1024);
+finalParallels = linspace(min(finalLat),max(finalLat),2*1024);
 for iTime = 1:1:length(gboTime)
     idascTime = find_time(dascTime,datestr(gboTime(iTime)));
-    tempKeo = [gboKeo(:,iTime)',dascKeo(:,idascTime)'];
-    F = griddedInterpolant(finalLat(index),tempKeo(index),'linear');
+    tempKeo = [gboKeo(gboLatIndx,iTime)',dascKeo(dascLatIndx,idascTime)'];
+    F = griddedInterpolant(finalLat(index),tempKeo(index),'nearest');
     finalKeo(:,iTime) = F(finalParallels);
 end
 finalTime = gboTime;
@@ -86,15 +93,14 @@ finalTime = gboTime;
 totalPanelNo=3;
 % clf;
 clim = [340, 400];
-p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
-
+p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',50);
+dt = 15*1/60;
 q=p(1);
-
 % 4a. Keogram, White light image
 q(2).select();
 % colormap(gca,get_colormap('k',[0,1,0]));
 colormap(viridis);
-ax=plot_2D_time_series(gboTime,gboLat,gboKeo,1/60,0,timeMinStr,timeMaxStr);
+ax=plot_2D_time_series(gboTime,gboLat,gboKeo,dt,0,timeMinStr,timeMaxStr);
 colorbar_thin;
 caxis(clim);
 ylabel('GAKO');
@@ -102,7 +108,7 @@ ylim([58,66]);
 
 q(1).select();
 % colormap(gca,get_colormap('k',[0,1,0]));
-ax=plot_2D_time_series(dascTime,dascLat,dascKeo,1/60,0,timeMinStr,timeMaxStr);
+ax=plot_2D_time_series(dascTime,dascLat,dascKeo,dt,0,timeMinStr,timeMaxStr);
 colorbar_thin;
 ylabel('DASC');
 caxis([340 400]);
@@ -110,12 +116,12 @@ ylim([61,68]);
 
 q(3).select();
 % colormap(gca,get_colormap('k',[0,1,0]));
-ax=plot_2D_time_series(finalTime,finalParallels,finalKeo,1/60,0,timeMinStr,timeMaxStr);
+ax=plot_2D_time_series(finalTime,finalParallels,finalKeo,dt,0,timeMinStr,timeMaxStr);
 colorbar_thin;
 ylabel('Combined');
 caxis(clim);
 ylim([58,68]);
-label_time_axis(finalTime, true, 1/60,timeMinStr,timeMaxStr);
+label_time_axis(finalTime, true,dt,timeMinStr,timeMaxStr);
 
 
 %% Plot the meridians
