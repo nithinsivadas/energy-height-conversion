@@ -21,7 +21,8 @@ pfisrNeAlt = h5read(h5FileStr,'/energyFluxFromMaxEnt/alt')';
 %%
 beamCodes = (h5read(h5FileStrNe,'/BeamCodes'));
 %%
-magBeamNo = find_field_aligned_beam_no(beamCodes,-154.3,77.5);
+% magBeamNo = find_field_aligned_beam_no(beamCodes,-154.3,77.5);
+magBeamNo = 12; % In order to match with Fig 4c; which picks latitude: 65.415N. Beam 12, is latitudinally close for 30 keV. 
 %% Glow
 time = pfisrData.time;
 energyBin = pfisrData.zEnergyBin(magBeamNo,:);
@@ -38,10 +39,12 @@ nBins = 350;
 energyBinGlow = egrid(10^6, 350);
 %%
 filter = ones(1,nBins);
-filterLE = ones(1,nBins);
+filterLE = ones(1,nBins); %LE < 30 keV
 filterLE(energyBinGlow>30000) = 0;
-filterHE = ones(1,nBins);
+filterHE = ones(1,nBins); %HE >30 keV
 filterHE(energyBinGlow<30000) = 0;
+filterSE = ones(1,nBins); % SE - >100 keV
+filterSE(energyBinGlow<100000) = 0;
 % energyBinGlowLE = logspace(1,log10(30*10^3),250);
 % energyBinGlowHE = logspace(log10(30*10^3),6,250);
 %%
@@ -72,8 +75,8 @@ for iTime = timeIndx
       glowLE.A4278(k,:) = ionoLE.A4278;
       glowLE.R5577(k,:) = ionoLE.R5577;
       glowLE.R4278(k,:) = ionoLE.R4278;
-      glowLE.A6300(k,:) = iono.A6300;
-      glowLE.R6300(k,:) = iono.R6300;
+      glowLE.A6300(k,:) = ionoLE.A6300;
+      glowLE.R6300(k,:) = ionoLE.R6300;
       
       ionoHE = calculate_rayleigh(time(iTime), glat, glon, Ap, energyBin, numFlux(iTime,:), energyBinGlow, filterHE);
       glowHE.Ne(k,:) = ionoHE.NeCalc;
@@ -82,8 +85,18 @@ for iTime = timeIndx
       glowHE.A4278(k,:) = ionoHE.A4278;
       glowHE.R5577(k,:) = ionoHE.R5577;
       glowHE.R4278(k,:) = ionoHE.R4278;
-      glowHE.A6300(k,:) = iono.A6300;
-      glowHE.R6300(k,:) = iono.R6300;
+      glowHE.A6300(k,:) = ionoHE.A6300;
+      glowHE.R6300(k,:) = ionoHE.R6300;
+      
+      ionoSE = calculate_rayleigh(time(iTime), glat, glon, Ap, energyBin, numFlux(iTime,:), energyBinGlow, filterSE);
+      glowSE.Ne(k,:) = ionoSE.NeCalc;
+      glowSE.NeIRI(k,:) = ionoSE.Ne;
+      glowSE.A5577(k,:) = ionoSE.A5577;
+      glowSE.A4278(k,:) = ionoSE.A4278;
+      glowSE.R5577(k,:) = ionoSE.R5577;
+      glowSE.R4278(k,:) = ionoSE.R4278;
+      glowSE.A6300(k,:) = ionoSE.A6300;
+      glowSE.R6300(k,:) = ionoSE.R6300;
       
       iono = calculate_rayleigh(time(iTime), glat, glon, Ap, energyBin, zeros(1,length(energyBin)), energyBinGlow, filter);
      
@@ -112,6 +125,7 @@ for iTime = timeIndx
 end
 glow0.time = time(timeIndx);
 %%
+glowSE.time = time(timeIndx);
 glowHE.time = time(timeIndx);
 glowLE.time = time(timeIndx);
 glow.time = time(timeIndx);
@@ -208,6 +222,115 @@ legend('Glow - 5577A in R without airglow','Glow - 4278A in R without airglow','
 yyaxis left
 ylabel('Rayleigh');
 
+%%
+totalPanelNo=2;
+p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
+
+q1=p(1);
+% 4a. Keogram, White light image
+q1(1).select();
+plot(glow.time,glowSE.R5577-glow0.R5577,'m');
+hold on;
+plot(glow.time,glowHE.R5577-glow0.R5577,'b');
+ylim([0 500]);
+[TTick,TTickLim]=label_time_axis(glow.time,false,1/6,timeMinStr,timeMaxStr);
+ylabel({'Emission','5577 Aº','[Rayleigh]'});
+legend('>100 keV e^-','>30 keV e^-','Location','northwest');
+% set(gca,'YScale','log');
+% ylim([10,4000]);
+
+q1(2).select();
+plot(glow.time,glowSE.R4278-glow0.R4278,'m');
+hold on;
+plot(glow.time,glowHE.R4278-glow0.R4278,'b');
+ylim([0 500]);
+
+[TTick,TTickLim]=label_time_axis(glow.time,true,1/6,timeMinStr,timeMaxStr);
+ylabel({'Emission','4278 Aº','[Rayleigh]'});
+legend('>100 keV e^-','>30 keV e^-','Location','northwest');
+
+
+%%
+totalPanelNo=3;
+p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
+
+q=p(1);
+% 4a. Keogram, White light image
+q(2).select();
+plot(glow.time,glowHE.R6300-glow0.R6300,'r');
+hold on;
+plot(glow.time,glowHE.R5577-glow0.R5577,'g');
+hold on;
+plot(glow.time,glowHE.R4278-glow0.R4278,'b');
+hold on;
+[TTick,TTickLim]=label_time_axis(glow.time,false,1/6,timeMinStr,timeMaxStr);
+ylabel({'Emission from','>30 keV e^-','[Rayleigh]'});
+legend('6300Aº','5577Aº','4278Aº','Location','northwest');
+ylim([0 400]);
+
+q(3).select();
+plot(glow.time,glowSE.R6300-glow0.R6300,'r');
+hold on;
+plot(glow.time,glowSE.R5577-glow0.R5577,'g');
+hold on;
+plot(glow.time,glowSE.R4278-glow0.R4278,'b');
+hold on;
+[TTick,TTickLim]=label_time_axis(glow.time,true,1/6,timeMinStr,timeMaxStr);
+ylabel({'Emission from','>100 keV e^-','[Rayleigh]'});
+legend('6300Aº','5577Aº','4278Aº','Location','northwest');
+ylim([0 100]);
+
+q(1).select();
+plot(glow.time,glow.R6300-glow0.R6300,'r');
+hold on;
+plot(glow.time,glow.R5577-glow0.R5577,'g');
+hold on;
+plot(glow.time,glow.R4278-glow0.R4278,'b');
+hold on;
+[TTick,TTickLim]=label_time_axis(glow.time,false,1/6,timeMinStr,timeMaxStr);
+ylabel({'Emission from','>0.05 keV e^-','[Rayleigh]'});
+legend('6300Aº','5577Aº','4278Aº','Location','northwest');
+ylim([0 7000]);
+
+%%
+totalPanelNo=3;
+p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
+
+q=p(1);
+% 4a. Keogram, White light image
+q(2).select();
+plot(glow.time,100.*(glowHE.R6300-glow0.R6300)./(glow.R6300-glow0.R6300),'r');
+hold on;
+plot(glow.time,100.*(glowHE.R5577-glow0.R5577)./(glow.R5577-glow0.R5577),'g');
+hold on;
+plot(glow.time,100.*(glowHE.R4278-glow0.R4278)./(glow.R4278-glow0.R4278),'b');
+hold on;
+[TTick,TTickLim]=label_time_axis(glow.time,false,1/6,timeMinStr,timeMaxStr);
+ylabel({'Emission from','>30 keV e^-','[%]'});
+ylim([0 100]);
+legend('6300Aº','5577Aº','4278Aº','Location','northwest');
+
+q(3).select();
+plot(glow.time,100.*(glowSE.R6300-glow0.R6300)./(glow.R6300-glow0.R6300),'r');
+hold on;
+plot(glow.time,100.*(glowSE.R5577-glow0.R5577)./(glow.R5577-glow0.R5577),'g');
+hold on;
+plot(glow.time,100.*(glowSE.R4278-glow0.R4278)./(glow.R4278-glow0.R4278),'b');
+hold on;
+[TTick,TTickLim]=label_time_axis(glow.time,true,1/6,timeMinStr,timeMaxStr);
+ylabel({'Emission from','>100 keV e^-','[%]'});
+legend('6300Aº','5577Aº','4278Aº','Location','northwest');
+
+q(1).select();
+plot(glow.time,100.*(glowLE.R6300-glow0.R6300)./(glow.R6300-glow0.R6300),'r');
+hold on;
+plot(glow.time,100.*(glowLE.R5577-glow0.R5577)./(glow.R5577-glow0.R5577),'g');
+hold on;
+plot(glow.time,100.*(glowLE.R4278-glow0.R4278)./(glow.R4278-glow0.R4278),'b');
+hold on;
+[TTick,TTickLim]=label_time_axis(glow.time,false,1/6,timeMinStr,timeMaxStr);
+ylabel({'Emission from','<30 keV e^-','[%]'});
+legend('6300Aº','5577Aº','4278Aº','Location','northwest');
 %%
 figure; 
 plot(datetime(datevec(datestr(glowLE.time))),glowLE.R4278); 

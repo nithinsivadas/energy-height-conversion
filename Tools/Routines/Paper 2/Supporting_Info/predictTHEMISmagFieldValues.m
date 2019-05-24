@@ -4,7 +4,7 @@ clear all;
 %% Magnetic field model paramters
 dateStr = '26 Mar 2008';
 omniH5FileStr = 'G:\My Drive\Research\Projects\Data\omni.h5';
-magFieldModelNo = 7;
+magFieldModelStr='TS96';
 timeMinStr = '26 Mar 2008 08:00';
 timeMaxStr = '26 Mar 2008 12:30';
 
@@ -16,7 +16,8 @@ timeMaxStr = '26 Mar 2008 12:30';
     themisData.thd.state.time(1),themisData.thd.state.time(end));
 
 %% Calculating magnetic field at themis-D location
-magFieldModelStr=find_irbem_magFieldModelStr(magFieldModelNo);
+
+magFieldModelNo = find_irbem_magFieldModelNo(magFieldModelStr);
 maginput = filter_irbem_maginput(magFieldModelNo,maginput);
 x1 = themisData.thd.state.XYZ_GEO(:,1);
 x2 = themisData.thd.state.XYZ_GEO(:,2);
@@ -107,6 +108,66 @@ legend([magFieldModelStr,' Bmag'],'THM-D Bmag','Location','Northwest');
 set(gca,'YLim',[0 100]);
 ylabel('[nT]');
 
+%%
+totalPanelNo=4;
+hFig1 = figure(2);
+p = create_panels(hFig1, 'totalPanelNo', totalPanelNo);
+timeMinStr='2008-03-26/08:05:00';
+timeMaxStr='2008-03-26/12:00:00';
+timeTick=0.5;
+  
+
+
+q=p(1);
+
+q(1).select();
+Bxthm_interp = interp1(themisTime(timeArrayThm),Bxthm(timeArrayThm),timeMaginput(timeArray))';
+p1=plot(timeMaginput(timeArray),100*(Bgeo(:,1)-Bxthm_interp)./Bxthm_interp,'-k');
+label_time_axis(timeMaginput(timeArray),false,timeTick,timeMinStr,timeMaxStr);
+line([timeMaginput(timeArray(1)),timeMaginput(timeArray(end))],[25, 25],'Color','r','HandleVisibility','off');
+line([timeMaginput(timeArray(1)),timeMaginput(timeArray(end))],[-25, -25],'Color','r','HandleVisibility','off');
+legend(p1,[magFieldModelStr,'-Bx - ThmD-Bx'],'Location','NorthEast');
+set(gca,'YLim',[-50 50],'YTick',[-50,-25,0,25,50]);
+ylabel({'Percent Error [%]'});
+
+q(2).select();
+Bythm_interp = interp1(themisTime(timeArrayThm),Bythm(timeArrayThm),timeMaginput(timeArray))';
+p1=plot(timeMaginput(timeArray),100*(Bgeo(:,2)-Bythm_interp)./Bythm_interp,'-k');
+label_time_axis(timeMaginput(timeArray),false,timeTick,timeMinStr,timeMaxStr);
+line([timeMaginput(timeArray(1)),timeMaginput(timeArray(end))],[25, 25],'Color','r','HandleVisibility','off');
+line([timeMaginput(timeArray(1)),timeMaginput(timeArray(end))],[-25, -25],'Color','r','HandleVisibility','off');
+legend(p1,[magFieldModelStr,'-By - ThmD-By'],'Location','SouthWest');
+% set(gca,'YLim',[-50 50],'YTick',[-50,-25,0,25,50]);
+ylabel({'Percent Error [%]'});
+
+q(3).select();
+Bzthm_interp = interp1(themisTime(timeArrayThm),Bzthm(timeArrayThm),timeMaginput(timeArray))';
+p1=plot(timeMaginput(timeArray),100*(Bgeo(:,3)-Bzthm_interp)./Bzthm_interp,'-k');
+label_time_axis(timeMaginput(timeArray),false,timeTick,timeMinStr,timeMaxStr);
+line([timeMaginput(timeArray(1)),timeMaginput(timeArray(end))],[25, 25],'Color','r','HandleVisibility','off');
+line([timeMaginput(timeArray(1)),timeMaginput(timeArray(end))],[-25, -25],'Color','r','HandleVisibility','off');
+legend(p1,[magFieldModelStr,'-Bz - ThmD-Bz'],'Location','SouthWest');
+set(gca,'YLim',[-50 50],'YTick',[-50,-25,0,25,50]);
+ylabel({'Percent Error [%]'});
+
+q(4).select();
+Bthm_interp = interp1(themisTime(timeArrayThm),Bthm(timeArrayThm),timeMaginput(timeArray))';
+p1=plot(timeMaginput(timeArray),100*(B(:)-Bthm_interp)./Bthm_interp,'-k');
+label_time_axis(timeMaginput(timeArray),false,timeTick,timeMinStr,timeMaxStr);
+line([timeMaginput(timeArray(1)),timeMaginput(timeArray(end))],[25, 25],'Color','r','HandleVisibility','off');
+line([timeMaginput(timeArray(1)),timeMaginput(timeArray(end))],[-25, -25],'Color','r','HandleVisibility','off');
+legend(p1,[magFieldModelStr,'-Bmag - ThmD-Bmag'],'Location','NorthWest');
+set(gca,'YLim',[-50 50],'YTick',[-50,-25,0,25,50]);
+ylabel({'Percent Error [%]'});
+label_time_axis(timeMaginput(timeArray),true,timeTick,timeMinStr,timeMaxStr);
+
+% plot(timeMaginput(timeArray),B(:),'--k');
+% hold on;
+% plot(themisTime(timeArrayThm),Bthm(timeArrayThm),'-r');
+
+% legend([magFieldModelStr,' Bmag'],'THM-D Bmag','Location','Northwest');
+% set(gca,'YLim',[0 100]);
+% ylabel('[nT]');
 %%
 function [themisTime,B,Bx,By,Bz] = get_themis_Bfield(themisDBfieldPath)
 

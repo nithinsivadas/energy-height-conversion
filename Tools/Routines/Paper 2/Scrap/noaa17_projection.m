@@ -14,8 +14,8 @@ maginput = filter_irbem_maginput(magFieldNo,maginput);
 
 %%
 % POES trajectory
-poesTimeMinStr = '26-Mar-2008 11:28';
-poesTimeMaxStr = '26-Mar-2008 11:31';
+poesTimeMinStr = '26-Mar-2008 11:27:00';
+poesTimeMaxStr = '26-Mar-2008 11:33:00';
 poesTimeIndx = find_time(poes.time,poesTimeMinStr):1:find_time(poes.time,poesTimeMaxStr);
 poestime = poes.time(poesTimeIndx);
 multiWaitbar('Processing',0);
@@ -39,7 +39,7 @@ end
 %%
 maps.opticalData =  get_2D_plot_inputs_time_independent(fileStr,...
         'plotModeStr','OpticalImage','site','mcgr');
-maps.opticalData.longitude = convert_longitude(maps.opticalData.longitude,'360to180');
+% maps.opticalData.longitude = convert_longitude(maps.opticalData.longitude,'360to180');
 poesmcgr.time = poes.time(poesTimeIndx);
 
 for iTime = 1:1:length(poesTimeIndx)
@@ -59,15 +59,15 @@ for iTime = 1:1:length(poesTimeIndx)
 end
 
 %% Create table to view
-T  = table(datestr(poes.time(poesTimeIndx)),poes.lat(poesTimeIndx),poesmcgr.pixel',poesColor1,poesColor2,poesColor,...
-    'VariableNames',{'Time','glat','MCGR','ted01','ted03','MEPD30_300keV'});
+% T  = table(datestr(poes.time(poesTimeIndx)),poes.lat(poesTimeIndx),poesmcgr.pixel',poesColor1,poesColor2,poesColor,...
+%     'VariableNames',{'Time','glat','MCGR','ted01','ted03','MEPD30_300keV'});
                 
 %% Plot the TED (0.5-20 keV) energy flux with MCGR counts
 %%
 poeslarad = deg2rad(poesla);    
 poeslastr = 2*pi*(1-cos(poeslarad));
 
-tIndxOffset = 0;
+tIndxOffset = -11;
 poesColor = poes.mep0E1(poesTimeIndx+tIndxOffset)-poes.mep0E3(poesTimeIndx+tIndxOffset);
 poesColorTrapped = poes.mep90E1(poesTimeIndx+tIndxOffset)-poes.mep90E3(poesTimeIndx+tIndxOffset);
 poesAnisotropy = poesColor./poesColorTrapped;
@@ -103,20 +103,21 @@ poes.mep30_300 = poes.mep30_100+poes.mep100_300;
 poes.ted0_05_1 = poes.ted01.*(1.865*10^-6)*poeslastr;
 poes.ted1_20 = poes.ted03.*(6.394*10^-5)*poeslastr;
 poes.ted0_20 = poes.ted0_05_1+poes.ted1_20;
-tIndxOffset = 0;
+tIndxOffset = 11;
 disp(['Lat offset: ',num2str(poes.lat(poesTimeIndx(44)+tIndxOffset)-(poes.lat(poesTimeIndx(44))))]);
 h = figure; 
 % semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor','k');
-p = create_panels(h,'demargin',30,'PanelHeight',45);
+% p = create_panels(h,'demargin',30,'PanelHeight',45);
+p = create_panels(h,'demargin',20);
 p(1,1).select();
-semilogy(poes.time(poesTimeIndx+tIndxOffset),poes.ted0_05_1(poesTimeIndx),'r');
+semilogy(poes.time(poesTimeIndx),poes.ted0_05_1(poesTimeIndx),'r');
 hold on;
-semilogy(poes.time(poesTimeIndx+tIndxOffset),poes.ted1_20(poesTimeIndx),'g');
+semilogy(poes.time(poesTimeIndx),poes.ted1_20(poesTimeIndx),'g');
 hold on;
-semilogy(poes.time(poesTimeIndx+tIndxOffset),poes.mep30_300(poesTimeIndx),'b');
+semilogy(poes.time(poesTimeIndx),poes.mep30_300(poesTimeIndx),'b');
 hold on;
-semilogy(poes.time(poesTimeIndx+tIndxOffset),...
-    poes.ted0_20(poesTimeIndx)+poes.mep30_300(poesTimeIndx),'Color',[0,0,0],'LineWidth',1.5); 
+semilogy(poes.time(poesTimeIndx),...
+    poes.ted0_20(poesTimeIndx)+poes.mep30_300(poesTimeIndx),'Color',[0,0,0],'LineWidth',1); 
 hold on;
 
 ylim([0.01,10]);
@@ -126,64 +127,63 @@ ylabel({'MEPD','[mW/m^2]'});
 hold on;
 yyaxis right
 ylabel('White-light [Counts]');
-plot(poesmcgr.time,poesmcgr.pixel,'m','LineWidth',1.5); 
+plot(poes.time(poesTimeIndx-tIndxOffset),poesmcgr.pixel,'m','LineWidth',1); % Push the MCGR emissions poleward
 legend('<1 keV', '1-20 keV','>30 keV','NOAA','MCGR');
 % xlim([datetime(datevec('26 Mar 2008 11:28:00')),datetime(datevec('26 Mar 2008 11:31:00'))]);
 ylim([2500,4300]);
 title(['Equatorward latitudinal offset: ',num2str(poes.lat(poesTimeIndx(44)+tIndxOffset)-(poes.lat(poesTimeIndx(44))))]);
 set(gca,'ycolor','m','yscale','log');
-[TTick, TTickLim] = label_time_axis(poes.time(poesTimeIndx),false,1/(2*60),'26 Mar 2008 11:28:00','26 Mar 2008 11:31:00');
-[TTick2, TTickLim2] = label_time_axis(poes.time(poesTimeIndx),false,1/(6*60),'26 Mar 2008 11:28:00','26 Mar 2008 11:31:00');
+[TTick, TTickLim] = label_time_axis(poes.time(poesTimeIndx),false,1/(60),'26 Mar 2008 11:27:00','26 Mar 2008 11:33:00');
+[TTick2, TTickLim2] = label_time_axis(poes.time(poesTimeIndx),false,1/(2*60),'26 Mar 2008 11:27:00','26 Mar 2008 11:33:00');
 add_horizontal_axes(TTick2,TTickLim2,poes.time(poesTimeIndx),cellstr(datestr(poes.time(poesTimeIndx),'ss')),'Seconds',2);
-add_horizontal_axes(TTick,TTickLim,poes.time(poesTimeIndx),cellstr(datestr(poes.time(poesTimeIndx),'HH:MM:ss')),'UT [HH:MM:SS]',1);
-add_horizontal_axes(TTick2,TTickLim2,poes.time(poesTimeIndx),poesmcgr.glat,'NFoot Lat',3);
-grid on;
+add_horizontal_axes(TTick,TTickLim,poes.time(poesTimeIndx),cellstr(datestr(poes.time(poesTimeIndx),'HH:MM')),'UT [HH:MM]',1);
+add_horizontal_axes(TTick2,TTickLim2,poes.time(poesTimeIndx-tIndxOffset),poesmcgr.glat,'NFoot Lat',3); %% push the footpoints along with MCGR emissions
 
 %%
 figure; 
-semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor4); 
-hold on;
-semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor5); 
-hold on;
-semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor6); 
-ylim([0.01,10]);
-set(gca,'YTick',[0.01,0.1,1,10],'YTickLabel',{'0.01','0.1','1','10'});
-ylabel({'TED','[mW/m^2]'});
-
-hold on;
-yyaxis right
-ylabel('White-light [Counts]');
-semilogy(datetime(datevec(poesmcgr.time)),poesmcgr.pixel,'g'); 
-ylim([2500,4500]);
-legend('0.05-20 keV', '0.05-1keV','1-20 keV','mcgr');
-%%
-figure; 
-% semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor','k');
-semilogy(datetime(datevec(poes.time(poesTimeIndx))),poes.mep0E1eFlux(poesTimeIndx));
-hold on;
-semilogy(datetime(datevec(poes.time(poesTimeIndx))),poes.mep0E2eFlux(poesTimeIndx));
-hold on;
-semilogy(datetime(datevec(poes.time(poesTimeIndx))),poes.mep0E3eFlux(poesTimeIndx));
-ylim([0.01,9]);
-set(gca,'YTick',[0.01,0.1,1,10],'YTickLabel',{'0.01','0.1','1','10'});
-ylabel({'MEPD','[mW/m^2]'});
-
-hold on;
-yyaxis right
-ylabel('White-light [Counts]');
-semilogy(datetime(datevec(poesmcgr.time)),poesmcgr.pixel,'g'); 
-legend('>30 keV', '>100 keV','>300 keV','mcgr');
-ylim([2500,4500]);
-            
-%%
-figure; 
-semilogy(datetime(datevec(poes.time(poesTimeIndx))),log10(poesColor'),'k'); 
+% semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor4); 
+% hold on;
+% semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor5); 
+% hold on;
+% semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor6); 
 % ylim([0.01,10]);
-set(gca,'YTick',[0.01,0.1,1,10]);
-ylabel({'MEPD','30-300 keV','Counts/s'});
-hold on;
-yyaxis right
-plot(datetime(datevec(poesmcgr.time)),poesmcgr.glat,'g'); 
+% set(gca,'YTick',[0.01,0.1,1,10],'YTickLabel',{'0.01','0.1','1','10'});
+% ylabel({'TED','[mW/m^2]'});
+% 
+% hold on;
+% yyaxis right
+% ylabel('White-light [Counts]');
+% semilogy(datetime(datevec(poesmcgr.time)),poesmcgr.pixel,'g'); 
+% ylim([2500,4500]);
+% legend('0.05-20 keV', '0.05-1keV','1-20 keV','mcgr');
+% %%
+% figure; 
+% % semilogy(datetime(datevec(poes.time(poesTimeIndx))),poesColor','k');
+% semilogy(datetime(datevec(poes.time(poesTimeIndx))),poes.mep0E1eFlux(poesTimeIndx));
+% hold on;
+% semilogy(datetime(datevec(poes.time(poesTimeIndx))),poes.mep0E2eFlux(poesTimeIndx));
+% hold on;
+% semilogy(datetime(datevec(poes.time(poesTimeIndx))),poes.mep0E3eFlux(poesTimeIndx));
+% ylim([0.01,9]);
+% set(gca,'YTick',[0.01,0.1,1,10],'YTickLabel',{'0.01','0.1','1','10'});
+% ylabel({'MEPD','[mW/m^2]'});
+% 
+% hold on;
+% yyaxis right
+% ylabel('White-light [Counts]');
+% semilogy(datetime(datevec(poesmcgr.time)),poesmcgr.pixel,'g'); 
+% legend('>30 keV', '>100 keV','>300 keV','mcgr');
+% ylim([2500,4500]);
+%             
+% %%
+% figure; 
+% semilogy(datetime(datevec(poes.time(poesTimeIndx))),log10(poesColor'),'k'); 
+% % ylim([0.01,10]);
+% set(gca,'YTick',[0.01,0.1,1,10]);
+% ylabel({'MEPD','30-300 keV','Counts/s'});
+% hold on;
+% yyaxis right
+% plot(datetime(datevec(poesmcgr.time)),poesmcgr.glat,'g'); 
             
 %% thd
 % timeThd = padData.thd.time;
