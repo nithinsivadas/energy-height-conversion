@@ -1,7 +1,17 @@
 function [longitude] = convert_longitude(longitude,modeStr)
 %convert_longitude Converts longitude from 0-360 to -180(W)to+180(E), and vice
-%versa. 
+%versa.
 %   Detailed explanation goes here
+%   Input:
+%         longitude - A value between 0 to 360 or -180 to +180
+%         modeStr   - '360to180' or '180to360' [Default: '360to180']
+%   Output:
+%         longitude - Converted longitude
+%------------------------------------------------------------------------------
+% Created by: Nithin Sivadas
+% Modified on: 29 May 2019
+%------------------------------------------------------------------------------
+
 if nargin<2
     modeStr = '360to180';
 end
@@ -27,4 +37,3 @@ if flag == 1
 end
 
 end
-

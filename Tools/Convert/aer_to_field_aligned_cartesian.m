@@ -1,6 +1,8 @@
 function amisrData = aer_to_field_aligned_coords(amisrData,projectionAlt)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%% Retired function
+% aer_to_field_aligned_coords Converts az, el, range coordinates
+% to cartesian coordinates and interpolates
+% it to magnetic field aligned cartesian coordinates
 %
 % Input:
 % projectionAlt - Altitude of projection [km]
@@ -10,6 +12,8 @@ function amisrData = aer_to_field_aligned_coords(amisrData,projectionAlt)
 % amisrData --> (added)
 %           --> magCartCoords.xEast,yNorth,zUp % Field aligned beams
 %           --> cartCoords.xEast,yNorth,zUp
+%---------------------------------------------------------------------------
+% Updated on 29 May 2019
 
 % Initializing
 az = double(amisrData.az);
@@ -63,4 +67,3 @@ amisrData.origCartCoords.xEast = xEast;
 amisrData.origCartCoords.yNorth = yNorth;
 amisrData.origCartCoords.zUp = zUp;
 end
-
