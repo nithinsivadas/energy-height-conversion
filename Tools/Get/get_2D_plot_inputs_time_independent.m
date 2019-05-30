@@ -1,6 +1,6 @@
 function plotData = get_2D_plot_inputs_time_independent(inputH5FileStr,varargin)
-% get_2D_plot_inputs_at_time.m Get inputs required to plot at a particular
-% time instant for HDF5 file
+% get_2D_plot_inputs_at_time.m Get 'OpticalImage', 'EnergyFluxMap',
+% 'MagneticFieldMap' data form hdf5 file that is time independent
 %   Detailed explanation goes here
 
 p = inputParser;
@@ -53,22 +53,22 @@ switch p.Results.plotModeStr
             plotData.longitude = convert_longitude(plotData.longitude,'360to180');
         end
     case 'EnergyFluxMap'
-        
+
         magcoords = permute(readh5_variable_at_time(inputH5FileStr,...
             'magGeodeticLatLonAlt','/magneticFieldAlignedCoordinates/',[]),[3 2 1]);
-              
+
         % Interpolate beam-wise at projectionAlt, and get the lat, lon values for [nBeamsxnEnergy]
-        tempLatitude = squeeze(magcoords(1,:,:)); 
+        tempLatitude = squeeze(magcoords(1,:,:));
         tempLongitude = squeeze(magcoords(2,:,:));
-        tempAltitude = squeeze(magcoords(3,:,:)); 
+        tempAltitude = squeeze(magcoords(3,:,:));
         nBeams = size(tempLatitude,1);
         plotData.zEnergyBin = repmat(readh5_variable_at_time(inputH5FileStr,...
             'energyBin','/energyFluxFromMaxEnt/',[])',nBeams,1);
-        
+
         plotData.time = h5read(inputH5FileStr,'/energyFluxFromMaxEnt/time')';
-        
+
         if isnan(p.Results.peakIonizationAltitude)
-        
+
             if isnan(p.Results.timeNeutralAtmosphere)
                 timeNeutralAtmosphere=median(plotData.time);
             else
@@ -85,34 +85,34 @@ switch p.Results.plotModeStr
             for iEnergy = 1:1:size(plotData.zEnergyBin,2)
                 for iBeam = 1:1:nBeams
                     pfisrLatitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLatitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');
-                    pfisrLongitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');  
+                    pfisrLongitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');
                 end
             end
         else
             timeNeutralAtmosphere = nan;
             peakIonizationAlt = p.Results.peakIonizationAltitude*ones(1,size(plotData.zEnergyBin,2));
-            
+
             nBeams = size(tempLatitude,1);
             iEnergy = 1;
             for iBeam = 1:1:nBeams
                 pfisrLatitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLatitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');
-                pfisrLongitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');  
+                pfisrLongitude(iBeam,iEnergy) = interp1(tempAltitude(iBeam,:),tempLongitude(iBeam,:),peakIonizationAlt(iEnergy),'linear','extrap');
             end
             pfisrLatitude = repmat(pfisrLatitude,1,size(plotData.zEnergyBin,2));
             pfisrLongitude = repmat(pfisrLongitude,1,size(plotData.zEnergyBin,2));
-            
+
         end
-        
+
 %         plotData.latitude = repmat(pfisrLatitude,[1,size(plotData.zEnergyBin,2)]);
 %         plotData.longitude = repmat(pfisrLongitude,[1,size(plotData.zEnergyBin,2)]);
         plotData.latitude = pfisrLatitude;
         plotData.longitude = pfisrLongitude;
         plotData.projectionAltitude = peakIonizationAlt; % in KM
         plotData.timeNeutralAtmosphere = timeNeutralAtmosphere;
-        
+
     case 'MagneticFieldMap'
         plotData.ionosphereCoord = readh5_variable_at_time(inputH5FileStr,...
-            'ionosphereCoordGDZ',['/magneticMap/',p.Results.magFieldModelStr,'/'],[])';        
+            'ionosphereCoordGDZ',['/magneticMap/',p.Results.magFieldModelStr,'/'],[])';
         plotData.time = unix_to_matlab_time(h5read(inputH5FileStr,['/magneticMap/',p.Results.magFieldModelStr,'/time']))';
     otherwise
         error('No or incorrect plotMode');

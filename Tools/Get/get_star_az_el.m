@@ -1,7 +1,7 @@
 function [az,el] = get_star_az_el...
     (RA,DEC,pmRA,pmDEC,parallax,RV,time,glat,glong,galt,...
     temperature,pressure,humidity,wavelength)
-%UNTITLED4 Summary of this function goes here
+%get_star_az_el Get stars azimuth and elevation in the sky given the input star catalogue values.
 %   Detailed explanation goes here
 % RA,DA         double  ICRS right ascension & declination at J1991.25 (radians, Note 1)
 % pmRA          double  RA proper motion (radians/year; Note 2)
@@ -25,8 +25,8 @@ t = datevec(time);
 
 % height above ellipsoid? what is the difference from altitude?
 if nargin<11 || isempty(temperature)
-   t0 = 256; %[k] - Alaska temperature 
-else 
+   t0 = 256; %[k] - Alaska temperature
+else
    t0 = temperature; %ambient temperature
 end
 if nargin<12 || isempty(pressure)
@@ -66,5 +66,3 @@ az = rad2deg(az);
 el = 90-rad2deg(zenithDistance);
 
 end
-
-

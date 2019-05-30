@@ -1,36 +1,37 @@
 function GW=get_tsyganenko_GW_1(yyyy,programDir,omniASCDir)
-%% get_tsyganenko_GW.m Runs the fortran code MagParametersProgramONE 
+%% get_tsyganenko_GW_1.m Runs the fortran code MagParametersProgramONE
 %                    to calculate G1-G3, and W1-W6: input parameters to the
 %                    tsyganenko magnetic field models 2001, 2003.
+%                    Uses .dat/.asc files generated from the code.
 %--------------------------------------------------------------------------
 % Input
 %------
 % yyyy -     [yyyy] An integer indicating the year for which you would like
 %             to calculate G & W.
-%           
-% programDir - A string indicating the directory where the program 
-%              MagmodelinputONE.exe is. Which is compiled using g77 from 
+%
+% programDir - A string indicating the directory where the program
+%              MagmodelinputONE.exe is. Which is compiled using g77 from
 %              MagmodelinputONE.f manually.
 %              Default: '~\github\energy-height-conversion\Tools\...
 %              External Tools\Tsyganenko_Parameters\MagParameterProgram-rsw\'
-% omniASCDir - The director where the ASC omni files will be downloaded by 
+% omniASCDir - The director where the ASC omni files will be downloaded by
 %              download_omni_cdf(...,'asc');
 %              Default: '~\githun\LargeFiles\omni\ASC\'
 %--------------------------------------------------------------------------
 % Output
 %-------
 % GW - A struct array containing the following parameters
-%      datenum,ByIMF,BzIMF,Velocity_SW,Density_P,Pressure_dynamic,G:[G1 G2 G3]  
+%      datenum,ByIMF,BzIMF,Velocity_SW,Density_P,Pressure_dynamic,G:[G1 G2 G3]
 %      Status8, kp,akp3,dst,Bz1_6:[Bz1,Bz2,Bz3,Bz4,Bz5,Bz6],W:[W1 W2 W3 W4 W5 W6]
 %      Status6
 %--------------------------------------------------------------------------
-% Modified: 13th Feb 2017 
+% Modified: 30th May 2019
 % Created : 6th Feb 2017
 % Author  : Nithin Sivadas
-% Ref     : 
+% Ref     :
 % Notes   : The structure filed names don't have the standard variable name
-% convention. 
-% Needs g77 installed, and the External Tool:MagParametersProgram from 
+% convention.
+% Needs g77 installed, and the External Tool:MagParametersProgram from
 % http://virbo.org/svn/virbo/qindenton/MagParameterProgram-rsw/
 %--------------------------------------------------------------------------
 f=filesep;
@@ -53,7 +54,7 @@ end
     omni2CurrYr = textscan(inputFileID2,formatSpecOmni2);
     fclose(inputFileID1);
     fclose(inputFileID2);
-    
+
     DOY = [(omni2PrevYr{1,2});(omni2CurrYr{1,2})];
     YEAR = [(omni2PrevYr{1,1});(omni2CurrYr{1,1})];
     HR = [(omni2PrevYr{1,3});(omni2CurrYr{1,3})];
@@ -119,7 +120,7 @@ end
     timeMax = datenum(datetime(yyyy+1,1,1))-1/(24*60);
     timeIndex = crop_time(tempIndex',tempTime,timeMin,timeMax);
     GW.time = tempTime(timeIndex);
-    GW.ByIMF = double(dataGW{1,5}(timeIndex)); 
+    GW.ByIMF = double(dataGW{1,5}(timeIndex));
     GW.BzIMF = double(dataGW{1,6}(timeIndex));
     GW.Velocity_SW = double(dataGW{1,7}(timeIndex));
     GW.Density_P = double(dataGW{1,8}(timeIndex));
@@ -137,6 +138,5 @@ end
         double(dataGW{1,27}(timeIndex)),double(dataGW{1,28}(timeIndex))];
     GW.Status6 = double(dataGW{1,29}(timeIndex));
     GW.fieldNames = C_text;
-    
-end
 
+end

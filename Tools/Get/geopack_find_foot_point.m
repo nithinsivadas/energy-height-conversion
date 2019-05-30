@@ -1,7 +1,6 @@
 function Xfoot = geopack_find_foot_point(magFieldNo,maxLength,...
     sysaxes,thisTime,x1,x2,x3,stop_alt,hemiflag,maginput,runGEOPACK_RECALC)
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
+% geopack_find_foot_point Find the foot point of the field lines using GEOPACK tracing
 
 if nargin<11
     runGEOPACK_RECALC = true;
@@ -38,7 +37,7 @@ Xfoot(3) = interp1(xGDZ(:,1),xGDZ(:,3),stop_alt);
 end
 
 function [PARMOD,IOPT,magStr] = get_parmod(magFieldNo,maginput)
-    
+
 PARMOD = zeros(10,1);
 
 if magFieldNo==4
@@ -51,15 +50,15 @@ elseif magFieldNo==7
     PARMOD(1) = maginput(5);
     PARMOD(2) = maginput(2);
     PARMOD(3) = maginput(6);
-    PARMOD(4) = maginput(7);    
+    PARMOD(4) = maginput(7);
     IOPT = 0;
 elseif magFieldNo==9
     magStr = 'T01';
     PARMOD(1) = maginput(5);
     PARMOD(2) = maginput(2);
     PARMOD(3) = maginput(6);
-    PARMOD(4) = maginput(7);    
-    PARMOD(5) = maginput(8);    
+    PARMOD(4) = maginput(7);
+    PARMOD(5) = maginput(8);
     PARMOD(6) = maginput(9);
     IOPT=0;
 else
@@ -69,7 +68,7 @@ end
 end
 
 function DIR = get_dir(xGSM,hemiflag)
-    
+
 DIR = sign(xGSM(3));
     if hemiflag == 0
         DIR = DIR*-1;
@@ -81,5 +80,5 @@ DIR = sign(xGSM(3));
     else
         error('hemiflag value out of range');
     end
-    
+
 end

@@ -1,6 +1,6 @@
 function [Kc] = geopack_find_curvature(XX,YY,ZZ)
-%UNTITLED6 Summary of this function goes here
-%   Detailed explanation goes here
+%geopack_find_curvature Find curvature of the field lines (Kc) using field line 
+% coordinates in cartesian coordinates
 
 dX = gradient(XX);
 ddX = gradient(dX);
@@ -15,4 +15,3 @@ Kc = sqrt((ddZ.*dY - ddY.*dZ).^2 + (ddX.*dZ - ddZ.*dX).^2 + (ddY.*dX - ddX.*dY).
 .*(dX.^2 + dY.^2 + dZ.^2).^-1.5;
 
 end
-

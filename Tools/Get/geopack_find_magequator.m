@@ -1,7 +1,6 @@
 function [magEqGEO] = geopack_find_magequator(magFieldNo,...
     maxLength,sysaxes,thisTime,x1,x2,x3,maginput,runGEOPACK_RECALC)
-%UNTITLED7 Summary of this function goes here
-%   Detailed explanation goes here
+%geopack_find_magequator Find magnetic equator points using GEOPACK tracing
 
 if nargin<9
     runGEOPACK_RECALC = true;
@@ -41,7 +40,7 @@ magEqGEO = onera_desp_lib_coord_axes(magEqGSM,[2 sysaxes],thisTime);
 end
 
 function [PARMOD,IOPT,magStr] = get_parmod(magFieldNo,maginput)
-    
+
 PARMOD = zeros(10,1);
 
 if magFieldNo==4
@@ -54,15 +53,15 @@ elseif magFieldNo==7
     PARMOD(1) = maginput(5);
     PARMOD(2) = maginput(2);
     PARMOD(3) = maginput(6);
-    PARMOD(4) = maginput(7);    
+    PARMOD(4) = maginput(7);
     IOPT = 0;
 elseif magFieldNo==9
     magStr = 'T01';
     PARMOD(1) = maginput(5);
     PARMOD(2) = maginput(2);
     PARMOD(3) = maginput(6);
-    PARMOD(4) = maginput(7);    
-    PARMOD(5) = maginput(8);    
+    PARMOD(4) = maginput(7);
+    PARMOD(5) = maginput(8);
     PARMOD(6) = maginput(9);
     IOPT=0;
 else
@@ -72,7 +71,7 @@ end
 end
 
 function DIR = get_dir(xGSM,hemiflag)
-    
+
 DIR = sign(xGSM(3));
     if hemiflag == 0
         DIR = DIR*-1;
@@ -84,5 +83,5 @@ DIR = sign(xGSM(3));
     else
         error('hemiflag value out of range');
     end
-    
+
 end

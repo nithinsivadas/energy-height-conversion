@@ -1,8 +1,8 @@
 function create_video(mainDirName,imageDir,videoFileName)
-%UNTITLED Summary of this function goes here
+% create_video Creates .avi file with images in imageDir
 %   Detailed explanation goes here
 multiWaitbar('Generating Video',0);
-videoDir ='Videos';  
+videoDir ='Videos';
 mkdir(mainDirName,videoDir);
 outputVideo = VideoWriter(fullfile([mainDirName,filesep,videoDir,...
     filesep,videoFileName]));
@@ -21,4 +21,3 @@ close(outputVideo);
 multiWaitbar('Generating Video','Close');
 
 end
-

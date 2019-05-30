@@ -1,9 +1,9 @@
 function cmap = get_colormap3(lowerColor,midColor,upperColor,L)
-%UNTITLED8 Summary of this function goes here
+% get_colormap3 Produce colormap with 3 colors.
 %   Detailed explanation goes here
 if nargin<4
     L=32;
-else 
+else
     L = round(L/2);
 end
 
@@ -38,6 +38,6 @@ end
 
 function rgb=get_rgb_triplet(colorStr)
     color = string(['y','m','c','r','g','b','w','k']');
-    rgbArr = [1 1 0; 1 0 1;  0 1 1; 1 0 0; 0 1 0; 0 0 1; 1 1 1; 0 0 0];    
+    rgbArr = [1 1 0; 1 0 1;  0 1 1; 1 0 0; 0 1 0; 0 0 1; 1 1 1; 0 0 0];
     rgb = rgbArr(strcmp(color,string(colorStr)),:);
 end
