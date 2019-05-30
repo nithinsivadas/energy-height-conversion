@@ -1,6 +1,7 @@
 function [ figureHandle ] = plot_2D_conductivity_slice_geodetic...
     ( data, geodeticCoords, timeNo, altitudeSelected, conductivityType, setMapOn, latLim, lonLim)
-%plot_2D_conductivity_slice_geodetic Plotting a 2D slice of PFISR densities
+%plot_2D_conductivity_slice_geodetic Plotting a 2D slice of PFISR conductivities
+% given a data structure.
 % Input
 % data : data.electronDensity --> Matrix of electron density point at each[position, time]
 %      : the measurements can be organized in any order

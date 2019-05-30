@@ -1,6 +1,6 @@
 function [ figureHandle ] = plot_2D_conductivity_slice_geodetic_faster...
     ( FscatteredInterpolant, geodeticCoords, altitudeSelected, setMapOn, latLim, lonLim)
-%plot_2D_conductivity_slice_geodetic Plotting a 2D slice of PFISR densities
+%plot_2D_conductivity_slice_geodetic Plotting a 2D slice of PFISR conductivities
 % Input
 % data : data.electronDensity --> Matrix of electron density point at each[position, time]
 %      : the measurements can be organized in any order

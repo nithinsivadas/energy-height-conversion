@@ -19,13 +19,13 @@ function [varValue] = read_h5_variable_at_time_v2(h5FileStr, datasetPath,...
     % If both timeIndx and timeStr are provided, then timeIndx will get
     % preference
     % If datasets with no time variation are requested, the dataset will be
-    % read without any change, and presented as output. 
+    % read without any change, and presented as output.
     %
     % Last Updated: 23rd Nov 2018,30th Sep 2018
     % Create by   : Nithin Sivadas
-    
 
-if nargin < 4 
+
+if nargin < 4
     thisTimeStr = [];
 end
 
@@ -45,8 +45,8 @@ if isempty(thisTimeIndx)
     if isempty(thisTimeStr)
         error('Please specify either thisTimeIndx, or thisTimeStr');
     else
-        
-        [statusTime, infoTime] = ish5dataset(h5FileStr, timeStr);  
+
+        [statusTime, infoTime] = ish5dataset(h5FileStr, timeStr);
         if statusTime
             try
                 units=h5readatt(h5FileStr,timeStr,'Units');
@@ -65,10 +65,10 @@ if isempty(thisTimeIndx)
                 catch
                     units= '[matlab units]';
                 end
-                time = h5read(h5FileStr,timeStr); %This is currently matlab time :/            
+                time = h5read(h5FileStr,timeStr); %This is currently matlab time :/
             else
-                error('Default Time array /energyFluxFromMaxEnt/time does not exists');    
-            end    
+                error('Default Time array /energyFluxFromMaxEnt/time does not exists');
+            end
         end
         if ~strcmp(units,'[matlab units]')
             time = unixtime2matlab(time);
@@ -76,7 +76,7 @@ if isempty(thisTimeIndx)
         thisTimeIndx = find_time(time,thisTimeStr);
     end
     nTime = length(time);
-else   
+else
     [statusTime, infoTime] = ish5dataset(h5FileStr, timeStr);
     if ~statusTime
         warning(['No time array for the group,',...
@@ -110,7 +110,6 @@ end
 varValue = squeeze(permute(h5read(...
     h5FileStr,datasetPath,startIndx,countIndx...
     ),fliplr(1:1:nDim)));
-    
-    
-end
 
+
+end

@@ -1,14 +1,14 @@
 function [axesHandleOptical] = combine_2D_plots_v3(inputH5FileStr,figureHandle,...
     varargin)
 %combine_2D_plots Plot optical images, energy flux maps, and or magnetic
-%field maps over one another.
+%field maps over one another. Adjusts for contrast.
 
 p = inputParser;
 
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
 expectedMaps = {'OpticalImage','EnergyFluxMap','MagneticFieldMap','NoMap'};
 expectedSites = {'gako','fykn','mcgr','whit','inuv','kian','dasc','pokerFlat'};
-expectedMagMapContour = {'RE','Lm','Lstar','Kc'}; 
+expectedMagMapContour = {'RE','Lm','Lstar','Kc'};
 expectedMagFieldModels = {'NoExternalField','MF75','TS87short','TS87long',...
     'TS89','OP77quiet','OP88dynamic','TS96','OM97','TS01','TS01storm',...
     'TS04storm','Alexeev2000'};
@@ -108,7 +108,7 @@ for iTime = 1:1:nTime
         % Create two axes
     else
         resize_figure(figureHandle,p.Results.figureLength,p.Results.figureBreadth); %A5 Paper Size, 148 cm vert, 210 cm horizontal
-        
+
         if nOptical>0 %Plot opitcal images on a map
             comment('Plotting optical images...',p.Results.showComments);
             for i=1:1:nOptical
@@ -118,14 +118,14 @@ for iTime = 1:1:nTime
                     'plotData',maps.opticalData(i),...
                     'thisTimeIndx', thisTimeIndx,...
                     'site', p.Results.sites{maps.optical(i)});
-              
+
 %               dascData.background = dascData.background.*2^-16;
               dascData.image = dascData.image.*2^-16;
               bias = 0;
 %               intensityScale = 250./dascData.background;
               intensityScale = 1;
 %               intensityScale = 0.1./dascData.background;
-              n=1.5;  
+              n=1.5;
 %               intensityScale = 1;
             if strcmpi(p.Results.sites(maps.optical(i)),'pokerFlat')
 %                 intensityScale = intensityScale.*4; % Custom scaling
@@ -136,7 +136,7 @@ for iTime = 1:1:nTime
 %                 bias = -1*dascData.background ; %+1000
 %                   intensityScale = intensityScale*4.2;
 %                   bias = -2000;
-                  n=1;                  
+                  n=1;
             elseif strcmpi(p.Results.sites(maps.optical(i)),'gako')
 %                 intensityScale = intensityScale*1.2; % Custom scaling 0.8
 %                 bias = -1*dascData.background ; %250
@@ -159,7 +159,7 @@ for iTime = 1:1:nTime
 %                 intensityScale = 1; %Scale size of the intensities measured
 %                 bias = -1*dascData.background ; %250
             end
-            
+
 %               Idouble = im2double(dascData.image);
 %               avg = mean2(Idouble);
               avg = dascData.background.*2^-16;
@@ -172,7 +172,7 @@ for iTime = 1:1:nTime
               if upperLim >=1
                   upperLim=1;
               end
-            
+
             dascData.image = imadjust(dascData.image, [lowerLim upperLim],[]);
 %             zenith=90-maps.opticalData(i).elevation;
 %             height = 1000*1000; C=define_universal_constants();
@@ -188,7 +188,7 @@ for iTime = 1:1:nTime
                 if i==1
                 dascData.image(dascData.image>=65536)=nan; % Remove saturated pixels (16Bit)
                 %Correcting all cameras (rudimentary method); nightsky background intensity
-                
+
 %                 maxMedianMarker = nightsky(i)./max(dascData.image(:));
                 axesHandleOptical=axes;
                 [axesmHandleOptical, hOptical(i)] = plot_DASC_geodetic((dascData.image+ bias).*intensityScale ,...
@@ -200,13 +200,13 @@ for iTime = 1:1:nTime
                     cbOptical = colorbar(axesHandleOptical,'eastoutside');
                     ylabel(cbOptical,'[a.u.]');
                     caxis(axesHandleOptical,p.Results.opticalLim);
-                    
+
 %                     hold on;
 %                     plotm([60, 59, 58],[-150, -147, -145],'*');
                 else
                 hold on;
 %                 dascData.image(dascData.image>=65536)=nan; % Remove saturated pixels (16Bit)
-                
+
                 [~,hOptical(i)]=plot_DASC_geodetic((dascData.image+ bias).*intensityScale ,...
                     dascData.thisTime, dascData.latitude, dascData.longitude,...
                     size(dascData.image,1), p.Results.latLim, p.Results.lonLim, ...
@@ -214,13 +214,13 @@ for iTime = 1:1:nTime
 %                     cm=get_colormap('k',[0,1,0]);
                     colormap(axesHandleOptical,viridis);
                     caxis(axesHandleOptical,p.Results.opticalLim);
-                
+
                 end
                 if p.Results.setOpticalLabel
                     textm(maps.opticalData(i).sensorloc(1), maps.opticalData(i).sensorloc(2),...
                        {char(upper(p.Results.sites(maps.optical(i)))),[datestr(dascData.thisTime,'HH:MM:SS'),' UT']});
                 end
-                alpha(hOptical(i),p.Results.transparency);         
+                alpha(hOptical(i),p.Results.transparency);
             else
                 if i==1
                 axesHandleOptical=axes;
@@ -228,22 +228,22 @@ for iTime = 1:1:nTime
             end
             end
         end
-        
+
         if nEnergy>0 % Plot energyFluxMaps
             comment('Plotting energy flux maps...',p.Results.showComments);
             for i=1:1:nEnergy
                 thisTimeIndx = find_time(maps.energyData(i).time,datestr(p.Results.thisTime(iTime)));
-                
+
                 pfisrData = get_2D_plot_inputs_at_time(inputH5FileStr,...
                     'plotModeStr',expectedMaps{2},...
                     'plotData',maps.energyData(i),...
                     'thisTimeIndx', thisTimeIndx);
-                
-                
+
+
                 latWidth = p.Results.latLim(2)-p.Results.latLim(1);
                 lonWidth = p.Results.lonLim(2)-p.Results.lonLim(1);
                 pfisrData.diffEnergyFlux(imag(pfisrData.diffEnergyFlux(:))~=0)=nan;
-                
+
                 if i==1
                 axesHandleEnergy=axes;
                 [axesmHandleEnergy,hEnergy]=plot_2D_energy_slice_geodetic_v2018...
@@ -251,7 +251,7 @@ for iTime = 1:1:nTime
                 pfisrData.latitude, pfisrData.longitude,...
                 pfisrData.zEnergyBin, pfisrData.thisTime,...
                 p.Results.energySlice,latWidth,lonWidth,true,...
-                p.Results.setEnergyTimeLabelOn);  
+                p.Results.setEnergyTimeLabelOn);
                 colormap(axesHandleEnergy,'inferno');
                 cbEnergy = colorbar(axesHandleEnergy,'westoutside');
                 ylabel(cbEnergy,'log_1_0 [eV m^-^2 s^-^1 sr^-^1 eV^-^1]');
@@ -266,7 +266,7 @@ for iTime = 1:1:nTime
                 pfisrData.zEnergyBin, pfisrData.thisTime,...
                 p.Results.energySlice,latWidth,lonWidth,true,...
                 p.Results.setEnergyTimeLabelOn);
-                end             
+                end
             end
         end
 
@@ -281,10 +281,10 @@ for iTime = 1:1:nTime
                     'magFieldModelStr',p.Results.magneticFieldModel,...
                     'energySlice',p.Results.energySlice,...
                     'getKc',strcmp(p.Results.plotContours,'Kc'));
-                
+
                     if i==1
                     axesHandleMagneticField=axes;
-                    
+
                     if strcmp(p.Results.plotContours,'RE')
                          plotVariable = magFieldData.RE;
                     elseif strcmp(p.Results.plotContours,'Lm')
@@ -303,7 +303,7 @@ for iTime = 1:1:nTime
                         'setFieldLabelOn',false,'setTimeLabelOn', p.Results.setMagneticFieldTimeLabelOn);
                     else
                         hold on;
-                    
+
                     if strcmp(p.Results.plotContours,'RE')
                          plotVariable = magFieldData.RE;
                     elseif strcmp(p.Results.plotContours,'Lm')
@@ -320,10 +320,10 @@ for iTime = 1:1:nTime
                         'BfieldModelStr',magFieldData.magFieldModelStr, 'thisTimeBfieldModel',magFieldData.thisTime,...
                         'setMapOn',true, 'latLim', p.Results.latLim,'lonLim', p.Results.lonLim,'contourLineArray', p.Results.contourLineArray,...
                         'setFieldLabelOn',false,'setTimeLabelOn', p.Results.setMagneticFieldTimeLabelOn);
-                    end 
-            end     
+                    end
+            end
         end
-        
+
         comment('Linking Axes...',p.Results.showComments);
         if nOptical > 0 && nEnergy > 0
             linkaxes([axesHandleOptical,axesHandleEnergy]);
@@ -331,41 +331,41 @@ for iTime = 1:1:nTime
             if nMagneticField > 0
                 tempAxesHandle.XLim = axesHandleMagneticField.XLim;
             end
-    
+
 
             setm(axesmHandleEnergy,'MapProjection','lambertstd',...
                 'MapLatLimit',getm(axesmHandleOptical,'MapLatLimit'),...
                 'MapLonLimit',getm(axesmHandleOptical,'MapLonLimit'),...
             'Frame','on','Grid','off','MeridianLabel','off','ParallelLabel','off',...
-            'PLineVisible','off','MLineVisible','off');  
+            'PLineVisible','off','MLineVisible','off');
             setm(axesHandleEnergy,'Origin',getm(axesHandleOptical,'Origin'),...
                 'FLatLimit',getm(axesmHandleOptical,'FLatLimit'),...
                 'FLonLimit',getm(axesmHandleOptical,'FLonLimit'));
             alpha(axesHandleEnergy, 0.5);
-        
+
         elseif nMagneticField > 0 && nEnergy > 0
             linkaxes([axesHandleMagneticField,axesHandleEnergy]);
             set(axesHandleEnergy,'Position',get(axesHandleMagneticField,'Position'),'XLim',get(axesHandleMagneticField,'XLim'));
-            
+
             tempAxesHandle.XLim = axesHandleMagneticField.XLim;
-            
+
             setm(axesmHandleEnergy,'MapProjection','lambertstd',...
                 'MapLatLimit',getm(axesmHandleMagneticField,'MapLatLimit'),...
                 'MapLonLimit',getm(axesmHandleMagneticField,'MapLonLimit'),...
             'Frame','on','Grid','off','MeridianLabel','off','ParallelLabel','off',...
-            'PLineVisible','off','MLineVisible','off');        
+            'PLineVisible','off','MLineVisible','off');
             setm(axesHandleEnergy,'Origin',getm(axesHandleMagneticField,'Origin'),...
                 'FLatLimit',getm(axesmHandleMagneticField,'FLatLimit'),...
                 'FLonLimit',getm(axesmHandleMagneticField,'FLonLimit'));
-            alpha(axesHandleEnergy, 0.5);    
-           
+            alpha(axesHandleEnergy, 0.5);
+
         elseif nOptical > 0 && nEnergy > 0 && nMagneticField > 0
             linkaxes([axesHandleOptical,axesHandleEnergy,axesHandleMagneticField]);
             set(axesHandleEnergy,'Position',get(axesHandleOptical,'Position'),'XLim',get(axesHandleOptical,'XLim'));
             set(axesHandleMagneticField,'Position',get(axesHandleOptical,'Position'),'XLim',get(axesHandleOptical,'XLim'));
 
             tempAxesHandle.XLim = axesHandleMagneticField.XLim;
-            
+
             setm(axesmHandleEnergy,'MapProjection','lambertstd','MapLatLimit',getm(axesmHandleOptical,'MapLatLimit'),...
                 'MapLonLimit',getm(axesmHandleOptical,'MapLonLimit'),...
             'Frame','on','Grid','off','MeridianLabel','off','ParallelLabel','off',...
@@ -385,7 +385,7 @@ for iTime = 1:1:nTime
             alpha(axesHandleEnergy, 0.5);
             alpha(axesHandleMagneticField, 0.5);
         end
-        
+
         comment('Making some adjustments on final figure...',p.Results.showComments);
         if nMagneticField > 0 && p.Results.setFieldLabelOn
         htext = clabelm(cMagnetic,hMagnetic,p.Results.contourLabelArray,...
@@ -396,18 +396,18 @@ for iTime = 1:1:nTime
         if nMagneticField > 0
             set(axesHandleMagneticField,'XLim',tempAxesHandle.XLim);
         end
-        
+
         if p.Results.setStoreImage == true
             comment('Storing the image...',p.Results.showComments);
             export_fig(strcat(p.Results.imageStoreDir,imageName,'.png'),'-r300','-png','-nocrop');
             close(figureHandle);
         end
-    
+
     end
 title(datestr(p.Results.thisTime(iTime)));
-comment('Done...',p.Results.showComments);       
+comment('Done...',p.Results.showComments);
 end
-   
+
 end
 
 function comment(inputStr,showComments)
@@ -422,7 +422,7 @@ function OK = isfigure(h)
  else
      OK = false;
  end
-     
+
 end
 
 % function minElFilter = elevation_cut_off(dascData,minEl)

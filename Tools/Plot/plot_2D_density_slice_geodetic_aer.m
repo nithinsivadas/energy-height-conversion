@@ -1,6 +1,6 @@
 function [ figureHandle ] = plot_2D_density_slice_geodetic_aer...
     ( data, geodeticCoords, altitude, nBeams, timeNo, altitudeSelected, setMapOn)
-%UNTITLED2 Summary of this function goes here
+% plot_2D_density_slice_geodetic_aer Plotting 2D slice in geodetic of density profiles
 %   Detailed explanation goes here
 
 if nargin <7
@@ -36,7 +36,7 @@ if setMapOn==true
     hold on;
 end;
 
-h2=pcolorm(latq,lonq,log10(Vq)); 
+h2=pcolorm(latq,lonq,log10(Vq));
 set(h2,'EdgeColor','none');
 % hold on;
 % textm(latLim(2), lonLim(2)+0.1, ['PFISR: ', num2str(energy),' keV'],'color','r');
@@ -45,4 +45,3 @@ set(h2,'EdgeColor','none');
 
 %check plot_2D_energy_slice_geodetic.m
 end
-

@@ -4,7 +4,7 @@ function varValue=readh5_variable_at_time(h5FileStr,varStr,address,thisTimeIndx)
     % file ****_energyFlux.h5. [NOT IN USE, See read_h5_variable_at_time_v2]
     %----------------------------------------------------------------------
     % Input
-    %--------     
+    %--------
     %   h5FileStr   - The path of the hdf5 file
     %   varStr      - Variable name
     %   address     - H5 file address of the variable
@@ -17,7 +17,7 @@ function varValue=readh5_variable_at_time(h5FileStr,varStr,address,thisTimeIndx)
     %----------------------------------------------------------------------
     % Last Updated: 30th Sep 2018
     % Create by   : Nithin Sivadas
-    
+
     array1DwithTimeVars = {'message'};
     matrix2DwithTimeVars = {'MSE','maxIter','time','BmagEq','Lm','Lstar',...
         'MLT','BIonosphere'};
