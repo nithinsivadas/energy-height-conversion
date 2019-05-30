@@ -2,7 +2,7 @@ function status = create_thg_hdf5(siteName,outputH5FileStr,varargin)
 %create_thg_hdf5.m Downloads, and writes themis GBO ASI images for a
 %particular site to and HDF5 file. If time limits are set as default, then
 %the function will search the outputH5FileStr for a time array and use that
-%to download the right cdf files from themis webserver. 
+%to download the right cdf files from themis webserver.
 
 p = inputParser;
 addParameter(p,'dateFormat','yyyy-mm-dd HH:MM:SS',@(x) isstring(x)||ischar(x));
@@ -12,7 +12,7 @@ addParameter(p,'localStorePath','default',@(x) isstring(x)||ischar(x));
 addParameter(p,'sensorLocationFile','default',@(x) isstring(x)||ischar(x));
 addParameter(p,'altIndx',2,@(x) x>=1&&x<=3&&(ceil(x)-x)==0); %Choosing Altitude to be 110 km
 
-addRequired(p,'outputH5FileStr',@(x)contains(x,{'.h5','.hdf5'})); 
+addRequired(p,'outputH5FileStr',@(x)contains(x,{'.h5','.hdf5'}));
 addRequired(p,'siteName', @(x) isstring(x)||ischar(x));
 
 parse(p,outputH5FileStr,siteName,varargin{:});
@@ -75,7 +75,7 @@ for iFile = 1:1:nFiles
     'lon',thgData.glon,'az',thgData.az,'el',thgData.el,'alt',thgData.alt,...
     'altIndx',p.Results.altIndx,'mlat',thgData.mlat,'mlon',thgData.mlon,...
     'time',thgData.time,'sensorloc',[thgSites.glat(siteID),thgSites.glon(siteID),0],...
-    'siteCode',siteName);        
+    'siteCode',siteName);
 end
 add_ASI_background_to_hdf5(siteName,outputH5FileStr); % Adding the backgroud
 multiWaitbar('Writing Themis GBO ASI to HDF5 Files',1);
@@ -86,5 +86,3 @@ else
     fprintf([status,'\n']);
 end
 end
-
-

@@ -27,7 +27,7 @@ image = reshape(p.Results.image,nTime,[])';
 lat   = reshape(p.Results.latitude,1,[])';
 lon   = reshape(p.Results.longitude,1,[])';
 
-latPixelNum = p.Results.latPixelNum; 
+latPixelNum = p.Results.latPixelNum;
 
 if isnan(latPixelNum) % Choosing number of latitude pixels
     latPixelNum = ceil(sqrt(length(lat)));
@@ -43,13 +43,13 @@ if isnan(meridian) % Chosing the keogram meridian to be the magnetic meridian
     else
         sensorLoc = p.Results.sensorLoc;
     end
-    
+
     if isnan(p.Results.time)
         time = datenum('26 Mar 2008 11:00');
     else
         time = p.Results.time;
     end
-    
+
     if isnan(p.Results.projectionAlt)
         projectionAlt = 110;
     else
@@ -61,7 +61,7 @@ elseif numel(meridian)==1
     meridian = meridian.*ones(size(parallels));
 end
 
-multiWaitbar('Keogramming...',0);  
+multiWaitbar('Keogramming...',0);
 id = 1./nTime;
     for i=1:1:nTime
         F = scatteredInterpolant(lat(~isnan(lat)),lon(~isnan(lat)),...
@@ -69,7 +69,5 @@ id = 1./nTime;
         keo(:,i) = F(parallels,meridian);
         multiWaitbar('Keogramming...','Increment',id);
     end
-multiWaitbar('Keogramming...',1);  
+multiWaitbar('Keogramming...',1);
 end
-
-

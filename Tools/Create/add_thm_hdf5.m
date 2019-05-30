@@ -1,6 +1,32 @@
 function data = add_thm_hdf5(probeName, outputH5FileStr,omniH5FileStr, varargin)
-%add_thm_hdf5 Adds Themis probe data onto hdf5 file, as well as foot
-% points, and L-shell. 
+%add_thm_hdf5 Adds Themis probe state data onto hdf5 file, as well as foot
+% points, and L-shell.
+%-------------------------------------------------------------------------
+% Input
+%------
+%       probeName       - Either: {'tha','thb','thc','thd','the'}
+%       outputH5Str     - H5 file name to add the themis data
+%       omniH5FileStr   - Omni H5 data file within the date range
+%       Optional inputs:
+
+%-------------------------------------------------------------------------
+% Output
+%---------
+%       data
+%           --> time
+%           --> magFieldStr
+%           --> XYZ_GEO
+%           --> NFoot
+%           --> Lm
+%----------------------------------------------------------------------------
+% Modified: 30th May 2019
+% Created : Unknown
+% Author  : Nithin Sivadas
+% Ref     :
+% Comments: Uses write_sc_to_hdf5
+%
+%----------------------------------------------------------------------------
+
 
 p = inputParser;
 validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0);
@@ -18,8 +44,8 @@ addParameter(p,'localStorePath','default',@(x) isstring(x)||ischar(x));
 addParameter(p,'projectionAltitude',110);
 
 addRequired(p,'probeName', @(x) any(validatestring(x,expectedProbeNames)));
-addRequired(p,'outputH5FileStr',@(x)contains(x,{'.h5','.hdf5'})); 
-addRequired(p,'omniH5FileStr',@(x)contains(x,{'.h5','.hdf5'})); 
+addRequired(p,'outputH5FileStr',@(x)contains(x,{'.h5','.hdf5'}));
+addRequired(p,'omniH5FileStr',@(x)contains(x,{'.h5','.hdf5'}));
 
 parse(p,probeName,outputH5FileStr,omniH5FileStr,varargin{:});
 
@@ -75,17 +101,16 @@ for iTime = 1:1:nTime
             data.XYZ_GEO(iTime,1),...
             data.XYZ_GEO(iTime,2),...
             data.XYZ_GEO(iTime,3),...
-            p.Results.projectionAltitude,+1,thisMaginput); 
+            p.Results.projectionAltitude,+1,thisMaginput);
      data.Lm(iTime,:) = onera_desp_lib_make_lstar...
             (magFieldNo,[0,0,0,0,0],sysaxes,data.time(iTime),...
             data.XYZ_GEO(iTime,1),...
             data.XYZ_GEO(iTime,2),...
             data.XYZ_GEO(iTime,3),...
-            thisMaginput);   
+            thisMaginput);
 end
 
 write_sc_to_hdf5(outputH5FileStr,probeName,data.time,data.XYZ_GEO,...
     data.magFieldStr,data.NFoot,data.Lm);
 
 end
-

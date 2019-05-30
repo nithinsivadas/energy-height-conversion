@@ -1,6 +1,9 @@
 function [status] = create_omni_HDF5(h5FileStr,localStorePath,setCalculateGW)
-%create_omni_HDF5
+%create_omni_HDF5 Downloads high resolution omni files, and creates omni HDF5
+% that is needed to generate magniput for IRBEM. The file contains all important
+% information on solar wind parameters, and geomagnetic indices.
 %
+
 if nargin<3
     setCalculateGW = true;
 end
@@ -13,7 +16,7 @@ if nargin <1
     h5FileStr = 'G:\My Drive\Research\Projects\Data\omni.h5';
 end
 
-% Setting up remote path 
+% Setting up remote path
 remoteLinkOmniHighRes = '/pub/data/omni/high_res_omni';
 remoteLinkOmni2 = '/pub/data/omni/low_res_omni/extended';
 
@@ -31,11 +34,11 @@ status{2,1} = 'Loaded ASCII Files';
 
 end
 function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
-    
+
     if nargin<3
         setCalculateGW = true;
     end
-    
+
     files=dir(localStorePath);
     fileListCell = struct2cell(files);
     formatSpecOmni1 = '%4d %4d %3d %3d %3d %3d %4d %4d %4d %7d %7d %6.2f %7d %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.1f %8.1f %8.1f %8.1f %7.2f %9.0f %6.2f %7.2f %7.2f %6.1f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %6d %6d %6d %6d %6d %6d %6d %7.2f %5.1f';
@@ -45,7 +48,7 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
     k=1;
     l=1;
     multiWaitbar('Stitch omni_high_res data',0);
-    
+
     h5Headers = {'/Time','/Timeshift',...
         '/BField/BxGSE', '/BField/ByGSE','/BField/BzGSE',...
         '/BField/ByGSM', '/BField/BzGSM',...
@@ -57,7 +60,7 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
         '/Error/sigmaVelocity','/Error/sigmaAlphaProtonRatio',...
         '/TSY/G1','/TSY/G2','/TSY/G3',...
         '/TSY/W1','/TSY/W2','/TSY/W3','/TSY/W4','/TSY/W5','/TSY/W6'};
-    
+
     h5Description = {'UNIX Date-Time','Timeshift from L1 to Stagnation Point',...
         'Bx - same for GSE and GSM', 'By - GSE','Bz - GSE',...
         'By - GSM', 'Bz - GSM',...
@@ -69,7 +72,7 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
         'sigmaV [1hr]','sigma_Na_Np [1hr]',...
         'TSY Parameter G1','TSY Parameter G2','TSY Parameter G3',...
         'TSY Parameter W1','TSY Parameter W2','TSY Parameter W3','TSY Parameter W4','TSY Parameter W5','TSY Parameter W6'};
-    
+
     h5Units = {'UNIX Time [days]','[sec]',...
         '[nT]', '[nT]','[nT]',...
         '[nT]', '[nT]',...
@@ -81,60 +84,60 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
         '[km/s]','[a.u.]',...
         '[a.u.]','[a.u.]','[a.u.]',...
         '[a.u.]','[a.u.]','[a.u.]','[a.u.]','[a.u.]','[a.u.]'};
-    
+
     q = length(h5Headers);
-    
-   
+
+
     for j = 1:1:q
             h5create(h5FileStr,h5Headers{j},[1 Inf],'ChunkSize',[1 100],'Deflate',9);
             h5writeatt(h5FileStr,h5Headers{j},'Descriptions',h5Description{j});
             h5writeatt(h5FileStr,h5Headers{j},'Units',h5Units{j});
     end
-    
+
     for i=1:1:n
         multiWaitbar('Stitch omni_high_res data','Value',i/n);
         yr = str2num(fileListMinStr{i}(regexp(fileListMinStr{i},'_min')+4:regexp(fileListMinStr{i},'.asc')-1));
-        
+
         if yr >= 1995
-        
-        %% omni1 
+
+        %% omni1
         omni1 = load_ascii_files(fileListMinStr{i},formatSpecOmni1);
-        
+
         kwidth = length(omni1{1,1});
         kend = k+kwidth-1;
-        
+
         time1 = datetime(omni1{1,1},ones(kwidth,1),...
             omni1{1,2},omni1{1,3},omni1{1,4},...
             zeros(kwidth,1));
-        
+
         %% omni2
         fileOmni2Str=strcat(fileListCell(2,strncmp(fileListCell(1,:)',['omni2_',num2str(yr)],10))',filesep,fileListCell(1,strncmp(fileListCell(1,:)',['omni2_',num2str(yr)],10))');
-        omni2 = load_ascii_files(fileOmni2Str{1},formatSpecOmni2);     
+        omni2 = load_ascii_files(fileOmni2Str{1},formatSpecOmni2);
         lwidth = length(omni2{1,1});
         time2 = datetime(omni2{1,1},ones(lwidth,1),...
             omni2{1,2},omni2{1,3},zeros(lwidth,1),...
             zeros(lwidth,1));
-        
+
         data = select_required_parameters(omni1, omni2, time1, time2, yr, setCalculateGW);
-                
+
         for j = 1:1:q
                 h5write(h5FileStr,h5Headers{j},data(:,j)',[1 k],[1 kwidth]);
-        end 
-        
+        end
+
         k = kend+1;
         end
-        
+
     end
     multiWaitbar('Stitch omni_high_res data',1);
-    
+
 end
 
 function data=select_required_parameters(omni1, omni2, time1, time2, yyyy, setCalculateGW)
-        
+
         if nargin<6
             setCalculateGW = true;
         end
-        
+
         ptime2 = posixtime(time2);
         data(:,1) = posixtime(time1);
         data(:,2) = omni1{1,10}; data(data(:,2)==999999,2)=nan; %Timeshift
@@ -164,7 +167,7 @@ function data=select_required_parameters(omni1, omni2, time1, time2, yyyy, setCa
         data(:,26) = interp1(ptime2,omni2{1,31},data(:,1),'nearest'); data(data(:,26)==999.9,26)=nan; % Sigma N
         data(:,27) = interp1(ptime2,omni2{1,32},data(:,1),'nearest'); data(data(:,27)==9999.0,27)=nan; % Sigma V
         data(:,28) = interp1(ptime2,omni2{1,33},data(:,1),'nearest'); data(data(:,28)==999.9,28)=nan; % Sigma Alpha Proton Ratio
-        
+
         if setCalculateGW==true
             GW = get_tsyganenko_GW_1(yyyy);
             data(:,29:31) = interp1(GW.time, GW.G, unixtime2matlab(data(:,1)),'nearest');
@@ -174,7 +177,7 @@ function data=select_required_parameters(omni1, omni2, time1, time2, yyyy, setCa
             data(:,29:31) = nan(length(GW.time),3);
             data(:,32:37) = nan(length(GW.time),6);
         end
-        
+
 
 end
 
@@ -215,7 +218,7 @@ if isdir(localStorePath)
     urlFile = 'omni_1min_URLs.txt';
     urlFilePath = [localStorePath,filesep,urlFile];
     urls = strcat('ftp://',host,remoteFinalLink,'/',remoteFileListName(indexMissingFiles));
-    
+
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
     [status,cmdout]=unix(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
@@ -234,7 +237,7 @@ else
     else
         [status,cmdout]=...
             system(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
-    end    
+    end
 end
 
 close(omni);
@@ -243,7 +246,7 @@ end
 
 function download_omni_2(remoteLink, localStorePath)
 
-%% OMNI-2 Download 
+%% OMNI-2 Download
 host = 'spdf.gsfc.nasa.gov';
 omni=ftp(host);
 remoteFinalLinkHourly = remoteLink;
@@ -293,7 +296,7 @@ else
     else
         [status,cmdout]=...
             system(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
-    end    
+    end
 end
 close(omni);
 end

@@ -1,7 +1,7 @@
 function [out, in] = add_conductivity_hdf5(inputH5Str,outputH5Str,setInterpNe)
 %add_conductivity_hdf5.m calculates Pedersen and Hall conductivities, from
 %magnetically field aligned electron densities obtained from the
-%inputH5Str, and stores it in outputH5Str. 
+%inputH5Str, and stores it in outputH5Str.
 %-------------------------------------------------------------------------
 % Input
 %------
@@ -12,7 +12,7 @@ function [out, in] = add_conductivity_hdf5(inputH5Str,outputH5Str,setInterpNe)
 %-------------------------------------------------------------------------
 % Output
 %---------
-%       
+%
 %   outputArguments.sigma_P  - Pederson conductivity [S/m]
 %   outputArguments.sigma_H  - Hall conductivity [S/m]
 %   outputArguments.alt      - Altitude [km]
@@ -22,8 +22,8 @@ function [out, in] = add_conductivity_hdf5(inputH5Str,outputH5Str,setInterpNe)
 % Created : 27th Sep 2017
 % Author  : Nithin Sivadas
 % Ref     :
-% Comments: 
-% 
+% Comments: Uses get_conductivity_v2
+%
 %----------------------------------------------------------------------------
 
 % Max time instances that can be recorded to HDF5 file at once
@@ -31,7 +31,7 @@ function [out, in] = add_conductivity_hdf5(inputH5Str,outputH5Str,setInterpNe)
 nTimeMax = 1000;
 
 % Extracting Data from InputH5File
-time = h5read(inputH5Str,'/energyFluxFromMaxEnt/time'); 
+time = h5read(inputH5Str,'/energyFluxFromMaxEnt/time');
 Ne = h5read(inputH5Str,'/inputData/Ne');
 coords = h5read(inputH5Str,...
     '/magneticFieldAlignedCoordinates/magGeodeticLatLonAlt');
@@ -57,24 +57,24 @@ for iTime = 1:1:nTime
     lon1 = lon*ones(size(alt1));
     msisData = msis_irbem(time(iTime), [alt1',lat1',lon1']);
    for iBeam = 1:1:nBeams
-       
+
         inputNe = squeeze(Ne(:,iBeam,iTime));
         if setInterpNe
         inputNe(inputNe<0) = nan;
         inputNe = interp_nans(inputNe);
         end
        inputAlt = squeeze(alt(:,iBeam));
-       
-       % Compromise to increase the code-speed by 10 times. 
+
+       % Compromise to increase the code-speed by 10 times.
        inputMsisData.AltTemp = interp1(alt1,msisData.AltTemp,inputAlt);
        inputMsisData.O = interp1(alt1,msisData.O,inputAlt);
        inputMsisData.N2 = interp1(alt1,msisData.N2,inputAlt);
        inputMsisData.O2 = interp1(alt1,msisData.O2,inputAlt);
        inputMsisData.totalNumberDensity = interp1(alt1,msisData.totalNumberDensity,inputAlt);
-       
+
        [data, input] = get_conductivity_v2(inputAlt, inputNe, lat, lon,...
            time(iTime), 0, {'all'}, false,[],inputMsisData);
-       
+
        out.sigma_P(:,iBeam,iTime) = real(data.pedersonConductivity);
        out.sigma_H(:,iBeam,iTime) = real(data.hallConductivity);
        out.alt(:,iBeam,1) = data.altitude;

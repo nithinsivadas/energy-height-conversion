@@ -2,8 +2,25 @@ function [dataASILastDay] = create_DASC_hdf5_low_memory(localStoreDir,outputH5Fi
     projectionAltitudeDASC,minElevation,...
     minTimeStr,maxTimeStr,...
     calFileAz,calFileEl, setDownloadDASCFlag)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+  % create_DASC_hdf5_low_memory_v2 Downloads DASC fits files and then converts it
+  % to hdf5, and stores it in the outputH5FileStr HDF5 file
+  %-------------------------------------------------------------------------
+  % Input
+  %------
+  %
+  %----------------------------------------------------------------------------
+  % Output
+  %---------
+  %
+  %----------------------------------------------------------------------------
+  % Modified: 30th May 2019
+  % Created : Unknown
+  % Author  : Nithin Sivadas
+  % Ref     :
+  % Comments:
+  %
+  %----------------------------------------------------------------------------
+
 if nargin<9
     setDownloadDASCFlag = true;
 end
@@ -31,7 +48,7 @@ end
 if nargin<2
     outputH5FileStr='outputDASC.h5';
 end
-if nargin<1 
+if nargin<1
     localStoreDir = [intialize_root_path,'LargeFiles',filesep,'DASC',filesep];
 end
 
@@ -59,19 +76,19 @@ for idays=1:1:length(dayArray)
         fprintf(['Status: Downloading FITS files ',datestr(dayArray(idays),'dd-mmm-yyyy')]);
         download_DASC_FITS(datestr(dayArray(idays)),localStoreDir);
     end
-    
-    localDASCDirPath(idays,:) = ([localStoreDir,datestr(dayArray(idays),'yyyymmdd')]); 
-    
+
+    localDASCDirPath(idays,:) = ([localStoreDir,datestr(dayArray(idays),'yyyymmdd')]);
+
     fileStr = get_files_in_folder(localDASCDirPath(idays,:),'*.FITS');
     timeASI = fitsfiletimestamp(fileStr);
-    
+
     if idays==1 && ~isempty(minTimeStr)
         [fileStr, timeASI]=crop_time(reshape(fileStr,[],1),timeASI,datenum(minTimeStr), timeASI(end));
     end
     if idays==length(dayArray) && ~isempty(maxTimeStr)
         [fileStr, timeASI]=crop_time(reshape(fileStr,[],1),timeASI,timeASI(1),datenum(maxTimeStr));
     end
-    
+
     nTimeASITotal = length(timeASI);
     dkTime = 800; % To allow for low memory
     nkTime = ceil(nTimeASITotal/dkTime);
@@ -85,13 +102,13 @@ for idays=1:1:length(dayArray)
     data.lowAzGradientFilter = nan(imageSize,imageSize);
     data.minElFilter = nan(imageSize,imageSize);
     sizeData1 = [imageSize,imageSize];
-    
-    for kTime=1:nkTime    
+
+    for kTime=1:nkTime
         timeEndIndx = min(kTime*dkTime,nTimeASITotal);
         timeStartIndx = 1 + (kTime-1)*dkTime;
         nTimeASI = length(timeStartIndx:timeEndIndx);
 %         timeStartIndx = 1 ; timeEndIndx = nTimeASI;
-        
+
         azOldRes = fitsread(calFileAz);
         elOldRes = fitsread(calFileEl);
 
@@ -109,9 +126,9 @@ for idays=1:1:length(dayArray)
         if(sizeData(2)<64)chunkSize(1,2)=sizeData(2);else chunkSize(1,2)=64;end
         if(sizeData(3)<80)chunkSize(1,3)=sizeData(3);else chunkSize(1,3)=80;end
         if(sizeData1(1)<50)chunkSize1(1,1)=sizeData1(1);else chunkSize1(1,1)=50;end
-        if(sizeData1(2)<80)chunkSize1(1,2)=sizeData1(2);else chunkSize1(1,2)=80;end  
+        if(sizeData1(2)<80)chunkSize1(1,2)=sizeData1(2);else chunkSize1(1,2)=80;end
         if(sizeData5(1)<50)chunkSize5(1,1)=sizeData5(1);else chunkSize5(1,1)=50;end
-        if(sizeData5(2)<80)chunkSize5(1,2)=sizeData5(2);else chunkSize5(1,2)=80;end  
+        if(sizeData5(2)<80)chunkSize5(1,2)=sizeData5(2);else chunkSize5(1,2)=80;end
 
         if idays==1 && kTime==1
             h5create(outputH5FileStr,['/DASC/','ASI'],...
@@ -119,7 +136,7 @@ for idays=1:1:length(dayArray)
             h5writeatt(outputH5FileStr,['/DASC/','ASI'],...
                 'Dimensions','nTime x nImageSize x nImageSize');
             for iField = 1:1:nFields
-                if iField < nFields 
+                if iField < nFields
                     h5create(outputH5FileStr,['/DASC/',fieldNames{iField}],...
                         sizeData1,'ChunkSize',chunkSize1,'Deflate',9);
                     h5writeatt(outputH5FileStr,['/DASC/',fieldNames{iField}],...
@@ -133,7 +150,7 @@ for idays=1:1:length(dayArray)
                     h5writeatt(outputH5FileStr,['/DASC/',fieldNames{iField}],...
                         'Units','Posix time');
                 end
-            end  
+            end
         [data.az, data.el, data.lowAzGradientFilter] = calibrate_DASC_pixels(azOldRes,elOldRes,imageSize);
         [data.minElFilter, data.lat, data.lon, data.alt] = DASC_aer_to_geodetic_v2018(data.az, data.el,...
             minElevation, projectionAltitudeDASC);
@@ -160,7 +177,7 @@ for idays=1:1:length(dayArray)
         if idays==1 && kTime == 1
             for iField = 1:1:nFields-1
                 h5write(outputH5FileStr,['/DASC/',fieldNames{iField}],...
-                        (data.(fieldNames{iField}))');  
+                        (data.(fieldNames{iField}))');
             end
         multiWaitbar('Writing data','Increment',0.2/nkTime);
         h5create(outputH5FileStr,['/DASC/','azCalData'],...
@@ -179,17 +196,17 @@ for idays=1:1:length(dayArray)
         end
         multiWaitbar('Writing data','Increment',0.4/nkTime);
         %Writing 'time'
-        iField = nFields; 
+        iField = nFields;
         h5write(outputH5FileStr,['/DASC/',fieldNames{iField}],...
                         (data.(fieldNames{iField}))',start5,count5);
         multiWaitbar('Writing data','Increment',0.5/nkTime);
         %Writing image
         h5write(outputH5FileStr,['/DASC/','ASI'],...
-                    permute(ASI,[3 2 1]),start,count);       
+                    permute(ASI,[3 2 1]),start,count);
         multiWaitbar('Writing data','Value',kTime*1./nkTime);
         % Writing error messages
         messageTotal(start5(2):1:start5(2)+nTimeASI-1) = message;
-        multiWaitbar('Creating DASC HDF5 File','Increment',1/(length(dayArray)*kTime));    
+        multiWaitbar('Creating DASC HDF5 File','Increment',1/(length(dayArray)*kTime));
         clearvars message;
         start = start + [0 0 nTimeASI];
         start5 = start5 + [0 nTimeASI];

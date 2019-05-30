@@ -1,8 +1,29 @@
 function [status] = create_amisr_web_experiment_H5_database...
     (timeMinStr,timeMaxStr,instrumentID,outputH5File,writeModeStr)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
-if nargin<4 
+%create_amisr_web_experiment_H5_database.h5 Downloads from amisr.com the data
+% regarding amisr experiments, and stores it in an HDF5 file
+%-------------------------------------------------------------------------
+% Input
+%------
+%       timeMinStr   - Start time string
+%       timeMaxStr   - Stop time string
+%       instrumentID - The number of the instrument. It is 61 for Poker Flat ISR
+%       outputH5File - Output database file name
+%       writeModeStr -  NA
+%----------------------------------------------------------------------------
+% Output
+%---------
+%       status - 'Success' or 'Failed'
+%----------------------------------------------------------------------------
+% Modified: 30th May 2019
+% Created : Unknown
+% Author  : Nithin Sivadas
+% Ref     :
+% Comments:
+%
+%----------------------------------------------------------------------------
+
+if nargin<4
     outputH5File = 'amisrWebDatabase.h5';
 end
 
@@ -42,4 +63,3 @@ hdf5write(outputH5File,['/',instrumentStr,'/expId'],((table(:,1))'),...
 status = 'Success';
 
 end
-
