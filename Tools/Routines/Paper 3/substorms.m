@@ -1,6 +1,8 @@
 %% Substorms in the vicinity of PFISR
 % Find SuperMag Substorms and PFISR conjunctions
+clear all;
 
+%% Initialization
 dataStoreDir = "G:\Team Drives\Semeter-Research in Progress\All AMISR Experiments\";
 outputFileStr = "amisrWebDatabase_temp.h5";
 amisrDatabaseStr = strcat(dataStoreDir,outputFileStr);
@@ -12,6 +14,16 @@ omniFileStr = "G:\My Drive\Research\Projects\Data\omni.h5";
 timeMinStr = "01 May 2018";
 timeMaxStr = "01 Dec 2018";
 
+% Substorms at PFISR [IMPORTANT]
+Dmlt = 2;
+Dmlat = 1;
+
+% Poker Flat geolocation
+pkrGLAT = 65.126;
+pkrGLON = -147.47;
+pkrh0=0.693;
+
+%% Loading database
 % Create amisr database
 if ~isfile(amisrDatabaseStr)
     status = create_amisr_web_experiment_H5_database(timeMinStr,timeMaxStr,61,[dataStoreDir,outputFileStr]);
@@ -19,21 +31,40 @@ end
 
 % Load supermag database
 superMag = extract_superMag_data(superMagFileStr);
+superMag.stormID = (1:length(superMag.time))';
 
 % Load amisr data
-
 amisr = extract_amisr_data(amisrDatabaseStr);
+%% Load omni data
+omni.AE = h5read(omniFileStr,'/Indices/AE');
+omni.time = unixtime2matlab(h5read(omniFileStr,'/Time'));
+%% Calculations
+% Estimating PFISR magnetic coordinates 
+[superMag.pfisrMlat,superMag.pfisrMlon,superMag.pfisrMlt] = get_magnetic_coordinates([pkrh0,pkrGLAT,pkrGLON],superMag.time(:));
+%% Selecting AE index of the substorms
+superMag.AE = interp1(omni.time,omni.AE,superMag.time);
 
 %%
-pkrMLAT = 65.2639;
-pkrMLON = -94.1995; 
-pkrGLAT = 65.126;
-pkrGLON = -147.47;
-pkrh0=0.693;
+% Selecting substorms closest to PFISR location
+deltaMLT = mod(superMag.pfisrMlt - superMag.mlt,24);
+desiredMLTIndx = abs(deltaMLT)<Dmlt;
+desiredMLATIndx = superMag.mlat<superMag.pfisrMlat+Dmlat;
+closestSubstormIndx = desiredMLTIndx & desiredMLATIndx; 
+
 
 %%
-[MLAT,MLON,MLT] = get_magnetic_coordinates([pkrh0,pkrGLAT,pkrGLON],superMag.time(:));
+figure; 
+plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[40,90]);
+%%
+figure; 
+plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90]);
 
+%%
+figure; 
+plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90],'zColor',superMag.AE,'zLim',[0,600],'markerSize',2);
+%%
+figure; 
+plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[60,70],'zColor',superMag.AE(closestSubstormIndx),'zLim',[0,600],'markerSize',2);
 %% Functions
 function data=load_ascii_files(loadFile, format, headerlines)
 if nargin<3

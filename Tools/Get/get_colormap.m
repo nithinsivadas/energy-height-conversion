@@ -1,6 +1,10 @@
-function cmap = get_colormap(lowerColor,upperColor)
+function cmap = get_colormap(lowerColor,upperColor,L)
 %UNTITLED8 Summary of this function goes here
 %   Detailed explanation goes here
+if nargin<3
+    L = 64;
+end
+
 if isstring(lowerColor)||ischar(lowerColor)
     rgb1 = get_rgb_triplet(lowerColor);
 else
@@ -13,7 +17,7 @@ else
     rgb2 = upperColor;
 end
 
-L=64;
+
 cmap(:,1) = linspace(rgb1(1),rgb2(1),L);
 cmap(:,2) = linspace(rgb1(2),rgb2(2),L);
 cmap(:,3) = linspace(rgb1(3),rgb2(3),L);

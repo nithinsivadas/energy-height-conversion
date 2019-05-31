@@ -1,5 +1,5 @@
 function [varValue] = read_h5_variable_at_time_v2(h5FileStr, datasetPath,...
-    thisTimeIndx, thisTimeStr)
+    thisTimeIndx, thisTimeStr, timePath)
 %READ_H5_VARIABLE_AT_TIME_V2 Reads variable at timeIndx or timeStr
 
 %----------------------------------------------------------------------
@@ -21,7 +21,8 @@ function [varValue] = read_h5_variable_at_time_v2(h5FileStr, datasetPath,...
     % If datasets with no time variation are requested, the dataset will be
     % read without any change, and presented as output.
     %
-    % Last Updated: 23rd Nov 2018,30th Sep 2018
+    % Last Updated: 23rd Nov 2018,30th Sep 2018, 
+    %               31 May 2019 - added timePath
     % Create by   : Nithin Sivadas
 
 
@@ -35,7 +36,11 @@ end
 
 temp = strsplit(datasetPath,'/');
 groupStr = strjoin(temp(1:end-1),'/');
-timeStr = strcat(groupStr,'/time');
+if nargin<5
+    timeStr = strcat(groupStr,'/time');
+else
+    timeStr = timePath;
+end
 [status, info, ~] = ish5dataset(h5FileStr, datasetPath);
 if ~status
     error(['Dataset ',datasetPath,' incorrect or does not exist']);
