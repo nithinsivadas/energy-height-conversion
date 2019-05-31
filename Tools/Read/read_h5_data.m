@@ -35,9 +35,13 @@ function dataset = read_h5_data (h5FilePath, groupPath)
         dataset{thisDataset,4} = info.Dataspace.Size; % Size
         dataset{thisDataset,5} = info.Dataspace.MaxSize; % maxSize
         dataset{thisDataset,6} = info.ChunkSize; % chunkSize
-        dataset{thisDataset,7} = string({info.Attributes.Name}); % Attribute Names
-        dataset{thisDataset,8} = string({info.Attributes.Value}); % Attribute Values
-        
+        if ~isempty(info.Attributes)
+            dataset{thisDataset,7} = string({info.Attributes.Name}); % Attribute Names
+            dataset{thisDataset,8} = string({info.Attributes.Value}); % Attribute Values
+        else
+            dataset{thisDataset,7} = " "; % Attribute Names
+            dataset{thisDataset,8} = " "; % Attribute Values
+        end
         % Permuting H5 data, to resolve the matlab/hdf5 conversion problem
         permuteVar = fliplr(1:1:length(size(dataset{thisDataset,3})));
         if ~isempty(permuteVar)
