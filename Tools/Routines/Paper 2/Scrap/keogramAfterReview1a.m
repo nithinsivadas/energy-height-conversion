@@ -76,8 +76,8 @@ gboTime = gboData.time(minIndx:maxIndx);
 %%
 match = 0.05;
 gboKeo = match*(gboKeo1-gboData.background)+dascData.background-10;
-dascLatIndx = find_altitude(dascLat,63):find_altitude(dascLat,68);
-gboLatIndx = find_altitude(gboLat,58):find_altitude(gboLat,63);
+dascLatIndx = find_altitude(dascLat,63.75):find_altitude(dascLat,67);
+gboLatIndx = find_altitude(gboLat,60):find_altitude(gboLat,63.75);
 finalLat = [gboLat(gboLatIndx),dascLat(dascLatIndx)];
 finalLon = [gboMeridian(gboLatIndx),dascMeridian(dascLatIndx)];
 [~,index] = sortrows(finalLat');
@@ -104,15 +104,22 @@ ax=plot_2D_time_series(gboTime,gboLat,gboKeo,dt,0,timeMinStr,timeMaxStr);
 colorbar_thin;
 caxis(clim);
 ylabel('GAKO');
-ylim([58,66]);
+ylim([60,65]);
+hold on;
+line([gboTime(1), gboTime(end)],[gboData.sensorloc(1), gboData.sensorloc(1)],'Color',[0.5, 0.5, 0.5]);
+
 
 q(1).select();
 % colormap(gca,get_colormap('k',[0,1,0]));
-ax=plot_2D_time_series(dascTime,dascLat,dascKeo,dt,0,timeMinStr,timeMaxStr);
+dascKeo1 = dascKeo;
+dascKeo1(isnan(dascKeo)) = 340;
+dascKeo1(dascKeo>1000) = 340;
+ax=plot_2D_time_series(dascTime,dascLat,dascKeo1,dt,0,timeMinStr,timeMaxStr);
 colorbar_thin;
 ylabel('DASC');
 caxis([340 400]);
-ylim([61,68]);
+ylim([63,67]);
+line([dascTime(1), dascTime(end)],[dascData.sensorloc(1), dascData.sensorloc(1)],'Color',[0.5, 0.5, 0.5]);
 
 q(3).select();
 % colormap(gca,get_colormap('k',[0,1,0]));
@@ -120,9 +127,11 @@ ax=plot_2D_time_series(finalTime,finalParallels,finalKeo,dt,0,timeMinStr,timeMax
 colorbar_thin;
 ylabel('Combined');
 caxis(clim);
-ylim([58,68]);
+ylim([60,67]);
 label_time_axis(finalTime, true,dt,timeMinStr,timeMaxStr);
-
+hold on;
+line([gboTime(1), gboTime(end)],[gboData.sensorloc(1), gboData.sensorloc(1)],'Color',[0.5, 0.5, 0.5]);
+line([dascTime(1), dascTime(end)],[dascData.sensorloc(1), dascData.sensorloc(1)],'Color',[0.5, 0.5, 0.5]);
 
 %% Plot the meridians
 dascFov = create_dasc_fov(22.5, 110, dascData);
