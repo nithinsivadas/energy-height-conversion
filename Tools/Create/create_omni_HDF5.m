@@ -207,8 +207,23 @@ if isdir(localStorePath)
     indexMissingFiles = find(~cell2mat(index));
     % Making sure current year data is always downloaded
     currentYearIndx = find((strncmp(remoteFileListName,strcat('omni_min',string(year(datetime))),12)));
+    previousYearIndx = find((strncmp(remoteFileListName,strcat('omni_min',string(year(datetime)-1)),12)));
+    % Remove current & previous year?
+    if sum(indexMissingFiles==previousYearIndx)==0
+        indexMissingFiles(end+1)=previousYearIndx;
+        if isunix
+            [status0,cmdout0]=unix(['rm ',localStorePath,filesep,char(remoteFileListName(previousYearIndx))]);
+        else
+            [status0,cmdout0]=system(['del ',localStorePath,filesep,char(remoteFileListName(previousYearIndx))]);
+        end
+    end
     if sum(indexMissingFiles==currentYearIndx)==0
         indexMissingFiles(end+1)=currentYearIndx;
+        if isunix
+            [status0,cmdout0]=unix(['rm ',localStorePath,filesep,char(remoteFileListName(currentYearIndx))]);
+        else
+            [status0,cmdout0]=system(['del ',localStorePath,filesep,char(remoteFileListName(currentYearIndx))]);
+        end
     end
     % If all files are already downloaded then displaying a message
     if isempty(indexMissingFiles)
@@ -268,11 +283,21 @@ if isdir(localStorePath)
     currentYearIndx = find((strncmp(remoteFileListName,strcat('omni2_',string(year(datetime))),10)));
     previousYearIndx = find((strncmp(remoteFileListName,strcat('omni2_',string(year(datetime)-1)),10)));
     % Remove current & previous year?
-    if sum(indexMissingFiles==currentYearIndx)==0
-        indexMissingFiles(end+1)=currentYearIndx;
-    end
     if sum(indexMissingFiles==previousYearIndx)==0
         indexMissingFiles(end+1)=previousYearIndx;
+        if isunix
+            [status0,cmdout0]=unix(['rm ',localStorePath,filesep,char(remoteFileListName(previousYearIndx))]);
+        else
+            [status0,cmdout0]=system(['del ',localStorePath,filesep,char(remoteFileListName(previousYearIndx))]);
+        end
+    end
+    if sum(indexMissingFiles==currentYearIndx)==0
+        indexMissingFiles(end+1)=currentYearIndx;
+        if isunix
+            [status0,cmdout0]=unix(['rm ',localStorePath,filesep,char(remoteFileListName(currentYearIndx))]);
+        else
+            [status0,cmdout0]=system(['del ',localStorePath,filesep,char(remoteFileListName(currentYearIndx))]);
+        end
     end
     % If all files are already downloaded then displaying a message
     if isempty(indexMissingFiles)
