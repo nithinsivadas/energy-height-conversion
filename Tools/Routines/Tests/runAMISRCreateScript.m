@@ -11,6 +11,9 @@ try
     status = create_amisr_web_experiment_H5_database(timeMinStr,timeMaxStr,61,strcat(dataStoreDir,outputFileStr));
     % Code ends
 catch ME
+    disp('-----------------------------------------');
+    disp('            Encountered Error');
+    disp('-----------------------------------------');
     ME
 end
 endTimeStr = (datevec(datetime('now')));
@@ -21,3 +24,4 @@ disp('-----------------------------------------');
 diary off
 send_email('attachments','record.txt','scriptName',mfilename);
 system('rm record.txt');
+exit

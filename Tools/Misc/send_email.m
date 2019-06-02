@@ -21,6 +21,7 @@ p = inputParser;
 addParameter(p,'to','nithin@bu.edu');
 addParameter(p,'subject','Code executed');
 addParameter(p,'attachments',nan);
+addParameter(p,'errorFlag',0);
 addParameter(p,'scriptName','A MATLAB script');
 nowTimeStr = datestr(clock);
 
@@ -31,20 +32,29 @@ parse(p,varargin{:});
 scriptName = p.Results.scriptName;
 
 if isnan(p.Results.message)
+    if p.Results.errorFlag == 0
     message = ['Hello'...
         10 10 scriptName,' has been executed'...
         10 'on ',get_computer_name...
         10 'at ',nowTimeStr...
         10 10 'Thank you'...
         10 '- MATLAB ',version];
+        subject = ['[MATLAB] ',p.Results.subject,' ',nowTimeStr];
+    else
+        message = ['Hello'...
+        10 10 scriptName,' has failed to execute'...
+        10 'on ',get_computer_name...
+        10 'at ',nowTimeStr...
+        10 10 'Sorry!'...
+        10 '- MATLAB ',version];
+        subject = ['[MATLAB] ','Error encountered',' ',nowTimeStr];
+    end
 end
 
 props = java.lang.System.getProperties;
 props.setProperty('mail.smtp.auth','true');
 props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
 props.setProperty('mail.smtp.socketFactory.port','465');
-
-subject = ['[MATLAB] ',p.Results.subject,' ',nowTimeStr];
 
 if ~isnan(p.Results.attachments)
     sendmail(p.Results.to,subject,message,p.Results.attachments);
