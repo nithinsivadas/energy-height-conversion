@@ -30,7 +30,7 @@ if exist('scriptFnHandle','var')==1
         %% Script 
         scriptFnHandle();
 
-    catch ME;
+    catch ME
         disp('-----------------------------------------');
         disp('            Encountered Error');
         disp('-----------------------------------------');
