@@ -22,7 +22,8 @@ if nargin<1
         dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles';
     elseif strcmp(computer,'aurora1-optiplex-780')
         rootPathStr='/home/nithin/Documents/git-repos/';
-        dataPathStr = '/home/nithin/Documents/git-repos/Largefiles/';
+%         dataPathStr = '/home/nithin/Documents/git-repos/Largefiles/';
+        dataPathStr = '/media/nithin/PFISR_002_006/Nithin/Data/';
     elseif strcmp(computer,'scc-lite')
         rootPathStr = '/usr3/graduate/nithin/git-repos/';
         dataPathStr = '/scratch/nithin/Data/';
