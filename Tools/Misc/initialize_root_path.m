@@ -23,9 +23,11 @@ if nargin<1
     elseif strcmp(computer,'aurora1-optiplex-780')
         rootPathStr='/home/nithin/Documents/git-repos/';
         dataPathStr = '/home/nithin/Documents/git-repos/Largefiles/';
-    elseif strcmp(computer,'ssc-lite')
+    elseif strcmp(computer,'scc-lite')
         rootPathStr = '/usr3/graduate/nithin/git-repos/';
         dataPathStr = '/scratch/nithin/Data/';
+    else
+        error('Computer not initialized to run energy-height-conversion/Tools');
     end
 end
 
