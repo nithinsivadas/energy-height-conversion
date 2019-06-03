@@ -1,4 +1,4 @@
-function [ rootPathStr,comp ] = initialize_root_path()
+function [ rootPathStr, dataPathStr, computer ] = initialize_root_path()
 %% initialize_root_path.m Generates the root git-hub path based on the computer
 %--------------------------------------------------------------------------
 % Output
@@ -12,17 +12,20 @@ function [ rootPathStr,comp ] = initialize_root_path()
 % Update  : v1.1 10/31/2017 Added Nithin-Carbon, Also changed the
 % comparison function to strcmp, instead of just "=="
 %----------------------------------------------------------------------------
-computer=getenv('computername');
+computer=get_computer_name();
 if nargin<1
-    if strcmp(computer,'NITHIN-SURFACE')
+    if strcmp(computer,'nithin-surface')
         rootPathStr='C:\Users\Nithin\Documents\GitHub\';
-        comp = 'NITHIN-SURFACE';
-    elseif strcmp(computer,'NITHIN-CARBON')
-        rootPathStr='C:\Users\nithin\Documents\GitHub\';    
-        comp = 'NITHIN-CARBON';
-    else 
-        rootPathStr=['/home/nithin/Documents/git-repos/'];
-        comp = 'Aurora-Optiplex';
+        dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles';
+    elseif strcmp(computer,'nithin-carbon')
+        rootPathStr='C:\Users\nithin\Documents\GitHub\';
+        dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles';
+    elseif strcmp(computer,'aurora1-optiplex-780')
+        rootPathStr='/home/nithin/Documents/git-repos/';
+        dataPathStr = '/home/nithin/Documents/git-repos/Largefiles/';
+    elseif strcmp(computer,'ssc-lite')
+        rootPathStr = '/usr3/graduate/nithin/git-repos/';
+        dataPathStr = '/scratch/nithin/Data/';
     end
 end
 
