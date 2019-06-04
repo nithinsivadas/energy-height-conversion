@@ -1,6 +1,8 @@
 function AMISR_exp_script()
     % Generate AMISR experiment database from amisr.com
     % Store the data in root data path
+    % run this from linux commad line as follows:
+    % runMatlabScript @AMISR_exp_script
     [~, dataPath] = initialize_root_path();
 %     dataPathStr = "/media/nithin/PFISR_002_006/Nithin/";
     outputFileStr = 'amisrWebDatabase.h5';
