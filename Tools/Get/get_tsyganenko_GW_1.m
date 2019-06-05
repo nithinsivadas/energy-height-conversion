@@ -38,7 +38,7 @@ f=filesep;
 if nargin < 3
     omniASCDir = [initialize_root_path,'LargeFiles',f,'omni',f,'ASC',f];
 end
-if nargin <2
+if nargin <2 || isempty(programDir)
     programDir = [initialize_root_path,...
         'energy-height-conversion',f,'Tools',f,'External Tools',f,'Tsyganenko_Parameters',f,'MagParameterProgram-rsw',f];
 end
@@ -64,6 +64,13 @@ end
     % Columns: YEAR DOY HR MIN  Kp DST
     matrixOutput = [YEAR, DOY, HR, Kp, Dst];
     % Writing kpdst.lst file
+    if ~isfolder([programDir,'1min'])
+        if ~ispc
+            system(['mkdir "',programDir,'1min"']);
+        else
+            system(['md "',programDir,'1min"']);
+        end
+    end
     outputFileID = fopen([programDir,'1min',f,'kpdst.lst'],'w');
     formatSpec = '%4u %3u %2u %2u %5d\n';
     fprintf(outputFileID,formatSpec,matrixOutput');
@@ -95,6 +102,11 @@ end
     currentPath = pwd;
     cd(programDir);
     if isunix
+        if ~isfile('MagmodelinputONElinux')
+        % If exe file does not exists, then compile
+        dos('gfortran -fbackslash -o MagmodelinputONElinux MagmodelinputONE_NS.f');
+        % Use MagmidelinputONE_NS.f which is modified to work with gfortran
+        end
         dos('./MagmodelinputONElinux');
     else
         dos('MagmodelinputONE');

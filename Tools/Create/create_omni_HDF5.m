@@ -87,11 +87,19 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
 
     q = length(h5Headers);
 
-
-    for j = 1:1:q
-            h5create(h5FileStr,h5Headers{j},[1 Inf],'ChunkSize',[1 100],'Deflate',9);
-            h5writeatt(h5FileStr,h5Headers{j},'Descriptions',h5Description{j});
-            h5writeatt(h5FileStr,h5Headers{j},'Units',h5Units{j});
+    if ~isfile(h5FileStr)
+        for j = 1:1:q
+                h5create(h5FileStr,h5Headers{j},[1 Inf],'ChunkSize',[1 100],'Deflate',9);
+                h5writeatt(h5FileStr,h5Headers{j},'Descriptions',h5Description{j});
+                h5writeatt(h5FileStr,h5Headers{j},'Units',h5Units{j});
+        end
+    else
+        if ispc
+            error([h5FileStr,' already exists. Please remove it before continuing']);
+        else
+            warning([h5FileStr,' already exists. Removing it before continuing']);
+            system(['mv ',h5FileStr,' ',h5FileStr,'_bk']);
+        end
     end
 
     for i=1:1:n
@@ -118,7 +126,8 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
             omni2{1,2},omni2{1,3},zeros(lwidth,1),...
             zeros(lwidth,1));
 
-        data = select_required_parameters(omni1, omni2, time1, time2, yr, setCalculateGW);
+        data = select_required_parameters(omni1, omni2, time1, time2, yr,...
+            setCalculateGW, localStorePath);
 
         for j = 1:1:q
                 h5write(h5FileStr,h5Headers{j},data(:,j)',[1 k],[1 kwidth]);
@@ -132,7 +141,8 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
 
 end
 
-function data=select_required_parameters(omni1, omni2, time1, time2, yyyy, setCalculateGW)
+function data=select_required_parameters(omni1, omni2, time1, time2, yyyy,...
+    setCalculateGW, omniASCDir)
 
         if nargin<6
             setCalculateGW = true;
@@ -169,7 +179,7 @@ function data=select_required_parameters(omni1, omni2, time1, time2, yyyy, setCa
         data(:,28) = interp1(ptime2,omni2{1,33},data(:,1),'nearest'); data(data(:,28)==999.9,28)=nan; % Sigma Alpha Proton Ratio
 
         if setCalculateGW==true
-            GW = get_tsyganenko_GW_1(yyyy);
+            GW = get_tsyganenko_GW_1(yyyy,[],[omniASCDir,filesep]);
             data(:,29:31) = interp1(GW.time, GW.G, unixtime2matlab(data(:,1)),'nearest');
             data(:,32:37) = interp1(GW.time, GW.W, unixtime2matlab(data(:,1)),'nearest');
         else
