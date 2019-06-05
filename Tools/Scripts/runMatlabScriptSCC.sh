@@ -5,5 +5,5 @@ currentPath=$(pwd)
 cd /usr3/graduate/nithin/MATLAB/
 nohup matlab -nodisplay -nosplash -r "run_script($1); quit">/dev/null 2>&1 &
 #nohup matlab -nodisplay -nosplash -r "run_script($1); quit">"/usr3/graduate/nithin/git-repos/nohup.txt"&
-cd $currentPath
+cd "$currentPath"
 echo "Now you can run something else"

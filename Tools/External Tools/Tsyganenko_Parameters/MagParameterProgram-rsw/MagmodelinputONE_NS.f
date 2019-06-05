@@ -438,7 +438,7 @@ ccccccc  input the 1 day average
       open(unit=2,file=fout,status='unknown')
       do i=1,ni
          write(2,2100) (av1(j,i),j=1,nk)
- 2100    format(f9.4,11(1x,f9.4))
+ 2100    format(f9.4,11(1x,f12.4))
       enddo
       close(2)
 
@@ -1089,8 +1089,8 @@ c     This program takes the 1 day average of the data.
 
       finput='5min/model_inputr5min.d'
       fout='5min/av1day5min.d'
-      open(unit=111,file=finput,status='old')
- 34   read(111,20,err=34,end=300)iyr4,idoy,ihr,imin,(pv(j),j=1,nj)
+      open(unit=11,file=finput,status='old')
+ 34   read(11,20,err=34,end=300)iyr4,idoy,ihr,imin,(pv(j),j=1,nj)
  20   format(I5,i4,2i3,2F8.2,F8.1,F7.2,F6.2,6F8.2)
 
          if( mod(iyr4,4).eq.0 ) then
@@ -1127,7 +1127,7 @@ c     This program takes the 1 day average of the data.
 
       go to 34
 
-  300 close(111,status='delete')
+  300 close(11,status='delete')
       do 23010 j= 1,nj
          do 23012 i= 1,ni
             if( w(i,j).eq. 0. .or.w(i,j).lt.72 ) then
@@ -1725,8 +1725,8 @@ c    This program is to take the 1 year average of the hourly data
       finput='hour/model_input.d'
       fout='hour/av1year.d'
 
-      open(unit=112,file=finput,status='old')
- 34   read(112,20,err=34,end=300)iyr4,idoy,ihr,(pv(j),j=1,5),
+      open(unit=11,file=finput,status='old')
+ 34   read(11,20,err=34,end=300)iyr4,idoy,ihr,(pv(j),j=1,5),
      $a,a,idst,(pv(j),j=6,nj)
  20   format(I4,1x,I3,1x,I2,1x,2F8.2,F8.1,F7.2,F6.2,2(F6.2,1x),i6,6f8.2)
 
@@ -1764,7 +1764,7 @@ c    This program is to take the 1 year average of the hourly data
 c -- repeat
       go to 34
 
-  300 close(112)
+  300 close(11)
       do 23010 j= 1,nj
          do 23012 i= 1,ni
             if( w(i,j).eq. 0. ) then
@@ -1813,8 +1813,8 @@ c    this program is to take the 20 days average of the hourly data
       finput='hour/model_input.d'
       fout='hour/av20days.d'
 
-      open(unit=113,file=finput,status='old')
- 34   read(113,20,err=34,end=300)iyr4,idoy,ihr,(pv(j),j=1,5),
+      open(unit=11,file=finput,status='old')
+ 34   read(11,20,err=34,end=300)iyr4,idoy,ihr,(pv(j),j=1,5),
      $a,a,idst,(pv(j),j=6,nj)
 20    format(I4,1x,I3,1x,I2,1x,2F8.2,F8.1,F7.2,F6.2,2(F6.2,1x),i6,6f8.2)
 
@@ -1852,7 +1852,7 @@ c    this program is to take the 20 days average of the hourly data
 23008   continue
       go to 34
 
- 300  close(113)
+ 300  close(11)
       do 23010 j= 1,nj
          do 23012 i= 1,ni
             if( w(i,j).eq. 0. .or. w(i,j).lt.120. ) then
