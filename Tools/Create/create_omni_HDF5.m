@@ -87,19 +87,18 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
 
     q = length(h5Headers);
 
-    if ~isfile(h5FileStr)
-        for j = 1:1:q
-                h5create(h5FileStr,h5Headers{j},[1 Inf],'ChunkSize',[1 100],'Deflate',9);
-                h5writeatt(h5FileStr,h5Headers{j},'Descriptions',h5Description{j});
-                h5writeatt(h5FileStr,h5Headers{j},'Units',h5Units{j});
-        end
-    else
+    if isfile(h5FileStr)
         if ispc
             error([h5FileStr,' already exists. Please remove it before continuing']);
         else
             warning([h5FileStr,' already exists. Removing it before continuing']);
             system(['mv ',h5FileStr,' ',h5FileStr,'_bk']);
         end
+    end
+    for j = 1:1:q
+        h5create(h5FileStr,h5Headers{j},[1 Inf],'ChunkSize',[1 100],'Deflate',9);
+        h5writeatt(h5FileStr,h5Headers{j},'Descriptions',h5Description{j});
+        h5writeatt(h5FileStr,h5Headers{j},'Units',h5Units{j});
     end
 
     for i=1:1:n
