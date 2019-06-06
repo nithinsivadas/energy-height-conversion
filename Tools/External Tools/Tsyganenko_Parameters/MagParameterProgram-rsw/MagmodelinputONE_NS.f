@@ -370,7 +370,7 @@ c    This program is to take the 1 day average of all parameters.
       do 23014 i= 1,ni
 	   yrdouble=y(i)+iy1
           write(21,2100) yrdouble,(p(i,j),j=1,nj)
- 2100       format(f9.4,11(1x,f9.4))
+ 2100       format(f9.4,11(1x,f12.4))
 23014 continue
       close(21)
       write(*,*)'     Subroutine av1day_min     DONE'
@@ -543,7 +543,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       write(3,52) 'Year','Day','Hr','Min','ByIMF','s','BzIMF','s',
      $'V_SW','s','Den_P','s','Pdyn','s','Bz1','s','Bz2','s',
      $'Bz3','s','Bz4','s','Bz5','s','Bz6','s'
-52    format(a5,a4,2a3,2(a8,a2),a8,a2,a7,a2,a6,a2,6(a8,a2))
+52    format(a5,a4,2a3,2(a12,a2),a12,a2,a11,a2,a9,a2,6(a12,a2))
 
       do 2002 j=1,ni
         do 4000 k=2,12
@@ -674,7 +674,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      $ainter(4),istatus(4),ainter(5),istatus(5),ainter(6),istatus(6),
      $ainter(7),istatus(7),ainter(8),istatus(8),ainter(9),istatus(9),
      $ainter(10),istatus(10),ainter(11),istatus(11)
-50    format(i5,i4,2i3,2(f8.2,i2),f8.1,i2,f7.2,i2,f6.2,i2,6(f8.2,i2))
+50    format(i5,i4,2i3,2(f12.2,i2),f12.1,i2,f11.2,i2,f9.2,
+     $i2,6(f12.2,i2))
 2002	continue
       close(3)
       write(*,*)'     Subroutine interpl_min    DONE'
@@ -741,7 +742,7 @@ c    This program is to calculate the W and G parameters
      $  'dst'
      $,'Bz1','Bz2','Bz3','Bz4','Bz5','Bz6','W1'
      $,'W2','W3','W4','W5','W6','6 stat'
-52    format(a5,a4,a3,a4,a6,7a7,a10,2a7,a6,6a7,6a9,a8)
+52    format(a5,a4,a3,a4,a6,7a7,a10,2a7,a6,6a12,6a12,a8)
 
       read(1,*)
       read(1,*)
@@ -750,7 +751,8 @@ c    This program is to calculate the W and G parameters
  10   read(2,*,err=20,end=20)iyr1,idy1,ihr1,imn1,kp,kp3,dst
       read(1,70,err=20,end=20)iyr,idy,ihr,imn,by,iby,bz,ibz,v,iv,den,id,
      $p,ip,bz1,i1,bz2,i2,bz3,i3,bz4,i4,bz5,i5,bz6,i6
- 70   format(i5,i4,2i3,2(f8.2,i2),f8.1,i2,f7.2,i2,f6.2,i2,6(f8.2,i2))
+ 70   format(i5,i4,2i3,2(f12.2,i2),f12.1,i2,f11.2,i2,f9.2,
+     $i2,6(f12.2,i2))
       n=n+1
 
 cccccccc  G parameters cccccccccccccccccccccccccccccccccccc
@@ -863,7 +865,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      $iby,ibz,iv,id,ip,iG1,iG2,iG3,kp,kp3,dst,(bzn(i),i=1,6),
      $(W(i)*f(i),i=1,6),(iW(i),i=1,6)
 50    format(I5,I4,2I3,2f7.2,f7.1,2f7.2,3f7.2,i3,7i1,
-     $f7.2,f7.2,i6,6f7.2,6f9.3,i3,5i1)
+     $f7.2,f7.2,i6,6f12.2,6f12.3,i3,5i1)
       endif
 
       goto 10
@@ -1141,7 +1143,7 @@ c     This program takes the 1 day average of the data.
       do 23014 i= 1,ni
 	   yrdouble=y(i)+iy1
           write(21,2100) yrdouble,(p(i,j),j=1,nj)
- 2100       format(f9.4,11(1x,f9.4))
+ 2100       format(f9.4,11(1x,f12.4))
 23014 continue
       close(21)
  1000 continue
@@ -1203,7 +1205,7 @@ ccccccc  input the 1 day average
       open(unit=2,file=fout,status='unknown')
       do i=1,ni
          write(2,2100) (av1(j,i),j=1,nk)
- 2100    format(f9.4,11(1x,f9.4))
+ 2100    format(f9.4,11(1x,f12.4))
       enddo
       close(2)
 
@@ -1779,7 +1781,7 @@ c -- repeat
       do 23014 i= 1,ni
 	   yrdouble=y(i)+iy1
           write(21,2100) yrdouble,(p(i,j),j=1,nj)
- 2100       format(f9.4,11(1x,f9.4))
+ 2100       format(f9.4,11(1x,f12.4))
 23014 continue
       close(21)
       write(*,*)'     Subroutine av1year        DONE'
@@ -1866,7 +1868,7 @@ c    this program is to take the 20 days average of the hourly data
       do 23014 i= 1,ni
 	   yrdouble=y(i)+iy1
           write(21,2100) yrdouble,(p(i,j),j=1,nj)
- 2100       format(f9.4,11(1x,f9.4))
+ 2100       format(f9.4,11(1x,f12.4))
 23014 continue
       close(21)
       write(*,*)'     Subroutine av20days       DONE'
@@ -1911,7 +1913,7 @@ ccccccc  input the original data   ccccccccccccccccccccccccccccccccccccccccccccc
 
       do n=1,9999
       read(2,40,err=37,end=37) (data20d(i,n),i=1,12)
- 40   format(f9.4,11(1x,f9.4))
+ 40   format(f9.4,11(1x,f12.4))
       enddo
  37   close(2,status='delete')
       nm=n-1
@@ -2028,7 +2030,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      $ainter(4),ainter(5),ainter(6),
      $ainter(7),ainter(8),ainter(9),
      $ainter(10),ainter(11)
-50    format(f9.4,11(1x,f9.4))
+50    format(f9.4,11(1x,f12.4))
 2002	continue
       close(3)
       write(*,*)'     Subroutine inter20days    DONE'

@@ -101,6 +101,7 @@ end
 %     waitbar(60/75,h,'Calculating G and W values: Running fortran code');
     currentPath = pwd;
     cd(programDir);
+    disp(num2str(yyyy));
     if isunix
         if ~isfile('MagmodelinputONElinux')
         % If exe file does not exists, then compile
