@@ -3,15 +3,15 @@
 clear all;
 
 %% Initialization
-dataStoreDir = "G:\Team Drives\Semeter-Research in Progress\All AMISR Experiments\";
-outputFileStr = "amisrWebDatabase_temp.h5";
-amisrDatabaseStr = strcat(dataStoreDir,outputFileStr);
+dataDir = 'G:\My Drive\Research\Projects\Data\';
+outputFileStr = 'amisrWebDatabase.h5';
+amisrDatabaseStr = [dataDir,outputFileStr];
 
-superMagFileStr = "G:\My Drive\Research\Projects\Paper 3\Data\substorms_superMag_20190530.txt";
+superMagFileStr = 'G:\My Drive\Research\Projects\Paper 3\Data\substorms_superMag_20190530.txt';
 
-omniFileStr = "G:\My Drive\Research\Projects\Data\omni.h5";
+omniFileStr = [dataDir,'omni.h5'];
 
-timeMinStr = "01 May 2018";
+timeMinStr = "01 Dec 2006";
 timeMaxStr = "01 Dec 2018";
 
 % Substorms at PFISR [IMPORTANT]
@@ -50,7 +50,9 @@ deltaMLT = mod(superMag.pfisrMlt - superMag.mlt,24);
 desiredMLTIndx = abs(deltaMLT)<Dmlt;
 desiredMLATIndx = superMag.mlat<superMag.pfisrMlat+Dmlat;
 closestSubstormIndx = desiredMLTIndx & desiredMLATIndx; 
+%% Substorms AE>500 nT, 2<MLT<6
 
+filterIndx = superMag.mlt<8 & superMag.mlt>5 & superMag.AE>500 & superMag.AE<3000;
 
 %%
 figure; 
@@ -61,10 +63,12 @@ plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90]);
 
 %%
 figure; 
-plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90],'zColor',superMag.AE,'zLim',[0,600],'markerSize',2);
+plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90],'zColor',superMag.AE,'zLim',[0,1200],'markerSize',2);
 %%
 figure; 
 plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[60,70],'zColor',superMag.AE(closestSubstormIndx),'zLim',[0,600],'markerSize',2);
+
+
 %% Functions
 function data=load_ascii_files(loadFile, format, headerlines)
 if nargin<3
