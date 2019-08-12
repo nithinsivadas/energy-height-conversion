@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+<Document>
+<name>
+demo_ge_colorbar.kml
+</name>
+<Placemark id="colorbar">
+<name>
+click the icon to see the colorbar
+</name>
+
+<visibility>
+1
+</visibility>
+
+<description>
+<![CDATA[<TABLE border=0 bgcolor=#FFFFFF>
+<TR><TD width="15px" bgcolor=#DC3499>&nbsp;</TD><TD bgcolor=#FFFFFF><TD>farmland</TD></TR>
+<TR><TD width="15px" bgcolor=#CC58A1>&nbsp;</TD><TD bgcolor=#FFFFFF><TD>sugar beet</TD></TR>
+<TR><TD width="15px" bgcolor=#564482>&nbsp;</TD><TD bgcolor=#FFFFFF><TD>grass</TD></TR>
+<TR><TD width="15px" bgcolor=#07C5F0>&nbsp;</TD><TD bgcolor=#FFFFFF><TD>wheat</TD></TR>
+</TABLE>]]>
+</description>
+	<Style><IconStyle><scale>1</scale><Icon><href>http://maps.google.com/mapfiles/kml/shapes/donut.png</href></Icon></IconStyle><ListStyle></ListStyle></Style><Point id="poly_colorbar">
+<altitudeMode>
+clampToGround
+</altitudeMode>
+<extrude>
+1
+</extrude><tessellate>
+1
+</tessellate>
+<coordinates>
+5,53,1
+6,52,1
+7,51,1
+8,50,1
+</coordinates>
+
+</Point>
+
+</Placemark>
+
+</Document>
+</kml>

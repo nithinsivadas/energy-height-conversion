@@ -1,7 +1,7 @@
 %% Paper2: Movie_S1 (Variation of structure)
 clear all;
 h5FileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3.h5';
-movieFigRootFolderStr = 'G:\My Drive\Research\Projects\Paper 2\InternalReview3\Supporting Information\';
+movieFigRootFolderStr = 'G:\My Drive\Research\Projects\Paper 2\Submission_v3\Supporting Information\';
 movieFigFolderStr = 'Movie\';
 movieName = 'Movie_S1';
 
@@ -161,6 +161,7 @@ colorbar_thin('YLabel','[a.u.]');
 
 hold on;
 plotm(pfisrFOV.lat,pfisrFOV.lon,'r');
+title(datestr(time(iT)));
 
 % ASI - High resolution
 zValueBinArray  = globalVar.altitudeArray;

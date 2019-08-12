@@ -156,113 +156,113 @@ gl.energyArray = [3,8,30,100];
 gl.altitudeArray = [120,108,95,85];
 
 %% Figure of Energy Flux 
-h1 = figure;
-resize_figure(h1,125,225);
-timeArrayStr = gl.timeArrayStr;
-zValueBinArray = gl.energyArray;
-cLimArray = [7,9;...
-            7,9;...
-            7,9;...
-            7,9];
-zUnitStr = 'keV';
-colorUnitStr = '[eV/m^2 sr s eV]';
-titleStr = 'Energy flux from PFISR';
-
-generate_panels(h1,log10(pfisr.energyFlux),pfisr.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),...
-    pfisr.zEnergyBin(1,:,:)/1000,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
-colormap('inferno');
+% h1 = figure;
+% resize_figure(h1,125,225);
+% timeArrayStr = gl.timeArrayStr;
+% zValueBinArray = gl.energyArray;
+% cLimArray = [7,9;...
+%             7,9;...
+%             7,9;...
+%             7,9];
+% zUnitStr = 'keV';
+% colorUnitStr = '[eV/m^2 sr s eV]';
+% titleStr = 'Energy flux from PFISR';
+% 
+% generate_panels(h1,log10(pfisr.energyFlux),pfisr.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),...
+%     pfisr.zEnergyBin(1,:,:)/1000,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
+% colormap('inferno');
 
 
 %% Electron density (descrepancy between the coordinates of electron density and energy flux)
-h2 = figure;
-resize_figure(h2,125,225);
-timeArrayStr = gl.timeArrayStr;
-zValueBinArray = gl.altitudeArray;
-cLimArray = [9.5,10.5;...
-            9.5,10.5;...
-            9.5,10.5;...
-            9.5,10.5];
-zUnitStr = 'km';
-colorUnitStr = '[m^-^3]';
-% uniformAlt = repmat(mean(pfisrNe.alt(1,:,:),2),1,size(pfisrNe.data,2),1).*1000;
-titleStr = 'Ne from PFISR';
-pfisrNe.data(pfisrNe.data<=0) = nan;
-generate_panels(h2,log10(pfisrNe.data),pfisr.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
-    pfisrNe.alt(1,:,:),timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
-colormap(magma);
+% h2 = figure;
+% resize_figure(h2,125,225);
+% timeArrayStr = gl.timeArrayStr;
+% zValueBinArray = gl.altitudeArray;
+% cLimArray = [9.5,10.5;...
+%             9.5,10.5;...
+%             9.5,10.5;...
+%             9.5,10.5];
+% zUnitStr = 'km';
+% colorUnitStr = '[m^-^3]';
+% % uniformAlt = repmat(mean(pfisrNe.alt(1,:,:),2),1,size(pfisrNe.data,2),1).*1000;
+% titleStr = 'Ne from PFISR';
+% pfisrNe.data(pfisrNe.data<=0) = nan;
+% generate_panels(h2,log10(pfisrNe.data),pfisr.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
+%     pfisrNe.alt(1,:,:),timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
+% colormap(magma);
 
 %% Figure of asi undersampled/ energy flux
-h3 = figure;
-resize_figure(h3,125,225);
-timeArrayStr = gl.timeArrayStr;
-zValueBinArray = gl.energyArray;
-cLimArray = [370,400;...
-            370,400;...
-            370,400;...
-            370,400];
-zUnitStr = 'keV';
-colorUnitStr = '[a.u.]';
-titleStr = 'ASI undersampled at PFISR energy flux coords';
-generate_panels(h3,asi.eflux,asi.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),...
-    pfisrData.zEnergyBin/1000,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
-% colormap(get_colormap('k','g'));
-colormap(viridis);
+% h3 = figure;
+% resize_figure(h3,125,225);
+% timeArrayStr = gl.timeArrayStr;
+% zValueBinArray = gl.energyArray;
+% cLimArray = [370,400;...
+%             370,400;...
+%             370,400;...
+%             370,400];
+% zUnitStr = 'keV';
+% colorUnitStr = '[a.u.]';
+% titleStr = 'ASI undersampled at PFISR energy flux coords';
+% generate_panels(h3,asi.eflux,asi.time(:,1,1),pfisr.lat(1,:,:),pfisr.lon(1,:,:),...
+%     pfisrData.zEnergyBin/1000,timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
+% % colormap(get_colormap('k','g'));
+% colormap(viridis);
 
 %% Figure of asi undersampled/ Ne
-h4 = figure;
-resize_figure(h4,125,225);
-timeArrayStr = gl.timeArrayStr;
-zValueBinArray = gl.altitudeArray;
-cLimArray = [370,400;...
-            370,400;...
-            370,400;...
-            370,400];
-zUnitStr = 'km';
-colorUnitStr = '[a.u.]';
-titleStr = 'ASI undersampled at PFISR Ne coords';
-% uniformAlt = repmat((pfisrNe.alt(1,13,:)),1,size(pfisrNe.data,2),1).*1000;
-generate_panels(h4,asi.ne,asi.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
-    pfisrNe.alt(1,:,:),timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
-
-% colormap(get_colormap('k','g'));
-colormap(viridis);
-
-%% Figure of asi/energy flux with high resolution
-h5=figure; 
-resize_figure(h5,125,225);
-timeArrayStr = gl.timeArrayStr;
-zValueBinArray = gl.energyArray;
-cLimArray = [370,400;...
-            370,400;...
-            370,400;...
-            370,400];
-zUnitStr = 'keV';
-colorUnitStr = '[a.u.]';
-titleStr = ' ASI in PFISR Field of View / Energy Flux';
-generate_panels_asi(h5, asi.data, asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
-    pfisr.lat(1,:,:),pfisr.lon(1,:,:),pfisr.zEnergyBin(1,1,:)./1000,timeArrayStr,...
-    zValueBinArray, cLimArray, zUnitStr, colorUnitStr, titleStr);
-% colormap(get_colormap('k','g'));
-colormap(viridis);
-
+% h4 = figure;
+% resize_figure(h4,125,225);
+% timeArrayStr = gl.timeArrayStr;
+% zValueBinArray = gl.altitudeArray;
+% cLimArray = [370,400;...
+%             370,400;...
+%             370,400;...
+%             370,400];
+% zUnitStr = 'km';
+% colorUnitStr = '[a.u.]';
+% titleStr = 'ASI undersampled at PFISR Ne coords';
+% % uniformAlt = repmat((pfisrNe.alt(1,13,:)),1,size(pfisrNe.data,2),1).*1000;
+% generate_panels(h4,asi.ne,asi.time(:,1,1),pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),...
+%     pfisrNe.alt(1,:,:),timeArrayStr,zValueBinArray,cLimArray,zUnitStr,colorUnitStr,titleStr);
+% 
+% % colormap(get_colormap('k','g'));
+% colormap(viridis);
 
 %% Figure of asi/energy flux with high resolution
-h6=figure; 
-resize_figure(h6,125,225);
-timeArrayStr = gl.timeArrayStr;
-zValueBinArray = gl.altitudeArray;
-cLimArray = [340,380;...
-            340,380;...
-            340,380;...
-            340,380];
-zUnitStr = 'km';
-colorUnitStr = '[a.u.]';
-titleStr = ' ASI in PFISR Field of View / Ne';
-generate_panels_asi(h7, asi.data, asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
-    pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),pfisrNe.alt(1,1,:),timeArrayStr,...
-    zValueBinArray, cLimArray, zUnitStr, colorUnitStr, titleStr);
-% colormap(get_colormap('k','g'));
-colormap(viridis);
+% h5=figure; 
+% resize_figure(h5,125,225);
+% timeArrayStr = gl.timeArrayStr;
+% zValueBinArray = gl.energyArray;
+% cLimArray = [370,400;...
+%             370,400;...
+%             370,400;...
+%             370,400];
+% zUnitStr = 'keV';
+% colorUnitStr = '[a.u.]';
+% titleStr = ' ASI in PFISR Field of View / Energy Flux';
+% generate_panels_asi(h5, asi.data, asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
+%     pfisr.lat(1,:,:),pfisr.lon(1,:,:),pfisr.zEnergyBin(1,1,:)./1000,timeArrayStr,...
+%     zValueBinArray, cLimArray, zUnitStr, colorUnitStr, titleStr);
+% % colormap(get_colormap('k','g'));
+% colormap(viridis);
+
+
+%% Figure of asi/energy flux with high resolution
+% h6=figure; 
+% resize_figure(h6,125,225);
+% timeArrayStr = gl.timeArrayStr;
+% zValueBinArray = gl.altitudeArray;
+% cLimArray = [340,380;...
+%             340,380;...
+%             340,380;...
+%             340,380];
+% zUnitStr = 'km';
+% colorUnitStr = '[a.u.]';
+% titleStr = ' ASI in PFISR Field of View / Ne';
+% generate_panels_asi(h7, asi.data, asi.time(:,1,1),asi.lat(1,:,:),asi.lon(1,:,:),...
+%     pfisrNe.lat(1,:,:),pfisrNe.lon(1,:,:),pfisrNe.alt(1,1,:),timeArrayStr,...
+%     zValueBinArray, cLimArray, zUnitStr, colorUnitStr, titleStr);
+% % colormap(get_colormap('k','g'));
+% colormap(viridis);
 
 %% Find Correlation between ASI pixels and Ne/energy flux
 [r_eflux,time_r_eflux, time2_r_eflux] = calculate_correlation_v2((pfisr.energyFlux),pfisr.time(:,1,1),(asi.eflux),asi.time(:,1,1));
@@ -275,51 +275,51 @@ pfisrne80km = repmat(interp_nans(pfisrNe.data(:,:,altIndx)')',1,1,size(pfisrNe.d
 [r_ne_ne,time_r_ne_ne] = calculate_correlation_v2(pfisrNe.data,pfisr.time(:,1,1),pfisrne80km,pfisr.time(:,1,1));
 
 %%  Plot correlation between ASI pixels and Ne/ energy flux
-totalPanelNo=2;
-p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
-q=p(1);
-
-q(1).select();
-plot_2D_time_series(time_r_eflux,pfisrData.zEnergyBin(1,:)./1000,r_eflux',10/60,-1);
-label_time_axis(time_r_eflux, false, 10/60);
-set(gca,'YScale','log','YTick',[10,30,100,300],'YTickLabel',[10,30,100,300]);
-ylabel('[keV]');
-colormap(gca,get_colormap3('k','w','r'));
-grid on;
-colorbar_thin('YLabel',{'r_0(\phi_E & Optical'});
-caxis([-1,1]);
-
-
-q(2).select();
-uniformAlt = repmat(mean(pfisrNe.alt(1,:,:),2),1,size(pfisrNe.data,2),1);
-plot_2D_time_series(time_r_ne,uniformAlt(1,13,:),r_ne',0.1,-1);
-label_time_axis(time_r_ne, true, 10/60);
-set(gca,'YScale','log','YTick',[70,80,100,120,200]);
-colormap(gca,get_colormap3('k','w','r'));
-% title('Correlation of Ne (mag-field-aligned) with ASI');
-ylabel('[Km]');
-colorbar_thin('YLabel',{'r_0 (N_e & Optical)'});
-caxis([-1,1]);
+% totalPanelNo=2;
+% p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
+% q=p(1);
+% 
+% q(1).select();
+% plot_2D_time_series(time_r_eflux,pfisrData.zEnergyBin(1,:)./1000,r_eflux',10/60,-1);
+% label_time_axis(time_r_eflux, false, 10/60);
+% set(gca,'YScale','log','YTick',[10,30,100,300],'YTickLabel',[10,30,100,300]);
+% ylabel('[keV]');
+% colormap(gca,get_colormap3('k','w','r'));
+% grid on;
+% colorbar_thin('YLabel',{'r_0(\phi_E & Optical'});
+% caxis([-1,1]);
+% 
+% 
+% q(2).select();
+% uniformAlt = repmat(mean(pfisrNe.alt(1,:,:),2),1,size(pfisrNe.data,2),1);
+% plot_2D_time_series(time_r_ne,uniformAlt(1,13,:),r_ne',0.1,-1);
+% label_time_axis(time_r_ne, true, 10/60);
+% set(gca,'YScale','log','YTick',[70,80,100,120,200]);
+% colormap(gca,get_colormap3('k','w','r'));
+% % title('Correlation of Ne (mag-field-aligned) with ASI');
+% ylabel('[Km]');
+% colorbar_thin('YLabel',{'r_0 (N_e & Optical)'});
+% caxis([-1,1]);
 
 %% Plot correlation between N_e@80 km and that at all other altitudes
-totalPanelNo=1;
-p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
-q=p(1);
-
-q(1).select();
-uniformAlt = repmat(mean(pfisrNe.alt(1,:,:),2),1,size(pfisrNe.data,2),1);
-plot_2D_time_series(time_r_ne_ne,uniformAlt(1,1,:),r_ne_ne',0.1,-1);
-label_time_axis(time_r_ne_ne, true, 10/60);
-set(gca,'YScale','log','YTick',[70,80,100,120,200]);
-colormap(gca,get_colormap('k','w','r'));
-% title('Correlation of Ne (mag-field-aligned) with ASI');
-ylabel('[Km]');
-colorbar_thin('YLabel',{'r_0 (N_e@80km & N_e)'});
-caxis([-1,1]);
+% totalPanelNo=1;
+% p = create_panels(figure,'totalPanelNo',totalPanelNo,'margintop',4,'panelHeight',25);
+% q=p(1);
+% 
+% q(1).select();
+% uniformAlt = repmat(mean(pfisrNe.alt(1,:,:),2),1,size(pfisrNe.data,2),1);
+% plot_2D_time_series(time_r_ne_ne,uniformAlt(1,1,:),r_ne_ne',0.1,-1);
+% label_time_axis(time_r_ne_ne, true, 10/60);
+% set(gca,'YScale','log','YTick',[70,80,100,120,200]);
+% colormap(gca,get_colormap('k','w','r'));
+% % title('Correlation of Ne (mag-field-aligned) with ASI');
+% ylabel('[Km]');
+% colorbar_thin('YLabel',{'r_0 (N_e@80km & N_e)'});
+% caxis([-1,1]);
 %% Testing if there is any time delay between the two images being correlated
-figure;
-plot(time_r_ne,(time2_r_ne(:)-time_r_ne(:))*24*3600);
-label_time_axis(time_r_ne, true, 10/60);
+% figure;
+% plot(time_r_ne,(time2_r_ne(:)-time_r_ne(:))*24*3600);
+% label_time_axis(time_r_ne, true, 10/60);
 
 %% Defining a polygon of radar field of view
 figure;
@@ -359,12 +359,12 @@ time = asi.time(:,1,1);
 for iTime = 1:1:length(time)
 % iTime = 100;
     100.*iTime./length(time)
-    h=figure('visible','off');
+    h=figure('visible','on');
     create_figure_sx(h,pfisr,pfisrNe,asi,correlation,pfisrFOV,gl,datestr(time(iTime)),...
         true,'G:\My Drive\Research\Projects\Paper 2\Videos\Oct18_2010\Movie\');
 end
 %%
-create_video('G:\My Drive\Research\Projects\Paper 2\Videos\Oct18_2010\','Movie\','Movie_S1.avi');
+% create_video('G:\My Drive\Research\Projects\Paper 2\Videos\Oct18_2010\','Movie\','Movie_S1.avi');
 %%
 % clc;
 % h=figure('visible','on');
