@@ -198,12 +198,10 @@ end
 
 function download_omni_high_res(remoteLink, localStorePath)
 
-host = 'spdf.gsfc.nasa.gov';
-remoteFinalLink = remoteLink;
-omni=ftp(host);
-cd(omni,remoteFinalLink);
-remoteFileList = dir(omni);
-remoteFileListCell = struct2cell(remoteFileList);
+host = 'https://spdf.gsfc.nasa.gov';
+remoteFinalLink = [host,remoteLink];
+tables.idTableBy.plaintextPreceedingTable = 'high_res_omni</h1>';
+remoteFileListCell = htmlTableToCell(remoteFinalLink,tables)';
 remoteFileListNameIndx = strncmp(remoteFileListCell(1,:),'omni_min',8);
 remoteFileListName = string(remoteFileListCell(1,remoteFileListNameIndx));
 
@@ -241,7 +239,7 @@ if isdir(localStorePath)
     %Downloading the missing files
     urlFile = 'omni_1min_URLs.txt';
     urlFilePath = [localStorePath,filesep,urlFile];
-    urls = strcat('ftp://',host,remoteFinalLink,'/',remoteFileListName(indexMissingFiles));
+    urls = strcat(remoteFinalLink,'/',remoteFileListName(indexMissingFiles));
 
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
@@ -253,7 +251,7 @@ else
     mkdir(localStorePath);
     urlFile = 'omni_1min_URLs.txt';
     urlFilePath = [localStorePath,filesep,urlFile];
-    urls = strcat('ftp://',host,remoteFinalLink,'/',remoteFileListName);
+    urls = strcat(remoteFinalLink,'/',remoteFileListName);
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
         [status,cmdout]=...
@@ -264,19 +262,15 @@ else
     end
 end
 
-close(omni);
-
 end
 
 function download_omni_2(remoteLink, localStorePath)
 
 %% OMNI-2 Download
-host = 'spdf.gsfc.nasa.gov';
-omni=ftp(host);
-remoteFinalLinkHourly = remoteLink;
-cd(omni,remoteFinalLinkHourly);
-remoteFileList = dir(omni);
-remoteFileListCell = struct2cell(remoteFileList);
+host = 'https://spdf.gsfc.nasa.gov';
+remoteFinalLinkHourly = [host,remoteLink];
+tables.idTableBy.plaintextPreceedingTable = 'low_res_omni/extended</h1>';
+remoteFileListCell = htmlTableToCell(remoteFinalLinkHourly,tables)';
 remoteFileListNameIndx = strncmp(remoteFileListCell(1,:),'omni2_',6);
 remoteFileListNameIndx = remoteFileListNameIndx&~endsWith(remoteFileListCell(1,:),'all_years.dat');
 remoteFileListName = string(remoteFileListCell(1,remoteFileListNameIndx));
@@ -315,7 +309,7 @@ if isdir(localStorePath)
     %Downloading the missing files
     urlFile = 'omni2_URLs.txt';
     urlFilePath = [localStorePath,filesep,urlFile];
-    urls = strcat('ftp://',host,remoteFinalLinkHourly,'/',remoteFileListName(indexMissingFiles));
+    urls = strcat(remoteFinalLinkHourly,'/',remoteFileListName(indexMissingFiles));
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
     [status,cmdout]=unix(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
@@ -326,7 +320,7 @@ else
     mkdir(localStorePath);
     urlFile = 'omni2_URLs.txt';
     urlFilePath = [localStorePath,filesep,urlFile];
-    urls = strcat('ftp://',host,remoteFinalLinkHourly,'/',remoteFileListName);
+    urls = strcat(remoteFinalLinkHourly,'/',remoteFileListName);
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
         [status,cmdout]=...
@@ -336,5 +330,5 @@ else
             system(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
     end
 end
-close(omni);
+
 end

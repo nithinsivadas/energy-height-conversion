@@ -68,6 +68,46 @@ plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90],'zColor',superMag.A
 figure; 
 plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[60,70],'zColor',superMag.AE(closestSubstormIndx),'zLim',[0,600],'markerSize',2);
 
+%% Adding the PFISR experiments running during the substorm time
+
+expBCArray = barker_coded_experiments();
+% Filter of Barker Coded PFISR Experiments
+bcFilterIndx = zeros(1,length(amisr.expId));
+for iexp = 1:1:length(expBCArray)
+    bcFilterIndx = bcFilterIndx|strcmp(strtrim(expBCArray(iexp)),cellstr(deblank(amisr.expName)));
+end
+
+for iStorm = 1:1:length(superMag.stormID)
+    amisrIndx = find_amisr_exp(superMag.time(iStorm),amisr.startTime, amisr.endTime);
+    if ~isnan(amisrIndx)
+        superMag.expID(iStorm) = amisr.expId(amisrIndx(1));
+        superMag.expName(iStorm) = amisr.expName(amisrIndx(1));
+        superMag.status(iStorm) = amisr.status(amisrIndx(1));
+        superMag.startTime(iStorm) = amisr.startTime(amisrIndx(1));
+        superMag.endTimeTime(iStorm) = amisr.endTime(amisrIndx(1));
+        superMag.additionalComments(iStorm) = {' '};
+        superMag.expBC(iStorm) = bcFilterIndx(amisrIndx(1));
+        if length(amisrIndx)>1
+            superMag.additionalComments(iStorm,:) = {['More than ',num2str(length(amisrIndx)),' experiments were running']};
+        end 
+    else
+        superMag.expID(iStorm) = "nan";
+        superMag.expName(iStorm) = "nan";
+        superMag.status(iStorm) = "nan";
+        superMag.startTime(iStorm) = nan;
+        superMag.endTimeTime(iStorm) = nan;
+    end
+end
+
+%% Create a table
+T = table(superMag.datetime(closestSubstormIndx),...
+    superMag.AE(closestSubstormIndx), superMag.mlat(closestSubstormIndx),...
+    superMag.mlt(closestSubstormIndx),...
+    superMag.expID(closestSubstormIndx)',superMag.expName(closestSubstormIndx)',...
+    superMag.status(closestSubstormIndx)',...
+    superMag.expBC(closestSubstormIndx)',...
+    'VariableNames',{'Time','AE','MLAT','MLT','PFISR_ExpID','PFISR_ExpName','PFISR_ExpStatus','BarkerCode'});
+
 
 %% Functions
 function data=load_ascii_files(loadFile, format, headerlines)
@@ -105,3 +145,23 @@ function [Lm,MLT] = get_pfisr_magnetic_coordinates(time,maginput,GDZ,magFieldNo)
 %     MLT_AACGM = double(py.array.array('d',py.numpy.nditer(tup{3})));
     Lm = abs(Lm);
 end
+
+function [amisrIndx] = find_amisr_exp(time, startTimeArr, endTimeArr)
+% Finds the amisr experiment indx
+    amisrIndx = find(time>startTimeArr & time<endTimeArr);
+    if isempty(amisrIndx)
+        amisrIndx=nan;
+    end
+    
+end
+
+function expArr = barker_coded_experiments()
+expArr =["GenPINOT_PulsatingAurora_TN30          ";
+    "Inspire_v01                            ";
+    "Kelley01                               ";
+    "MSWinds23                              ";
+    "MSWinds23_dt013                        ";
+    "MSWinds26.v03                          ";
+    "Semeter01                              ";
+    "Sporadic04                             "];
+ end
