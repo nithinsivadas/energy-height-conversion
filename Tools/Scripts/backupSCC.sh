@@ -3,7 +3,7 @@ currentPath=$(pwd)
 cd $gitRootDir
 git fetch 
 git pull
-git add -A
+git add --all :/
 git commit -m 'backup from scc-lite'
 git push origin master
 cd $currentPath
