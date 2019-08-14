@@ -12,7 +12,7 @@ superMagFileStr = 'G:\My Drive\Research\Projects\Paper 3\Data\substorms_superMag
 omniFileStr = [dataDir,'omni.h5'];
 
 timeMinStr = "01 Dec 2006";
-timeMaxStr = "01 Dec 2018";
+timeMaxStr = "31 Jul 2019";
 
 % Substorms at PFISR [IMPORTANT]
 Dmlt = 2;
@@ -26,9 +26,9 @@ pkrh0=0.693;
 %% Loading database
 % Create amisr database
 if ~isfile(amisrDatabaseStr)
-    status = create_amisr_web_experiment_H5_database(timeMinStr,timeMaxStr,61,[dataStoreDir,outputFileStr]);
+    status = create_amisr_web_experiment_H5_database(timeMinStr,timeMaxStr,61,[dataDir,outputFileStr]);
 end
-
+%%
 % Load supermag database
 superMag = extract_superMag_data(superMagFileStr);
 superMag.stormID = (1:length(superMag.time))';
@@ -55,18 +55,18 @@ closestSubstormIndx = desiredMLTIndx & desiredMLATIndx;
 filterIndx = superMag.mlt<8 & superMag.mlt>5 & superMag.AE>500 & superMag.AE<3000;
 
 %%
-figure; 
-plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[40,90]);
-%%
-figure; 
-plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90]);
-
-%%
-figure; 
-plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90],'zColor',superMag.AE,'zLim',[0,1200],'markerSize',2);
-%%
-figure; 
-plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[60,70],'zColor',superMag.AE(closestSubstormIndx),'zLim',[0,600],'markerSize',2);
+% figure; 
+% plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[40,90]);
+% %%
+% figure; 
+% plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90]);
+% 
+% %%
+% figure; 
+% plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90],'zColor',superMag.AE,'zLim',[0,1200],'markerSize',2);
+% %%
+% figure; 
+% plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[60,70],'zColor',superMag.AE(closestSubstormIndx),'zLim',[0,600],'markerSize',2);
 
 %% Adding the PFISR experiments running during the substorm time
 
@@ -87,6 +87,8 @@ for iStorm = 1:1:length(superMag.stormID)
         superMag.endTimeTime(iStorm) = amisr.endTime(amisrIndx(1));
         superMag.additionalComments(iStorm) = {' '};
         superMag.expBC(iStorm) = bcFilterIndx(amisrIndx(1));
+              
+        
         if length(amisrIndx)>1
             superMag.additionalComments(iStorm,:) = {['More than ',num2str(length(amisrIndx)),' experiments were running']};
         end 
@@ -96,6 +98,7 @@ for iStorm = 1:1:length(superMag.stormID)
         superMag.status(iStorm) = "nan";
         superMag.startTime(iStorm) = nan;
         superMag.endTimeTime(iStorm) = nan;
+        superMag.expBC(iStorm) = false;
     end
 end
 
@@ -107,8 +110,50 @@ T = table(superMag.datetime(closestSubstormIndx),...
     superMag.status(closestSubstormIndx)',...
     superMag.expBC(closestSubstormIndx)',...
     'VariableNames',{'Time','AE','MLAT','MLT','PFISR_ExpID','PFISR_ExpName','PFISR_ExpStatus','BarkerCode'});
+%%
+disp('Table of Barker Code Experiments during a SuperMag substorm');
+T(T.BarkerCode,:)
+%%
+disp('Table of PFISR Experiments during a SuperMag substorm');
+T(~strcmp(T.PFISR_ExpID,"nan"),:)
 
-
+%% Finding if DASC is ON during a particular substorm with PFISR ON
+substormIndx = 1:1:length(superMag.time);
+cIndx = substormIndx(closestSubstormIndx);
+ for cStorm = 1:1:length(cIndx)
+        superMagCloseStorm.time(cStorm) = superMag.time(cIndx(cStorm));
+        [timeStamp, wavelength] = find_DASC_FITS(datestr(superMagCloseStorm.time(cStorm)));
+        if ~isnan(timeStamp)
+            superMagCloseStorm.DASC_timeMin(cStorm) = min(timeStamp);
+            superMagCloseStorm.DASC_timeMax(cStorm) = max(timeStamp);
+            superMagCloseStorm.DASC_wavelength(cStorm) = {num2str(unique(wavelength))};
+        else
+            superMagCloseStorm.DASC_timeMin(cStorm) = nan;
+            superMagCloseStorm.DASC_timeMax(cStorm) = nan;
+            superMagCloseStorm.DASC_wavelength(cStorm) = {'nan'};
+        end
+ end
+ %%
+ for cStorm = 1:1:length(cIndx)
+     if ~isnan(superMagCloseStorm.DASC_timeMin)
+        superMagCloseStorm.DASC_timeMin1(cStorm) = datetime(superMagCloseStorm.DASC_timeMin(cStorm));
+     end
+ end
+ 
+ %%
+ T1 = table(superMag.datetime(closestSubstormIndx),...
+    superMag.AE(closestSubstormIndx), superMag.mlat(closestSubstormIndx),...
+    superMag.mlt(closestSubstormIndx),...
+    superMag.expID(closestSubstormIndx)',superMag.expName(closestSubstormIndx)',...
+    superMag.status(closestSubstormIndx)',...
+    superMag.expBC(closestSubstormIndx)',...
+    datetime(superMagCloseStorm.DASC_timeMin','ConvertFrom','datenum'),...
+    datetime(superMagCloseStorm.DASC_timeMax','ConvertFrom','datenum'),...
+    superMagCloseStorm.DASC_wavelength',...
+    'VariableNames',...
+    {'Time','AE','MLAT','MLT','PFISR_ExpID',...
+    'PFISR_ExpName','PFISR_ExpStatus','BarkerCode',...
+    'DASC_TimeMin','DASC_TimeMax','DASC_Wavelength'});
 %% Functions
 function data=load_ascii_files(loadFile, format, headerlines)
 if nargin<3
@@ -163,5 +208,6 @@ expArr =["GenPINOT_PulsatingAurora_TN30          ";
     "MSWinds23_dt013                        ";
     "MSWinds26.v03                          ";
     "Semeter01                              ";
-    "Sporadic04                             "];
+    "Sporadic04                             ";
+    "ThemisD1.v01                             "];
  end

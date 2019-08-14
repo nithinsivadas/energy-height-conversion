@@ -1,4 +1,4 @@
-function Numlist = fitsfiletimestamp(file_list)
+function [Numlist, Wavelength] = fitsfiletimestamp(file_list)
 % fitsfiletimestamp.m
 % Numlist = fitsfiletimestamp(file_list)
 % by John Swoboda
@@ -10,6 +10,8 @@ function Numlist = fitsfiletimestamp(file_list)
 % file_list - A Nx1 or 1xN cell array with the file names.
 %% Outputs
 % Numlist - A Nx1 or 1xN array of datenum time stamps.
+% Wavelength - A Nx1 or 1xN array of wavelength in [nm] that the image
+% corresponds to. 
 %% Main
 if ischar(file_list)
     temp_list = file_list;
@@ -39,6 +41,7 @@ for k = 1:N
     time_str = [yearstr,'-',time_split{end},'.',split_cell{2}];
     
     Numlist(k) = datenum(time_str,'yyyymmdd-HHMMSS.FFF');
+    Wavelength(k) = str2num(time_split{3});
 end
 
 if makewarn
