@@ -42,6 +42,10 @@ instrumentStr = 'DASC';
 
 data.time=posixtime(data.time);
 
+if isfile(outputH5File)
+    movefile(outputH5File, [outputH5File,'_bak']);
+end
+
 try h5create(outputH5File,['/',instrumentStr,'/time'],size(data.time'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
 try h5create(outputH5File,['/',instrumentStr,'/wavelength'],size(data.wavelength'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
 
