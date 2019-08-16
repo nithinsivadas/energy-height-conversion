@@ -42,17 +42,23 @@ instrumentStr = 'DASC';
 
 data.time=posixtime(data.time);
 
-try h5create(outputH5File,['/',instrumentStr,'/time'],size(data.time'));catch ME; end
-try h5create(outputH5File,['/',instrumentStr,'/wavelength'],size(data.wavelength'));catch ME; end
-try h5create(outputH5File,['/',instrumentStr,'/file'],size(data.file'));catch ME; end
-try h5create(outputH5File,['/',instrumentStr,'/date'],size(data.date'));catch ME; end
-try h5create(outputH5File,['/',instrumentStr,'/url'],size(data.url'));catch ME; end
+try h5create(outputH5File,['/',instrumentStr,'/time'],size(data.time'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
+try h5create(outputH5File,['/',instrumentStr,'/wavelength'],size(data.wavelength'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
 
-hdf5write(outputH5File,['/',instrumentStr,'/time'],(data.time'),...
-['/',instrumentStr,'/wavelength'],(data.wavelength)',...
-['/',instrumentStr,'/file'],(data.file)',...
-['/',instrumentStr,'/date'],(data.date)',...
-['/',instrumentStr,'/url'],(data.url)');
+h5write(outputH5File,['/',instrumentStr,'/time'],(data.time'));
+h5write(outputH5File,['/',instrumentStr,'/wavelength'],(data.wavelength)');
+h5_create_writestr(outputH5File,['/',instrumentStr,'/url'],cellstr(data.url)');
+
+
+% try h5create(outputH5File,['/',instrumentStr,'/file'],size(data.file'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
+% try h5create(outputH5File,['/',instrumentStr,'/date'],size(data.date'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
+% try h5create(outputH5File,['/',instrumentStr,'/url'],size(data.url'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
+
+% hdf5write(outputH5File,['/',instrumentStr,'/url'],(data.url)','WriteMode','append','Deflate',9);
+
+% ['/',instrumentStr,'/file'],(data.file)',...
+% ['/',instrumentStr,'/date'],(data.date)',...
+
 
 status = 'Success';
 
