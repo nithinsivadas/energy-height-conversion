@@ -8,8 +8,8 @@ function create_dasch5_script()
     outputFileStr = 'dascDatabase.h5';
 %     timeMinStr = '01 Jan 2007';
 %     timeMaxStr = '31 Dec 2019';
-    timeMinStr = '31 Dec 2017';
-    timeMaxStr = '20 Jan 2018';
+    timeMinStr = '01 Jan 2007';
+    timeMaxStr = '31 Dec 2019';
     [status, error] = create_dasc_H5_database(timeMinStr, timeMaxStr, [dataPath,outputFileStr]);
     disp([10 'Status: ']);
     cellstr(status)
