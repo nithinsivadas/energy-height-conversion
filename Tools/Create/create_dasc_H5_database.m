@@ -36,7 +36,7 @@ end
 status = 'failed';
 
 if isfile(outputH5File)
-    movefile(outputH5File, [outputH5File,'_bak']);
+   movefile(outputH5File, [outputH5File,'_bak']);
 end
 
 date1 = datetime(datenum(timeMinStr),'ConvertFrom','datenum');
@@ -65,34 +65,12 @@ for iYear = 1:1:length(yearArr)
         if ~isempty(data.time)
  
         data.time1=posixtime(data.time);
-        
-%         if iYear == 1
-%         try 
-%             h5create(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
-%                 '/time'],...
-%                 size(data.time'),...
-%                 'ChunkSize',[1 80],'Deflate',9);
-%         catch ME; 
-%         end
-%         try 
-%             h5create(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
-%                 '/wavelength'],...
-%                 size(data.wavelength'),...
-%                 'ChunkSize',[1 80],'Deflate',9);
-%         catch ME; 
-%         end
-%         end
-        
+              
         write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
             '/time'],(data.time1),1,true);
         write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
             '/wavelength'],(data.wavelength),1,true);
-        
-%         h5write(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
-%             '/time'],(data.time1'));
-%         h5write(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
-%             '/wavelength'],(data.wavelength)');
-        
+ 
         end
     catch ME
     
@@ -100,17 +78,6 @@ for iYear = 1:1:length(yearArr)
 end
         
         
-% h5_create_writestr(outputH5File,['/',instrumentStr,'/file'],cellstr(data.file)');
-% try h5create(outputH5File,['/',instrumentStr,'/file'],size(data.file'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
-% try h5create(outputH5File,['/',instrumentStr,'/date'],size(data.date'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
-% try h5create(outputH5File,['/',instrumentStr,'/url'],size(data.url'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
-
-% hdf5write(outputH5File,['/',instrumentStr,'/url'],(data.url)','WriteMode','append','Deflate',9);
-
-% ['/',instrumentStr,'/file'],(data.file)',...
-% ['/',instrumentStr,'/date'],(data.date)',...
-
-
 status = 'Success';
 
 end
