@@ -46,7 +46,7 @@ if timeDim>0
         dataMaxSize = dataSize;
         dataMaxSize(timeDim) = Inf;
         chunkSize = dataSize;
-        chunkSize(timeDim) = 1;
+        chunkSize(timeDim) = ceil(chunkSize(timeDim)/4);
         h5create(h5FileStr, datasetPath, dataMaxSize, 'ChunkSize', chunkSize,...
             'Deflate', 9);
         [status, info, ~] = ish5dataset(h5FileStr, datasetPath);

@@ -35,25 +35,72 @@ end
 
 status = 'failed';
 
-[data, error] = get_DASC_FITS_times(timeMinStr, timeMaxStr);
-
-% Can be edited to include more cameras
-instrumentStr = 'DASC';
-
-data.time=posixtime(data.time);
-
 if isfile(outputH5File)
     movefile(outputH5File, [outputH5File,'_bak']);
 end
 
-try h5create(outputH5File,['/',instrumentStr,'/time'],size(data.time'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
-try h5create(outputH5File,['/',instrumentStr,'/wavelength'],size(data.wavelength'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
+date1 = datetime(datenum(timeMinStr),'ConvertFrom','datenum');
+date2 = datetime(datenum(timeMaxStr),'ConvertFrom','datenum');
 
-h5write(outputH5File,['/',instrumentStr,'/time'],(data.time'));
-h5write(outputH5File,['/',instrumentStr,'/wavelength'],(data.wavelength)');
-h5_create_writestr(outputH5File,['/',instrumentStr,'/file'],cellstr(data.file)');
+% Can be edited to include more cameras
+instrumentStr = 'DASC';
 
+yearArr = year(date1):year(date2);
+for iYear = 1:1:length(yearArr)
 
+    try 
+        if iYear == 1
+            timeMinStr1 = timeMinStr;
+        else
+            timeMinStr1 = ['01 Jan ',num2str(yearArr(iYear))];
+        end
+        if iYear == length(yearArr)
+            timeMaxStr1 = timeMaxStr;
+        else
+            timeMaxStr1 = ['31 Dec ',num2str(yearArr(iYear)),' 23:59:59.999'];
+        end
+        
+        [data, error] = get_DASC_FITS_times(timeMinStr1, timeMaxStr1);
+        
+        if ~isempty(data.time)
+ 
+        data.time1=posixtime(data.time);
+        
+%         if iYear == 1
+%         try 
+%             h5create(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+%                 '/time'],...
+%                 size(data.time'),...
+%                 'ChunkSize',[1 80],'Deflate',9);
+%         catch ME; 
+%         end
+%         try 
+%             h5create(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+%                 '/wavelength'],...
+%                 size(data.wavelength'),...
+%                 'ChunkSize',[1 80],'Deflate',9);
+%         catch ME; 
+%         end
+%         end
+        
+        write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            '/time'],(data.time1),1,true);
+        write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            '/wavelength'],(data.wavelength),1,true);
+        
+%         h5write(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+%             '/time'],(data.time1'));
+%         h5write(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+%             '/wavelength'],(data.wavelength)');
+        
+        end
+    catch ME
+    
+    end
+end
+        
+        
+% h5_create_writestr(outputH5File,['/',instrumentStr,'/file'],cellstr(data.file)');
 % try h5create(outputH5File,['/',instrumentStr,'/file'],size(data.file'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
 % try h5create(outputH5File,['/',instrumentStr,'/date'],size(data.date'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
 % try h5create(outputH5File,['/',instrumentStr,'/url'],size(data.url'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
