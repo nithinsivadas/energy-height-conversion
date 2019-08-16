@@ -51,7 +51,7 @@ try h5create(outputH5File,['/',instrumentStr,'/wavelength'],size(data.wavelength
 
 h5write(outputH5File,['/',instrumentStr,'/time'],(data.time'));
 h5write(outputH5File,['/',instrumentStr,'/wavelength'],(data.wavelength)');
-h5_create_writestr(outputH5File,['/',instrumentStr,'/url'],cellstr(data.url)');
+h5_create_writestr(outputH5File,['/',instrumentStr,'/file'],cellstr(data.file)');
 
 
 % try h5create(outputH5File,['/',instrumentStr,'/file'],size(data.file'),'ChunkSize',[1 80],'Deflate',9);catch ME; end
