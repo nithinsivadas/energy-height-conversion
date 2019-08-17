@@ -4,10 +4,13 @@ clear all;
 
 %% Initialization
 dataDir = 'G:\My Drive\Research\Projects\Data\';
+storeDir = 'G:\My Drive\Research\Projects\Paper 3\Data\';
 outputFileStr = 'amisrWebDatabase.h5';
 amisrDatabaseStr = [dataDir,outputFileStr];
 
-superMagFileStr = 'G:\My Drive\Research\Projects\Paper 3\Data\substorms_superMag_20190530.txt';
+superMagFileStr = [storeDir,'substorms_superMag_20190530.txt'];
+
+dascFileStr = [storeDir,'dascDatabase.h5'];
 
 omniFileStr = [dataDir,'omni.h5'];
 
@@ -120,25 +123,31 @@ T(~strcmp(T.PFISR_ExpID,"nan"),:)
 %% Finding if DASC is ON during a particular substorm with PFISR ON
 substormIndx = 1:1:length(superMag.time);
 cIndx = substormIndx(closestSubstormIndx);
+Tdasc = read_h5_data(dascFileStr);
+[timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
  for cStorm = 1:1:length(cIndx)
-        superMagCloseStorm.time(cStorm) = superMag.time(cIndx(cStorm));
-        [timeStamp, wavelength] = find_DASC_FITS(datestr(superMagCloseStorm.time(cStorm)));
-        if ~isnan(timeStamp)
-            superMagCloseStorm.DASC_timeMin(cStorm) = min(timeStamp);
-            superMagCloseStorm.DASC_timeMax(cStorm) = max(timeStamp);
-            superMagCloseStorm.DASC_wavelength(cStorm) = {num2str(unique(wavelength))};
+        superMagCloseStorm.time(cStorm) = datetime(superMag.time(cIndx(cStorm)),'ConvertFrom','datenum');
+        tempStart = dateshift(superMagCloseStorm.time(cStorm),'start','day');
+        tempEnd = dateshift(superMagCloseStorm.time(cStorm),'end','day');
+        indxtStamp = timeStamp<tempEnd & timeStamp>=tempStart;
+        tempArr = timeStamp(indxtStamp);
+        wavelengthArr = wavelength(indxtStamp);
+        if ~isempty(tempArr)
+            superMagCloseStorm.DASC_timeMin(cStorm) = min(tempArr);
+            superMagCloseStorm.DASC_timeMax(cStorm) = max(tempArr);
+            superMagCloseStorm.DASC_wavelength(cStorm) = {num2str(unique(wavelengthArr)')};
         else
-            superMagCloseStorm.DASC_timeMin(cStorm) = nan;
-            superMagCloseStorm.DASC_timeMax(cStorm) = nan;
+            superMagCloseStorm.DASC_timeMin(cStorm) = NaT;
+            superMagCloseStorm.DASC_timeMax(cStorm) = NaT;
             superMagCloseStorm.DASC_wavelength(cStorm) = {'nan'};
         end
  end
  %%
- for cStorm = 1:1:length(cIndx)
-     if ~isnan(superMagCloseStorm.DASC_timeMin)
-        superMagCloseStorm.DASC_timeMin1(cStorm) = datetime(superMagCloseStorm.DASC_timeMin(cStorm));
-     end
- end
+%  for cStorm = 1:1:length(cIndx)
+%      if ~isnan(superMagCloseStorm.DASC_timeMin)
+%         superMagCloseStorm.DASC_timeMin1(cStorm) = datetime(superMagCloseStorm.DASC_timeMin(cStorm));
+%      end
+%  end
  
  %%
  T1 = table(superMag.datetime(closestSubstormIndx),...
@@ -147,14 +156,100 @@ cIndx = substormIndx(closestSubstormIndx);
     superMag.expID(closestSubstormIndx)',superMag.expName(closestSubstormIndx)',...
     superMag.status(closestSubstormIndx)',...
     superMag.expBC(closestSubstormIndx)',...
-    datetime(superMagCloseStorm.DASC_timeMin','ConvertFrom','datenum'),...
-    datetime(superMagCloseStorm.DASC_timeMax','ConvertFrom','datenum'),...
+    superMagCloseStorm.DASC_timeMin',...
+    superMagCloseStorm.DASC_timeMax',...
     superMagCloseStorm.DASC_wavelength',...
     'VariableNames',...
     {'Time','AE','MLAT','MLT','PFISR_ExpID',...
     'PFISR_ExpName','PFISR_ExpStatus','BarkerCode',...
     'DASC_TimeMin','DASC_TimeMax','DASC_Wavelength'});
+
+
+%% Table of all substorms where DASC data is available
+T2 = T1(~strcmp(T1.DASC_Wavelength,'nan'),:);
+
+%% Calculating URL of a particular substorm from this table
+% [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
+[~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T2.Time(200));
+%% Downloading a sample storm
+[status] = download_DASC_FITS_for_storm(url,wavelengthStr,T2.Time(200),storeDir);
 %% Functions
+
+function [status] = download_DASC_FITS_for_storm(urls,wavelengthStr,stormTime,storeDir,h5FileStr)
+    wavelengthStr = string(wavelengthStr);
+    wavelengths = unique(wavelengthStr);
+    for w = 1:1:length(wavelengths)
+       tempStorePath = strcat(storeDir,'temp');
+       folderStr = datestr(stormTime,'yyyymmdd');
+       if ~isdir(tempStorePath)
+           mkdir(tempStorePath);
+       end
+       urlFile = 'tempURL.txt';
+       urlFilePath = strcat(tempStorePath,filesep,urlFile);
+       fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
+       if isunix
+       [status,cmdout]=unix(strcat('aria2c -V -c -j 50 ','-d ',tempStorePath,' -i ',urlFilePath));
+       else
+       [status,cmdout]=system(strcat('aria2c -V -c -j 50 ','-d ',tempStorePath,' -i ',urlFilePath));
+       end
+       read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengths(w), folderStr, tempStorePath);
+       % Need remove all the temp files
+       delete(strcat(tempStorePath,filesep,'*'));
+       disp(w)
+    end
+    fileIDVerbose = fopen(strcat(tempStorePath,filesep,'status.txt'),'a');
+    fprintf(fileIDVerbose,cmdout);
+    fclose(fileIDVerbose);
+end
+
+function read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengthStr, folderStr, tempStorePath)
+    localFileList = dir([tempStorePath,filesep,'*.FITS']);
+    localFileListName = string(deblank(char(localFileList.name)));
+    pathStr = string(strcat(deblank(char(localFileList.folder)),filesep,localFileListName));
+    
+    dkTime = 10;
+    nTimeASITotal = length(pathStr);
+    nkTime = ceil(nTimeASITotal/dkTime);
+    
+    datasetPath = char(strcat('/',folderStr,'/',wavelengthStr,'/'));
+    for kTime=1:1:nkTime
+        timeEndIndx = min(kTime*dkTime,nTimeASITotal);
+        timeStartIndx = 1 + (kTime-1)*dkTime;
+        k=1;
+        ASI = [];
+        time = [];
+        for iTime = timeStartIndx:1:timeEndIndx
+            ASI(k,:,:) = fitsread(pathStr(iTime));
+            time(k,1) = posixtime(datetime(fitsfiletimestamp(localFileListName(iTime)),'ConvertFrom','datenum'));
+            k = k+1;
+        end      
+        write_h5_dataset(h5FileStr,[datasetPath,'time'],time,1,true);
+        write_h5_dataset(h5FileStr,[datasetPath,'ASI'],ASI,1,true);
+    end
+    
+end
+
+function [time, wavelength, url, wavelengthStr] = get_DASC_times_during_substorm(...
+    dascTimeStamps, wavelengths, substormTime, growthDuration, expansionDuration)
+    
+    %substormTime - datetime
+    if nargin<5
+        expansionDuration = 1.0; %hr
+    end
+    
+    if nargin<4
+        growthDuration = 2.0; %hr
+    end
+    
+    tempStart = substormTime - hours(growthDuration);
+    tempEnd = substormTime - hours(expansionDuration);
+    indxtStamp = dascTimeStamps<=tempEnd & dascTimeStamps>=tempStart;
+    time = dascTimeStamps(indxtStamp);
+    wavelength = wavelengths(indxtStamp);
+    wavelengthStr = num2str(wavelength,'%04.f');
+    url = create_DASC_url(time,wavelength);
+end
+
 function data=load_ascii_files(loadFile, format, headerlines)
 if nargin<3
     headerlines = 1;
@@ -210,4 +305,14 @@ expArr =["GenPINOT_PulsatingAurora_TN30          ";
     "Semeter01                              ";
     "Sporadic04                             ";
     "ThemisD1.v01                             "];
- end
+end
+ 
+function [timeStamp, wavelength] = restructure_DASC_table_to_time_array(T)
+    timeStamp = [];
+    wavelength = [];
+    for i = 1:1:length(T.Path)/2
+        timeStamp = [timeStamp; T.Data{1+2*(i-1)}];
+        wavelength = [wavelength; T.Data{2+2*(i-1)}];
+    end
+    timeStamp = datetime(unix_to_matlab_time(timeStamp),'ConvertFrom','datenum');
+end
