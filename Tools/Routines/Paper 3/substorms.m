@@ -3,15 +3,23 @@
 clear all;
 
 %% Initialization
-dataDir = 'G:\My Drive\Research\Projects\Data\';
-storeDir = 'G:\My Drive\Research\Projects\Paper 3\Data\';
-outputFileStr = 'amisrWebDatabase.h5';
-amisrDatabaseStr = [dataDir,outputFileStr];
+if strcmp(get_computer_name,'nithin-carbon')
+    dataDir = 'G:\My Drive\Research\Projects\Data\';
+    storeDir = 'G:\My Drive\Research\Projects\Paper 3\Data\';
+elseif strcmp(get_computer_name,'aurora1-optiplex-780')
+    dataDir = '/media/nithin/PFISR_002_006/Nithin/Data/';
+    storeDir = '/media/nithin/PFISR_002_006/Nithin/Paper 3/';
+else
+    error(['Not configured for this computer: ',get_computer_name]);
+end
+
+outputAMISRFileStr = 'amisrWebDatabase.h5';
+amisrDatabaseStr = [dataDir,outputAMISRFileStr];
 
 superMagFileStr = [storeDir,'substorms_superMag_20190530.txt'];
 
 dascFileStr = [storeDir,'dascDatabase.h5'];
-
+outputDASCh5FileStr = 'dascData.h5';
 omniFileStr = [dataDir,'omni.h5'];
 
 timeMinStr = "01 Dec 2006";
@@ -26,10 +34,17 @@ pkrGLAT = 65.126;
 pkrGLON = -147.47;
 pkrh0=0.693;
 
+substorm_dasc_store(dataDir,storeDir,outputAMISRFileStr,...
+  superMagFileStr, dascFileStr, outputDASCh5FileStr, omniFileStr,...
+  timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0);
+
+function substorm_dasc_store(dataDir,storeDir,outputAMISRFileStr,...
+  superMagFileStr, dascFileStr, outputDASCh5FileStr, omniFileStr,...
+  timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0)
 %% Loading database
 % Create amisr database
 if ~isfile(amisrDatabaseStr)
-    status = create_amisr_web_experiment_H5_database(timeMinStr,timeMaxStr,61,[dataDir,outputFileStr]);
+    status = create_amisr_web_experiment_H5_database(timeMinStr,timeMaxStr,61,[dataDir,outputAMISRFileStr]);
 end
 %%
 % Load supermag database
@@ -57,19 +72,6 @@ closestSubstormIndx = desiredMLTIndx & desiredMLATIndx;
 
 filterIndx = superMag.mlt<8 & superMag.mlt>5 & superMag.AE>500 & superMag.AE<3000;
 
-%%
-% figure; 
-% plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[40,90]);
-% %%
-% figure; 
-% plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90]);
-% 
-% %%
-% figure; 
-% plot_polar_scatter(superMag.mlat,superMag.mlt,'RLim',[40,90],'zColor',superMag.AE,'zLim',[0,1200],'markerSize',2);
-% %%
-% figure; 
-% plot_polar_scatter(superMag.mlat(closestSubstormIndx),superMag.mlt(closestSubstormIndx),'RLim',[60,70],'zColor',superMag.AE(closestSubstormIndx),'zLim',[0,600],'markerSize',2);
 
 %% Adding the PFISR experiments running during the substorm time
 
@@ -142,13 +144,7 @@ Tdasc = read_h5_data(dascFileStr);
             superMagCloseStorm.DASC_wavelength(cStorm) = {'nan'};
         end
  end
- %%
-%  for cStorm = 1:1:length(cIndx)
-%      if ~isnan(superMagCloseStorm.DASC_timeMin)
-%         superMagCloseStorm.DASC_timeMin1(cStorm) = datetime(superMagCloseStorm.DASC_timeMin(cStorm));
-%      end
-%  end
- 
+
  %%
  T1 = table(superMag.datetime(closestSubstormIndx),...
     superMag.AE(closestSubstormIndx), superMag.mlat(closestSubstormIndx),...
@@ -167,16 +163,18 @@ Tdasc = read_h5_data(dascFileStr);
 
 %% Table of all substorms where DASC data is available
 T2 = T1(~strcmp(T1.DASC_Wavelength,'nan'),:);
-
+T3 = T2(T2.BarkerCode,:);
 %% Calculating URL of a particular substorm from this table
 % [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
-[~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T2.Time(200));
-%% Downloading a sample storm
-[status] = download_DASC_FITS_for_storm(url,wavelengthStr,T2.Time(200),storeDir,'G:\My Drive\Research\Projects\Paper 3\Data\dascData.h5');
-
+nT = length(T3.Time);
+    for iT=1:1:nT
+        [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T3.Time(iT));
+        [status] = download_DASC_FITS_for_storm(url,wavelengthStr,T2.Time(200),...
+            storeDir,strcat(storeDir,outputDASCh5FileStr));
+    end
 
 %% Functions
-
+end
 
 
 function [time, wavelength, url, wavelengthStr] = get_DASC_times_during_substorm(...
