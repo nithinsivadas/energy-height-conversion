@@ -1,6 +1,6 @@
 %% Substorms in the vicinity of PFISR
 % Find SuperMag Substorms and PFISR conjunctions
-clear all;
+%clear all;
 
 %% Initialization
 if strcmp(get_computer_name,'nithin-carbon')
@@ -34,11 +34,11 @@ pkrGLAT = 65.126;
 pkrGLON = -147.47;
 pkrh0=0.693;
 
-substorm_dasc_store(dataDir,storeDir,outputAMISRFileStr,...
+substorm_dasc_store(dataDir,storeDir,outputAMISRFileStr,amisrDatabaseStr,...
   superMagFileStr, dascFileStr, outputDASCh5FileStr, omniFileStr,...
   timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0);
 
-function substorm_dasc_store(dataDir,storeDir,outputAMISRFileStr,...
+function substorm_dasc_store(dataDir,storeDir,outputAMISRFileStr,amisrDatabaseStr,...
   superMagFileStr, dascFileStr, outputDASCh5FileStr, omniFileStr,...
   timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0)
 %% Loading database
