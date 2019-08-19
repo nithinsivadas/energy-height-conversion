@@ -172,62 +172,12 @@ T2 = T1(~strcmp(T1.DASC_Wavelength,'nan'),:);
 % [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
 [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T2.Time(200));
 %% Downloading a sample storm
-[status] = download_DASC_FITS_for_storm(url,wavelengthStr,T2.Time(200),storeDir);
+[status] = download_DASC_FITS_for_storm(url,wavelengthStr,T2.Time(200),storeDir,'G:\My Drive\Research\Projects\Paper 3\Data\dascData.h5');
+
+
 %% Functions
 
-function [status] = download_DASC_FITS_for_storm(urls,wavelengthStr,stormTime,storeDir,h5FileStr)
-    wavelengthStr = string(wavelengthStr);
-    wavelengths = unique(wavelengthStr);
-    for w = 1:1:length(wavelengths)
-       tempStorePath = strcat(storeDir,'temp');
-       folderStr = datestr(stormTime,'yyyymmdd');
-       if ~isdir(tempStorePath)
-           mkdir(tempStorePath);
-       end
-       urlFile = 'tempURL.txt';
-       urlFilePath = strcat(tempStorePath,filesep,urlFile);
-       fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
-       if isunix
-       [status,cmdout]=unix(strcat('aria2c -V -c -j 50 ','-d ',tempStorePath,' -i ',urlFilePath));
-       else
-       [status,cmdout]=system(strcat('aria2c -V -c -j 50 ','-d ',tempStorePath,' -i ',urlFilePath));
-       end
-       read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengths(w), folderStr, tempStorePath);
-       % Need remove all the temp files
-       delete(strcat(tempStorePath,filesep,'*'));
-       disp(w)
-    end
-    fileIDVerbose = fopen(strcat(tempStorePath,filesep,'status.txt'),'a');
-    fprintf(fileIDVerbose,cmdout);
-    fclose(fileIDVerbose);
-end
 
-function read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengthStr, folderStr, tempStorePath)
-    localFileList = dir([tempStorePath,filesep,'*.FITS']);
-    localFileListName = string(deblank(char(localFileList.name)));
-    pathStr = string(strcat(deblank(char(localFileList.folder)),filesep,localFileListName));
-    
-    dkTime = 10;
-    nTimeASITotal = length(pathStr);
-    nkTime = ceil(nTimeASITotal/dkTime);
-    
-    datasetPath = char(strcat('/',folderStr,'/',wavelengthStr,'/'));
-    for kTime=1:1:nkTime
-        timeEndIndx = min(kTime*dkTime,nTimeASITotal);
-        timeStartIndx = 1 + (kTime-1)*dkTime;
-        k=1;
-        ASI = [];
-        time = [];
-        for iTime = timeStartIndx:1:timeEndIndx
-            ASI(k,:,:) = fitsread(pathStr(iTime));
-            time(k,1) = posixtime(datetime(fitsfiletimestamp(localFileListName(iTime)),'ConvertFrom','datenum'));
-            k = k+1;
-        end      
-        write_h5_dataset(h5FileStr,[datasetPath,'time'],time,1,true);
-        write_h5_dataset(h5FileStr,[datasetPath,'ASI'],ASI,1,true);
-    end
-    
-end
 
 function [time, wavelength, url, wavelengthStr] = get_DASC_times_during_substorm(...
     dascTimeStamps, wavelengths, substormTime, growthDuration, expansionDuration)
