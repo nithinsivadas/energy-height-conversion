@@ -32,7 +32,7 @@ function read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengthStr, folderStr
         end      
         write_h5_dataset(h5FileStr,[datasetPath,'time'],time,1,true);
         write_h5_dataset(h5FileStr,[datasetPath,'ASI'],ASI,1,true);
-        write_h5_dataset(h5FileStr,[datasetPath,'errorIndicies'],errorIndices,1,true);
+        write_h5_dataset(h5FileStr,[datasetPath,'errorIndices'],errorIndices,1,true);
     end
     
 end
