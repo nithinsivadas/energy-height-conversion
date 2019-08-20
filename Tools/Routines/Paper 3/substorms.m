@@ -116,11 +116,11 @@ T = table(superMag.datetime(closestSubstormIndx),...
     superMag.expBC(closestSubstormIndx)',...
     'VariableNames',{'Time','AE','MLAT','MLT','PFISR_ExpID','PFISR_ExpName','PFISR_ExpStatus','BarkerCode'});
 %%
-disp('Table of Barker Code Experiments during a SuperMag substorm');
-T(T.BarkerCode,:)
+% disp('Table of Barker Code Experiments during a SuperMag substorm');
+% T(T.BarkerCode,:)
 %%
-disp('Table of PFISR Experiments during a SuperMag substorm');
-T(~strcmp(T.PFISR_ExpID,"nan"),:)
+% disp('Table of PFISR Experiments during a SuperMag substorm');
+% T(~strcmp(T.PFISR_ExpID,"nan"),:)
 
 %% Finding if DASC is ON during a particular substorm with PFISR ON
 substormIndx = 1:1:length(superMag.time);
@@ -169,7 +169,7 @@ T3 = T2(T2.BarkerCode,:);
 nT = length(T3.Time);
     for iT=1:1:nT
         [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T3.Time(iT));
-        [status] = download_DASC_FITS_for_storm(url,wavelengthStr,T2.Time(200),...
+        [status] = download_DASC_FITS_for_storm(url,wavelengthStr,T3.Time(iT),...
             storeDir,strcat(storeDir,outputDASCh5FileStr));
     end
 
@@ -190,7 +190,7 @@ function [time, wavelength, url, wavelengthStr] = get_DASC_times_during_substorm
     end
     
     tempStart = substormTime - hours(growthDuration);
-    tempEnd = substormTime - hours(expansionDuration);
+    tempEnd = substormTime + hours(expansionDuration);
     indxtStamp = dascTimeStamps<=tempEnd & dascTimeStamps>=tempStart;
     time = dascTimeStamps(indxtStamp);
     wavelength = wavelengths(indxtStamp);
