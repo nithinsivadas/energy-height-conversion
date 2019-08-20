@@ -8,7 +8,7 @@ if strcmp(get_computer_name,'nithin-carbon')
     storeDir = 'G:\My Drive\Research\Projects\Paper 3\Data\';
 elseif strcmp(get_computer_name,'aurora1-optiplex-780')
     dataDir = '/media/nithin/PFISR_002_006/Nithin/Data/';
-    storeDir = '/media/nithin/PFISR_002_006/Nithin/Paper 3/';
+    storeDir = '/media/nithin/PFISR_002_006/Nithin/Data/Paper_3/';
 else
     error(['Not configured for this computer: ',get_computer_name]);
 end
