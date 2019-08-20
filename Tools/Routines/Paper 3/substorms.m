@@ -22,7 +22,7 @@ dascFileStr = [storeDir,'dascDatabase.h5'];
 outputDASCh5FileStr = 'dascData.h5';
 omniFileStr = [dataDir,'omni.h5'];
 
-timeMinStr = "01 Dec 2016";
+timeMinStr = "01 Dec 2006";
 timeMaxStr = "31 Jul 2019";
 
 % Substorms at PFISR [IMPORTANT]
