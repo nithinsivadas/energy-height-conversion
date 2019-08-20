@@ -16,7 +16,7 @@ function [status] = download_DASC_FITS_for_storm(urls,wavelengthStr,stormTime,st
        [status,cmdout]=system(strcat('aria2c -V -c -j 50 ',' -d "',tempStorePath,'" -i "',urlFilePath,'"'));
        end
        read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengths(w), folderStr, tempStorePath);
-       % Need remove all the temp files
+       % Remove All Temp Files
        try
         rmdir(tempStorePath,'s');
         catch ME

@@ -14,17 +14,25 @@ function read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengthStr, folderStr
         k=1;
         ASI = [];
         time = [];
+        errorIndices = [];
         for iTime = timeStartIndx:1:timeEndIndx
             try
-            ASI(k,:,:) = fitsread(pathStr(iTime));
+                ASI(k,:,:) = fitsread(pathStr(iTime));
             catch ME
-            ASI(k,:,:) = nan;
+                ASI(k,:,:) = nan;
+                errorIndices(k) = true;
             end
-            time(k,1) = posixtime(datetime(fitsfiletimestamp(localFileListName(iTime)),'ConvertFrom','datenum'));
+            try
+                time(k,1) = posixtime(datetime(fitsfiletimestamp(localFileListName(iTime)),'ConvertFrom','datenum'));
+            catch ME
+                time(k,1) = nan;
+                errorIndices(k) = true;
+            end
             k = k+1;
         end      
         write_h5_dataset(h5FileStr,[datasetPath,'time'],time,1,true);
         write_h5_dataset(h5FileStr,[datasetPath,'ASI'],ASI,1,true);
+        write_h5_dataset(h5FileStr,[datasetPath,'errorIndicies'],errorIndices,1,true);
     end
     
 end

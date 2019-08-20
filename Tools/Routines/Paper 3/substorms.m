@@ -164,15 +164,23 @@ Tdasc = read_h5_data(dascFileStr);
 %% Table of all substorms where DASC data is available
 T2 = T1(~strcmp(T1.DASC_Wavelength,'nan'),:);
 T3 = T2(T2.BarkerCode,:);
+T4 = T3(T3.Time>=datetime(datestr(timeMinStr)) & T3.Time<=datetime(datestr(timeMaxStr)),:);
 %% Calculating URL of a particular substorm from this table
 % [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
-nT = length(T3.Time);
-    for iT=1:1:nT
-        [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T3.Time(iT));
-        [status] = download_DASC_FITS_for_storm(url,wavelengthStr,T3.Time(iT),...
-            storeDir,strcat(storeDir,outputDASCh5FileStr));
-    end
+fileID = fopen(strcat(storeDir,'dascerror.log'),'a+');
 
+nT = length(T4.Time);
+    for iT=1:1:nT
+        try
+        [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T4.Time(iT));
+        [status] = download_DASC_FITS_for_storm(url,wavelengthStr,T4.Time(iT),...
+            storeDir,strcat(storeDir,outputDASCh5FileStr));
+        catch ME
+            fprintf(fileID,'\n%s',datestr(T4.Time(iT)));
+            fprintf(fileID,'%s\n',strcat(' - ',ME.message));
+        end
+    end
+fclose(fileID);
 %% Functions
 end
 
