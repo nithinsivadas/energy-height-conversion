@@ -18,17 +18,17 @@ function read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengthStr, folderStr
         for iTime = timeStartIndx:1:timeEndIndx
             try
                 ASI(k,:,:) = fitsread(pathStr(iTime));
-                errorFlag(k) = 0;
+                errorFlag(k,1) = 0;
             catch ME
                 ASI(k,:,:) = nan;
-                errorFlag(k) = 1;
+                errorFlag(k,1) = 1;
             end
             try
                 time(k,1) = posixtime(datetime(fitsfiletimestamp(localFileListName(iTime)),'ConvertFrom','datenum'));
-                errorFlag(k) = 0;
+                errorFlag(k,1) = 0;
             catch ME
                 time(k,1) = nan;
-                errorFlag(k) = 2;
+                errorFlag(k,1) = 2;
             end
             k = k+1;
         end      
