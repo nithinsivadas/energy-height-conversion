@@ -9,7 +9,8 @@ function [status] = download_DASC_FITS_for_storm(urls,wavelengthStr,stormTime,st
        end
        urlFile = 'tempURL.txt';
        urlFilePath = strcat(tempStorePath,filesep,urlFile);
-       fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
+       urlsThisW = urls(strcmp(wavelengthStr,wavelengths(w)));
+       fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urlsThisW');fclose(fileID);
        if isunix
        [status,cmdout]=unix(strcat('aria2c -V -c -j 50 ',' -d "',tempStorePath,'" -i "',urlFilePath,'"'));
        else

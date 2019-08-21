@@ -22,8 +22,12 @@ dascFileStr = [storeDir,'dascDatabase.h5'];
 outputDASCh5FileStr = 'dascData.h5';
 omniFileStr = [dataDir,'omni.h5'];
 
-timeMinStr = "01 Dec 2006";
-timeMaxStr = "31 Jul 2019";
+timeMinStr = "02 Dec 2013";
+timeMaxStr = "04 Dec 2013";
+
+
+% timeMinStr = "01 Dec 2006";
+% timeMaxStr = "31 Jul 2019";
 
 % Substorms at PFISR [IMPORTANT]
 Dmlt = 2;
@@ -177,13 +181,13 @@ nT = length(T4.Time);
             storeDir,strcat(storeDir,outputDASCh5FileStr));
         catch ME
             fprintf(fileID,'\n%s',datestr(T4.Time(iT)));
-            fprintf(fileID,'%s\n',strcat(' - ',ME.message));
+            fprintf(fileID,'%s\n',strcat("  : ",getReport(ME,'extended','hyperlinks','off')));
         end
     end
 fclose(fileID);
-%% Functions
-end
 
+end
+%% Functions
 
 function [time, wavelength, url, wavelengthStr] = get_DASC_times_during_substorm(...
     dascTimeStamps, wavelengths, substormTime, growthDuration, expansionDuration)
