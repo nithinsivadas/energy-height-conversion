@@ -47,13 +47,12 @@ load([storeDir,'table_of_substorms_as_input.mat']);
 timeMinStr = "01 Dec 2006";
 timeMaxStr = "31 Jul 2019";
 
-nWorkers = 4;
-substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr, nWorkers);
+% nWorkers = 4;
+substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr);
 
 
-function substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr, nWorkers)
+function substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr)
 %% Loading database
-parpool('local',nWorkers);
 
 %% Table of all substorms where DASC data is available
 T2 = T1(~strcmp(T1.DASC_Wavelength,'nan'),:);
@@ -63,36 +62,43 @@ T4 = T3(T3.Time>=datetime(datestr(timeMinStr)) & T3.Time<=datetime(datestr(timeM
 % [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
 
 nT = length(T4.Time);
-errorMsg = strings(nT);
+% errorMsg = strings(nT);
     
-    parfor iT=1:1:nT
-        ME = [];
-        try
-        [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T4.Time(iT));
-        download_DASC_FITS_for_storm(url,wavelengthStr,T4.Time(iT),T4.stormID(iT),...
-            storeDir,strcat(storeDir,outputDASCh5FileStr));
-        catch ME
+    for iT=1:1:nT
+%         ME = [];
+%         try
+          batch(@download_and_store,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr});
+%         [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T4.Time(iT));
+%         download_DASC_FITS_for_storm(url,wavelengthStr,T4.Time(iT),T4.stormID(iT),...
+%             storeDir,strcat(storeDir,outputDASCh5FileStr));
+%         catch ME
+%         
+%         end
         
-        end
-        
-        if ~isempty(ME)
-            errorMsg(iT) = string(getReport(ME,'extended','hyperlinks','off'));
-        else
-            errorMsg(iT) = "No error";
-        end
+%         if ~isempty(ME)
+%             errorMsg(iT) = string(getReport(ME,'extended','hyperlinks','off'));
+%         else
+%             errorMsg(iT) = "No error";
+%         end
     end
     
-fileID = fopen(strcat(storeDir,'dascerror.log'),'a+');
-fprintf(fileID,'\n%s\n',['Logging on ', datestr(now)]);    
-for iT = 1:1:nT
-    fprintf(fileID,'\n%s\n',[datestr(T4.Time(iT)),' Storm ID: ',num2str(T4.stormID(iT)),' Iteration:',num2str(iT)]);
-    fprintf(fileID,'%s\n',strcat("  : ",errorMsg(iT)));    
-end
-fclose(fileID);
+% fileID = fopen(strcat(storeDir,'dascerror.log'),'a+');
+% fprintf(fileID,'\n%s\n',['Logging on ', datestr(now)]);    
+% for iT = 1:1:nT
+%     fprintf(fileID,'\n%s\n',[datestr(T4.Time(iT)),' Storm ID: ',num2str(T4.stormID(iT)),' Iteration:',num2str(iT)]);
+%     fprintf(fileID,'%s\n',strcat("  : ",errorMsg(iT)));    
+% end
+% fclose(fileID);
 
-delete(parpool);
+% delete(parpool);
 end
 %% Functions
+
+function download_and_store(timeStamp, wavelength, substormTime, substormID, storeDir, outputDASCh5FileStr)
+        [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, substormTime);
+        download_DASC_FITS_for_storm(url,wavelengthStr,substormTime,substormID,...
+            storeDir,strcat(storeDir,outputDASCh5FileStr));
+end
 
 function [T, T1, timeStamp, wavelength] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
   superMagFileStr, dascFileStr, omniFileStr,...
