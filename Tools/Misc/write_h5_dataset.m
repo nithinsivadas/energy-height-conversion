@@ -1,5 +1,5 @@
 function write_h5_dataset(h5FileStr, datasetPath, varValue,...
-    timeDim, setAppend, setComment)
+    timeDim, setAppend, minChunkTimeDim, setComment, gzipIndx)
 %% write_h5_dataset Writes a variable containing data to hdf5 file.
 %  Input:
 %         h5FileStr   - Name/Path of h5 file
@@ -9,8 +9,16 @@ function write_h5_dataset(h5FileStr, datasetPath, varValue,...
 %                       is considered that there is no time dimension)
 %         setAppend   - If true, appends on the existing data set
 %         setComment  - If true, will fprintf stages of the process.
-if nargin < 6
+if gzipIndx < 8
+    gzipIndx = 9;
+end
+
+if nargin < 7
     setComment = false;
+end
+
+if nargin < 6 
+    minChunkTimeDim = [];
 end
 
 if nargin < 5
@@ -46,9 +54,13 @@ if timeDim>0
         dataMaxSize = dataSize;
         dataMaxSize(timeDim) = Inf;
         chunkSize = dataSize;
-        chunkSize(timeDim) = ceil(chunkSize(timeDim)/4);
+        if isempty(minChunkTimeDim)
+            chunkSize(timeDim) = ceil(chunkSize(timeDim)/100);
+        else
+            chunkSize(timeDim) = minChunkTimeDim;
+        end
         h5create(h5FileStr, datasetPath, dataMaxSize, 'ChunkSize', chunkSize,...
-            'Deflate', 9);
+            'Deflate', gzipIndx);
         [status, info, ~] = ish5dataset(h5FileStr, datasetPath);
         dataMaxSizeOld = info.Dataspace.MaxSize;
         dataSizeOld = info.Dataspace.Size;
@@ -89,8 +101,8 @@ else
     if ~status
         comment('Creating a new variable \n',setComment);
         dataMaxSize = dataSize;
-        chunkSize = ceil(dataSize/4);
-        h5create(h5FileStr, datasetPath, dataMaxSize, 'ChunkSize', chunkSize, 'Deflate', 9);
+        chunkSize = ceil(dataSize/50);
+        h5create(h5FileStr, datasetPath, dataMaxSize, 'ChunkSize', chunkSize, 'Deflate', gzipIndx);
     end
     comment('Rewriting the variable, since variable time independent \n',setComment);
     h5write(h5FileStr,datasetPath,varValue);

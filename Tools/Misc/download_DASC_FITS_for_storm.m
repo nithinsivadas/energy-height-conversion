@@ -1,9 +1,9 @@
-function [status] = download_DASC_FITS_for_storm(urls,wavelengthStr,stormTime,storeDir,h5FileStr)
+function [status] = download_DASC_FITS_for_storm(urls,wavelengthStr,stormTime,stormID,storeDir,h5FileStr)
     wavelengthStr = string(wavelengthStr);
     wavelengths = unique(wavelengthStr);
     for w = 1:1:length(wavelengths)
-       tempStorePath = strcat(storeDir,'temp',filesep,wavelengths(w));
-       folderStr = datestr(stormTime,'yyyymmdd');
+       tempStorePath = strcat(storeDir,'temp',filesep,num2str(stormID));
+       stormDateStr = datestr(stormTime,'yyyymmdd');
        if ~isdir(tempStorePath)
            mkdir(tempStorePath);
        end
@@ -16,7 +16,10 @@ function [status] = download_DASC_FITS_for_storm(urls,wavelengthStr,stormTime,st
        else
        [status,cmdout]=system(strcat('aria2c -V -c -j 50 ',' -d "',tempStorePath,'" -i "',urlFilePath,'"'));
        end
-       read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengths(w), folderStr, tempStorePath);
+       tempStr = strsplit(h5FileStr,filesep);
+       tempStr{end} = strcat(num2str(stormID),'_',stormDateStr,'_',tempStr{end});
+       h5FileStr = strjoin(tempStr,filesep);
+       read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengths(w), tempStorePath);
        % Remove All Temp Files
        try
         rmdir(tempStorePath,'s');
@@ -27,3 +30,4 @@ function [status] = download_DASC_FITS_for_storm(urls,wavelengthStr,stormTime,st
        end
     end
 end
+

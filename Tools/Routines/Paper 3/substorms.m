@@ -1,6 +1,6 @@
 %% Substorms in the vicinity of PFISR
 % Find SuperMag Substorms and PFISR conjunctions
-%clear all;
+clear all;
 
 %% Initialization
 if strcmp(get_computer_name,'nithin-carbon')
@@ -22,10 +22,6 @@ dascFileStr = [storeDir,'dascDatabase.h5'];
 outputDASCh5FileStr = 'dascData.h5';
 omniFileStr = [dataDir,'omni.h5'];
 
-timeMinStr = "02 Dec 2013";
-timeMaxStr = "04 Dec 2013";
-
-
 % timeMinStr = "01 Dec 2006";
 % timeMaxStr = "31 Jul 2019";
 
@@ -38,12 +34,68 @@ pkrGLAT = 65.126;
 pkrGLON = -147.47;
 pkrh0=0.693;
 
-substorm_dasc_store(dataDir,storeDir,outputAMISRFileStr,amisrDatabaseStr,...
-  superMagFileStr, dascFileStr, outputDASCh5FileStr, omniFileStr,...
-  timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0);
+% tic 
+% [T,T1, timeStamp, wavelength] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
+%   superMagFileStr, dascFileStr, omniFileStr,...
+%   timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0);
+% toc 
 
-function substorm_dasc_store(dataDir,storeDir,outputAMISRFileStr,amisrDatabaseStr,...
-  superMagFileStr, dascFileStr, outputDASCh5FileStr, omniFileStr,...
+load([storeDir,'table_of_substorms_as_input.mat']);
+
+%%
+
+timeMinStr = "01 Dec 2006";
+timeMaxStr = "31 Jul 2019";
+
+nWorkers = 8;
+substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr, nWorkers);
+
+
+function substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, nWorkers)
+%% Loading database
+parpool('local',mWorkers);
+
+%% Table of all substorms where DASC data is available
+T2 = T1(~strcmp(T1.DASC_Wavelength,'nan'),:);
+T3 = T2(T2.BarkerCode,:);
+T4 = T3(T3.Time>=datetime(datestr(timeMinStr)) & T3.Time<=datetime(datestr(timeMaxStr)),:);
+%% Calculating URL of a particular substorm from this table
+% [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
+
+nT = length(T4.Time);
+errorMsg = strings(nT);
+    
+    parfor iT=1:1:nT
+        ME = [];
+        try
+        [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T4.Time(iT));
+        download_DASC_FITS_for_storm(url(1:10),wavelengthStr(1:10,:),T4.Time(iT),T4.stormID(iT),...
+            storeDir,strcat(storeDir,outputDASCh5FileStr));
+        catch ME
+        
+        end
+        
+        if ~isempty(ME)
+            errorMsg(iT) = string(getReport(ME,'extended','hyperlinks','off'));
+        else
+            errorMsg(iT) = "No error";
+        end
+    end
+    
+fileID = fopen(strcat(storeDir,'dascerror.log'),'a+');
+fprintf(fileID,'\n%s\n',['Logging on ', datestr(now)]);    
+for iT = 1:1:nT
+    fprintf(fileID,'\n%s\n',[datestr(T4.Time(iT)),' Storm ID: ',num2str(T4.stormID(iT)),' Iteration:',num2str(iT)]);
+    fprintf(fileID,'%s\n',strcat("  : ",errorMsg(iT)));    
+end
+fclose(fileID);
+
+delete(parpool);
+end
+%% Functions
+
+function [T, T1, timeStamp, wavelength] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
+  superMagFileStr, dascFileStr, omniFileStr,...
   timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0)
 %% Loading database
 % Create amisr database
@@ -112,13 +164,13 @@ for iStorm = 1:1:length(superMag.stormID)
 end
 
 %% Create a table
-T = table(superMag.datetime(closestSubstormIndx),...
+T = table(superMag.datetime(closestSubstormIndx),superMag.stormID(closestSubstormIndx),...
     superMag.AE(closestSubstormIndx), superMag.mlat(closestSubstormIndx),...
     superMag.mlt(closestSubstormIndx),...
     superMag.expID(closestSubstormIndx)',superMag.expName(closestSubstormIndx)',...
     superMag.status(closestSubstormIndx)',...
     superMag.expBC(closestSubstormIndx)',...
-    'VariableNames',{'Time','AE','MLAT','MLT','PFISR_ExpID','PFISR_ExpName','PFISR_ExpStatus','BarkerCode'});
+    'VariableNames',{'Time','stormID','AE','MLAT','MLT','PFISR_ExpID','PFISR_ExpName','PFISR_ExpStatus','BarkerCode'});
 %%
 % disp('Table of Barker Code Experiments during a SuperMag substorm');
 % T(T.BarkerCode,:)
@@ -150,7 +202,7 @@ Tdasc = read_h5_data(dascFileStr);
  end
 
  %%
- T1 = table(superMag.datetime(closestSubstormIndx),...
+ T1 = table(superMag.datetime(closestSubstormIndx),superMag.stormID(closestSubstormIndx),...
     superMag.AE(closestSubstormIndx), superMag.mlat(closestSubstormIndx),...
     superMag.mlt(closestSubstormIndx),...
     superMag.expID(closestSubstormIndx)',superMag.expName(closestSubstormIndx)',...
@@ -160,34 +212,11 @@ Tdasc = read_h5_data(dascFileStr);
     superMagCloseStorm.DASC_timeMax',...
     superMagCloseStorm.DASC_wavelength',...
     'VariableNames',...
-    {'Time','AE','MLAT','MLT','PFISR_ExpID',...
+    {'Time','stormID','AE','MLAT','MLT','PFISR_ExpID',...
     'PFISR_ExpName','PFISR_ExpStatus','BarkerCode',...
     'DASC_TimeMin','DASC_TimeMax','DASC_Wavelength'});
 
-
-%% Table of all substorms where DASC data is available
-T2 = T1(~strcmp(T1.DASC_Wavelength,'nan'),:);
-T3 = T2(T2.BarkerCode,:);
-T4 = T3(T3.Time>=datetime(datestr(timeMinStr)) & T3.Time<=datetime(datestr(timeMaxStr)),:);
-%% Calculating URL of a particular substorm from this table
-% [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
-fileID = fopen(strcat(storeDir,'dascerror.log'),'a+');
-
-nT = length(T4.Time);
-    for iT=1:1:nT
-        try
-        [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T4.Time(iT));
-        [status] = download_DASC_FITS_for_storm(url,wavelengthStr,T4.Time(iT),...
-            storeDir,strcat(storeDir,outputDASCh5FileStr));
-        catch ME
-            fprintf(fileID,'\n%s',datestr(T4.Time(iT)));
-            fprintf(fileID,'%s\n',strcat("  : ",getReport(ME,'extended','hyperlinks','off')));
-        end
-    end
-fclose(fileID);
-
 end
-%% Functions
 
 function [time, wavelength, url, wavelengthStr] = get_DASC_times_during_substorm(...
     dascTimeStamps, wavelengths, substormTime, growthDuration, expansionDuration)
