@@ -47,13 +47,13 @@ load([storeDir,'table_of_substorms_as_input.mat']);
 timeMinStr = "01 Dec 2006";
 timeMaxStr = "31 Jul 2019";
 
-nWorkers = 8;
+nWorkers = 4;
 substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr, nWorkers);
 
 
-function substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, nWorkers)
+function substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr, nWorkers)
 %% Loading database
-parpool('local',mWorkers);
+parpool('local',nWorkers);
 
 %% Table of all substorms where DASC data is available
 T2 = T1(~strcmp(T1.DASC_Wavelength,'nan'),:);
@@ -69,7 +69,7 @@ errorMsg = strings(nT);
         ME = [];
         try
         [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T4.Time(iT));
-        download_DASC_FITS_for_storm(url(1:10),wavelengthStr(1:10,:),T4.Time(iT),T4.stormID(iT),...
+        download_DASC_FITS_for_storm(url,wavelengthStr,T4.Time(iT),T4.stormID(iT),...
             storeDir,strcat(storeDir,outputDASCh5FileStr));
         catch ME
         
