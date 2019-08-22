@@ -44,7 +44,7 @@ load([storeDir,'table_of_substorms_as_input.mat']);
 
 %%
 
-timeMinStr = "01 Dec 2006";
+timeMinStr = "01 Dec 2013";
 timeMaxStr = "31 Jul 2019";
 
 % nWorkers = 4;

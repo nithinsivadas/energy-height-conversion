@@ -2,16 +2,18 @@ function read_all_local_FITS_and_create_HDF5(h5FileStr, wavelengthStr, stormTime
  
     wavelengthStr = string(wavelengthStr);
     wavelengths = unique(wavelengthStr);
+    stormDateStr = datestr(stormTime,'yyyymmdd');
+    tempStr = strsplit(h5FileStr,filesep);
+    tempStr{end} = strcat(num2str(stormID),'_',stormDateStr,'_',tempStr{end});
+    h5FileStr = strjoin(tempStr,filesep);
+       
     for w = 1:1:length(wavelengths)
         tempStorePath = strcat(storeDir,'temp',filesep,num2str(stormID),filesep,wavelengths(w));
-        stormDateStr = datestr(stormTime,'yyyymmdd');
+        
         if ~isfolder(tempStorePath)
             error([tempStorePath,' does not exist']);
         end
-       tempStr = strsplit(h5FileStr,filesep);
-       tempStr{end} = strcat(num2str(stormID),'_',stormDateStr,'_',tempStr{end});
-       h5FileStr = strjoin(tempStr,filesep);
-       
+              
        localFileList = dir(strcat(tempStorePath,filesep,'*.FITS'));
        localFileListName = string(deblank(char(localFileList.name)));
        pathStr = string(strcat(deblank(char(localFileList.folder)),filesep,localFileListName));
