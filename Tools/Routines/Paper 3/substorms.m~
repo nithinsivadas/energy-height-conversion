@@ -57,14 +57,12 @@ substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, tim
 function substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr)
 %% Loading database
 
-% Table of substorms where DASC is ON
+%% Table of all substorms where DASC data is available
 T2 = T1(~strcmp(T1.DASC_Wavelength,'nan') & T1.Time<T1.DASC_TimeMax & T1.Time>T1.DASC_TimeMin,:);
-% Table of substorms with an additional constraint of an operating PFISR barker code mode
 T3 = T2(T2.BarkerCode,:);
-% Table of substorms within an additional constraing of being within the user defined dates
 T4 = T3(T3.Time>=datetime(datestr(timeMinStr)) & T3.Time<=datetime(datestr(timeMaxStr)),:);
-
-%% Executing batch processing
+%% Calculating URL of a particular substorm from this table
+% [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
 
 nT = length(T4.Time);
     
@@ -78,9 +76,18 @@ nT = length(T4.Time);
         % Don't wait
     end
     
-end
+% fileID = fopen(strcat(storeDir,'dascerror.log'),'a+');
+% fprintf(fileID,'\n%s\n',['Logging on ', datestr(now)]);    
+% for iT = 1:1:nT
+%     fprintf(fileID,'\n%s\n',[datestr(T4.Time(iT)),' Storm ID: ',num2str(T4.stormID(iT)),' Iteration:',num2str(iT)]);
+%     fprintf(fileID,'%s\n',strcat("  : ",errorMsg(iT)));    
+% end
+% fclose(fileID);
 
+% delete(parpool);
+end
 %% Functions
+
 function download_all_dasc(timeStamp, wavelength, substormTime, substormID, storeDir)
         [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, substormTime);
         download_DASC_FITS_for_storm(url,wavelengthStr,substormID,...

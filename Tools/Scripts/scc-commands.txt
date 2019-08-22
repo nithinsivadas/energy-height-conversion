@@ -1,1 +1,0 @@
-# Following commands have been set up in scc-lite using aliases and the like
