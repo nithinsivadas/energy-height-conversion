@@ -67,7 +67,13 @@ nT = length(T4.Time);
     for iT=1:1:nT
 %         ME = [];
 %         try
-          batch(@download_and_store,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr});
+          j = batch(@download_all_dasc,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir});
+          wait(j);
+          batch(@create_all_dasc_hdf5,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr});
+            
+%           download_all_dasc(timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir);
+%           create_all_dasc_hdf5(timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr);
+          
 %         [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, T4.Time(iT));
 %         download_DASC_FITS_for_storm(url,wavelengthStr,T4.Time(iT),T4.stormID(iT),...
 %             storeDir,strcat(storeDir,outputDASCh5FileStr));
@@ -94,10 +100,19 @@ nT = length(T4.Time);
 end
 %% Functions
 
-function download_and_store(timeStamp, wavelength, substormTime, substormID, storeDir, outputDASCh5FileStr)
+function download_all_dasc(timeStamp, wavelength, substormTime, substormID, storeDir)
         [~, ~, url, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, substormTime);
-        download_DASC_FITS_for_storm(url,wavelengthStr,substormTime,substormID,...
-            storeDir,strcat(storeDir,outputDASCh5FileStr));
+        download_DASC_FITS_for_storm(url,wavelengthStr,substormID,...
+            storeDir);
+        %strcat(storeDir,outputDASCh5FileStr)
+end
+
+function create_all_dasc_hdf5(timeStamp, wavelength, substormTime, substormID, storeDir, outputDASCh5FileStr)
+        
+        [~, ~, ~, wavelengthStr] = get_DASC_times_during_substorm(timeStamp, wavelength, substormTime);
+        read_all_local_FITS_and_create_HDF5(strcat(storeDir,outputDASCh5FileStr),...
+            wavelengthStr, substormTime, substormID, storeDir)
+        %strcat(storeDir,outputDASCh5FileStr)
 end
 
 function [T, T1, timeStamp, wavelength] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
