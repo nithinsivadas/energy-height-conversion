@@ -13,7 +13,9 @@ elseif strcmp(get_computer_name,'scc-lite')
     dataDir = '/projectnb/semetergrp/nithin/Data/';
     storeDir = '/scratch/nithin/Data/Paper_3/';
 else
-    error(['Not configured for this computer: ',get_computer_name]);
+%     error(['Not configured for this computer: ',get_computer_name]);
+    dataDir = '/projectnb/semetergrp/nithin/Data/';
+    storeDir = '/projectnb/semetergrp/nithin/Data/Paper_3/';
 end
 
 outputAMISRFileStr = 'amisrWebDatabase.h5';
@@ -68,13 +70,15 @@ T4 = T3(T3.Time>=datetime(datestr(timeMinStr)) & T3.Time<=datetime(datestr(timeM
 
 nT = length(T4.Time);
     
+myCluster = parcluster("ibatch");
+    
     for iT=1:1:nT
         % Download all DASC FITS files for a particular substorm
-        j = batch(@download_all_dasc,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir});
+        j(iT) = batch(myCluster, @download_all_dasc,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir});
         % Wait till the download is done
-        wait(j); 
+        wait(j(iT)); 
         % Start extracting and storing the data into and HDF5 file
-        batch(@create_all_dasc_hdf5,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr});
+        batch(myCluster, @create_all_dasc_hdf5,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr});
         % Don't wait
     end
     
