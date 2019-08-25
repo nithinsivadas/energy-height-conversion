@@ -84,7 +84,7 @@ myCluster.JobStorageLocation = jobDir;
         batch(myCluster, @create_all_dasc_hdf5,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr});
         % Don't wait
     end
-    
+delete(myCluster.Jobs);
 end
 
 %% Functions

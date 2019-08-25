@@ -12,15 +12,18 @@ function run_script(scriptFnHandle)
 % Updated on: NA
 %--------------------------------------------------------------------------
 
-if exist('record.txt','file')
+diaryFileStr = 'record.txt';
+diaryFile = strcat(pwd,filesep,diaryFileStr);
+
+if exist(diaryFile,'file')
     if ispc
-        system('del record.txt')
+        system(['del ',diaryFile])
     else
-        system('rm record.txt');
+        system(['rm ', diaryFile]);
     end
 end
 
-diary record.txt
+diary(diaryFile);
 errorFlag = 0;
 startTimeStr = (datevec(datetime('now')));
 disp(['Start time: ',datestr(startTimeStr), 10]);
@@ -47,9 +50,10 @@ disp([10,'End time: ',datestr(endTimeStr),10]);
 disp('-----------------------------------------');
 disp('              Complete');
 disp('-----------------------------------------');
+
 diary off
 
-send_email('attachments','record.txt','scriptName',...
+send_email('attachments',diaryFile,'scriptName',...
    funcStr,'errorFlag',errorFlag);
 
 if ispc
