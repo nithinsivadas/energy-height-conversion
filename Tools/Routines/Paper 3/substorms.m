@@ -12,10 +12,12 @@ elseif strcmp(get_computer_name,'aurora1-optiplex-780')
 elseif strcmp(get_computer_name,'scc-lite')
     dataDir = '/projectnb/semetergrp/nithin/Data/';
     storeDir = '/scratch/nithin/Data/Paper_3/';
+    jobDir = '/projectnb/semetergrp/nithin/local_cluster_object';
 else
 %     error(['Not configured for this computer: ',get_computer_name]);
     dataDir = '/projectnb/semetergrp/nithin/Data/';
     storeDir = '/projectnb/semetergrp/nithin/Data/Paper_3/';
+    jobDir = '/projectnb/semetergrp/nithin/local_cluster_object';
 end
 
 outputAMISRFileStr = 'amisrWebDatabase.h5';
@@ -53,10 +55,10 @@ timeMinStr = "01 Dec 2006";
 timeMaxStr = "31 Jul 2019";
 
 % nWorkers = 4;
-substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr);
+substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr, jobDir);
 
 
-function substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr)
+function substorm_dasc_store(T1, timeStamp, wavelength, storeDir,outputDASCh5FileStr, timeMinStr, timeMaxStr, jobDir)
 %% Loading database
 
 % Table of substorms where DASC is ON
@@ -70,7 +72,8 @@ T4 = T3(T3.Time>=datetime(datestr(timeMinStr)) & T3.Time<=datetime(datestr(timeM
 
 nT = length(T4.Time);
     
-myCluster = parcluster("ibatch");
+myCluster = parcluster("local");
+myCluster.JobStorageLocation = jobDir;
     
     for iT=1:1:nT
         % Download all DASC FITS files for a particular substorm
