@@ -29,7 +29,13 @@ data.altitude = h5read(fileNameStr,'/NeFromPower/Altitude')/1000; % in [km]
 data.range = h5read(fileNameStr,'/NeFromPower/Range')/1000; % in [km]
 data.time = unix_to_matlab_time(double(h5read(fileNameStr,'/Time/UnixTime'))); % [matlab time]
 % data.electronDensity(data.electronDensity<0)=10^6; %this isn't a good idea
-data.dNeFrac = h5read(fileNameStr,'/NeFromPower/dNeFrac'); % Fractional error in Ne
+if ish5dataset(fileNameStr,'/NeFromPower/dNeFrac')
+    data.dNeFrac = h5read(fileNameStr,'/NeFromPower/dNeFrac'); % Fractional error in Ne
+elseif ish5dataset(fileNameStr,'/NeFromPower/errNe_NoTr')
+    data.dNeFrac = h5read(fileNameStr,'/NeFromPower/errNe_NoTr'); % Fractional error in Ne
+else
+    warning('No error measurements');
+end
 data.site.latitude = h5read(fileNameStr,'/Site/Latitude');
 data.site.longitude = h5read(fileNameStr,'/Site/Longitude');
 data.site.altitude = h5read(fileNameStr,'/Site/Altitude'); % [in m]

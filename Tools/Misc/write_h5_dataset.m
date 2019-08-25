@@ -9,7 +9,7 @@ function write_h5_dataset(h5FileStr, datasetPath, varValue,...
 %                       is considered that there is no time dimension)
 %         setAppend   - If true, appends on the existing data set
 %         setComment  - If true, will fprintf stages of the process.
-if gzipIndx < 8
+if nargin < 8
     gzipIndx = 9;
 end
 
