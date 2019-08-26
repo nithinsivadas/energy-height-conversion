@@ -1,6 +1,5 @@
 %% Substorms in the vicinity of PFISR
 % Find SuperMag Substorms and PFISR conjunctions
-clear all;
 
 %% Initialization
 if strcmp(get_computer_name,'nithin-carbon')
@@ -13,12 +12,19 @@ elseif strcmp(get_computer_name,'scc-lite')
     dataDir = '/projectnb/semetergrp/nithin/Data/';
     storeDir = '/scratch/nithin/Data/Paper_3/';
     jobDir = '/projectnb/semetergrp/nithin/local_cluster_object';
+    if exist(jobDir,'dir')==7
+        system(['rm -rf ',jobDir,filesep,'*']); 
+    end
 else
 %     error(['Not configured for this computer: ',get_computer_name]);
     dataDir = '/projectnb/semetergrp/nithin/Data/';
     storeDir = '/projectnb/semetergrp/nithin/Data/Paper_3/';
     jobDir = '/projectnb/semetergrp/nithin/local_cluster_object';
+    if exist(jobDir,'dir')==7
+        system(['rm -rf ',jobDir,filesep,'*']); 
+    end
 end
+
 
 outputAMISRFileStr = 'amisrWebDatabase.h5';
 amisrDatabaseStr = [dataDir,outputAMISRFileStr];
@@ -81,10 +87,13 @@ myCluster.JobStorageLocation = jobDir;
         % Wait till the download is done
         wait(j(iT)); 
         % Start extracting and storing the data into and HDF5 file
-        batch(myCluster, @create_all_dasc_hdf5,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr});
+        i(iT) = batch(myCluster, @create_all_dasc_hdf5,0,{timeStamp, wavelength, T4.Time(iT), T4.stormID(iT), storeDir, outputDASCh5FileStr});
         % Don't wait
     end
-delete(myCluster.Jobs);
+    
+wait(i(iT));
+
+% delete(myCluster.Jobs);
 end
 
 %% Functions

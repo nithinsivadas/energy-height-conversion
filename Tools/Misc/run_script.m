@@ -38,7 +38,7 @@ if exist('scriptFnHandle','var')==1
         disp('            Encountered Error');
         disp('-----------------------------------------');
         errorFlag = 1;
-       getReport(ME)
+       getReport(ME,'extended','hyperlinks','off')
     end
 else
     disp([10 'Error: No input function handle' 10]);
@@ -56,10 +56,12 @@ diary off
 send_email('attachments',diaryFile,'scriptName',...
    funcStr,'errorFlag',errorFlag);
 
-if ispc
-    system('del record.txt')
-else
-    system('rm record.txt');
+if exist(diaryFile,'file')
+    if ispc
+        system(['del ',diaryFile])
+    else
+        system(['rm ', diaryFile]);
+    end
 end
 
 end
