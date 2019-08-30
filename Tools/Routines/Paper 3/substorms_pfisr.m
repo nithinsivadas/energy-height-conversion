@@ -1,6 +1,5 @@
 %% Substorms in the vicinity of PFISR
 % Find SuperMag Substorms and PFISR conjunctions
-clear all;
 
 %% Initialization
 if strcmp(get_computer_name,'nithin-carbon')
@@ -78,6 +77,11 @@ function write_ne_to_h5(outputh5Suffix,rawFileStr,storeDir)
     write_h5_dataset(outputh5Str,'/az',data.az,0,true);
     write_h5_dataset(outputh5Str,'/el',data.el,0,true);
     write_h5_dataset(outputh5Str,'/range',data.range,0,true);
+    write_h5_dataset(outputh5Str,'/alt',data.alt,0,true);
+    
+    write_h5_dataset(outputh5Str,'/site/latitude',data.site.latitude,0,true);
+    write_h5_dataset(outputh5Str,'/site/longitude',data.site.longitude,0,true);
+    write_h5_dataset(outputh5Str,'/site/altitude',data.site.altitude,0,true);
     
 end
 
@@ -86,13 +90,14 @@ function data = extract_ne_from_raw_h5(rawFileStr)
     tempData = read_amisr(rawFileStr);
     data.electronDensity = permute(tempData.electronDensity(:,tempData.magBeamNo,:),[3 1 2]);
     data.altitude = tempData.altitude(:,tempData.magBeamNo)';
-    data.time = permute(tempData.electronDensity(:,tempData.magBeamNo,:),[3 1 2]);
+    data.time = tempData.time(1,:)';
     data.dNeFrac = permute(tempData.dNeFrac(:,tempData.magBeamNo,:),[3 1 2]);
     data.range = tempData.range(:,tempData.magBeamNo)';
     data.az = tempData.az(:,tempData.magBeamNo)';
     data.el = tempData.el(:,tempData.magBeamNo)';
-    [data.lat,data.lon,~] = aer2geodetic(data.az,data.el,data.range,...
+    [data.lat,data.lon,data.alt] = aer2geodetic(data.az,data.el,data.range,...
         tempData.site.latitude,tempData.site.longitude,tempData.site.altitude/1000,wgs84Ellipsoid('km'));
+    data.site = tempData.site;
 end
 
 function rawFileListStr = select_PFISR_raw_data(storeDir)

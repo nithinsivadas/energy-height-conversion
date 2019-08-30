@@ -34,6 +34,11 @@ function datasetPaths = read_h5_dataset_paths (h5FilePath, groupPath)
     nGroups = length(info.Groups);
     datasetPaths = [];
     if nGroups>0
+        if ~isempty(info.Datasets)
+        datasetPaths = [datasetPaths;...
+                        strcat('/',...
+                        string({info.Datasets.Name})')];
+        end
         for thisGroup = 1:1:nGroups
             nGroupsTemp = length(info.Groups(thisGroup).Groups);
             if ~isempty(info.Groups(thisGroup).Datasets)

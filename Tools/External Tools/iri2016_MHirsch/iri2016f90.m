@@ -33,7 +33,12 @@ Nexe = ceil(Nalt/maxRows);
 
 % Initializing paths to run the fortran IRI2016
 rootPath =[initialize_root_path,'IRI2016',filesep','matlab'];
-exeStr = ['..',filesep,'bin',filesep,'iri2016_driver'];
+if ispc
+    exeStr = ['..',filesep,'build',filesep,'iri2016_driver.exe'];
+else
+    exeStr = ['..',filesep,'build',filesep,'iri2016_driver'];
+end
+
 currentPath = pwd;
 cd(rootPath);
 
