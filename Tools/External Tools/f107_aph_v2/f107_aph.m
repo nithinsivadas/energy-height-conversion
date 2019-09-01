@@ -54,7 +54,7 @@ yrstr = num2str(unique([YAp year(daten)]));
 N = size(yrstr,1);
 
 % define remote directories
-url = 'http://45.79.106.44/geophys_params/';
+url = 'https://amisr.com/geophys_params/';
 remote = cellstr(strcat(url,yrstr));
 
 % define full local directories
@@ -62,9 +62,11 @@ localFolder = strcat(initialize_root_path,'LargeFiles',filesep,'KP_AP',filesep);
 local = cellstr(strcat(localFolder,yrstr));
 
 % determine if needed Ap data already exists in pwd, if not then download
+options = weboptions;
+options.CertificateFilename=('');
 for i=1:N
     if ~exist(local{i},'file') || setForceDownload
-        websave(local{i},remote{i});% download dataset
+        websave(local{i},remote{i},options);% download dataset
     else
         warning(['File ',local{i},' alread exists']);
     end
