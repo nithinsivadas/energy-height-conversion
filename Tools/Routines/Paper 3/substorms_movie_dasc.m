@@ -37,7 +37,16 @@ if isempty(filePathStr)
     error('No files in WorkDir');
 end
 
+myCluster = parcluster("local");
+myCluster.JobStorageLocation = jobDir;
+
 for i=1:1:length(filePathStr)
+    j(i) = batch(myCluster, @batch_process,0,{i,filePathStr,calibration});
+end
+wait(j(i));
+
+
+function batch_process(i,filePathStr, calibration)
     fileName = filePathStr(i);
     tempStr = strsplit(fileName,filesep);
     tempStr1 = strsplit(tempStr(end),'.');
@@ -48,6 +57,7 @@ for i=1:1:length(filePathStr)
     create_video(workDir,imageDir,videoFileName);
     rmdir(imageLongDir,'s');
 end
+
 
 function [status,imageDir] = create_images(fileName, imageDirName, setStoreImage,...
     calibration)
