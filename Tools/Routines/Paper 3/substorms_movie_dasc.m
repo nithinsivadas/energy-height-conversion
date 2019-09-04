@@ -23,13 +23,13 @@ else
 end
 
 %% Getting input files
-if isempty(filePathStr)
-    error('No files in WorkDir');
-end
 workDir = strcat(storeDir,'WorkDir');
 fileNameList = struct2cell(dir([workDir,strcat(filesep,'*_dascData.h5')]));
 filePathStr = strcat(strcat(workDir,filesep),string(fileNameList(1,:)'));
 h5Calibration = fullfile(storeDir,'DASC_Calibration_Files','dasc_calibration.h5');
+if isempty(filePathStr)
+    error('No files in WorkDir');
+end
 if ~isfile(h5Calibration)
     error(['Calibration file not available: ',h5Calibration]);
 end
