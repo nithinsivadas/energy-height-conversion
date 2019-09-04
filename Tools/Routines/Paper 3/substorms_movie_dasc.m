@@ -35,7 +35,7 @@ if ~isfile(h5Calibration)
 end
 calibration = read_h5_data(h5Calibration);
 %%
-setSample = true; %% Plot only samples - 50 frames for each substorm
+setSample = true; %% Plot only samples - 99 frames for each substorm
 
 %%
 myCluster = parcluster("local");
@@ -129,15 +129,17 @@ indx=find(strcmp(string(data.Name),'ASI'));
         ASI{i} = data.Data{indx(i)};
         time{i} = unix_to_matlab_time(data.Data{strcmp(string(data.Path),strcat('/',tempStr(2),'/','time'))});
         tLength(i) = length(time{i});
-        asiPlotVar(i).median = median(ASI{i}(:));
-        asiPlotVar(i).mean = mean(ASI{i}(:));
-        asiPlotVar(i).std = std(ASI{i}(:));
+        tempArr = ASI{i}(:);
+        tempArr(tempArr>10000) = nan;
+        asiPlotVar(i).median = nanmedian(tempArr);
+        asiPlotVar(i).mean = nanmean(tempArr);
+        asiPlotVar(i).std = nanstd(tempArr);
     end
 
 [~,maxTimeIndx] = max(tLength);
 mainTime = time{maxTimeIndx};
     if setSample
-        timeArr = round(linspace(1,length(mainTime),min(50,length(mainTime)))); %only 50 frames per sample
+        timeArr = round(linspace(1,length(mainTime),min(99,length(mainTime)))); %only 99 frames per sample
     else
         timeArr = 1:1:length(mainTime);
     end
@@ -239,7 +241,12 @@ function plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
         set(gca,'XColor','none','YColor','none');
         try
         closestTimeIndx = find_time(time{iLambda},timeStr);
-        plot_DASC_aer_v1(Fae, flagPixel, ASI{iLambda}(closestTimeIndx,:,:));
+        image = ASI{iLambda}(closestTimeIndx,:,:);
+        imean = nanmean(image(:));
+        istd = nanstd(image(:));
+        
+        
+        plot_DASC_aer_v1(Fae, flagPixel, image);
         if turn==1
         text(0.5,1,{datestr(time{iLambda}(closestTimeIndx),'dd mmm yyyy')},...
             'Units','normalized','HorizontalAlignment','center','VerticalAlignment','bottom');
@@ -248,7 +255,9 @@ function plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
             'Units','normalized','HorizontalAlignment','right','VerticalAlignment','bottom');
         colormap(gca,get_colormap('k',colorStr));
         
-        caxis([floor(asiPlotVar(iLambda).median), ceil(asiPlotVar(iLambda).mean+asiPlotVar(iLambda).std)]);       
+        cmax = min(ceil(asiPlotVar(iLambda).mean+asiPlotVar(iLambda).std),imean+4*istd);
+        
+        caxis([floor(asiPlotVar(iLambda).median), cmax]);       
         c = colorbar_thin();
         set(c, 'YAxisLocation', 'left');
         if ~isempty(pfisrData)
@@ -333,7 +342,11 @@ end
 function h2=plot_DASC_aer_v1(Fae, flagPixel, dataNew, imageSize)
 
 if nargin<4
-    imageSize = max(size(dataNew));
+    %imageSize = max(size(dataNew));
+    imageSize = 512; %%?? Only as long as we don't have the right calibration files
+    if max(size(dataNew))>imageSize
+        dataNew = modify_matrix_size(squeeze(dataNew),imageSize,imageSize);
+    end
 end
 
 xq = linspace(-90,90,imageSize);
@@ -395,4 +408,12 @@ function [az,el,lat,lon,minElFlag] = get_calibration_coordinates(calibration, ti
     lat = calibration.Data{strcmp(string(calibration.Path),latDataStr)};
     lon = calibration.Data{strcmp(string(calibration.Path),lonDataStr)};
     minElFlag = calibration.Data{strcmp(string(calibration.Path),minElFlagStr)};
+    
+    if chosenFileIndx==1
+        az = 180-az';
+        el = el';
+        lat = lat';
+        lon = lon';
+        minElFlag = minElFlag';
+    end
 end

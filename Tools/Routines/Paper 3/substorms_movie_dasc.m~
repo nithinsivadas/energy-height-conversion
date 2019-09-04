@@ -23,28 +23,37 @@ else
 end
 
 %% Getting input files
-if isempty(filePathStr)
-    error('No files in WorkDir');
-end
 workDir = strcat(storeDir,'WorkDir');
 fileNameList = struct2cell(dir([workDir,strcat(filesep,'*_dascData.h5')]));
 filePathStr = strcat(strcat(workDir,filesep),string(fileNameList(1,:)'));
 h5Calibration = fullfile(storeDir,'DASC_Calibration_Files','dasc_calibration.h5');
+if isempty(filePathStr)
+    error('No files in WorkDir');
+end
 if ~isfile(h5Calibration)
     error(['Calibration file not available: ',h5Calibration]);
 end
 calibration = read_h5_data(h5Calibration);
 %%
-setSample = true; %% Plot only samples - 50 frames for each substorm
+setSample = true; %% Plot only samples - 99 frames for each substorm
+
 %%
-myCluster = parcluster("local");
-myCluster.JobStorageLocation = jobDir;
+% myCluster = parcluster("local");
+% myCluster.JobStorageLocation = jobDir;
+% try
+%     delete(myCluster.Jobs);
+% catch
+% end
+
 for i=1:1:length(filePathStr)
-    j(i) = batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample});
-%     batch_process(i,filePathStr,calibration,workDir,setSample);
+%     j(i)=batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample});
+    batch_process(i,filePathStr,calibration,workDir,setSample);
 end
 
-% delete(myCluster.Jobs);
+%% Wait for each job to finish before quitting matlab
+for i=1:1:length(filePathStr)
+    wait(j(i));
+end
 
 function batch_process(i,filePathStr, calibration, workDir, setSample)
     fileName = filePathStr(i);
@@ -120,21 +129,23 @@ indx=find(strcmp(string(data.Name),'ASI'));
         ASI{i} = data.Data{indx(i)};
         time{i} = unix_to_matlab_time(data.Data{strcmp(string(data.Path),strcat('/',tempStr(2),'/','time'))});
         tLength(i) = length(time{i});
-        asiPlotVar(i).median = median(ASI{i}(:));
-        asiPlotVar(i).mean = mean(ASI{i}(:));
-        asiPlotVar(i).std = std(ASI{i}(:));
+        tempArr = ASI{i}(:);
+        tempArr(tempArr>10000) = nan;
+        asiPlotVar(i).median = nanmedian(tempArr);
+        asiPlotVar(i).mean = nanmean(tempArr);
+        asiPlotVar(i).std = nanstd(tempArr);
     end
 
 [~,maxTimeIndx] = max(tLength);
 mainTime = time{maxTimeIndx};
     if setSample
-        timeArr = round(linspace(1,length(mainTime),50)); %only 50 frames per sample
+        timeArr = round(linspace(1,length(mainTime),min(99,length(mainTime)))); %only 99 frames per sample
     else
         timeArr = 1:1:length(mainTime);
     end
 
     for iTime = timeArr
-        h=figure('visible','off');
+        h=figure('visible','on');
         h=create_figure(h,Fae,flagPixel,datestr(mainTime(iTime)),...
             time,ASI,asiPlotVar,wavelengthStr,pfisrData);         
         if setStoreImage == true
@@ -324,7 +335,11 @@ end
 function h2=plot_DASC_aer_v1(Fae, flagPixel, dataNew, imageSize)
 
 if nargin<4
-    imageSize = max(size(dataNew));
+    %imageSize = max(size(dataNew));
+    imageSize = 512;
+    if max(size(dataNew))>imageSize
+        
+    end
 end
 
 xq = linspace(-90,90,imageSize);
