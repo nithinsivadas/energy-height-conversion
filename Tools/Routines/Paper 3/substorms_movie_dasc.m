@@ -410,7 +410,11 @@ function [az,el,lat,lon,minElFlag] = get_calibration_coordinates(calibration, ti
     minElFlag = calibration.Data{strcmp(string(calibration.Path),minElFlagStr)};
     
     if chosenFileIndx==1
-        az = 180-az';
+        if chosenFileIndx == 2
+            az = 180-az';
+        else
+            az = az';
+        end
         el = el';
         lat = lat';
         lon = lon';
