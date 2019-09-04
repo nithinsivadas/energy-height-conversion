@@ -40,12 +40,16 @@ setSample = true; %% Plot only samples - 50 frames for each substorm
 %%
 myCluster = parcluster("local");
 myCluster.JobStorageLocation = jobDir;
+try
+    delete(myCluster.Jobs);
+catch
+end
 
 for i=1:1:length(filePathStr)
-    j(i) = batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample});
+    batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample});
 %     batch_process(i,filePathStr,calibration,workDir,setSample);
 end
-% delete(myCluster.Jobs);
+
 
 function batch_process(i,filePathStr, calibration, workDir, setSample)
     fileName = filePathStr(i);
@@ -129,7 +133,7 @@ indx=find(strcmp(string(data.Name),'ASI'));
 [~,maxTimeIndx] = max(tLength);
 mainTime = time{maxTimeIndx};
     if setSample
-        timeArr = round(linspace(1,length(mainTime),99)); %only 99 frames per sample
+        timeArr = round(linspace(1,length(mainTime),min(50,length(mainTime)))); %only 50 frames per sample
     else
         timeArr = 1:1:length(mainTime);
     end
