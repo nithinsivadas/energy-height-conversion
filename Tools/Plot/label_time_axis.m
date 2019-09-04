@@ -50,7 +50,7 @@ function [TTick,TTickLim]=label_time_axis(time, setLabel, timeTick, timeMinStr, 
     if setLabel == true
         set(gca,'XTickLabel',{datestr(TTick,'HH:MM')});
         delta = -0.11;
-        txtHandle = text(-0.05, delta, 'UT [HH:MM]','Units','normalized','FontSize',8);
+        txtHandle = text(-0.06, delta, 'UT [HH:MM]','Units','normalized','FontSize',8);
         set(txtHandle, 'HorizontalAlignment','right','VerticalAlignment','middle');
     elseif setLabel == false
         set(gca,'XTickLabel','');

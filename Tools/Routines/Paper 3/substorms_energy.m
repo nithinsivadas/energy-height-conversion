@@ -8,11 +8,19 @@ elseif strcmp(get_computer_name,'aurora1-optiplex-780')
     storeDir = '/media/nithin/PFISR_002_006/Nithin/Data/Paper_3/';
 elseif strcmp(get_computer_name,'scc-lite')
     dataDir = '/projectnb/semetergrp/nithin/Data/';
-    storeDir = '/scratch/nithin/Data/Paper_3/';
+    storeDir = '/scratch/nithin/Data/Paper_3/';    
+    jobDir = '/projectnb/semetergrp/nithin/local_cluster_object';
+    if exist(jobDir,'dir')==7
+        system(['rm -rf ',jobDir,filesep,'*']); 
+    end
 else
 %     error(['Not configured for this computer: ',get_computer_name]);
     dataDir = '/projectnb/semetergrp/nithin/Data/';
     storeDir = '/projectnb/semetergrp/nithin/Data/Paper_3/';
+    jobDir = '/projectnb/semetergrp/nithin/local_cluster_object';
+    if exist(jobDir,'dir')==7
+        system(['rm -rf ',jobDir,filesep,'*']); 
+    end
 end
 
 %% Getting input files

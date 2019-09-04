@@ -67,8 +67,10 @@ end
 
 function y = modSign(x)
     for i=1:1:length(x)
-        if x(i)==0
-            x(i) = +1;
+        for j=1:1:length(x)
+            if x(i,j)==0
+                x(i,j) = +1;
+            end
         end
     end
     y = sign(x);
