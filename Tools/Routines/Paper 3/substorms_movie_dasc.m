@@ -41,21 +41,28 @@ myCluster = parcluster("local");
 myCluster.JobStorageLocation = jobDir;
 
 for i=1:1:length(filePathStr)
-    j(i) = batch(myCluster, @batch_process,0,{i,filePathStr,calibration});
+    j(i) = batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir});
+%     batch_process(i,filePathStr,calibration,workDir);
 end
-wait(j(i));
 
+% delete(myCluster.Jobs);
 
-function batch_process(i,filePathStr, calibration)
+function batch_process(i,filePathStr, calibration, workDir)
     fileName = filePathStr(i);
     tempStr = strsplit(fileName,filesep);
     tempStr1 = strsplit(tempStr(end),'.');
     videoFileName = strcat(tempStr1(1),'.avi');
     imageDir = ['images_',num2str(i)];
     imageLongDir = fullfile(tempStr{1:end-1},imageDir);
+    if isunix
+        imageLongDir = char(strcat(filesep,imageLongDir));
+    end
     [status,~] = create_images(fileName,imageDir, true, calibration); 
     create_video(workDir,imageDir,videoFileName);
+    try
     rmdir(imageLongDir,'s');
+    catch
+    end
 end
 
 
@@ -65,7 +72,11 @@ function [status,imageDir] = create_images(fileName, imageDirName, setStoreImage
 status = 'Failed';
 tempStr = strsplit(fileName,filesep);
 tempStr1 = strsplit(tempStr{end},'_');
-pfisrFile = struct2cell(dir(fullfile(tempStr{1:end-1},strcat(tempStr1{1},"*_pfisrData.h5"))));
+pfisrSearch = fullfile(tempStr{1:end-1},strcat(tempStr1{1},"*_pfisrData.h5"));
+if isunix
+    pfisrSearch = char(strcat(filesep,pfisrSearch));
+end
+pfisrFile = struct2cell(dir(pfisrSearch));
 if ~isempty(pfisrFile(1,:))
    if length(pfisrFile(1,:))>1
        warning('More than one PFISR data file, taking just the first one.');
@@ -92,6 +103,10 @@ end
 [Fae,~,flagPixel] = get_scattered_points(az,el,lat,lon);
 
 imageDir = strcat(fullfile(tempStr{1:end-1}),filesep,imageDirName);
+if isunix
+    imageDir = char(strcat(filesep,imageDir));
+end
+
 data = read_h5_data(fileName);
 indx=find(strcmp(string(data.Name),'ASI'));
 
