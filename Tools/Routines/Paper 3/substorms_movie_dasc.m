@@ -46,10 +46,14 @@ catch
 end
 
 for i=1:1:length(filePathStr)
-    batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample});
+    j(i)=batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample});
 %     batch_process(i,filePathStr,calibration,workDir,setSample);
 end
 
+%% Wait for each job to finish before quitting matlab
+for i=1:1:length(filePathStr)
+    wait(j(i));
+end
 
 function batch_process(i,filePathStr, calibration, workDir, setSample)
     fileName = filePathStr(i);
