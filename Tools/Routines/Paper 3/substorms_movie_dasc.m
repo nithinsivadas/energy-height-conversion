@@ -41,17 +41,16 @@ omni.TotTime = unix_to_matlab_time(h5read(omni.h5File,'/Time'));
 setSample = true; %% Plot only samples - 99 frames for each substorm
 
 %%
-% myCluster = parcluster("local");
-% myCluster.JobStorageLocation = jobDir;
-% try
-%     delete(myCluster.Jobs);
-% catch
-% end
+myCluster = parcluster("local");
+myCluster.JobStorageLocation = jobDir;
+try
+    delete(myCluster.Jobs);
+catch
+end
 
 for i=1:1:length(filePathStr)
-%     j(i)=batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample,omni});
-    i = 4;
-    batch_process(i,filePathStr,calibration,workDir,setSample,omni);
+    j(i)=batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample,omni});
+%     batch_process(i,filePathStr,calibration,workDir,setSample,omni);
 end
 
 %% Wait for each job to finish before quitting matlab
@@ -145,13 +144,13 @@ mainTime = time{maxTimeIndx};
 omni = generate_omni_parameters(omni, mainTime(1), mainTime(end));
 
     if setSample
-        timeArr = round(linspace(1,length(mainTime),min(5,length(mainTime)))); %only 99 frames per sample
+        timeArr = round(linspace(1,length(mainTime),min(50,length(mainTime)))); %only 99 frames per sample
     else
         timeArr = 1:1:length(mainTime);
     end
 
     for iTime = timeArr
-        h=figure('visible','on');
+        h=figure('visible','off');
         h=create_figure(h,Fae,flagPixel,datestr(mainTime(iTime)),...
             time,ASI,asiPlotVar,wavelengthStr,pfisrData,omni);         
         if setStoreImage == true
