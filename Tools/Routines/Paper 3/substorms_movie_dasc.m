@@ -122,7 +122,7 @@ data = read_h5_data(fileName);
 indx=find(strcmp(string(data.Name),'ASI'));
 
     if(~isfolder(imageDir))
-        mkdir(imageDir);
+        mkdir(imageDir);e
     end
     
 
@@ -174,21 +174,21 @@ function h=create_figure(h,...
         if nLambda == 3
             viewMode = 1;
             nX = 3; nY = 2;
-            resize_figure(h,210,250+125);
+            resize_figure(h,210,250+125); hold on;
         elseif nLambda == 1
             viewMode = 3;
             nX = 3; nY = 1;
-            resize_figure(h,110,250+125);
+            resize_figure(h,110,250+125);hold on;
         end
     else
         if nLambda == 3
             viewMode = 2;
             nX = 2; nY = 2;
-            resize_figure(h,210,250);
+            resize_figure(h,210,250);hold on;
         elseif nLambda == 1
             viewMode = 4;
             nX = 2; nY = 1;
-            resize_figure(h,110,250);
+            resize_figure(h,110,250);hold on;
         end 
     end
    
