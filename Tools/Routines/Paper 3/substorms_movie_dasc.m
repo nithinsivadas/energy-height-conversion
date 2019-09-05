@@ -27,6 +27,8 @@ workDir = strcat(storeDir,'WorkDir');
 fileNameList = struct2cell(dir([workDir,strcat(filesep,'*_dascData.h5')]));
 filePathStr = strcat(strcat(workDir,filesep),string(fileNameList(1,:)'));
 h5Calibration = fullfile(storeDir,'DASC_Calibration_Files','dasc_calibration.h5');
+omni.h5File = strcat(dataDir,'omni.h5');
+
 if isempty(filePathStr)
     error('No files in WorkDir');
 end
@@ -34,20 +36,22 @@ if ~isfile(h5Calibration)
     error(['Calibration file not available: ',h5Calibration]);
 end
 calibration = read_h5_data(h5Calibration);
+omni.TotTime = unix_to_matlab_time(h5read(omni.h5File,'/Time'));
 %%
 setSample = true; %% Plot only samples - 99 frames for each substorm
 
 %%
-myCluster = parcluster("local");
-myCluster.JobStorageLocation = jobDir;
-try
-    delete(myCluster.Jobs);
-catch
-end
+% myCluster = parcluster("local");
+% myCluster.JobStorageLocation = jobDir;
+% try
+%     delete(myCluster.Jobs);
+% catch
+% end
 
 for i=1:1:length(filePathStr)
-    j(i)=batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample});
-%     batch_process(i,filePathStr,calibration,workDir,setSample);
+%     j(i)=batch(myCluster, @batch_process,0,{i,filePathStr,calibration,workDir,setSample,omni});
+    i = 4;
+    batch_process(i,filePathStr,calibration,workDir,setSample,omni);
 end
 
 %% Wait for each job to finish before quitting matlab
@@ -55,7 +59,7 @@ for i=1:1:length(filePathStr)
     wait(j(i));
 end
 
-function batch_process(i,filePathStr, calibration, workDir, setSample)
+function batch_process(i,filePathStr, calibration, workDir, setSample, omni)
     fileName = filePathStr(i);
     tempStr = strsplit(fileName,filesep);
     tempStr1 = strsplit(tempStr(end),'.');
@@ -65,7 +69,7 @@ function batch_process(i,filePathStr, calibration, workDir, setSample)
     if isunix
         imageLongDir = char(strcat(filesep,imageLongDir));
     end
-    [status,~] = create_images(fileName,imageDir, true, calibration, setSample); 
+    [status,~] = create_images(fileName,imageDir, true, calibration, setSample, omni); 
     create_video(workDir,imageDir,videoFileName);
     try
     rmdir(imageLongDir,'s');
@@ -75,7 +79,7 @@ end
 
 
 function [status,imageDir] = create_images(fileName, imageDirName, setStoreImage,...
-    calibration, setSample)
+    calibration, setSample, omni)
 
 status = 'Failed';
 tempStr = strsplit(fileName,filesep);
@@ -138,16 +142,18 @@ indx=find(strcmp(string(data.Name),'ASI'));
 
 [~,maxTimeIndx] = max(tLength);
 mainTime = time{maxTimeIndx};
+omni = generate_omni_parameters(omni, mainTime(1), mainTime(end));
+
     if setSample
-        timeArr = round(linspace(1,length(mainTime),min(99,length(mainTime)))); %only 99 frames per sample
+        timeArr = round(linspace(1,length(mainTime),min(5,length(mainTime)))); %only 99 frames per sample
     else
         timeArr = 1:1:length(mainTime);
     end
 
     for iTime = timeArr
-        h=figure('visible','off');
+        h=figure('visible','on');
         h=create_figure(h,Fae,flagPixel,datestr(mainTime(iTime)),...
-            time,ASI,asiPlotVar,wavelengthStr,pfisrData);         
+            time,ASI,asiPlotVar,wavelengthStr,pfisrData,omni);         
         if setStoreImage == true
            export_fig(fullfile(imageDir,strcat('Figure_',datestr(mainTime(iTime),'HH_MM_ss'),'.png')),...
                '-r300','-png','-nocrop');
@@ -159,77 +165,84 @@ end
 
 function h=create_figure(h,...
     Fae,flagPixel,timeStr,time,ASI,asiPlotVar,wavelengthStr,...
-    pfisrData)
+    pfisrData, omni)
   
     p = panel();
-
+   
     nLambda= length(wavelengthStr);
-
-    if nLambda == 3
-        nX = 2;
-        nY = 2;
-        resize_figure(h,210,250);
-        panelHeight = 100; %mm
-        panelBreadth = 100; %mm
-        rowHeights = repmat({{panelHeight}},1,nY);
-        colBreadths = repmat({{panelBreadth}},1,nX);
-        p.pack(rowHeights, colBreadths);
-        p.de.margin = 4;
-               
-        if ~isempty(pfisrData)
-            p(1,2).marginleft=30;
-            try
-            p=plot_pfisr_panels(p, pfisrData, timeStr);
-            catch
-                p(1,2).select();
-                set(gca,'XColor','none','YColor','none');
-            end
-        else
-            p(1,2).select();
-            set(gca,'XColor','none','YColor','none');
+     
+    if ~isempty(pfisrData)
+        if nLambda == 3
+            viewMode = 1;
+            nX = 3; nY = 2;
+            resize_figure(h,210,250+125);
+        elseif nLambda == 1
+            viewMode = 3;
+            nX = 3; nY = 1;
+            resize_figure(h,110,250+125);
         end
-        
-        iLambda = (strcmp(wavelengthStr,'0558'));
-        p(1,1).select();
-        plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
-            iLambda,wavelengthStr,asiPlotVar,pfisrData,'y',1);     
-        
-        iLambda = (strcmp(wavelengthStr,'0428'));
-        p(2,1).select();
-        plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
-            iLambda,wavelengthStr,asiPlotVar,pfisrData,'c',2);
-        
-        iLambda = (strcmp(wavelengthStr,'0630'));
-        p(2,2).marginleft=15;
-        p(2,2).select();
-        plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
-            iLambda,wavelengthStr,asiPlotVar,pfisrData,'m',3);
-        
-    elseif nLambda == 1
-        
-        nX = 2;
-        nY = 1;
-        panelHeight = 100; %mm
-        panelBreadth = 100; %mm
-        rowHeights = repmat({{panelHeight}},1,nY);
-        colBreadths = repmat({{panelBreadth}},1,nX);
-        p.pack(rowHeights, colBreadths);
-        p.de.margin = 4;
-                 
-        if ~isempty(pfisrData)
+    else
+        if nLambda == 3
+            viewMode = 2;
+            nX = 2; nY = 2;
+            resize_figure(h,210,250);
+        elseif nLambda == 1
+            viewMode = 4;
+            nX = 2; nY = 1;
             resize_figure(h,110,250);
-            p(1,2).marginleft=30;
-            p=plot_pfisr_panels(p, pfisrData, timeStr);
-        else
+        end 
+    end
+   
+   
+    panelHeight = 100; %mm
+    panelBreadth = 100; %mm
+    rowHeights = repmat({{panelHeight}},1,nY);
+    colBreadths = repmat({{panelBreadth}},1,nX);
+    p.pack(rowHeights, colBreadths);
+    p.de.margin = 4;
+    
+    %% Plot PFISR   
+    if ~isempty(pfisrData)
+        p(1,2).marginleft=30;
+        try
+        p=plot_pfisr_panels(p, pfisrData, timeStr);
+        catch
             p(1,2).select();
             set(gca,'XColor','none','YColor','none');
-            resize_figure(h,110,135);
         end
+    end
+    
+    %% Plot DASC
+    if nLambda == 3
+    iLambda = (strcmp(wavelengthStr,'0558'));
+    p(1,1).select();
+    plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
+        iLambda,wavelengthStr,asiPlotVar,pfisrData,'y',1);     
+
+    iLambda = (strcmp(wavelengthStr,'0428'));
+    p(2,1).select();
+    plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
+        iLambda,wavelengthStr,asiPlotVar,pfisrData,'c',2);
+
+    iLambda = (strcmp(wavelengthStr,'0630'));
+    p(2,2).marginleft=15;
+    p(2,2).select();
+    plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
+        iLambda,wavelengthStr,asiPlotVar,pfisrData,'m',3);
         
+    elseif nLambda == 1        
         iLambda = 1;
         p(1,1).select();
         plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
             iLambda,wavelengthStr,asiPlotVar,pfisrData,'y',1);
+    end
+    
+    if viewMode == 1 || viewMode == 3
+        p(1,3).marginleft = 30;
+        p = plot_omni_panels(p, omni, timeStr, viewMode);
+    else
+        p(1,2).marginleft = 30;
+        p = plot_omni_panels(p, omni, timeStr, viewMode);
     end
     
 end
@@ -266,6 +279,92 @@ function plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
         catch             
         end
 end
+
+function p=plot_omni_panels(p, omni, timeStr, viewMode)
+            
+            if viewMode == 1 || viewMode == 3
+                ip = 3;
+            else
+                ip = 2;
+            end
+            color2 = [0.6350, 0.0780, 0.1840];
+            color1 = [0, 0, 0];
+            color3 = [0.25, 0.25, 0.25];
+            
+            nX = 1;
+            nY = 4;
+            panelHeight = 20; %mm
+            panelBreadth = 80; %mm
+            rowHeights = repmat({{panelHeight}},1,nY);
+            colBreadths = repmat({{panelBreadth}},1,nX);
+            p(1,ip).pack(rowHeights, colBreadths);
+            p(1,ip).de.margin = 4;
+            
+            closestTimeIndxPFISR = find_time(omni.time,timeStr);
+            x = [omni.time(closestTimeIndxPFISR) , omni.time(closestTimeIndxPFISR)];
+            
+            %% By & Bz
+            p(1,ip,1,1).select();
+            yyaxis left
+            plot(omni.time,omni.BzGSM,'color',color1);
+            ylabel({omni.header.BzGSM,omni.units.BzGSM});
+            hold on;
+            yAlt = get(gca,'YLim');
+            ylim(yAlt);
+            line(x,yAlt,'Color',color3);
+            
+            yyaxis right
+            plot(omni.time,omni.ByGSM,'color',color2);
+            ylabel({omni.header.ByGSM});
+
+            label_time_axis(omni.time, false, 0.5);
+            
+            plt = gca;
+            plt.YAxis(1).Color = color1;
+            plt.YAxis(2).Color = color2;
+
+            %% AE & AL
+            p(1,ip,2,1).select();
+            yyaxis left
+            plot(omni.time,omni.AE,'color',color1);
+            ylabel({omni.header.AE,omni.units.AE});
+            yAlt = get(gca,'YLim');
+            ylim(yAlt);
+            hold on;
+            line(x,yAlt,'Color',color3);
+            
+            yyaxis right
+            plot(omni.time,omni.AL,'color',color2);
+            ylabel({omni.header.AL});
+
+            label_time_axis(omni.time, false, 0.5);
+            
+            plt = gca;
+            plt.YAxis(1).Color = color1;
+            plt.YAxis(2).Color = color2;
+            
+            %% SYM_H
+            p(1,ip,3,1).select();
+            plot(omni.time,omni.SYM_H,'color',color1);
+            ylabel({omni.header.SYM_H,omni.units.SYM_H});
+            yAlt = get(gca,'YLim');
+            ylim(yAlt);
+            label_time_axis(omni.time, false, 0.5);
+            hold on;
+            line(x,yAlt,'Color',color3);
+            
+            %% Psw
+            p(1,ip,4,1).select();
+            plot(omni.time,omni.Psw,'color',color1);
+            ylabel({omni.header.Psw,omni.units.Psw});
+            yAlt = get(gca,'YLim');
+            ylim(yAlt);
+            label_time_axis(omni.time, true, 0.5);
+            hold on;
+            line(x,yAlt,'Color',color3);
+
+end
+
 function p=plot_pfisr_panels(p, pfisrData, timeStr)
             
             nX = 1;
@@ -409,15 +508,48 @@ function [az,el,lat,lon,minElFlag] = get_calibration_coordinates(calibration, ti
     lon = calibration.Data{strcmp(string(calibration.Path),lonDataStr)};
     minElFlag = calibration.Data{strcmp(string(calibration.Path),minElFlagStr)};
     
-    if chosenFileIndx==1
-        if chosenFileIndx == 2
-            az = 180-az';
-        else
-            az = az';
-        end
-        el = el';
-        lat = lat';
-        lon = lon';
-        minElFlag = minElFlag';
-    end
+end
+
+function [omni] = generate_omni_parameters(omni ,timeMin, timeMax)
+    %% Generate maginput from omni.h5
+    % omni structure requires omni.TotTime as input; Total time of the hdf5
+    % file
+    minTimeIndx = find_time(omni.TotTime,datestr(timeMin));
+    maxTimeIndx = find_time(omni.TotTime,datestr(timeMax));
+    deltaTimeIndx = maxTimeIndx - minTimeIndx +1;
+    timeIndx = minTimeIndx:1:maxTimeIndx;
+
+%     omni.header.Kp = "Kp";
+    omni.header.SYM_H = "SYM-H";
+%     omni.header.ProtonDensity = "N_p";
+%     omni.header.Vsw = "V_s_w";
+    omni.header.Psw = "P_s_w";
+    omni.header.ByGSM = "B_y_-_G_S_M";
+    omni.header.BzGSM = "B_z_-_G_S_M";
+    omni.header.AE = "AE";
+    omni.header.AL = "AL";
+%     omni.header.AU = "AU";
+    
+%     omni.units.Kp = "[a.u.]";
+    omni.units.SYM_H = "[nT]";
+%     omni.units.ProtonDensity = "[cm^-^3]";
+%     omni.units.Vsw = "[km.s^-^1]";
+    omni.units.Psw = "[nPa]";
+    omni.units.ByGSM = "[nT]";
+    omni.units.BzGSM = "[nT]";
+    omni.units.AE = "[a.u]";
+    omni.units.AL = "[a.u.]";
+%     omni.units.AU = "[a.u.]";
+    
+%     omni.Kp = h5read(omniH5FileStr, '/Indices/Kp', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.SYM_H = h5read(omni.h5File, '/Indices/SYM_H', [1 minTimeIndx], [1 deltaTimeIndx]);
+%     omni.ProtonDensity = h5read(omniH5FileStr, '/ProtonDensity', [1 minTimeIndx], [1 deltaTimeIndx]);
+%     omni.Vsw = h5read(omniH5FileStr, '/Velocity/V', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.Psw = h5read(omni.h5File, '/FlowPressure', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.ByGSM = h5read(omni.h5File, '/BField/ByGSM', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.BzGSM = h5read(omni.h5File, '/BField/BzGSM', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.AE = h5read(omni.h5File, '/Indices/AE', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.AL = h5read(omni.h5File, '/Indices/AL', [1 minTimeIndx], [1 deltaTimeIndx]);
+%     omni.AU = h5read(omniH5FileStr, '/Indices/AU', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.time = omni.TotTime(timeIndx);
 end
