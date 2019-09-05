@@ -122,7 +122,7 @@ data = read_h5_data(fileName);
 indx=find(strcmp(string(data.Name),'ASI'));
 
     if(~isfolder(imageDir))
-        mkdir(imageDir);e
+        mkdir(imageDir);
     end
     
 
