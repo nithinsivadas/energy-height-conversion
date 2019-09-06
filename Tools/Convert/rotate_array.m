@@ -17,8 +17,8 @@ function [ rotatedArray ] = rotate_array( array, alpha )
 %--------------------------------------------------------------------------
 
 a1 = array - alpha;
-I = find(a1<0);
-a1(I) = 360 + a1(I);
-rotatedArray = a1;
+% I = find(a1<0);
+% a1(I) = 360 + a1(I);
+rotatedArray = wrapTo360(a1);
 end
 

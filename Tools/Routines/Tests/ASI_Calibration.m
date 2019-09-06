@@ -2,8 +2,8 @@
 clear all;
 
 stars=get_star_catalogue;
-fileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\EEA List\20080326.001_bc_15sec-full_v2.h5';
-
+% fileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\EEA List\20080326.001_bc_15sec-full_v2.h5';
+fileStr = 'C:\Users\nithin\Downloads\20080326.001_bc_15sec-full_v2.h5';
 %% Step 1: Estimate Darkest hour
 [totalIntensity,timeArr]=estimate_darkest_frame(fileStr);
 [val,indx]=min(totalIntensity);
@@ -34,8 +34,8 @@ polaris.el = stars.el(polarisIndx);
 
 %% Reading DASC data
 dasc.ASI = read_h5_variable_at_time_v2(fileStr,'/DASC/ASI',[],timeStr);
-dasc.az = (h5read(fileStr,'/DASC/az'))';
-dasc.el = (h5read(fileStr,'/DASC/el'))';
+dasc.az = (h5read(fileStr,'/DASC/azCalData'))';
+dasc.el = (h5read(fileStr,'/DASC/elCalData'))';
 %% Step 2: Identify Hot Pixles
 % Load fits File
 asiPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\20080326\';
@@ -56,7 +56,7 @@ ASI3 = fitsread([asiPath,asi3File]);
 ASINew1 = ASINew1';
 ASINoise1 = ASINoise1';
 background1 = background1';
-
+%%
 figure; 
 imagesc(ASINew);
 colorbar;
@@ -68,7 +68,7 @@ colorbar;
 colormap(get_colormap('k','w'));
 caxis([0 10]); title('ASI noise (Row fit)');
 figure;
-imagesc(background);
+imagesc(background1);
 colorbar;
 colormap(get_colormap('k','w'));
 caxis([200 800]); title('Background with stars removed (Row fits)');
@@ -111,27 +111,39 @@ colormap(get_colormap('k','w'));
 caxis([0 100]); title('ASI with bkgnd removed + noise spikes removed (Col fit)');
 
 %% Step 6: Star extraction 
-faintStarImage = faint_star_extracter(ASINew1, sigma_n);
+[faintStarImage] = faint_star_extracter(ASINew1, sigma_n);
 % Rough removal of noise below 20 pixels
 %
 faintStarImage(faintStarImage <= 20) = 0;
 faintStarImage(1:125,:) = 0;
 faintStarImage(1000:1024,:) = 0;
-
 %%
-brightStarImage = bright_star_extracter(ASINew1, sigma_n);
+% faintStarImageModified = modify_matrix_size(faintStarImage, 512, 512);
+%%
+[brightStarImage] = bright_star_extracter(ASINew1, sigma_n);
 % Rough removal of noise below 20 pixels
 %
 brightStarImage(brightStarImage <= 20) = 0;
 brightStarImage(1:125,:) = 0;
 brightStarImage(1000:1024,:) = 0;
 
+%% Step 7: Extracting the star position and brightness
+
+imstar = extract_stars(faintStarImage);
+
+% Process star position and brightness for astrometry
+astroFileStr = 'G:\My Drive\Research\Projects\Paper 3\Data\StarCalibration\sivadas_astrometry_01.txt';
+dascstar = astrometry_file(imstar,22.5);
+
 %%
 figure; 
-imagesc(faintStarImage);
+h=pcolor(faintStarImage);
+set(h,'EdgeColor','none');
 colorbar;
 colormap(get_colormap('k','w'));
 caxis([0 100]); title('Faint stars (extraction algorithm)');
+hold on;
+scatter(dascstar.location(:,1),dascstar.location(:,2),50*dascstar.brightness/max(dascstar.brightness),'r');
 %%
 figure; 
 imagesc(brightStarImage);
@@ -146,12 +158,18 @@ plot(x,polyval(pRow(i,:),x));
 hold on;
 plot(x,ASI1(i,x));
 % ylim([0,1000]);
+%%
+% change scale of existing az & el
+modAz = modify_matrix_size(dasc.az,1024,1024);
+modEl = modify_matrix_size(dasc.el,1024,1024);
+%%
+realstar = get_actual_stars(stars,22.5, 4, 0, 0, 0, 1); %some problem with realstar
 %% Plotting
 figure;
 colormap(viridis);
 % Plotting all-sky camera image
-indx = dasc.el>0;
-plot_DASC_aer(dasc.ASI(indx), dasc.az(indx), dasc.el(indx), 512);
+indx = modEl>0;
+plot_DASC_aer(ASI1(indx), rotate_array(modAz(indx),0), modEl(indx), 1024, -1);
 hold on; 
 plot_grid_aer([0,90],[22.5],'m');
 % colorbar;
@@ -161,30 +179,222 @@ caxis([300 450]);
 hold on;
 
 % Stars
-starfilter=stars.vmag<3;
-plot_aer_stars(stars.az(starfilter), stars.el(starfilter), stars.relIntensity(starfilter)*50,'r');
+dx = 8;
+dy = +2.5;
+drot = +90;
+
+% starfilter=stars.vmag<4 & stars.el>22.5;
+% [x,y] = get_aer_stars(stars.az(starfilter),stars.el(starfilter), dx, dy, drot, -1);
+% scatter(x,y,stars.relIntensity(starfilter)*50,'r');
+[x,y] = get_aer_stars(realstar.locationAzEl(:,1), realstar.locationAzEl(:,2), dx, dy, drot, -1);
+scatter(x,y,realstar.brightness*30,'r');
 hold on;
-plot_aer_stars(polaris.azStellaris,polaris.elStellaris,10,'w');
+
+plot_aer_stars(polaris.azStellaris,polaris.elStellaris,10,'w', dx, dy, drot, -1);
 hold on;
-plot_aer_star_label(polaris.az, polaris.el, 'Polaris');
+plot_aer_star_label(polaris.az, polaris.el, 'Polaris', [],  dx, dy, drot, -1);
 hold on;
-plot_aer_stars(polaris.azObs, polaris.elObs,10,'c');
+plot_aer_stars(polaris.azObs, polaris.elObs,10,'c', dx, dy, drot, -1);
 
 title(timeStr);
+%%
 
-function plot_aer_stars(az,el,relIntensity,colorStr)
-    x = (90-el).*sind(360-az);
-    y = (90-el).*cosd(az);
+
+%%
+tic
+modAz1=modAz;
+modAz1(modAz1==0) = nan;
+modEl1=modEl;
+modEl1(modEl1==0) = nan;
+
+[dascstar1,x,fval] = calibrate_stars(realstar,dascstar,modAz1, modEl1);
+toc
+x
+fval
+%
+%%
+figure; 
+indx = modEl1>0;
+plot_DASC_aer(faintStarImage(indx), modAz1(indx), modEl1(indx), 1024, 1);
+colorbar;
+colormap(get_colormap('k','w'));
+caxis([0,100]);
+hold on;
+plot_aer_stars(dascstar1.locationAzEl(:,1),dascstar1.locationAzEl(:,2), dascstar1.brightness*20,'r',0,0,0,1);
+
+%%
+figure;
+% indx = modEl>0;
+% plot_DASC_aer(ASI1(indx), rotate_array(modAz(indx),0), modEl(indx), 1024, 1);
+% hold on;
+plot_aer_stars(realstar.locationAzEl(:,1),realstar.locationAzEl(:,2),realstar.brightness*50,'r',0,0,0,1);
+hold on;
+plot_aer_stars(dascstar1.locationAzEl(:,1),dascstar1.locationAzEl(:,2),dascstar1.brightness*10,'b',x(1),x(2),x(3), x(4));
+
+
+
+[azdasc1, eldasc1] = calculate_new_AzEl(dascstar1.locationAzEl(:,1),dascstar1.locationAzEl(:,2),x);
+hold on;
+plot_aer_stars(azdasc1, eldasc1, dascstar1.brightness*10,'g',0,0,0,1);
+%% Everything is working now; 
+%%
+figure;
+colormap(viridis);
+% Plotting all-sky camera image
+[azNew, elNew] = calculate_new_AzEl(modAz1,modEl1,x);
+indx = elNew>0;
+plot_DASC_aer(ASI1(indx), azNew(indx),elNew(indx), 1024, -1);
+hold on; 
+plot_grid_aer([0,90],[22.5],'m');
+% colorbar;
+xlim([-120,+120]);
+ylim([-120,+120]);
+caxis([300 450]);
+hold on;
+
+plot_aer_stars(azdasc1,eldasc1,dascstar1.brightness*50,'r',0,0,0,-1);
+
+hold on;
+plot_aer_stars(realstar.locationAzEl(:,1),realstar.locationAzEl(:,2),realstar.brightness*50,'c',0,0,0,-1);
+title(timeStr);
+
+%% Please carefully replicate it
+
+
+function [azNew, elNew] = calculate_new_AzEl(azOld,elOld,x)
+%     azOld(azOld==0)=nan;
+%     elOld(elOld==0)=nan;
+    [xNew,yNew] = get_aer_stars(azOld,elOld,x(1),x(2),x(3),x(4));
+%     problem.objective = @solveAzEl;
+%     problem.x0 = [0,90];
+%     problem.solver = 'fsolve';
+%     problem.options = optimoptions('fsolve','Display','none');
+%     multiWaitbar('Solving Az El Values',0);
+    azNew = wrapTo360(atan2d(xNew,yNew));
+    elNew = 90 - xNew./(sind(azNew));
     
-    scatter(x,y,relIntensity,colorStr);
-    
+%     di = 1./length(xNew);
+%     for i = 1:1:length(xNew)
+%         for j = 1:1:length(yNew)
+%             xN = xNew(i,j);
+%             yN = yNew(i,j);
+%             if ~isnan(xN) && ~isnan(yN)
+%                 a = fsolve(problem);
+%                 azNew(i,j) = a(1);
+%                 elNew(i,j) = a(2);
+%             else
+%                 azNew(i,j) = nan;
+%                 elNew(i,j) = nan;
+%             end
+%         end
+%         multiWaitbar('Solving Az El Values','Increment',di);
+%         disp(i);
+%     end
+%     
+%     function F = solveAzEl(a)
+%         a(1) = rotate_array(a(1),x(3));
+%         F(1) = x(4).*(90-a(2)).*sind(a(1)) - xN + x(1);
+%         F(2) = (90-a(2)).*cosd(a(1)) - yN + x(2);
+%     end
+%     
+%     azNew = [];
+%     elNew = [];
 end
 
-function plot_aer_star_label(az,el,textString,colorStr)
-    x = (90-el).*sind(360-az);
-    y = (90-el).*cosd(az);
+function [dascstar,x,fval] = calibrate_stars(realstar,dascstar,azOld,elOld)
     
-    if nargin<4
+    dloc = round(dascstar.location);
+    dascstar.brightness = dascstar.brightness./max(dascstar.brightness);
+    lindx = sub2ind(size(azOld),dloc(:,2),dloc(:,1)); %% There was issue, x - column , y - are rows
+    dascstar.locationAzEl = [azOld(lindx), elOld(lindx)];
+    minElFilter = find(dascstar.locationAzEl(:,2)>=22.5);
+    dascstar.locationAzEl = dascstar.locationAzEl(minElFilter,:);
+    dascstar.brightness = dascstar.brightness(minElFilter);
+    dascstar.location = dascstar.location(minElFilter,:);
+    ndasc = length(dascstar.brightness);
+    
+    x0 = [0,0,-90,1];
+    nvars = 4;
+    lb = [-10,-10,-180, -1];
+    ub = [+10,+10,+180,+1];
+    IntCon = 4;
+    
+    pflag = 0;
+    nflag = 0;
+    k = 0;
+    while(pflag == 0 || nflag ==0)
+        k = k+1;
+        [y(k,:),fval(k),exitflag] = ga(@starDistance,nvars,[],[],[],[],lb,ub,[],IntCon);
+        
+        if y(k,4) == -1
+            nflag = 1;
+        end
+        
+        if y(k,4) == 1
+            pflag = 1;
+        end
+    end
+    
+    [~,minIndx] = min(fval);
+    x = y(minIndx,:);    
+    
+    function dmin=starDistance(x)
+        [x1,y1] = get_aer_stars(dascstar.locationAzEl(:,1),dascstar.locationAzEl(:,2),x(1),x(2),x(3),x(4));
+        dascstar.newxy = [x1,y1];
+        D = pdist2(dascstar.newxy,realstar.location(1:ndasc,:));
+        dmin = sum(min(D));
+    end
+
+end
+% 
+% function [x1, y1, az1, el1] = transform_aer(az, el, del, drot, dsign)
+% 
+%     az1 = rotate_array(az, drot);
+%     el1 = el1-
+% 
+% end
+
+
+function realstar = get_actual_stars(stars,elCutOff,magCutOff,dx,dy,drot, dsign)
+    if nargin < 7
+        dsign = 1;
+    end
+
+%     stars.el = abs(stars.el);
+    starfilter=stars.vmag<magCutOff & stars.el>elCutOff;
+    [x,y] = get_aer_stars(stars.az(starfilter), stars.el(starfilter), dx, dy, drot, dsign);
+    realstar.location = [x, y];
+    realstar.brightness = stars.relIntensity(starfilter);
+    realstar.locationAzEl = [stars.az(starfilter), stars.el(starfilter)];
+    [realstar, I] = sort_star(realstar);
+    realstar.locationAzEl = realstar.locationAzEl(I,:);
+end
+
+function [x,y] = get_aer_stars(az,el,dx,dy,drot,dsign)
+    if nargin<6
+        dsign = 1;
+    end
+    az = rotate_array(az,drot);
+    x = dx+dsign*(90-el).*sind(az);
+    y = dy+(90-el).*cosd(az);  
+end
+
+function plot_aer_stars(az,el,relIntensity,colorStr, dx, dy, drot, dsign)
+    if nargin<8
+        dsign = 1;
+    end
+    [x,y] = get_aer_stars(az, el, dx, dy, drot, dsign);
+    scatter(x,y,relIntensity,colorStr);
+end
+
+function plot_aer_star_label(az,el,textString,colorStr, dx, dy, drot, dsign)
+    if nargin<8
+        dsign = 1;
+    end
+
+    [x,y] = get_aer_stars(az, el, dx, dy, drot, dsign);
+    
+    if nargin<4 || isempty(colorStr)
         colorStr = 'r';
     end
     
@@ -261,7 +471,7 @@ function f = fpoly3(p,x)
     f = p(1).*x.^3 + p(2).*x.^2 + p(3).*x + p(4);
 end
 
-function starImage = faint_star_extracter(ASI, sigma_n)
+function [starImage, imstar] = faint_star_extracter(ASI, sigma_n)
     
     mSz = 7;
     MSz = 9;
@@ -275,6 +485,8 @@ function starImage = faint_star_extracter(ASI, sigma_n)
     multiWaitbar('Faint Star Extraction...',0);
     id = 1./size(ASI,1);
      % For faint stars
+     imstar = [];
+%     countStar = 0;
     for i=1:1:size(ASI,1) - MSz
         for j = 1:1:size(ASI,2) - MSz
         M = ASI(i:i+MSz-1,j:j+MSz-1);
@@ -285,8 +497,14 @@ function starImage = faint_star_extracter(ASI, sigma_n)
         mu_in = nanmean(in(:));
         mu_out = nanmean(out(:));
         % Condition
-        if mu_in > 3*sig_n && mu_out < 2*sig_n 
+        if mu_in > 2*sig_n && mu_out < 2*sig_n 
             starImage(i:i+MSz-1,j:j+MSz-1) = M;
+%             countStar = countStar + 1;
+%             imstar.ID(countStar) = countStar;
+%             imstar.image(countStar).M = M;
+%             imstar.brightness(countStar) = sum(M(:));
+%             imstar.x(countStar) = i;
+%             imstar.y(countStar) = j;
         end
         
         end
@@ -295,7 +513,7 @@ function starImage = faint_star_extracter(ASI, sigma_n)
 
 end
 
-function starImage = bright_star_extracter(ASI, sigma_n)
+function [starImage, imstar] = bright_star_extracter(ASI, sigma_n)
     
     mSz = 11;
     MSz = 13;
@@ -308,6 +526,8 @@ function starImage = bright_star_extracter(ASI, sigma_n)
     
     multiWaitbar('Bright Star Extraction...',0);
     id = 1./size(ASI,1);
+    imstar = [];
+%     countStar = 0;
      % For bright stars
     for i=1:1:size(ASI,1) - MSz
         for j = 1:1:size(ASI,2) - MSz
@@ -319,14 +539,68 @@ function starImage = bright_star_extracter(ASI, sigma_n)
         mu_in = nanmean(in(:));
         mu_out = nanmean(out(:));
         % Condition
-        if mu_in > 10*sig_n && mu_out < 0.1*mu_in 
+        if mu_in > 3*sig_n && mu_out < 3*mu_in 
             starImage(i:i+MSz-1,j:j+MSz-1) = M;
+%             countStar = countStar + 1;
+%             imstar.ID(countStar) = countStar;
+%             imstar.image(countStar).M = M;
+%             imstar.brightness(countStar) = sum(M(:));
+%             imstar.x(countStar) = i;
+%             imstar.y(countStar) = j;
         end
         
         end
     multiWaitbar('Bright Star Extraction...','Increment',id);    
     end
 
+end
+
+function imstar = extract_stars(image)
+%% Image should be post all processing
+binaryImage = zeros(size(image));
+binaryImage(image>0)=1;
+[labelImage, numSpots] = bwlabel(binaryImage);
+props = regionprops(labelImage,image,'Centroid','Area','MeanIntensity');
+for i =1:1:numSpots
+    imstar.ID = i;
+    imstar.location(i,:) = props(i).Centroid;
+    imstar.brightness(i) = props(i).Area.*props(i).MeanIntensity;
+end
+imstar.size = size(image);
+end
+
+function newstar = astrometry_file(imstar, el, fileStr)
+    if nargin<3
+        fileStr = [];
+    end
+    FOV  = (90-el)*2;
+    %% Assuming fish eye
+    imLength = imstar.size(1);
+    LengthperElevation = imLength/180;
+    p.min = round(imLength/2) - round(LengthperElevation*FOV/2);
+    p.max = round(imLength/2) + round(LengthperElevation*FOV/2);
+    
+    selectedStarIndx =(imstar.location(:,1)>p.min &...
+        imstar.location(:,1)<p.max & ...
+        imstar.location(:,2)>p.min & ...
+        imstar.location(:,2)<p.max);
+    
+    newstar.location = imstar.location(selectedStarIndx,:);
+    newstar.brightness = imstar.brightness(selectedStarIndx);
+    
+    [newstar, I] = sort_star(newstar);
+
+    
+    if ~isempty(fileStr)
+    dlmwrite(fileStr,round(newstar.location));
+    end
+    
+end
+
+function [newstar, I] = sort_star(newstar)
+    [newstar.brightness, I] = sort(newstar.brightness,'descend');
+    newstar.brightness = newstar.brightness';
+    newstar.location = newstar.location(I,:);
 end
 
 function ASI = remove_noise_spikes(ASI, sigma_n)

@@ -17,8 +17,8 @@ el_all = 0:1:90;
 
 if ~isnan(el)
     for iel = 1:1:length(el)
-        x = (90-el(iel)).*sind(360-az_all);
-        y = (90-el(iel)).*cosd(360-az_all);
+        x = (90-el(iel)).*sind(360-az_all); %Counter clockwise rotation
+        y = (90-el(iel)).*cosd(az_all);
         hold on;
         plot(x,y,colorStr);
         text(max(x),10,[num2str(el(iel)),'^0'],'color',colorStr);
@@ -30,17 +30,17 @@ if ~isnan(az)
     for iaz = 1:1:length(az)
         x = (90-el_all).*sind(360-az(iaz));
         x1 = (90-el_all).*sind(rotate_array(360-az(iaz),180));
-        y = (90-el_all).*cosd(360-az(iaz));
-        y1 = (90-el_all).*cosd(rotate_array(360-az(iaz),180));
+        y = (90-el_all).*cosd(az(iaz));
+        y1 = (90-el_all).*cosd(rotate_array(az(iaz),180));
         hold on;
         plot(x,y,colorStr);
         plot(x1,y1,colorStr);
         [mx,i]=max(abs(x));
         [my,j]=max(abs(y));
-        text((mx+10)*sign_user(x(i)),(my+6)*sign_user(y(j)),[num2str(rotate_array(360-az(iaz),0)),'^0'],'color',colorStr);
+        text((mx+5)*sign_user(x(i)),(my+6)*sign_user(y(j)),[num2str(rotate_array(az(iaz),0)),'^0'],'color',colorStr);
         [mx1,i]=max(abs(x1));
         [my1,j]=max(abs(y1));
-        text((mx1+2)*sign_user(x1(i)),(my1+6)*sign_user(y1(j)),[num2str(rotate_array(rotate_array(360-az(iaz),0),180)),'^0'],'color',colorStr);
+        text((mx1-2)*sign_user(x1(i)),(my1+6)*sign_user(y1(j)),[num2str(rotate_array(rotate_array(az(iaz),0),180)),'^0'],'color',colorStr);
     end
 end    
 end

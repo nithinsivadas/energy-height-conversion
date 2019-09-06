@@ -1,4 +1,4 @@
-function plot_DASC_aer( dataNew, az, el, imageSize )
+function plot_DASC_aer( dataNew, az, el, imageSize, dsign )
 %% plot_DASC_aer.m Plots the All Sky Image in az, el, range coordinates
 %--------------------------------------------------------------------------
 % Input
@@ -20,10 +20,15 @@ function plot_DASC_aer( dataNew, az, el, imageSize )
 % x = (90-el).*sind(rotate_array(az,-90));
 % y = (90-el).*cosd(rotate_array(az,-90)); 
 
-x = (90-el).*sind(az);
+if nargin<5
+    dsign = 1;
+end
+x = dsign*(90-el).*sind(az); % Plots counter-clockwise
 y = (90-el).*cosd(az);
 
-F1 = scatteredInterpolant(x,y,dataNew,'linear','none');
+nanFilter = ~isnan(x) & ~isnan(y);
+
+F1 = scatteredInterpolant(x(nanFilter),y(nanFilter),dataNew(nanFilter),'linear','none');
 
 xq = linspace(-90,90,imageSize);
 yq = linspace(-90,90,imageSize);
