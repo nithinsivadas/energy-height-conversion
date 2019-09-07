@@ -19,7 +19,7 @@ polarisIndx = find(stars.HIP==11767); % Validation star : Polaris
     dasc.sensorLoc(1),dasc.sensorLoc(2),datestr(time,'yyyy/mm/dd HH:MM:ss'));
 
 % Sophesticated calculation of Polaris
-[polaris.azObs,polaris.elObs] = get_star_az_el...
+[polaris.azAccurate,polaris.elAccurate] = get_star_az_el...
     (stars.RA(polarisIndx),stars.DEC(polarisIndx),...
     stars.pmRA(polarisIndx),stars.pmDEC(polarisIndx),stars.parallax(polarisIndx),...
     stars.RV(polarisIndx),time,deg2rad(dasc.sensorLoc(1)),deg2rad(dasc.sensorLoc(2)),dasc.sensorLoc(3));
@@ -43,27 +43,27 @@ asi1File = 'PKR_DASC_0000_20080326_103958.000.FITS';
 asi2File = 'PKR_DASC_0000_20080326_104018.000.FITS';
 asi3File = 'PKR_DASC_0000_20080326_133018.000.FITS';
 
-ASI1 = fitsread([asiPath,asi1File]);
+image1 = fitsread([asiPath,asi1File]);
 ASI2 = fitsread([asiPath,asi2File]);
-ASI3 = fitsread([asiPath,asi3File]);
+image2 = fitsread([asiPath,asi3File]);
 
 
-[hotPixels] = identify_hot_pixels(ASI1, ASI3, 10);
+[hotPixels] = identify_hot_pixels(image1, image2, 10);
 
 %% Step 3: Remove background
-[ASINew,backgroundRow, ASINoise, pRow, muRow, a] = remove_background(ASI1,5);
-[ASINew1,background1, ASINoise1] = remove_background(ASINew');
-ASINew1 = ASINew1';
-ASINoise1 = ASINoise1';
+[image1BkgRemRow, backgroundRow, imRowNoise, pRow, muRow, a] = remove_background(image1,5);
+[image1BkgRem,background1, imColNoise] = remove_background(image1BkgRemRow');
+image1BkgRem = image1BkgRem';
+imColNoise = imColNoise';
 background1 = background1';
 %%
 figure; 
-imagesc(ASINew);
+imagesc(image1BkgRemRow);
 colorbar;
 colormap(get_colormap('k','w'));
 caxis([0 100]); title('ASI with bkgnd removed (Row fit)');
 figure; 
-imagesc(ASINoise);
+imagesc(imRowNoise);
 colorbar;
 colormap(get_colormap('k','w'));
 caxis([0 10]); title('ASI noise (Row fit)');
@@ -74,13 +74,13 @@ colormap(get_colormap('k','w'));
 caxis([200 800]); title('Background with stars removed (Row fits)');
 %%
 figure; 
-imagesc(ASINew1);
+imagesc(image1BkgRem);
 colorbar;
 colormap(get_colormap('k','w'));
 caxis([0 100]); title('ASI with bkgnd removed (Col fit)');
 %%
 figure;
-imagesc(ASINoise1);
+imagesc(imColNoise);
 colorbar;
 colormap(get_colormap('k','w'));
 caxis([0 10]); title('ASI noise (Col fit)');
@@ -92,7 +92,7 @@ caxis([0 50]); title('Background with stars removed (Col fits)');
 
 %% Step 4: Calculate the sigma_n / noise level
 fnoise = @(x) nanstd(x(:));
-totalNoise = ASINoise1+ASINoise;
+totalNoise = imColNoise+imRowNoise;
 totalNoise(totalNoise==0)=nan;
 sigma_n = nlfilter(totalNoise,[9 9],fnoise);
 %%
@@ -103,22 +103,22 @@ colormap(get_colormap('k','w'));
 caxis([0 10]); title('\sigma_n Noise at each pixel');
 
 %% Step 5: Noise spike removal
-ASINew2 = remove_noise_spikes(ASINew1, sigma_n);
+image1NoiseRem = remove_noise_spikes(image1BkgRem, sigma_n);
 figure; 
-imagesc(ASINew2);
+imagesc(image1NoiseRem);
 colorbar;
 colormap(get_colormap('k','w'));
 caxis([0 100]); title('ASI with bkgnd removed + noise spikes removed (Col fit)');
 
 %% Step 6: Star extraction 
-[faintStarImage] = faint_star_extracter(ASINew1, sigma_n);
+[starImage] = faint_star_extracter(image1BkgRem, sigma_n);
 % Rough removal of noise below 20 pixels
 %
-faintStarImage(faintStarImage <= 20) = 0;
-faintStarImage(1:125,:) = 0;
-faintStarImage(1000:1024,:) = 0;
+starImage(starImage <= 20) = 0;
+starImage(1:125,:) = 0;
+starImage(1000:1024,:) = 0;
 %%
-% faintStarImageModified = modify_matrix_size(faintStarImage, 512, 512);
+% faintStarImageModified = modify_matrix_size(starImage, 512, 512);
 %%
 [brightStarImage] = bright_star_extracter(ASINew1, sigma_n);
 % Rough removal of noise below 20 pixels
@@ -129,15 +129,15 @@ brightStarImage(1000:1024,:) = 0;
 
 %% Step 7: Extracting the star position and brightness
 
-imstar = extract_stars(faintStarImage);
+imstarStruct = extract_stars(starImage);
 
 % Process star position and brightness for astrometry
 astroFileStr = 'G:\My Drive\Research\Projects\Paper 3\Data\StarCalibration\sivadas_astrometry_01.txt';
-dascstar = astrometry_file(imstar,22.5);
+dascstar = astrometry_file(imstarStruct,22.5);
 
 %%
 figure; 
-h=pcolor(faintStarImage);
+h=pcolor(starImage);
 set(h,'EdgeColor','none');
 colorbar;
 colormap(get_colormap('k','w'));
@@ -156,7 +156,7 @@ x=a(i).fitRangeIndx;
 figure;
 plot(x,polyval(pRow(i,:),x));
 hold on;
-plot(x,ASI1(i,x));
+plot(x,image1(i,x));
 % ylim([0,1000]);
 %%
 % change scale of existing az & el
@@ -169,7 +169,7 @@ figure;
 colormap(viridis);
 % Plotting all-sky camera image
 indx = modEl>0;
-plot_DASC_aer(ASI1(indx), rotate_array(modAz(indx),0), modEl(indx), 1024, -1);
+plot_DASC_aer(image1(indx), rotate_array(modAz(indx),0), modEl(indx), 1024, -1);
 hold on; 
 plot_grid_aer([0,90],[22.5],'m');
 % colorbar;
@@ -194,7 +194,7 @@ plot_aer_stars(polaris.azStellaris,polaris.elStellaris,10,'w', dx, dy, drot, -1)
 hold on;
 plot_aer_star_label(polaris.az, polaris.el, 'Polaris', [],  dx, dy, drot, -1);
 hold on;
-plot_aer_stars(polaris.azObs, polaris.elObs,10,'c', dx, dy, drot, -1);
+plot_aer_stars(polaris.azAccurate, polaris.elAccurate,10,'c', dx, dy, drot, -1);
 
 title(timeStr);
 %%
@@ -215,7 +215,7 @@ fval
 %%
 figure; 
 indx = modEl1>0;
-plot_DASC_aer(faintStarImage(indx), modAz1(indx), modEl1(indx), 1024, 1);
+plot_DASC_aer(starImage(indx), modAz1(indx), modEl1(indx), 1024, 1);
 colorbar;
 colormap(get_colormap('k','w'));
 caxis([0,100]);
@@ -225,7 +225,7 @@ plot_aer_stars(dascstar1.locationAzEl(:,1),dascstar1.locationAzEl(:,2), dascstar
 %%
 figure;
 % indx = modEl>0;
-% plot_DASC_aer(ASI1(indx), rotate_array(modAz(indx),0), modEl(indx), 1024, 1);
+% plot_DASC_aer(image1(indx), rotate_array(modAz(indx),0), modEl(indx), 1024, 1);
 % hold on;
 plot_aer_stars(realstar.locationAzEl(:,1),realstar.locationAzEl(:,2),realstar.brightness*50,'r',0,0,0,1);
 hold on;
@@ -243,7 +243,7 @@ colormap(viridis);
 % Plotting all-sky camera image
 [azNew, elNew] = calculate_new_AzEl(modAz1,modEl1,x);
 indx = elNew>0;
-plot_DASC_aer(ASI1(indx), azNew(indx),elNew(indx), 1024, -1);
+plot_DASC_aer(image1(indx), azNew(indx),elNew(indx), 1024, -1);
 hold on; 
 plot_grid_aer([0,90],[22.5],'m');
 % colorbar;
@@ -410,13 +410,13 @@ totalIntensity = sum(sum(asi,3),2);
 
 end
 
-function [hotPixels] = identify_hot_pixels(ASI1, ASI2, threshold)
+function [hotPixels] = identify_hot_pixels(image1, ASI2, threshold)
     
     if nargin<3
         threshold = 2;
     end
     
-    temp = ASI1 - ASI2;
+    temp = image1 - ASI2;
     temp2 = temp;
     hotPixels=zeros(size(temp2));
     hotPixels(abs(temp2)<=threshold) = 1;
@@ -424,6 +424,8 @@ function [hotPixels] = identify_hot_pixels(ASI1, ASI2, threshold)
 end
 
 function [ASINew, background, ASINoise, pRow, muRow, a] = remove_background(ASI, nPoly)
+
+% Remove background along the row
 
 if nargin < 2
     nPoly = 3;
@@ -471,7 +473,7 @@ function f = fpoly3(p,x)
     f = p(1).*x.^3 + p(2).*x.^2 + p(3).*x + p(4);
 end
 
-function [starImage, imstar] = faint_star_extracter(ASI, sigma_n)
+function [starImage] = faint_star_extracter(ASI, sigma_n)
     
     mSz = 7;
     MSz = 9;
@@ -485,8 +487,6 @@ function [starImage, imstar] = faint_star_extracter(ASI, sigma_n)
     multiWaitbar('Faint Star Extraction...',0);
     id = 1./size(ASI,1);
      % For faint stars
-     imstar = [];
-%     countStar = 0;
     for i=1:1:size(ASI,1) - MSz
         for j = 1:1:size(ASI,2) - MSz
         M = ASI(i:i+MSz-1,j:j+MSz-1);
@@ -499,12 +499,6 @@ function [starImage, imstar] = faint_star_extracter(ASI, sigma_n)
         % Condition
         if mu_in > 2*sig_n && mu_out < 2*sig_n 
             starImage(i:i+MSz-1,j:j+MSz-1) = M;
-%             countStar = countStar + 1;
-%             imstar.ID(countStar) = countStar;
-%             imstar.image(countStar).M = M;
-%             imstar.brightness(countStar) = sum(M(:));
-%             imstar.x(countStar) = i;
-%             imstar.y(countStar) = j;
         end
         
         end
