@@ -62,12 +62,12 @@ display_image(toggle,image1,[],'Original Image');
 
 %%
 % %%?? Get initial Azimuth - Elevation
-% dasc.az = modify_matrix_size((h5read(fileStr,'/DASC/azCalData'))',1024,1024);
-% dasc.el = modify_matrix_size((h5read(fileStr,'/DASC/elCalData'))',1024,1024);
-% dasc.az(dasc.az==0) = nan;
-% dasc.el(dasc.az==0) = nan;
+dasc.az = modify_matrix_size((h5read(fileStr,'/DASC/azCalData'))',1024,1024);
+dasc.el = modify_matrix_size((h5read(fileStr,'/DASC/elCalData'))',1024,1024);
+dasc.az(dasc.az==0) = nan;
+dasc.el(dasc.az==0) = nan;
 
-[dasc.az, dasc.el] = get_AzEl_grid(size(image1,1));
+% [dasc.az, dasc.el] = get_AzEl_grid(size(image1,1));
 
 %%
 % *Step 4.1. Remove hot pixels* 
