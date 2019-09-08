@@ -1,4 +1,4 @@
-function plot_DASC_aer( dataNew, az, el, imageSize, dsign )
+function h2 = plot_DASC_aer( dataNew, az, el, imageSize, dsign )
 %% plot_DASC_aer.m Plots the All Sky Image in az, el, range coordinates
 %--------------------------------------------------------------------------
 % Input
