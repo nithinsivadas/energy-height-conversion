@@ -1,114 +1,76 @@
-%% This Routines Demos the steps taken for all sky calibration
+function [AZ, EL, accuracy] = calibrate_all_sky_camera(image, image2, time, ...
+    sensorloc, starCatalogueFitFile, toggle)
+%CALIBRATE_ALL_SKY_CAMERA The function takes as input an all sky image,
+%and calibrates its pixel location with stars. 
+% Input
+% image     -  an image matrix
+% time      -  matlab time
+% sensorloc -  [lat, lon, alt] [ deg N, deg E, meters]
+% starCatalogueFile - 'hipparcos_extended_catalogue_J2000.fit'
 
-clear all;
-%% Toggle figures on or off
-%%
-toggle = 1; % ON
-% toggle = 0; % OFF
-%% Step 1: Collect star catalogue
-%%
-starCatFITS = [initialize_root_path,filesep,'energy-height-conversion',...
+% output
+% AZ  -  azimuth matrix
+% EL  -  Elevation matrix
+%   accuracy
+%          ->pixel.mean  - Mean of the distance between the real and calibrated star points
+%          ->pixel.std   - its std deviation
+%          ->angle.mean  - the mean of the angular distance
+%          ->angle.std   - its std deviation
+
+if nargin < 6
+    toggle = false;
+end
+
+if nargin < 5
+    starCatalogueFitFile = [initialize_root_path,filesep,'energy-height-conversion',...
     filesep,'Tools',filesep,'External Tools',filesep,...
-    'skymap',filesep,'hipparcos_extended_catalogue_J2000.fit'];
+    'skymap',filesep,'hipparcos_extended_catalogue_J2000.fit'];    
+end
 
-stars = get_star_catalogue(starCatFITS); % Star catalogue [INPUT]
-%% Step 2: Collect information about the camera
-% Automatically calculating the darkest frame, so that we can use clear sky 
-% for calibration [Will be removed when converting the code to a function]
 
-fileStr = 'C:\Users\nithin\Downloads\20080326.001_bc_15sec-full_v2.h5';
-[totalIntensity,timeArr]=estimate_darkest_frame(fileStr);
-[val,indx]=min(totalIntensity);
-timeStr = datestr(timeArr(indx));
-
-% Get the time of the image
-time = timeArr(indx); % [INPUT]
-
-% Get camera location
-dasc.sensorLoc = h5read(fileStr,'/DASC/sensorloc'); % [INPUT]
-%% Step 3: Calculate star positions at camera location
-% Approximate star position is calculated using the following function
+stars = get_star_catalogue(starCatalogueFitFile);
 
 [stars.az,stars.el] = RADec2AzEl(rad2deg(stars.RA),rad2deg(stars.DEC),...
-    dasc.sensorLoc(1),dasc.sensorLoc(2),datestr(time,'yyyy/mm/dd HH:MM:ss'));
+    sensorloc(1),sensorloc(2),datestr(time,'yyyy/mm/dd HH:MM:ss'));
 
-%% 
-% Storing the location of a known star. In this case: the pole star. 
+display_image(toggle,image,[300 500],'Original Image');
 
-polarisIndx = find(stars.HIP==11767);
-% The index of polaris star in the star catalogue
+[dasc.az, dasc.el] = get_AzEl_grid(size(image,1));
 
-polaris.az = stars.az(polarisIndx);
-polaris.el = stars.el(polarisIndx);
+if ~isempty(image2)
+    [hotPixels] = identify_hot_pixels(image, image2, 10);
+    display_image(toggle,hotPixels,[],'Hot pixles');
+else
+    hotPixels = zeros(size(image));
+end
 
-%% 
-% A more accurate calculation can be made using the following function. 
-% It takes more time though. 
-
-[polaris.azAccurate,polaris.elAccurate] = get_star_az_el...
-    (stars.RA(polarisIndx),stars.DEC(polarisIndx),...
-    stars.pmRA(polarisIndx),stars.pmDEC(polarisIndx),stars.parallax(polarisIndx),...
-    stars.RV(polarisIndx),time,deg2rad(dasc.sensorLoc(1)),deg2rad(dasc.sensorLoc(2)),dasc.sensorLoc(3));
-%% Step 4: Get Image/ FITS File or Matrix
-%%
-asiPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\20080326\';
-asi1File = 'PKR_DASC_0000_20080326_103958.000.FITS';
-image1 = fitsread([asiPath,asi1File]); %% [INPUT]
-%%
-f = display_image(toggle,image1,[300 500],'Original Image');
-resize_figure(f,250,250);
-%% 
-% |Get initial azimuth elevation grid|
-
-[dasc.az, dasc.el] = get_AzEl_grid(size(image1,1));
-%% 
-% *Step 4.1. Remove hot pixels* If one needs to remove hot pixels one can 
-% attach another image that is separated in time
-
-asi2File = 'PKR_DASC_0000_20080326_133018.000.FITS';
-image2 = fitsread([asiPath,asi2File]);
-[hotPixels] = identify_hot_pixels(image1, image2, 10);
-display_image(toggle,hotPixels,[],'Hot pixles');
-%% 
-% *Step 4.2. Remove background* 
-
-[image1BkgRem,backgroundRow, imRowNoise, pRow, muRow, a] = remove_background(image1,5);
+ws = warning('off','all');
+[image1BkgRem,backgroundRow, imRowNoise] = remove_background(image,5);
 display_image(toggle,image1BkgRem,[0 100],'Image with background removed from row');
 display_image(toggle,backgroundRow, [200 800], 'Background with stars removed (After Row fits)');
 display_image(toggle,imRowNoise,[0 10],'Noise (row fit)');
 
+
 [image1BkgRem,background1, imColNoise] = remove_background(image1BkgRem');
+warning(ws);
 image1BkgRem = image1BkgRem';
 imColNoise = imColNoise';
 background1 = background1'; %Background of the image i.e. without the stars.
 display_image(toggle, image1BkgRem, [0 100], 'Image with background removed from row and column');
 display_image(toggle,background1, [0 50], 'Background with stars removed (After Row and Col fits)');
 display_image(toggle,imColNoise,[0 10],'Noise (col fit)');
-%% 
-% *Step 4.3. Calculate noise at each pixel*
 
 fnoise = @(x) nanstd(x(:));
 totalNoise = imColNoise+imRowNoise;
 totalNoise(totalNoise==0)=nan;
 sigma_n = nlfilter(totalNoise,[9 9],fnoise); % calculating std deviation from neighbouring pixels!
 display_image(toggle, sigma_n, [0 10], '\sigma_n Noise at each pixel');
-%% 
-% *Step 4.4. Removing noise spikes*
-
-image1NoiseRem = remove_noise_spikes(image1BkgRem, sigma_n);
-display_image(toggle, image1NoiseRem, [0 100], 'Image with bkg and noise removed');
-%% 
-% *Step 4.5. Removing hot pixels* See step 4.1
 
 image1BkgRem(logical(hotPixels(:)))= nan;
-%% Step 5: Extract stars
-%%
+
 starImage = faint_star_extracter(image1BkgRem, sigma_n);
 starImage(starImage <= 20) = 0;
-%%
 display_image(toggle, starImage, [0 100], 'Stars extracted');
-%% 
-% *Step 5.1. Extract stars*
 
 imstarStruct = extract_stars(starImage);
 dascstar = filter_stars(imstarStruct, 22.5); % remove points in the corners of the image
@@ -117,14 +79,11 @@ if toggle == 1
     scatter(dascstar.location(:,1), dascstar.location(:,2),20*dascstar.brightness, 'r');
     legend('Extracted stars', 'Centroid');
 end
-%% 
-% *Step 5.2. Get real stars in the above format*
 
 realstar = get_actual_stars(stars, 22.5, 4, 0, 0, 0, 1);
-%% Step 6: Calibrate stars from camera with stars from the star chart
-%%
-[dascstarCal,calPar,fval,acc] = calibrate_stars(realstar,dascstar,dasc.az, dasc.el);
-%%
+
+[dascstarCal,calPar,fval] = calibrate_stars(realstar,dascstar,dasc.az, dasc.el);
+
 if toggle == 1
     figure;
     plot_aer_stars(realstar.locationAzEl(:,1), realstar.locationAzEl(:,2),...
@@ -135,26 +94,32 @@ if toggle == 1
         calPar(1), calPar(2), calPar(3), calPar(4), calPar(5));
     legend('Star chart','From calibrated parameters');
 end
-%% 
-% Step 6.1: Transform the stars identified from image to new Az El values
 
 [dascStarAz, dascStarEl] = calculate_new_AzEl(dascstarCal.locationAzEl(:,1),...
     dascstarCal.locationAzEl(:,2),calPar);
+
 if toggle == 1
     hold on;
     plot_aer_stars(dascStarAz, dascStarEl, dascstarCal.brightness*30, 'g', 0, 0, 0, 1);
     legend('From star chart','From calibrated parameters','From new az-el grid');
 end
-%% Step 7: Rotate the initial Az-El stencil according to the above calibrated parameters
-%%
+
 [dasc.azCal, dasc.elCal] = calculate_new_AzEl(dasc.az,dasc.el,calPar);
 
+  
+    AZ = dasc.azCal;
+    EL = dasc.elCal;
+
+    accuracy = accuracy_of_star_calibration([dascStarAz,dascStarEl],...
+        realstar.locationAzEl,AZ,EL);
+    
+    
 if toggle == 1
     indx = dasc.elCal>0;
     h = figure;
     resize_figure(h,250,250);
     dsign = -1;
-    p(1) = plot_DASC_aer(image1(indx), dasc.azCal(indx), dasc.elCal(indx), 1024, dsign);
+    p(1) = plot_DASC_aer(image(indx), dasc.azCal(indx), dasc.elCal(indx), 1024, dsign);
     colorbar;
     colormap(get_colormap('k','w'));
     xlim([-120,+120]);
@@ -172,27 +137,21 @@ if toggle == 1
     hold on;
     plot_star_names(realstar, 8, 'w', 0, 0, 0, dsign);
     legend([p(1), p(2), p(3)], 'Calibrated image','Star chart','Stars from calibrated grid');
-    title(timeStr);
-    accuracy = (median(min(pdist2([dascStarAz,dascStarEl],...
-        realstar.locationAzEl(1:length(dascStarAz),:)))));
+    title(datestr(time));
     text(-90,-90,['Accuracy : ~',...
-        num2str(accuracy,2),'°']);
+        num2str(accuracy.angle.mean,2),'° +/- ',num2str(accuracy.angle.std,2),'°']);
+    text(-90,-98,['                 ~',...
+        num2str(accuracy.pixel.mean,2),'px +/- ',num2str(accuracy.pixel.std,2),'px']);
 end
-%% Functions
-%%
-function [totalIntensity,timeArr]=estimate_darkest_frame(h5FileStr)
 
-asi = permute(h5read(h5FileStr,'/DASC/ASI'),[3 2 1]);
-timeArr = unixtime2matlab((h5read(h5FileStr,'/DASC/time'))');
-totalIntensity = sum(sum(asi,3),2);
+
 
 end
-%% 
-% 
+
 
 function f = display_image(toggle,image,clim,titleStr)
 
-if toggle==1
+if toggle
     
     if nargin<4
         titleStr = '';
@@ -211,6 +170,7 @@ if toggle==1
 end
 
 end
+
 %% 
 % 
 
@@ -435,27 +395,6 @@ realstar.name = realstar.name(I);
 end
 %% 
 % 
-function [y,y1,y2,f1,f2] = radius_with_distortion(el,scale,transition)
-    % This function calculates the projected radius of an elevation 
-    % by assuming a quadratic function at small radisu and linear farther
-    % away. 
-    
-    r = 90-el;
-    scale = 90 - scale;
-    
-    s = @(x) 1./(1+exp(-transition*(x-scale)));  
-
-    % Linear *dominant when r is large*
-    y1 = (1-s(r));
-    f1 = r/90;
-    
-    % Quadratic/parabola *dominanat when r~0* 
-    y2 = s(r);
-    f2 =1-(1-r./90).^2;
-    
-    y  = 90.*(y1.*f1 + y2.*f2);
-end
-
 function [x,y] = get_aer_stars(az, el, dx, dy, drot, dsign, dr, k, k0)
 if nargin <9
     k0 = 5; % k0 is an unused parameter.
@@ -555,91 +494,6 @@ end
         dmin = sum(min(D));
     end
 
-end
-
-function [dascstar,x,fval,accuracy] = calibrate_stars_v2(realstar,dascstar,azOld,elOld)
-dloc = round(dascstar.location);
-dascstar.brightness = dascstar.brightness./max(dascstar.brightness);
-lindx = sub2ind(size(azOld),dloc(:,2),dloc(:,1));
-%                            rows(y)   cols(x)
-dascstar.locationAzEl = [azOld(lindx), elOld(lindx)];
-minElFilter = find(dascstar.locationAzEl(:,2)>=22.5);
-dascstar.locationAzEl = dascstar.locationAzEl(minElFilter,:);
-dascstar.brightness = dascstar.brightness(minElFilter);
-dascstar.location = dascstar.location(minElFilter,:);
-ndasc = length(dascstar.brightness);
-starIndx = true(1,ndasc);
-
-% dx, dy translation of center point
-% drot - rotation along azimuth
-% dr - is field of view (radius)
-% k - radial distortion - scale
-% k0 - transition
-%     dx   dy   drot    dr     k =0  k0
-lb = [-10, -10, -180,  -0.1];
-ub = [+10, +10, +180,  +0.1];
-nvars = 4;
-options = optimoptions('ga');
-%,'MaxGenerations',2000,'MaxStallGenerations',500
-dsign = [-1, +1];
-for k = 1:2
-    [y(k,:),fval(k),exitflag] = ga(@starDistance,nvars,[],[],[],[],...
-        lb,ub,[],options);
-end
-
-[~,minIndx] = min(fval);
-x = [y(minIndx,1), y(minIndx,2), y(minIndx,3), dsign(minIndx),...
-    y(minIndx,4), 0, 5];
-
-% Removing planets and other objects not in the star database
-[x2, y2] = get_aer_stars(dascstar.locationAzEl(:,1),...
-    dascstar.locationAzEl(:,2),x(1),x(2),x(3),x(4),x(5));
-D2 = pdist2([x2, y2], realstar.location(1:ndasc,:));
-dmin2 = min(D2');
-unmatchedObjects = dmin2 > 1; %Objects do not match if greater than 1 deg off
-nMatched = sum(~unmatchedObjects);
-accuracy = median(dmin2);
-if nMatched>10 && accuracy<1
-    starIndx = ~unmatchedObjects;
-    k = minIndx;
-    [dascStarAz, dascStarEl] = calculate_new_AzEl(dascstar.locationAzEl(:,1),...
-    dascstar.locationAzEl(:,2),x);
-    %     dx   dy   drot    dr     k =0  k0
-    lb = [ -1,  -1,   -1,  -0.01,   0   , -0.1];
-    ub = [ +1,  +1,   +1,  +0.01,   1  , 0.1 ];
-    nvars = 6;
-    [y2, fval(3), ~] = ga(@starDistance_v2,nvars,[],[],[],[],...
-        lb,ub,[],options);
-    if fval(3)<fval(minIndx)
-        x = [y2(1,1), y2(1,2), y2(1,3), dsign(minIndx), y2(1,4), y2(1,5), y2(1,6)];
-    end
-else
-    if nMatched<10
-    disp(['Number of stars available should be more than 10. N = ',...
-        num2str(nMatched),'. Redoing the calculation']);
-    end
-    if accuracy>1
-        disp(['Accuracy is not good enough, it is ~ ', num2str(accuracy,2),...
-            '. Redoing the calculation']);
-    end
-    [dascstar,x,fval] = calibrate_stars(realstar,dascstar,azOld,elOld);
-end
-
-    function dmin=starDistance(x)
-        [x1,y1] = get_aer_stars(dascstar.locationAzEl(starIndx,1),...
-            dascstar.locationAzEl(starIndx,2),x(1),x(2),x(3),dsign(k),x(4));
-        dascstar.newxy = [x1,y1];
-        D = pdist2(dascstar.newxy,realstar.location(1:sum(starIndx),:));
-        dmin = sum(min(D));
-    end
-
-    function dmin=starDistance_v2(x)
-        [x1,y1] = get_aer_stars(dascStarAz(starIndx),...
-            dascStarEl(starIndx),x(1),x(2),x(3),dsign(k),x(4),x(5),x(6));
-        dascstar.newxy = [x1,y1];
-        D = pdist2(dascstar.newxy,realstar.location(1:sum(starIndx),:));
-        dmin = sum(min(D));
-    end
 end
 
 %% 

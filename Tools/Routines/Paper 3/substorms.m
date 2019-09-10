@@ -1,6 +1,6 @@
 %% Substorms in the vicinity of PFISR
 % Find SuperMag Substorms and PFISR conjunctions
-
+% Download digital all sky camera data. 
 %% Initialization
 if strcmp(get_computer_name,'nithin-carbon')
     dataDir = 'G:\My Drive\Research\Projects\Data\';

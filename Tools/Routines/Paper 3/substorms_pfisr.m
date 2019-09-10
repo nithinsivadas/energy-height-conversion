@@ -1,6 +1,7 @@
 %% Substorms in the vicinity of PFISR
 % Find SuperMag Substorms and PFISR conjunctions
-
+% Calculate and store data - electron density, conductivity and energy flux
+% from already existing PFISR data files in a folder. 
 %% Initialization
 if strcmp(get_computer_name,'nithin-carbon')
     dataDir = 'G:\My Drive\Research\Projects\Data\';
@@ -29,6 +30,7 @@ outputh5Suffix = 'pfisrData.h5';
 % Substorms at PFISR [IMPORTANT]
 Dmlt = 2;
 Dmlat = 1;
+minAlt = 40; % Process electron densities down to 40 km, and not below that. 
 
 % Poker Flat geolocation
 pkrGLAT = 65.126;
@@ -70,7 +72,7 @@ for i = 1:1:length(rawFileListStr)
     maxTime = stormTime+hours(1);
     outputPrefix = num2str(T4.stormID(stormIDIndx(k)));
     write_ne_to_h5_v2(outputPrefix, outputh5Suffix, rawFileListStr(i),storeDir,...
-        minTime, maxTime, stormTime);
+        minTime, maxTime, stormTime, minAlt);
     end
 end
 
@@ -216,10 +218,10 @@ end
 
 
 function write_ne_to_h5_v2(outputPrefix,outputh5Suffix,rawFileStr,storeDir,...
-    minTime,maxTime,stormTime)
+    minTime,maxTime,stormTime,minAlt)
  
     % specific data structure written to h5 file
-    data = extract_ne_from_raw_h5(rawFileStr);
+    data = extract_ne_from_raw_h5(rawFileStr,minAlt);
     minTimeIndx = find_time(data.time,datestr(minTime));
     maxTimeIndx = find_time(data.time,datestr(maxTime));
     tIndx = minTimeIndx:1:maxTimeIndx;
@@ -255,10 +257,10 @@ function write_ne_to_h5_v2(outputPrefix,outputh5Suffix,rawFileStr,storeDir,...
     
 end
 
-function write_ne_to_h5(outputh5Suffix,rawFileStr,storeDir)
+function write_ne_to_h5(outputh5Suffix,rawFileStr,storeDir,minAlt)
  
     % specific data structure written to h5 file
-    data = extract_ne_from_raw_h5(rawFileStr);
+    data = extract_ne_from_raw_h5(rawFileStr,minAlt);
     tempStr = strsplit(rawFileStr,filesep);
     tempStr = strsplit(tempStr(end),'_');
     expID = tempStr(1);
@@ -288,19 +290,37 @@ function write_ne_to_h5(outputh5Suffix,rawFileStr,storeDir)
     
 end
 
-function data = extract_ne_from_raw_h5(rawFileStr)
+function data = extract_ne_from_raw_h5(rawFileStr, minAlt)
     
     tempData = read_amisr(rawFileStr);
     data.electronDensity = permute(tempData.electronDensity(:,tempData.magBeamNo,:),[3 1 2]);
     data.altitude = tempData.altitude(:,tempData.magBeamNo)';
     data.time = tempData.time(1,:)';
+    try
     data.dNeFrac = permute(tempData.dNeFrac(:,tempData.magBeamNo,:),[3 1 2]);
+    catch ME
+    end
     data.range = tempData.range(:,tempData.magBeamNo)';
     data.az = tempData.az(:,tempData.magBeamNo)';
     data.el = tempData.el(:,tempData.magBeamNo)';
     [data.lat,data.lon,data.alt] = aer2geodetic(data.az,data.el,data.range,...
         tempData.site.latitude,tempData.site.longitude,tempData.site.altitude/1000,wgs84Ellipsoid('km'));
     data.site = tempData.site;
+    
+        %% Trim lower limit of altitude appropriately
+    altIndx = find_altitude(data.alt,minAlt); % km
+    indx = altIndx:1:length(data.alt);
+    
+    data.electronDensity=data.electronDensity(:,indx);
+    data.altitude=data.altitude(1,indx);
+    data.dNeFrac=data.dNeFrac(:,indx);
+    data.range = data.range(1,indx);
+    data.az = data.az(1,indx);
+    data.el = data.el(1,indx);
+    data.lat = data.lat(1,indx);
+    data.lon = data.lon(1,indx);
+    data.alt = data.alt(1,indx);
+    
 end
 
 function rawFileListStr = select_PFISR_raw_data(storeDir)
