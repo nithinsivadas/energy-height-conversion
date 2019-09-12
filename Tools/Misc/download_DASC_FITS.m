@@ -46,7 +46,7 @@ if isdir(localStorePath)
     if isunix
     [status,cmdout]=unix(['aria2c -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
     else
-    [status,cmdout]=system(['aria2c -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
+    [status,cmdout]=system(['aria2c -V -c -j 50 ','-d "',localStorePath,'" -i "',urlFilePath,'"']);
     end
 
 else
