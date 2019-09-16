@@ -46,6 +46,9 @@ data.description.name = {'Star Name'};
 data.description.angularRadius = {'Angular Radius 1sigma','Unit: deg'};
 data.description.relIntensity = {'Relative intenisty of stars','I2/I1 - calculated from 10^0.4(m1-m2)'};
 
+%% Calculating planets
+
+
 
 end
 

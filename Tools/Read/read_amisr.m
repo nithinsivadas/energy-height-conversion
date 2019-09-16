@@ -31,6 +31,8 @@ data.time = unix_to_matlab_time(double(h5read(fileNameStr,'/Time/UnixTime'))); %
 % data.electronDensity(data.electronDensity<0)=10^6; %this isn't a good idea
 if ish5dataset(fileNameStr,'/NeFromPower/dNeFrac')
     data.dNeFrac = h5read(fileNameStr,'/NeFromPower/dNeFrac'); % Fractional error in Ne
+    data.dNeFrac = interp_nans(data.dNeFrac);
+    data.dNeFrac = data.dNeFrac.*data.electronDensity;
 elseif ish5dataset(fileNameStr,'/NeFromPower/errNe_NoTr')
     data.dNeFrac = h5read(fileNameStr,'/NeFromPower/errNe_NoTr'); % Fractional error in Ne
 else

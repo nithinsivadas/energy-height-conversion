@@ -3,7 +3,7 @@
 clear all;
 %% Toggle figures on or off
 %%
-toggle = 1; % ON
+toggle = 0; % ON
 % toggle = 0; % OFF
 %% Step 1: Collect star catalogue
 %%
@@ -55,8 +55,10 @@ asiPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\20080326\';
 asi1File = 'PKR_DASC_0000_20080326_103958.000.FITS';
 image1 = fitsread([asiPath,asi1File]); %% [INPUT]
 %%
-f = display_image(toggle,image1,[300 500],'Original Image');
-resize_figure(f,250,250);
+if toggle == 1
+    f = display_image(toggle,image1,[300 500],'Original Image');
+    resize_figure(f,250,250);
+end
 %% 
 % |Get initial azimuth elevation grid|
 
@@ -148,7 +150,7 @@ end
 %% Step 7: Rotate the initial Az-El stencil according to the above calibrated parameters
 %%
 [dasc.azCal, dasc.elCal] = calculate_new_AzEl(dasc.az,dasc.el,calPar);
-
+%%
 if toggle == 1
     indx = dasc.elCal>0;
     h = figure;

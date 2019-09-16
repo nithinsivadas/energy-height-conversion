@@ -21,7 +21,7 @@ if nargin < 6
     toggle = false;
 end
 
-if nargin < 5
+if nargin < 5 || isempty(starCatalogueFitFile)
     starCatalogueFitFile = [initialize_root_path,filesep,'energy-height-conversion',...
     filesep,'Tools',filesep,'External Tools',filesep,...
     'skymap',filesep,'hipparcos_extended_catalogue_J2000.fit'];    
@@ -197,6 +197,7 @@ if nargin < 2
 end
 
 % ASINew, background
+imageSize = size(ASI,1);
 rowIndx = 1:1:size(ASI,2);
 colIndx = 1:1:size(ASI,1);
 ASINew = zeros(size(ASI));
@@ -207,8 +208,8 @@ pRow = zeros([length(rowIndx),nPoly+1]);
 % First iteration
 for ifit = 1:2
     for i = rowIndx
-        lchord = sqrt(512.^2-(abs(512-i)).^2);
-        fitRangeIndx =512-round(lchord)+1:1:512+round(lchord);
+        lchord = sqrt((imageSize.*0.5).^2-(abs((imageSize.*0.5)-i)).^2);
+        fitRangeIndx =(imageSize.*0.5)-round(lchord)+1:1:(imageSize.*0.5)+round(lchord);
         x = colIndx(fitRangeIndx);
         y = ASItemp(i,fitRangeIndx);
         if length(fitRangeIndx)>10

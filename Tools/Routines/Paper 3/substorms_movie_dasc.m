@@ -104,7 +104,7 @@ if ~isempty(pfisrFile(1,:))
    pfisrData.sigmaP = h5read(h5pfisr,'/conductivity/pederson');
    pfisrData.lat = h5read(h5pfisr,'/lat');
    pfisrData.lon = h5read(h5pfisr,'/lon');
-   pfisrData.point.x = (90-pfisrData.el(1)).*sind(pfisrData.az(1));
+   pfisrData.point.x = -1.*(90-pfisrData.el(1)).*sind(pfisrData.az(1));
    pfisrData.point.y = (90-pfisrData.el(1)).*cosd(pfisrData.az(1));
 else
    pfisrData = [];
@@ -174,21 +174,21 @@ function h=create_figure(h,...
         if nLambda == 3
             viewMode = 1;
             nX = 3; nY = 2;
-            resize_figure(h,210,250+125); hold on;
+            resize_figure(h,210,250+125);
         elseif nLambda == 1
             viewMode = 3;
             nX = 3; nY = 1;
-            resize_figure(h,110,250+125);hold on;
+            resize_figure(h,110,250+125);
         end
     else
         if nLambda == 3
             viewMode = 2;
             nX = 2; nY = 2;
-            resize_figure(h,210,250);hold on;
+            resize_figure(h,210,250);
         elseif nLambda == 1
             viewMode = 4;
             nX = 2; nY = 1;
-            resize_figure(h,110,250);hold on;
+            resize_figure(h,110,250);
         end 
     end
    
@@ -250,7 +250,7 @@ end
 function plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
     iLambda,wavelengthStr,asiPlotVar,pfisrData,colorStr,turn)
         
-        set(gca,'XColor','none','YColor','none');
+        set(gca,'XColor','none','YColor','none','ColorScale','log');
         try
         closestTimeIndx = find_time(time{iLambda},timeStr);
         image = ASI{iLambda}(closestTimeIndx,:,:);
@@ -267,7 +267,8 @@ function plot_dasc_color(time,timeStr,Fae,flagPixel,ASI,...
             'Units','normalized','HorizontalAlignment','right','VerticalAlignment','bottom');
         colormap(gca,get_colormap('k',colorStr));
         
-        cmax = min(ceil(asiPlotVar(iLambda).mean+asiPlotVar(iLambda).std),imean+4*istd);
+%         cmax = min(ceil(asiPlotVar(iLambda).mean+asiPlotVar(iLambda).std),imean+4*istd);
+        cmax = imean + 3*istd;
         
         caxis([floor(asiPlotVar(iLambda).median), cmax]);       
         c = colorbar_thin();
@@ -439,12 +440,13 @@ end
 
 function h2=plot_DASC_aer_v1(Fae, flagPixel, dataNew, imageSize)
 
+
 if nargin<4
-    %imageSize = max(size(dataNew));
-    imageSize = 512; %%?? Only as long as we don't have the right calibration files
-    if max(size(dataNew))>imageSize
-        dataNew = modify_matrix_size(squeeze(dataNew),imageSize,imageSize);
-    end
+    imageSize = max(size(dataNew));
+%     imageSize = 512; %%?? Only as long as we don't have the right calibration files
+%     if max(size(dataNew))>imageSize
+%         dataNew = modify_matrix_size(squeeze(dataNew),imageSize,imageSize);
+%     end
 end
 
 xq = linspace(-90,90,imageSize);
@@ -470,8 +472,10 @@ hold on; text(-85,65,'E');
 
 end
 
-function [Fae,Fll,flagPixel] = get_scattered_points(az,el,lat,lon,elMin)
-
+function [Fae,Fll,flagPixel] = get_scattered_points(az,el,lat,lon,elMin,dsign)
+if nargin<6
+    dsign = -1;
+end
 if nargin<5 || isempty(elMin)
     elMin = 15;
 end
@@ -479,7 +483,7 @@ end
 nanIndx = isnan(lat)|isnan(lon);
 flagPixel = el>elMin & ~nanIndx;
 
-x = (90-el).*sind(az);
+x = dsign.*(90-el).*sind(az);
 y = (90-el).*cosd(az);
 
 Fae = scatteredInterpolant(x(flagPixel),y(flagPixel),zeros(length(x(flagPixel)),1),'linear','none');
