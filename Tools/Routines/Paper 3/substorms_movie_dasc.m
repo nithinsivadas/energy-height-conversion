@@ -144,7 +144,7 @@ mainTime = time{maxTimeIndx};
 omni = generate_omni_parameters(omni, mainTime(1), mainTime(end));
 
     if setSample
-        timeArr = round(linspace(1,length(mainTime),min(99,length(mainTime)))); %only 99 frames per sample
+        timeArr = round(linspace(1,length(mainTime),min(100,length(mainTime)))); %only 99 frames per sample
     else
         timeArr = 1:1:length(mainTime);
     end
