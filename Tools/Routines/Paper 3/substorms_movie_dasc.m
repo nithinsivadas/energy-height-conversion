@@ -41,7 +41,7 @@ omni.TotTime = unix_to_matlab_time(h5read(omni.h5File,'/Time'));
 setSample = true; %% Plot only samples - 99 frames for each substorm
 
 %%
-myCluster = parcluster("local");
+myCluster = parcluster("ibatch");
 myCluster.JobStorageLocation = jobDir;
 try
     delete(myCluster.Jobs);
