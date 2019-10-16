@@ -27,7 +27,7 @@ if runGEOPACK_RECALC == true
     GEOPACK_RECALC(year(t),day(t,'dayofyear'),hour(t),minute(t),second(t));
 end
 [~,~,~,XX,YY,ZZ,~] = GEOPACK_TRACE (xGSM(1),xGSM(2),xGSM(3),...
-    DIR,RLIM,1,IOPT,PARMOD,EXNAME,INNAME);
+    DIR,RLIM,1+stop_alt./6371,IOPT,PARMOD,EXNAME,INNAME);
 
 xGDZ = onera_desp_lib_coord_trans([XX',YY',ZZ'],[2 0],thisTime);
 Xfoot(1) = interp1(xGDZ(:,1),xGDZ(:,1),stop_alt);

@@ -181,6 +181,11 @@ function [ data, input ] = get_conductivity_v2( alt, electronDensity,...
 % Electron-ion collision frequency
 %   v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(34 + 4.18.*log(((Te.^3)./(ne.*(10^-6))))); % Michael C Kelley
     v_ei = ((ne.*(10^-6)).*Te.^-1.5).*(59 + 4.18.*log10(((Te.^3).*(ne)).^3)); %Michel C Kelley?
+    %%%%%%%%%%%
+    % log10(((Te.^3).*(ne)).^3)) this term will result in an imaginary
+    % electron-ion collision frequency because of the unphysical negative
+    % electron densities. 
+    %%%%%%%%%%%
 %     v_ei_1=  54.5*(ne.*(10^-6).*Te.^-1.5).*(C(:,1).*q_i(1).^2 + C(:,2).*q_i(2).^2 + C(:,3).*q_i(3).^2);
 
 % Electron collision frequency

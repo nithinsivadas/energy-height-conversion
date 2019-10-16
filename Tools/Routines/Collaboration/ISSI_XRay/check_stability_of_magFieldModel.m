@@ -1,13 +1,13 @@
 %%
 clear variables
-% magFieldModel=7; %TS96 
-% xmmOutputFileStr = 'xmm_eq_magnetic_point_TS96 - Copy.dat';
-% c4OutputFileStr = 'c4_eq_magnetic_point_TS96 - Copy.dat';
+magFieldModel=7; %TS96 
+xmmOutputFileStr = 'xmm_eq_magnetic_point_TS96 - Copy.dat';
+c4OutputFileStr = 'c4_eq_magnetic_point_TS96 - Copy.dat';
 % parobj=parpool;
 % 
-magFieldModel=9; %TS01 
-xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01 - Copy.dat';
-c4OutputFileStr = 'c4_eq_magnetic_point_TS01 - Copy.dat';
+% magFieldModel=9; %TS01 
+% xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01.dat';
+% c4OutputFileStr = 'c4_eq_magnetic_point_TS01.dat';
 
 if ispc
     xmmDataFolder = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
@@ -25,32 +25,32 @@ end
 % timeMinC4 = datenum('2001-01-09 15:23:00');
 % timeMaxC4 = datenum('2015-04-30 23:59:00');
 % 
-timeMinXMM = datenum('2001-01-09 15:23:00');
-timeMaxXMM = datenum('2001-01-10 09:29:00');
-timeMinC4 = datenum('2001-01-09 15:23:00');
-timeMaxC4 = datenum('2001-01-10 09:29:00');
+timeMinXMM = datenum('2006-06-04 09:00:00');
+timeMaxXMM = datenum('2006-06-05 20:34:00');
+% timeMinC4 = datenum('2001-01-09 15:23:00');
+% timeMaxC4 = datenum('2001-01-10 09:29:00');
 
 
 %%
-c4MatFile = [c4DataFolder,'Mat',filesep,'cluster_all_records.mat'];
-if ~isfile(c4MatFile)
-    c4CoordFile = 'cluster_omni_for_t96_allrecords.txt';
-    if ~isfile([c4DataFolder,c4CoordFile,'.bak'])
-        [s1,msg1] = replaceinfile(',','',[c4DataFolder,c4CoordFile]);
-    end
-    clusterA = importdata([c4DataFolder,c4CoordFile]);
-    c4.time = datenum(clusterA.textdata(2:end,1),'yyyy-mm-dd HH:MM:ss');
-    c4.xGSE  = clusterA.data(:,1:3);
-    c4.AE = clusterA.data(:,4);
-    c4.Dst = clusterA.data(:,5);
-    c4.BYimf = clusterA.data(:,6);
-    c4.BZimf = clusterA.data(:,7);
-    c4.Pdyn = clusterA.data(:,8);
-    save(c4MatFile,'c4*');
-else
-    load(c4MatFile);
-end
-disp('1/7 Done loading cluster4 coordinates...');
+% c4MatFile = [c4DataFolder,'Mat',filesep,'cluster_all_records.mat'];
+% if ~isfile(c4MatFile)
+%     c4CoordFile = 'cluster_omni_for_t96_allrecords.txt';
+%     if ~isfile([c4DataFolder,c4CoordFile,'.bak'])
+%         [s1,msg1] = replaceinfile(',','',[c4DataFolder,c4CoordFile]);
+%     end
+%     clusterA = importdata([c4DataFolder,c4CoordFile]);
+%     c4.time = datenum(clusterA.textdata(2:end,1),'yyyy-mm-dd HH:MM:ss');
+%     c4.xGSE  = clusterA.data(:,1:3);
+%     c4.AE = clusterA.data(:,4);
+%     c4.Dst = clusterA.data(:,5);
+%     c4.BYimf = clusterA.data(:,6);
+%     c4.BZimf = clusterA.data(:,7);
+%     c4.Pdyn = clusterA.data(:,8);
+%     save(c4MatFile,'c4*');
+% else
+%     load(c4MatFile);
+% end
+% disp('1/9 Done loading cluster4 coordinates...');
 %%
 
 
@@ -72,24 +72,24 @@ if ~isfile(xmmMatFile)
 else
     load(xmmMatFile);
 end
-disp('2/7 Done loading XMM coordinates...');
+disp('2/9 Done loading XMM coordinates...');
 %%
-[spacecraft.c4.xGSE,spacecraft.c4.time] = crop_time(c4.xGSE,c4.time,timeMinC4,timeMaxC4);
+% [spacecraft.c4.xGSE,spacecraft.c4.time] = crop_time(c4.xGSE,c4.time,timeMinC4,timeMaxC4);
 [spacecraft.xmm.xGSE,spacecraft.xmm.time] = crop_time(xmm.xGSE,xmm.time,timeMinXMM,timeMaxXMM);
 time = spacecraft.xmm.time;
 
 % Conversion from GSE to GEO
 c=define_universal_constants;
 % RE = c.RE/1000; %in km
-spacecraft.c4.GEO   = onera_desp_lib_rotate(spacecraft.c4.xGSE,'gse2geo',spacecraft.c4.time);
+% spacecraft.c4.GEO   = onera_desp_lib_rotate(spacecraft.c4.xGSE,'gse2geo',spacecraft.c4.time);
 spacecraft.xmm.GEO   = onera_desp_lib_rotate(spacecraft.xmm.xGSE,'gse2geo',spacecraft.xmm.time);
 
-c4.maginput = zeros(length(c4.time),25);
+% c4.maginput = zeros(length(c4.time),25);
 % c4.maginput(:,2) =c4.Dst; 
 % c4.maginput(:,5) = c4.Pdyn;
 % c4.maginput(:,6) = c4.BYimf; 
 % c4.maginput(:,7) = c4.BZimf;
-[spacecraft.c4.maginput,spacecraft.c4.time] = crop_time(c4.maginput,c4.time,timeMinC4,timeMaxC4);
+% [spacecraft.c4.maginput,spacecraft.c4.time] = crop_time(c4.maginput,c4.time,timeMinC4,timeMaxC4);
 % xmm.Pdyn(1:5) = [1.93; 1.16; 1.15; 1.35; nan];
 xmm.maginput = zeros(length(xmm.time),25);
 % xmm.maginput(:,2) =xmm.Dst; 
@@ -98,9 +98,9 @@ xmm.maginput = zeros(length(xmm.time),25);
 % xmm.maginput(:,6) = BimfXMM(:,2); 
 % xmm.maginput(:,7) = BimfXMM(:,3);
 [spacecraft.xmm.maginput,spacecraft.xmm.time] = crop_time(xmm.maginput,xmm.time,timeMinXMM,timeMaxXMM);
-disp('3/7 Done converting coordinates from GSE to GEO...');
+disp('3/9 Done converting coordinates from GSE to GEO...');
 %% OMNI Maginput
-[omnimaginput,omniTime] = generate_maginput(omniH5FileStr, timeMinXMM, timeMaxC4);
+[omnimaginput,omniTime] = generate_maginput(omniH5FileStr, timeMinXMM, timeMaxXMM);
 % nMonth = months(datestr(timeMin,'mmm dd yyyy'),datestr(timeMax,'mmm dd yyyy'))+1;
 % dateVec = datevec(timeMin);
 % dateVec(3) = 1; %setting day to 1st
@@ -118,43 +118,42 @@ disp('3/7 Done converting coordinates from GSE to GEO...');
 %         omniDataProcessTimes = addtodate(omniDataProcessTimes,1,'month');
 %     end
 % multiWaitbar('Generate OMNI Input',1);
-% omniPdyn = omnimaginput(:,5);
-% omniPdyn(omniPdyn>99.9) = nan;
-% omnimaginput(:,5) = interp_nans(omniPdyn);
+
 omnimaginput = filter_irbem_maginput(magFieldModel,omnimaginput);
 omnimaginput = interp_nans(omnimaginput);
 xmmMaginput = interp1(omniTime,omnimaginput,spacecraft.xmm.time);
-c4Maginput = interp1(omniTime,omnimaginput,spacecraft.c4.time);
+
+% c4Maginput = interp1(omniTime,omnimaginput,spacecraft.c4.time);
 spacecraft.xmm.maginput = xmmMaginput;
-spacecraft.c4.maginput = c4Maginput;
-disp('4/7 Done downloading OMNI data...');
+% spacecraft.c4.maginput = c4Maginput;
+disp('4/9 Done downloading OMNI data...');
 %%
 options = [0,0,0,0,0];
 sysaxes = 1; %GEO Input coordinates
 stopAlt = 110;
-
+% 
 % % Finding local Bfield
-% spacecraft.c4.BGEO=onera_desp_lib_get_field(magFieldModel,options,...
-%         sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
-%         spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
-%         spacecraft.c4.maginput);
-% spacecraft.c4.BGSE = onera_desp_lib_rotate(spacecraft.c4.BGEO,'geo2gse',spacecraft.c4.time);
+% % spacecraft.c4.BGEO=onera_desp_lib_get_field(magFieldModel,options,...
+% %         sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
+% %         spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
+% %         spacecraft.c4.maginput);
+% % spacecraft.c4.BGSE = onera_desp_lib_rotate(spacecraft.c4.BGEO,'geo2gse',spacecraft.c4.time);
 % 
 % spacecraft.xmm.BGEO=onera_desp_lib_get_field(magFieldModel,options,...
 %     sysaxes,spacecraft.xmm.time,spacecraft.xmm.GEO(:,1),...
 %     spacecraft.xmm.GEO(:,2),spacecraft.xmm.GEO(:,3),...
 %     spacecraft.xmm.maginput);
-% spacecraft.xmm.BGSE = onera_desp_lib_rotate(spacecraft.xmm.BGEO,'geo2gse',spacecraft.xmm.time);
+
 % 
 % disp('5/9 Done calculating local Bfield data...');
-
-
-% Finding North foot point
+%%
+% 
+% % Finding North foot point
 % hemiFlag = +1;
-% spacecraft.c4.GDZNorth=onera_desp_lib_find_foot_point(magFieldModel,options,...
-%     sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
-%     spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
-%     stopAlt,hemiFlag,spacecraft.c4.maginput);
+% % spacecraft.c4.GDZNorth=onera_desp_lib_find_foot_point(magFieldModel,options,...
+% %     sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
+% %     spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
+% %     stopAlt,hemiFlag,spacecraft.c4.maginput);
 % 
 % spacecraft.xmm.GDZNorth=onera_desp_lib_find_foot_point(magFieldModel,options,...
 %     sysaxes,spacecraft.xmm.time,spacecraft.xmm.GEO(:,1),...
@@ -165,10 +164,10 @@ stopAlt = 110;
 % 
 % % Find south hemisphere foot point
 % hemiFlag = -1;
-% spacecraft.c4.GDZSouth=onera_desp_lib_find_foot_point(magFieldModel,options,...
-%     sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
-%     spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
-%     stopAlt,hemiFlag,spacecraft.c4.maginput);
+% % spacecraft.c4.GDZSouth=onera_desp_lib_find_foot_point(magFieldModel,options,...
+% %     sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
+% %     spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
+% %     stopAlt,hemiFlag,spacecraft.c4.maginput);
 % 
 % spacecraft.xmm.GDZSouth=onera_desp_lib_find_foot_point(magFieldModel,options,...
 %     sysaxes,spacecraft.xmm.time,spacecraft.xmm.GEO(:,1),...
@@ -176,40 +175,44 @@ stopAlt = 110;
 %     stopAlt,hemiFlag,spacecraft.xmm.maginput);
 % 
 % disp('7/9 Done calculating Southern hemisphere foot point...');
-% delete(parobj);
-
-% spacecraft.c4.footType=double(sum(~isnan(spacecraft.c4.GDZNorth),2)>1) + double(sum(~isnan(spacecraft.c4.GDZSouth),2)>1);
+% % delete(parobj);
+% 
+% % spacecraft.c4.footType=double(sum(~isnan(spacecraft.c4.GDZNorth),2)>1) + double(sum(~isnan(spacecraft.c4.GDZSouth),2)>1);
 % spacecraft.xmm.footType=double(sum(~isnan(spacecraft.xmm.GDZNorth),2)>1) + double(sum(~isnan(spacecraft.xmm.GDZSouth),2)>1);
-% 
-% % Find Mag Equator points
-% [~,spacecraft.c4.eqGEO]=onera_desp_lib_find_magequator(magFieldModel,options,...
-%     sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
-%     spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
-%     spacecraft.c4.maginput);
-% spacecraft.c4.eqGSE = onera_desp_lib_rotate(spacecraft.c4.eqGEO,'geo2gse',spacecraft.c4.time);
-% 
-% [~,spacecraft.xmm.eqGEO]=onera_desp_lib_find_magequator(magFieldModel,options,...
-%     sysaxes,spacecraft.xmm.time,spacecraft.xmm.GEO(:,1),...
-%     spacecraft.xmm.GEO(:,2),spacecraft.xmm.GEO(:,3),...
-%     spacecraft.xmm.maginput);
-% spacecraft.xmm.eqGSE = onera_desp_lib_rotate(spacecraft.xmm.eqGEO,'geo2gse',spacecraft.xmm.time);
-
-% Find Mag Equator Field
-% spacecraft.c4.eqBGEO=onera_desp_lib_get_field(magFieldModel,options,...
-%         sysaxes,spacecraft.c4.time,spacecraft.c4.eqGEO(:,1),...
-%         spacecraft.c4.eqGEO(:,2),spacecraft.c4.eqGEO(:,3),...
-%         spacecraft.c4.maginput);
-% spacecraft.c4.eqBGSE = onera_desp_lib_rotate(spacecraft.c4.eqBGEO,'geo2gse',spacecraft.c4.time);
-% 
-% spacecraft.xmm.eqBGEO=onera_desp_lib_get_field(magFieldModel,options,...
-%     sysaxes,spacecraft.xmm.time,spacecraft.xmm.eqGEO(:,1),...
-%     spacecraft.xmm.eqGEO(:,2),spacecraft.xmm.eqGEO(:,3),...
-%     spacecraft.xmm.maginput);
-% spacecraft.xmm.eqBGSE = onera_desp_lib_rotate(spacecraft.xmm.eqBGEO,'geo2gse',spacecraft.xmm.time);
-
-
 %%
-multiWaitbar('XMM Calculation');
+% multiWaitbar('Geopack Calculation');
+% dt = 1./length(spacecraft.xmm.time);
+% tic
+% for i = 1:1:length(spacecraft.xmm.time)
+%     try
+%     geopack.xmm.GDZNorth(i,:) = geopack_find_foot_point(magFieldModel,100,...
+%     sysaxes,spacecraft.xmm.time(i),spacecraft.xmm.GEO(i,1),...
+%     spacecraft.xmm.GEO(i,2),spacecraft.xmm.GEO(i,3),...
+%     stopAlt,+1,spacecraft.xmm.maginput(i,:));
+%     geopack.xmm.errorFlag(i) = false;
+%     catch
+%         geopack.xmm.GDZNorth(i,:) = nan(1,3);
+%         geopack.xmm.errorFlag(i) = true;
+%     end
+%     
+%     try
+%     geopack.xmm.GDZSouth(i,:) = geopack_find_foot_point(magFieldModel,100,...
+%     sysaxes,spacecraft.xmm.time(i),spacecraft.xmm.GEO(i,1),...
+%     spacecraft.xmm.GEO(i,2),spacecraft.xmm.GEO(i,3),...
+%     stopAlt,-1,spacecraft.xmm.maginput(i,:),false);
+%     geopack.xmm.errorFlag(i) = false;
+%     catch
+%         geopack.xmm.GDZSouth(i,:) = nan(1,3);
+%         geopack.xmm.errorFlag(i) = true;
+%     end
+%     multiWaitbar('Geopack Calculation','Increment',dt);
+% end
+% multiWaitbar('ClearAll');
+% geopack.xmm.footType=double(sum(~isnan(geopack.xmm.GDZNorth),2)>1) + double(sum(~isnan(geopack.xmm.GDZSouth),2)>1);
+% geopack.xmm.footType(geopack.xmm.errorFlag) = 3;
+% toc
+%% Nithin Pack
+multiWaitbar('Nithinpack Calculation');
 dt = 1./length(spacecraft.xmm.time);
 tic
 for i = 1:1:length(spacecraft.xmm.time)
@@ -233,50 +236,46 @@ for i = 1:1:length(spacecraft.xmm.time)
         spacecraft.xmm.eqGEO(i,:) = nan(1,3);
         spacecraft.xmm.eqBGEO(i,:) = nan(1,3);
     end
-    multiWaitbar('XMM Calculation','Increment',dt);
+    multiWaitbar('Nithinpack Calculation','Increment',dt);
 end
+multiWaitbar('ClearAll');
 toc
 spacecraft.xmm.BGSE = onera_desp_lib_rotate(spacecraft.xmm.BGEO,'geo2gse',spacecraft.xmm.time);
 spacecraft.xmm.eqGSE = onera_desp_lib_rotate(spacecraft.xmm.eqGEO,'geo2gse',spacecraft.xmm.time);
 spacecraft.xmm.eqBGSE = onera_desp_lib_rotate(spacecraft.xmm.eqBGEO,'geo2gse',spacecraft.xmm.time);
 
-disp('5/7 Done calculating XMM...');
-%% Cluster Calculation
-multiWaitbar('Cluster Calculation');
-dt = 1./length(spacecraft.c4.time);
-tic
-for i = 1:1:length(spacecraft.c4.time)
-    
-    try
-    [foot, BGEO, eqGEO, eqBGEO] = nithin_find_foot_point_fast(magFieldModel,100,...
-    sysaxes,spacecraft.c4.time(i),spacecraft.c4.GEO(i,1),...
-    spacecraft.c4.GEO(i,2),spacecraft.c4.GEO(i,3),...
-    stopAlt,spacecraft.c4.maginput(i,:));
-    spacecraft.c4.GDZNorth(i,:) = foot.north;
-    spacecraft.c4.GDZSouth(i,:) = foot.south;
-    spacecraft.c4.footType(i) = foot.number;
-    spacecraft.c4.eqGEO(i,:) = eqGEO;
-    spacecraft.c4.eqBGEO(i,:) = eqBGEO;
-    spacecraft.c4.BGEO(i,:) = BGEO;
-    
-    catch
-        spacecraft.c4.GDZNorth(i,:) = nan(1,3);
-        spacecraft.c4.GDZSouth(i,:) = nan(1,3);
-        spacecraft.c4.footType(i) = 3;
-        spacecraft.c4.eqGEO(i,:) = nan(1,3);
-        spacecraft.c4.eqBGEO(i,:) = nan(1,3);
-    end
-    multiWaitbar('Cluster Calculation','Increment',dt);
-end
-multiWaitbar('CloseAll');
-toc
-spacecraft.c4.BGSE = onera_desp_lib_rotate(spacecraft.c4.BGEO,'geo2gse',spacecraft.c4.time);
-spacecraft.c4.eqGSE = onera_desp_lib_rotate(spacecraft.c4.eqGEO,'geo2gse',spacecraft.c4.time);
-spacecraft.c4.eqBGSE = onera_desp_lib_rotate(spacecraft.c4.eqBGEO,'geo2gse',spacecraft.c4.time);
+% %% Find Mag Equator points
+% % [~,spacecraft.c4.eqGEO]=onera_desp_lib_find_magequator(magFieldModel,options,...
+% %     sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
+% %     spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
+% %     spacecraft.c4.maginput);
+% % spacecraft.c4.eqGSE = onera_desp_lib_rotate(spacecraft.c4.eqGEO,'geo2gse',spacecraft.c4.time);
+% 
+% [~,spacecraft.xmm.eqGEO]=onera_desp_lib_find_magequator(magFieldModel,options,...
+%     sysaxes,spacecraft.xmm.time,spacecraft.xmm.GEO(:,1),...
+%     spacecraft.xmm.GEO(:,2),spacecraft.xmm.GEO(:,3),...
+%     spacecraft.xmm.maginput);
+% spacecraft.xmm.eqGSE = onera_desp_lib_rotate(spacecraft.xmm.eqGEO,'geo2gse',spacecraft.xmm.time);
+% 
+% % Find Mag Equator Field
+% % spacecraft.c4.eqBGEO=onera_desp_lib_get_field(magFieldModel,options,...
+% %         sysaxes,spacecraft.c4.time,spacecraft.c4.eqGEO(:,1),...
+% %         spacecraft.c4.eqGEO(:,2),spacecraft.c4.eqGEO(:,3),...
+% %         spacecraft.c4.maginput);
+% % spacecraft.c4.eqBGSE = onera_desp_lib_rotate(spacecraft.c4.eqBGEO,'geo2gse',spacecraft.c4.time);
+% 
+% spacecraft.xmm.eqBGEO=onera_desp_lib_get_field(magFieldModel,options,...
+%     sysaxes,spacecraft.xmm.time,spacecraft.xmm.eqGEO(:,1),...
+%     spacecraft.xmm.eqGEO(:,2),spacecraft.xmm.eqGEO(:,3),...
+%     spacecraft.xmm.maginput);
+% spacecraft.xmm.eqBGSE = onera_desp_lib_rotate(spacecraft.xmm.eqBGEO,'geo2gse',spacecraft.xmm.time);
+
+disp('8/9 Done calculating magnetic equatorial points...');
+disp('9/9 Process Complete');
+
+%%
 
 
-disp('6/7 Done calculating XMM...');
-disp('7/7 Process Complete');
 %% Writing to an ASCII File
 
 
@@ -327,7 +326,9 @@ fclose(fileID);
 
 disp('Done writing XMM magnetic coordinates output data file...');
 
-fileID = fopen(c4OutputFileStr,'w');
+% fileID = fopen(c4OutputFileStr,'w');
+% fprintf(fileID,'%s \n','DateTime FootType Bx_GSE By_GSE Bz_GSE Eq_x_GSE Eq_y_GSE Eq_z_GSE Beq_x_GSE Beq_y_GSE Beq_z_GSE');
+
 % formatSpec = "%s %8u %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8u %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f \n";
 % fprintf(fileID,'%15s %12s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s \n','DateTime',...
 %     'Kp','Dst','Np_SW','V_SW','Pdyn','yIMF_GSM','zIMF_GSM','G1','G2',...
@@ -341,29 +342,50 @@ fileID = fopen(c4OutputFileStr,'w');
 %     '[nT]','[nT]','[nT]','[0,1,2]','[RE]','[RE]','[RE]',...
 %     '[km]','[deg]','[deg]',...
 %     '[km]','[deg]','[deg]');
-fprintf(fileID,'%s \n','DateTime FootType Bx_GSE By_GSE Bz_GSE Eq_x_GSE Eq_y_GSE Eq_z_GSE Beq_x_GSE Beq_y_GSE Beq_z_GSE');
 
-for i=1:1:length(spacecraft.c4.time)
-        fprintf(fileID,kipsFormat,...
-        (datestr(spacecraft.c4.time(i),'yyyy-mm-dd HH:MM:ss'))',...
-        spacecraft.c4.footType(i),...    
-        spacecraft.c4.BGSE(i,:),...
-        spacecraft.c4.eqGSE(i,:),...
-        spacecraft.c4.eqBGSE(i,:));
-    
-%     fprintf(fileID,formatSpec,...
+
+% for i=1:1:length(spacecraft.c4.time)
+%         fprintf(fileID,kipsFormat,...
 %         (datestr(spacecraft.c4.time(i),'yyyy-mm-dd HH:MM:ss'))',...
-%         spacecraft.c4.maginput(i,1:9),...
-%         spacecraft.c4.xGSE(i,:),...
+%         spacecraft.c4.footType(i),...    
 %         spacecraft.c4.BGSE(i,:),...
-%         spacecraft.c4.footType(i),...
 %         spacecraft.c4.eqGSE(i,:),...
-%         spacecraft.c4.GDZNorth(i,:),...
-%         spacecraft.c4.GDZSouth(i,:));
-end    
-fclose(fileID);
+%         spacecraft.c4.eqBGSE(i,:));
+%     
+% %     fprintf(fileID,formatSpec,...
+% %         (datestr(spacecraft.c4.time(i),'yyyy-mm-dd HH:MM:ss'))',...
+% %         spacecraft.c4.maginput(i,1:9),...
+% %         spacecraft.c4.xGSE(i,:),...
+% %         spacecraft.c4.BGSE(i,:),...
+% %         spacecraft.c4.footType(i),...
+% %         spacecraft.c4.eqGSE(i,:),...
+% %         spacecraft.c4.GDZNorth(i,:),...
+% %         spacecraft.c4.GDZSouth(i,:));
+% end    
+% fclose(fileID);
 
 disp('Done writing C4 magnetic coordinates output data file...');
+
+%% Check with kips data
+kipDataFile1 = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Oct 2019\0400400401_mos2S002_qpb.fits';
+kipDataFile2 = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Oct 2019\0402530201_mos2S002_qpb.fits';
+kipDataFile3 = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Oct 2019\0403750101_mos2S002_qpb.fits';
+kipInfo = fitsinfo(kipDataFile);
+kipData = [cell2mat(fitsread(kipDataFile1,'binarytable'));...
+    cell2mat(fitsread(kipDataFile2,'binarytable'));...
+    cell2mat(fitsread(kipDataFile3,'binarytable'))];
+
+[kip.yy kip.mm kip.dd] = datevec(datenum(kipData(:,1),1,kipData(:,2)));
+kip.HH = kipData(:,3);
+kip.MM = kipData(:,4);
+kip.SS = kipData(:,5);
+%%
+figure; 
+plot(datetime(kip.yy,kip.mm,kip.dd,kip.HH,kip.MM,kip.SS),kipData(:,33),'.-');
+hold on;
+plot(datetime(datestr(spacecraft.xmm.time)),spacecraft.xmm.maginput(:,2));
+legend('Kip - 5min OMNI','Nithin-1min OMNI');
+title('DsT IMF');
 %%
 % conjunction.probeStr='xmm';
 % conjunction.radius = 500;
