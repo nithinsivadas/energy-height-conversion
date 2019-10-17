@@ -8,8 +8,8 @@ if isunix, setenv('LD_LIBRARY_PATH',''); end
 % parobj=parpool;
 % 
 magFieldModel=9; %TS01 
-xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01-copy.dat';
-c4OutputFileStr = 'c4_eq_magnetic_point_TS01-copy.dat';
+xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01_v2.dat';
+c4OutputFileStr = 'c4_eq_magnetic_point_TS01_v2.dat';
 
 if ispc
     xmmDataFolder = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
@@ -25,15 +25,15 @@ xmmOutputFileStr = [dataPathStr,filesep,xmmOutputFileStr];
 c4OutputFileStr = [dataPathStr,filesep,c4OutputFileStr];
 %% Inputs
 % Cropping time
-% timeMinXMM = datenum('2000-02-16 21:16:00');
-% timeMaxXMM = datenum('2012-08-30 09:29:00');
-% timeMinC4 = datenum('2001-01-09 15:23:00');
-% timeMaxC4 = datenum('2015-04-30 23:59:00');
-% 
-timeMinXMM = datenum('2001-01-09 15:23:00');
-timeMaxXMM = datenum('2001-01-10 09:29:00');
+timeMinXMM = datenum('2000-02-16 21:16:00');
+timeMaxXMM = datenum('2012-08-30 09:29:00');
 timeMinC4 = datenum('2001-01-09 15:23:00');
-timeMaxC4 = datenum('2001-01-10 09:29:00');
+timeMaxC4 = datenum('2015-04-30 23:59:00');
+% 
+% timeMinXMM = datenum('2001-01-09 15:23:00');
+% timeMaxXMM = datenum('2001-01-10 09:29:00');
+% timeMinC4 = datenum('2001-01-09 15:23:00');
+% timeMaxC4 = datenum('2001-01-10 09:29:00');
 
 
 %%
@@ -113,6 +113,7 @@ stopAlt = 110;
 %%
 % multiWaitbar('XMM Calculation');
 % dt = 1./length(spacecraft.xmm.time);
+tic
 out = generate_foot_point(magFieldModel,100,...
         sysaxes,spacecraft.xmm.time,spacecraft.xmm.GEO(:,1),...
         spacecraft.xmm.GEO(:,2),spacecraft.xmm.GEO(:,3),...
@@ -126,6 +127,7 @@ spacecraft.xmm.GDZSouth = onera_desp_lib_rotate(out.footSGEO,'geo2gdz',spacecraf
 spacecraft.xmm.BGSE = onera_desp_lib_rotate(spacecraft.xmm.BGEO,'geo2gse',spacecraft.xmm.time);
 spacecraft.xmm.eqGSE = onera_desp_lib_rotate(spacecraft.xmm.eqGEO,'geo2gse',spacecraft.xmm.time);
 spacecraft.xmm.eqBGSE = onera_desp_lib_rotate(spacecraft.xmm.eqBGEO,'geo2gse',spacecraft.xmm.time);
+toc
 %%
 fileID = fopen(xmmOutputFileStr,'w');
 fprintf(fileID,'%s\n','DateTime FootType Bx_GSE By_GSE Bz_GSE Eq_x_GSE Eq_y_GSE Eq_z_GSE Beq_x_GSE Beq_y_GSE Beq_z_GSE');
@@ -145,12 +147,12 @@ disp('Done writing XMM magnetic coordinates output data file...');
 
 disp('5/7 Done calculating XMM...');
 %% Cluster Calculation
-
+tic
 out = generate_foot_point(magFieldModel,100,...
         sysaxes,spacecraft.c4.time,spacecraft.c4.GEO(:,1),...
         spacecraft.c4.GEO(:,2),spacecraft.c4.GEO(:,3),...
         stopAlt,spacecraft.c4.maginput);
-   
+toc   
 spacecraft.c4.footType = out.foot;
 spacecraft.c4.BGEO = out.BGEO;
 spacecraft.c4.eqGEO = out.eqGEO;
