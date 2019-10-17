@@ -1,13 +1,15 @@
 %%
-clear variables
+[rootPathStr, dataPathStr] = initialize_root_path;
+addpath([rootPathStr,'Geopack2008']);
+if isunix, setenv('LD_LIBRARY_PATH',''); end
 % magFieldModel=7; %TS96 
 % xmmOutputFileStr = 'xmm_eq_magnetic_point_TS96 - Copy.dat';
 % c4OutputFileStr = 'c4_eq_magnetic_point_TS96 - Copy.dat';
 % parobj=parpool;
 % 
 magFieldModel=9; %TS01 
-xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01 - Copy.dat';
-c4OutputFileStr = 'c4_eq_magnetic_point_TS01 - Copy.dat';
+xmmOutputFileStr = 'xmm_eq_magnetic_point_TS01.dat';
+c4OutputFileStr = 'c4_eq_magnetic_point_TS01.dat';
 
 if ispc
     xmmDataFolder = 'G:\My Drive\Research\Research Trips\2018 April Bern ISSI\Work\Data\';
@@ -19,20 +21,20 @@ elseif isunix
     omniH5FileStr = [initialize_root_path,'LargeFiles/omni/omni.h5'];
 end
 
-xmmOutputFileStr = [xmmDataFolder,xmmOutputFileStr];
-c4OutputFileStr = [c4DataFolder,c4OutputFileStr];
+xmmOutputFileStr = [dataPathStr,xmmOutputFileStr];
+c4OutputFileStr = [dataPathStr,c4OutputFileStr];
 
 %% Inputs
 % Cropping time
-% timeMinXMM = datenum('2000-02-16 21:16:00');
-% timeMaxXMM = datenum('2012-08-30 09:29:00');
-% timeMinC4 = datenum('2001-01-09 15:23:00');
-% timeMaxC4 = datenum('2015-04-30 23:59:00');
-% 
-timeMinXMM = datenum('2001-01-09 15:23:00');
-timeMaxXMM = datenum('2001-01-10 09:29:00');
+timeMinXMM = datenum('2000-02-16 21:16:00');
+timeMaxXMM = datenum('2012-08-30 09:29:00');
 timeMinC4 = datenum('2001-01-09 15:23:00');
-timeMaxC4 = datenum('2001-01-10 09:29:00');
+timeMaxC4 = datenum('2015-04-30 23:59:00');
+% 
+%timeMinXMM = datenum('2001-01-09 15:23:00');
+%timeMaxXMM = datenum('2001-01-10 09:29:00');
+%timeMinC4 = datenum('2001-01-09 15:23:00');
+%timeMaxC4 = datenum('2001-01-10 09:29:00');
 
 
 %%
@@ -138,8 +140,8 @@ sysaxes = 1; %GEO Input coordinates
 stopAlt = 110;
 
 %%
-multiWaitbar('XMM Calculation');
-dt = 1./length(spacecraft.xmm.time);
+% multiWaitbar('XMM Calculation');
+% dt = 1./length(spacecraft.xmm.time);
 tic
 for i = 1:1:length(spacecraft.xmm.time)
     
@@ -162,17 +164,38 @@ for i = 1:1:length(spacecraft.xmm.time)
         spacecraft.xmm.eqGEO(i,:) = nan(1,3);
         spacecraft.xmm.eqBGEO(i,:) = nan(1,3);
     end
-    multiWaitbar('XMM Calculation','Increment',dt);
+%     multiWaitbar('XMM Calculation','Increment',dt);
 end
 toc
 spacecraft.xmm.BGSE = onera_desp_lib_rotate(spacecraft.xmm.BGEO,'geo2gse',spacecraft.xmm.time);
 spacecraft.xmm.eqGSE = onera_desp_lib_rotate(spacecraft.xmm.eqGEO,'geo2gse',spacecraft.xmm.time);
 spacecraft.xmm.eqBGSE = onera_desp_lib_rotate(spacecraft.xmm.eqBGEO,'geo2gse',spacecraft.xmm.time);
 
+fileID = fopen(xmmOutputFileStr,'w');
+fprintf(fileID,'%s\n','DateTime FootType Bx_GSE By_GSE Bz_GSE Eq_x_GSE Eq_y_GSE Eq_z_GSE Beq_x_GSE Beq_y_GSE Beq_z_GSE');
+kipsFormat = "%19s\t%1u\t%6.2f\t%6.2f\t%6.2f\t%7.2f\t%7.2f\t%7.2f\t%6.2f\t%6.2f\t%6.2f\n";
+
+for i=1:1:length(spacecraft.xmm.time)
+    fprintf(fileID,kipsFormat,...
+        (datestr(spacecraft.xmm.time(i),'yyyy-mm-dd HH:MM:ss'))',...
+        spacecraft.xmm.footType(i),...    
+        spacecraft.xmm.BGSE(i,:),...
+        spacecraft.xmm.eqGSE(i,:),...
+        spacecraft.xmm.eqBGSE(i,:));
+%         spacecraft.xmm.maginput(i,1:9),...
+%         spacecraft.xmm.xGSE(i,:),...
+    %         spacecraft.xmm.GDZNorth(i,:),...
+%         spacecraft.xmm.GDZSouth(i,:));
+        
+end    
+fclose(fileID);
+
+disp('Done writing XMM magnetic coordinates output data file...');
+
 disp('5/7 Done calculating XMM...');
 %% Cluster Calculation
-multiWaitbar('Cluster Calculation');
-dt = 1./length(spacecraft.c4.time);
+%multiWaitbar('Cluster Calculation');
+% dt = 1./length(spacecraft.c4.time);
 tic
 for i = 1:1:length(spacecraft.c4.time)
     
@@ -195,18 +218,16 @@ for i = 1:1:length(spacecraft.c4.time)
         spacecraft.c4.eqGEO(i,:) = nan(1,3);
         spacecraft.c4.eqBGEO(i,:) = nan(1,3);
     end
-    multiWaitbar('Cluster Calculation','Increment',dt);
+%    multiWaitbar('Cluster Calculation','Increment',dt);
 end
-multiWaitbar('CloseAll');
+% multiWaitbar('CloseAll');
 toc
 spacecraft.c4.BGSE = onera_desp_lib_rotate(spacecraft.c4.BGEO,'geo2gse',spacecraft.c4.time);
 spacecraft.c4.eqGSE = onera_desp_lib_rotate(spacecraft.c4.eqGEO,'geo2gse',spacecraft.c4.time);
 spacecraft.c4.eqBGSE = onera_desp_lib_rotate(spacecraft.c4.eqBGEO,'geo2gse',spacecraft.c4.time);
 
 
-disp('6/7 Done calculating XMM...');
-disp('7/7 Process Complete');
-%% Writing to an ASCII File
+% Writing to an ASCII File
 
 
 % celltable =[cellstr(datestr(spacecraft.xmm.time,'yyyy-mm-dd HH:MM:ss')),...
@@ -221,7 +242,7 @@ disp('7/7 Process Complete');
 %     'alt_NFoot_km','lat_NFoot_deg','East_lon_NFoot_deg',...
 %     'alt_SFoot_km','lat_SFoot_deg','East_lon_SFoot_deg'});
 % writetable(T,'tabledata.dat','Delimiter','\t');
-fileID = fopen(xmmOutputFileStr,'w');
+
 % formatSpec = "%s %8u %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8u %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f \n";
 % fprintf(fileID,'%15s %12s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s %8s \n','DateTime',...
 %     'Kp','Dst','Np_SW','V_SW','Pdyn','yIMF_GSM','zIMF_GSM','G1','G2',...
@@ -235,26 +256,6 @@ fileID = fopen(xmmOutputFileStr,'w');
 %     '[nT]','[nT]','[nT]','[0,1,2]','[RE]','[RE]','[RE]',...
 %     '[km]','[deg]','[deg]',...
 %     '[km]','[deg]','[deg]');
-
-fprintf(fileID,'%s\n','DateTime FootType Bx_GSE By_GSE Bz_GSE Eq_x_GSE Eq_y_GSE Eq_z_GSE Beq_x_GSE Beq_y_GSE Beq_z_GSE');
-kipsFormat = "%19s\t%1u\t%6.2f\t%6.2f\t%6.2f\t%7.2f\t%7.2f\t%7.2f\t%6.2f\t%6.2f\t%6.2f\n";
-
-for i=1:1:length(spacecraft.xmm.time)
-    fprintf(fileID,kipsFormat,...
-        (datestr(spacecraft.xmm.time(i),'yyyy-mm-dd HH:MM:ss'))',...
-        spacecraft.xmm.footType(i),...    
-        spacecraft.xmm.BGSE(i,:),...
-        spacecraft.xmm.eqGSE(i,:),...
-        spacecraft.xmm.eqBGSE(i,:));
-%         spacecraft.xmm.maginput(i,1:9),...
-%         spacecraft.xmm.xGSE(i,:),...
-    %         spacecraft.xmm.GDZNorth(i,:),...
-%         spacecraft.xmm.GDZSouth(i,:));
-        
-end    
-fclose(fileID);
-
-disp('Done writing XMM magnetic coordinates output data file...');
 
 fileID = fopen(c4OutputFileStr,'w');
 % formatSpec = "%s %8u %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8u %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f \n";
@@ -291,15 +292,17 @@ for i=1:1:length(spacecraft.c4.time)
 %         spacecraft.c4.GDZSouth(i,:));
 end    
 fclose(fileID);
-
 disp('Done writing C4 magnetic coordinates output data file...');
+
+disp('6/7 Done calculating Cluster...');
+disp('7/7 Process Complete');
 %%
 % conjunction.probeStr='xmm';
 % conjunction.radius = 500;
 % 
 % probes = find_magnetic_conjunctions_at_mag_equator(time,spacecraft,conjunction,110,1,magFieldModel);
 % probes.time = time;
-multiWaitbar('closeall');
+% multiWaitbar('closeall');
 
 %% Generate maginput from omni.h5
 function [maginput,time] = generate_maginput(omniH5FileStr, timeMin, timeMax)
