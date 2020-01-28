@@ -31,10 +31,10 @@ function [A] = get_energy_dep_matrix(alt,energyBin,latitude,longitude,time)
 	if nargin<5
 	    time        = datenum([2008 03 26 10 00 00]);
 	end
-	if nargin<4
+	if nargin<4 || isempty(longitude)
 	    longitude   = -147.5*ones(length(alt),1); % Degrees. 
 	end
-	if nargin<3
+	if nargin<3 || isempty(latitude)
 	    latitude    = 65*ones(length(alt),1); % Degrees.
     end
     

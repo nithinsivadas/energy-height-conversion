@@ -50,7 +50,7 @@ if min([YAp YSF])<1947
 end
 
 % convert year to string
-yrstr = num2str(unique([YAp year(daten)]));
+yrstr = num2str(unique([YAp;year(daten)]));
 N = size(yrstr,1);
 
 % define remote directories

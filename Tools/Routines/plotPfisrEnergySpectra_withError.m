@@ -7,7 +7,7 @@ initialize_geodata;
 
 %Global Variables
 computer=getenv('computername');
-if computer=='NITHIN-SURFACE'
+if strcmp(computer,'NITHIN-SURFACE')||strcmp(computer,'NITHIN-CARBON')
     pfisrDataFileNameStr =...
         'C:\Users\Nithin\Documents\GitHub\energy-height-conversion\PFISR_Energy_Spectra\Data\DataFile_2008_1.h5';
     thmDataFileNameStr =...
@@ -38,34 +38,43 @@ energyBin = thm.energyBin;
 
 %%  Mode 1: From measurements averaged across the PFISR beams
 [ePopDenAvg, altPop, timePop] = get_pfisr_variable(pfisrDataFileNameStr, 'popl', 0);
+ePopDenAvg = ePopDenAvg';
 
 % Tidying up Electron Density
 [NeAvg, time] = crop_time(ePopDenAvg, timePop, timeMin, timeMax);
-[NeAvg, alt] = crop_altitude(NeAvg, altPop,altMin, altMax);
+[NeAvg, alt] = crop_altitude(NeAvg', altPop,altMin, altMax);
 NeAvg = interp_nans(NeAvg);
 NeAvg(NeAvg<0)=10^9;
 
-% Generate Production Rate
-[qAvg,qAvgTime, alpha] = get_production_rate(NeAvg, alt, time, 2);
-
-% Invert production rates
-[dataAvg] = get_inverted_flux(qAvg, qAvgTime, alt, energyBin);
 %%  Mode 1.1: Error in PFISR Measurements
 [dePopDenAvg, altPop, timePop] = get_pfisr_variable(pfisrDataFileNameStr, 'dpopl', 0);
+dePopDenAvg = dePopDenAvg';
 
 % Tidying up Electron Density
 [dNeAvg, time] = crop_time(dePopDenAvg, timePop, timeMin, timeMax);
-[dNeAvg, alt] = crop_altitude(dNeAvg, altPop,altMin, altMax);
+[dNeAvg, alt] = crop_altitude(dNeAvg', altPop,altMin, altMax);
 dNeAvg = interp_nans(dNeAvg);
 dNeAvg(dNeAvg<0)=10^9;
 
 % Generate Production Rate
-[dqAvg0,dqAvgTime, alpha] = get_production_rate(dNeAvg, alt, time, 2);
-dqAvg = 2*alpha.*NeAvg.*dNeAvg; %Simon wedlund et al. 2013
+% [qAvg,qAvgTime, alpha] = get_production_rate(NeAvg, alt, time, 2);
+[dqAvg, qAvg, qAvgTime] = get_error_in_q(NeAvg, dNeAvg, alt, time, 2);
+
+%% Invert production rates
+A =get_energy_dep_matrix(alt,energyBin);
+[dataAvg] = get_inverted_flux(qAvg, dqAvg, qAvgTime, alt, energyBin, A);
+
+
+
+% Generate Production Rate
+% [dqAvg0,dqAvgTime, alpha] = get_production_rate(dNeAvg, alt, time, 2);
+% dqAvg = 2*alpha.*NeAvg.*dNeAvg; %Simon wedlund et al. 2013
 % Invert production rates
-[dataAvgError0] = get_inverted_flux(dqAvg, dqAvgTime, alt, energyBin);
-dataAvgError = dataAvgError0;
-dataAvgError.energyFlux = (get_error_in_energyFlux(dqAvg, dataAvg.A, dataAvg.energyBin, dataAvg.energyFlux, dataAvg.time,-1))';
+% [dataAvgError0] = get_inverted_flux(dqAvg, dqAvgTime, alt, energyBin);
+% dataAvgError = dataAvg;
+% dataAvgError.energyFlux = (get_error_in_energyFlux(dqAvg', dataAvg.A, dataAvg.energyBin, dataAvg.energyFlux, dataAvg.time,-1))';
+
+% [dE,dEFrac] = get_error_in_energyFlux(dq, A, dataAvg.energyBin, dataAvg.energyFlux, dataAvg.time);
 % 882 is the number of singular values (A<0.0001) in the forward model
 % dataAvgError.energyFlux = dataAvgError0.energyFlux-dataAvg.energyFlux;
 % dataAvgError.flux = dataAvgError0.flux-dataAvg.flux;
@@ -82,7 +91,7 @@ sic.time = t;
 clear h; clear ionrate_raw; clear ionrate_smoothed; clear Nedata; clear NeSIC; clear t; clear UT;
 
 % Invert production rates
-[dataAvgSIC] = get_inverted_flux(sic.qSmooth, sic.time, sic.alt, energyBin);
+[dataAvgSIC] = get_inverted_flux(sic.qSmooth',dqAvg(1:end-1,:), sic.time, sic.alt, energyBin, A);
 
 
 %% Plotting 2-D Electron Density neasurements
@@ -150,17 +159,17 @@ for iPanel=1:1:2
     end;
 end;
 
-% Plotting 1-D Validation Plots
+%% Plotting 1-D Validation Plots
 
 
-plotThisTime(1,:)='26-Mar-2008 09:47';
-plotThisTime(2,:)='26-Mar-2008 11:46';
+plotThisTime(1,:)='26-Mar-2008 11:46';
+plotThisTime(2,:)='26-Mar-2008 11:13';
 
 color1='k'; lineStyle1='-'; lineMarker1 ='none'; lineWidth1=1;
 color2='k'; lineStyle2='--'; lineMarker2 ='none'; lineWidth2=1;
 color3='r'; lineStyle3='-'; lineMarker3 ='none'; lineWidth3=1;
 color4='m'; lineStyle4='-.'; lineMarker4 ='none'; lineWidth4=1;
-color5='b'; lineStyle5=':'; lineMarker5 ='none'; lineWidth5=1;
+color5='b'; lineStyle5='-'; lineMarker5 ='none'; lineWidth5=1;
 
 for iTime = 1:1:2
 
@@ -169,11 +178,11 @@ for iTime = 1:1:2
     q(1)=plot_1D_time_slice_with_error(dataAvg.time, dataAvg.alt, NeAvg, dNeAvg, plotThisTime(iTime,:), 0);
     q(1).Color = color1; q(1).LineStyle = lineStyle1; q(1).Marker = lineMarker1; q(1).LineWidth = lineWidth1;
     hold on;
-    q(2)=plot_1D_time_slice(dataAvgError.time, dataAvgError.alt, dNeAvg, plotThisTime(iTime,:), 0);
+    q(2)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, dNeAvg, plotThisTime(iTime,:), 0);
     q(2).Color = color2; q(2).LineStyle = lineStyle2; q(2).Marker = lineMarker2; q(2).LineWidth = lineWidth2;
     hold on;
 
-    q(3)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, q_to_Ne(dataAvg.qInverted, dataAvg.alt, dataAvg.time), plotThisTime(iTime,:), 0);
+    q(3)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, q_to_Ne(dataAvg.qInverted', dataAvg.alt, dataAvg.time), plotThisTime(iTime,:), 0);
     q(3).Color = color4; q(3).LineStyle = lineStyle4; q(3).Marker = lineMarker4; q(3).LineWidth = lineWidth4;
     hold on;
     q(4)=plot_1D_time_slice(thm.time, thm.alt, thm.NeForward, plotThisTime(iTime,:), 0);
@@ -203,11 +212,11 @@ for iTime = 1:1:2
         set(lgd,'FontSize',8);
     end;
     p(iTime,2).select();
-    q(1)=plot_1D_time_slice_with_error(dataAvg.time, dataAvg.alt, qAvg, dqAvg, plotThisTime(iTime,:), 0);
+    q(1)=plot_1D_time_slice_with_error(dataAvg.time, dataAvg.alt, qAvg', dqAvg', plotThisTime(iTime,:), 0);
     q(1).Color = color1; q(1).LineStyle = lineStyle1; q(1).Marker = lineMarker1; q(1).LineWidth = lineWidth1;
     hold on;
 
-    q(2)=plot_1D_time_slice(dataAvgError.time, dataAvgError.alt, dqAvg, plotThisTime(iTime,:), 0);
+    q(2)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, dqAvg', plotThisTime(iTime,:), 0);
      q(2).Color = color2; q(2).LineStyle = lineStyle2; q(2).Marker = lineMarker2; q(2).LineWidth = lineWidth2;
     hold on;
 
@@ -215,7 +224,7 @@ for iTime = 1:1:2
     q(2).Color = color3; q(2).LineStyle = lineStyle3; q(2).Marker = lineMarker3; q(2).LineWidth = lineWidth3;
     hold on;
 
-    q(3)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, dataAvg.qInverted, plotThisTime(iTime,:), 0);
+    q(3)=plot_1D_time_slice(dataAvg.time, dataAvg.alt, dataAvg.qInverted', plotThisTime(iTime,:), 0);
     q(3).Color = color4; q(3).LineStyle = lineStyle4; q(3).Marker = lineMarker4; q(3).LineWidth = lineWidth4;
     hold on;
 
@@ -254,17 +263,17 @@ for iTime = 1:1:2
 
 
     p(iTime,3).select();
-    q(1)=plot_1D_time_slice_with_error(dataAvg.time, dataAvg.energyBin, dataAvg.energyFlux, dataAvgError.energyFlux, plotThisTime(iTime,:), -1);
+    q(1)=plot_1D_time_slice_with_error(dataAvg.time, dataAvg.energyBin, dataAvg.energyFlux, dataAvg.dEnergyFlux, plotThisTime(iTime,:), -1);
     q(1).Color = color1; q(1).LineStyle = lineStyle1; q(1).Marker = lineMarker1; q(1).LineWidth = lineWidth1;
     hold on;
 
-    q(2)=plot_1D_time_slice(dataAvgError.time, dataAvgError.energyBin, dataAvgError.energyFlux, plotThisTime(iTime,:), -1);
-    q(2).Color = color2; q(2).LineStyle = lineStyle2; q(2).Marker = lineMarker2; q(2).LineWidth = lineWidth2;
-    hold on;
+%     q(2)=plot_1D_time_slice(dataAvg.time, dataAvg.energyBin, dataAvg.dEnergyFlux, plotThisTime(iTime,:), -1);
+%     q(2).Color = color2; q(2).LineStyle = lineStyle2; q(2).Marker = lineMarker2; q(2).LineWidth = lineWidth2;
+%     hold on;
 
-    q(2)=plot_1D_time_slice(dataAvgSIC.time, dataAvgSIC.energyBin, dataAvgSIC.energyFlux, plotThisTime(iTime,:), -1);
-    q(2).Color = color3; q(2).LineStyle = lineStyle3; q(2).Marker = lineMarker3; q(2).LineWidth = lineWidth3;
-    hold on;
+%     q(2)=plot_1D_time_slice(dataAvgSIC.time, dataAvgSIC.energyBin, dataAvgSIC.energyFlux, plotThisTime(iTime,:), -1);
+%     q(2).Color = color3; q(2).LineStyle = lineStyle3; q(2).Marker = lineMarker3; q(2).LineWidth = lineWidth3;
+%     hold on;
     q(4)=plot_1D_time_slice(thm.time, thm.energyBin, thm.energyFlux, plotThisTime(iTime,:), -1);
     q(4).Color = color5; q(4).LineStyle = lineStyle5; q(4).Marker = lineMarker5; q(4).LineWidth = lineWidth5;
     hold on;

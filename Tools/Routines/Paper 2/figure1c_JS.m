@@ -2,8 +2,8 @@
 % Generate figure with satellite tracks, and Themis All Sky Cameras
 %% Load Data
 clear all;
-fileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3.h5';
-
+% fileStr = 'G:\My Drive\Research\Projects\Paper 2\Data\Version 2\20080326.001_bc_15sec-full_v3.h5';
+fileStr = 'G:\My Drive\Research\Projects\Published Work\Sivadas et al 2019\Data\Version 2\20080326.001_bc_15sec-full_v3_smaller_time_range.h5';
 
 %% LOAD Digital MSP
 dataMSP = get_msp_data('C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\Projects\Paper 2\Data\msp_vvel.mat','26 Mar 2008 10:00','26 Mar 2008 12:00');
@@ -28,10 +28,16 @@ timeMinStr = '26 Mar 2008 11:20:18';
 timeMaxStr = '26 Mar 2008 11:20:18';
 time = datenum(timeMinStr):5/(24*60*60):datenum(timeMaxStr);
 nTime = length(time);
-latLim = [63,67];
+% latLim = [63,67];
+% lonLim = [-153,-141];
+% deltaLat = 1;
+% deltaLon = 5;
+
+latLim = [62.5,67.5];
 lonLim = [-153,-141];
-deltaLat = 1;
-deltaLon = 5;
+deltaLat = 10;
+deltaLon = 33;
+
 storeImageDir = 'G:\My Drive\Research\Projects\Paper 2\InternalReview1\Figure_edits\';
 for i = 1:1:nTime
 % h=figure('visible','off');
@@ -45,10 +51,9 @@ h=figure('visible','on');
     'elCutOff',22.5,...
     'deltaLat',deltaLat,...
     'deltaLon',deltaLon,...
-    'opticalLim',[0 1],...
+    'opticalLim',[0 1.1],...
     'peakIonizationAltitude',85,...
     'setStoreImage',false);
-
 % Proton MSP Emissions
 projMAlt = Hbeta_Alt-h0; %km
 % [glat,glon,galt] = convert_mlatlon_to_glatlon(zeros(size(el)),el,projMAlt,pkrMLAT,pkrMLON,h0,time(i));
@@ -167,8 +172,8 @@ ax4 = copy_axes_properties(ax1,ax4);
 ax5 = copy_axes_properties(ax1,ax5);
 
 
-imageName = ['figure1c_',datestr(time(i),'HH_MM_SS')];
-export_fig(strcat(storeImageDir,imageName,'.png'),'-r600','-png','-nocrop');
+% imageName = ['figure1c_',datestr(time(i),'HH_MM_SS')];
+% export_fig(strcat(storeImageDir,imageName,'.png'),'-r600','-png','-nocrop');
 end
 
 

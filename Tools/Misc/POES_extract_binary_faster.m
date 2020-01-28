@@ -1,4 +1,4 @@
-function [poes, Table, outputFile] = POES_extract_binary(inputFile,outputFile)
+function [poes, Table, outputFile] = POES_extract_binary_faster(inputFile,outputFile)
 %POES_extract_binary.m Extracts .bin POES files using the fortan software provided
 % and provides 2 second time resolution of data in the form of a matlab
 % structure and table. 
@@ -48,26 +48,27 @@ Table = readtable(outputFile);
 n=size(Table,1);
 di = 1./n;
 % multiWaitbar('POES Interpolating time bins...',0);
-for i = 1:1:n
-sec = mod(i-1,4);
-    if sec==0
-    time(i)=(datenum([num2str(Table{i,'year'}),' 1 ',num2str(Table{i,'doy'}),...
-        ' ',num2str(Table{i,'hr'}),':',num2str(Table{i,'min'}),':',num2str(Table{i,'sec'})]));
-    lat(i,1) = Table{i,'lat'};
-    lon(i,1) = Table{i,'lon'};
-    alt(i,1) = Table{i,'alt_km_'};
-    else
-    time(i)= (datenum([num2str(Table{i,'year'}),' 1 ',num2str(Table{i,'doy'}),' ',num2str(Table{i,'hr'}),...
-        ':',num2str(Table{i,'min'}),':',num2str(Table{i,'sec'}+2*sec)]));
-    lat(i,1)=nan;
-    lon(i,1)=nan;
-    alt(i,1)=nan;
-    end
+indx = 1:1:height(Table);
+sec = mod(indx-1,4)';
+
+time=(datetime(Table{:,'year'},1,Table{:,'doy'},...
+    Table{:,'hr'},Table{:,'min'},Table{:,'sec'}+2*sec));
+
+% time=(datenum(strcat(num2str(Table{sec==0,'year'}),' 1 ',num2str(Table{sec==0,'doy'}),...
+%      ' ',num2str(Table{sec==0,'hr'}),':',num2str(Table{sec==0,'min'}),':',num2str(Table{sec==0,'sec'}))));
+lat = Table{:,'lat'};
+lon = Table{:,'lon'};
+alt = Table{:,'alt_km_'};
+
+lat(sec~=0) = nan;
+lon(sec~=0) = nan;
+alt(sec~=0) = nan;
+
 % multiWaitbar('POES Interpolating time bins...','Increment',di);
-end
+
 
 %%
-poes.time = time';
+poes.time = time;
 poes.lat = interp_nans(lat);
 poes.lon = interp_nans(lon);
 poes.alt = interp_nans(alt);

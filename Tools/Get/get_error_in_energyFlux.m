@@ -39,6 +39,7 @@ function [dE,dEFrac] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, tim
         
         Cq = diag(dq(:,itime).^2);
 
+        
         part1 = A'*inv(Cq)*A; 
         if Gamma ~= -1
             part2 = inv(Gamma*diag(thisFlux)); 
