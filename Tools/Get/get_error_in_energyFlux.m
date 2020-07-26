@@ -20,6 +20,8 @@ function [dE,dEFrac] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, tim
 %%
 %----------------------------------------------------------------------------
 % Modified: 22nd Sep 2016, 26 May 2017: Take the square root before converting to energy flux! 
+%           20 May 2020: Do not diagonalize, just use the diagonal elements
+%           of the covariance matrix
 % Created : 22nd Sep 2016
 % Author  : Nithin Sivadas
 % Ref     : D. L. Hysell 2007
@@ -50,9 +52,9 @@ function [dE,dEFrac] = get_error_in_energyFlux(dq, A, energyBin, energyFlux, tim
         Cflux_inv = part1 + part2;        
         Cflux = inv(Cflux_inv);
         
-        [X,D]=eig(Cflux,'matrix');
-           
-        dnumFlux=(abs(diag(D))).^0.5;        
+%         [X,D]=eig(Cflux,'matrix');
+        dnumFlux=(abs(diag(Cflux))).^0.5;   
+%         dnumFlux=(abs(diag(D))).^0.5;        
         denergyFlux(:,itime)=num_to_energy(dnumFlux,1,energyBin); 
      
     end

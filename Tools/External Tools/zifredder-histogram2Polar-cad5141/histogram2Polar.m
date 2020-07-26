@@ -410,7 +410,7 @@ classdef histogram2Polar < matlab.mixin.SetGet
            
             % if histogram is deleted, the respective instance of this class is deleted as
             % well
-            self.Histogram.DeleteFcn = @(~,~) self.delete;
+%            self.Histogram.DeleteFcn = @(~,~) self.delete;
             
             %%
             colormap(self.Parent, jet);

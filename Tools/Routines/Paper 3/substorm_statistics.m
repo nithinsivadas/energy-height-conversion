@@ -1,4 +1,4 @@
-%% Substorm Statistics
+%% Generate Substorm Statistics
 
 if strcmp(get_computer_name,'nithin-carbon')
     dataDir = 'G:\My Drive\Research\Projects\Data\';
@@ -38,25 +38,25 @@ omniFileStr = [dataDir,'omni.h5'];
 
 % Substorms at PFISR [IMPORTANT] : Range of closeness to PFISR
 Dmlt = 2;
-Dmlat = 1; %desiredMLATIndx = superMag.mlat<superMag.pfisrMlat+Dmlat
+Dmlat = 20; %desiredMLATIndx = superMag.mlat<superMag.pfisrMlat+Dmlat
 
 % Poker Flat geolocation
 pkrGLAT = 65.126;
 pkrGLON = -147.47;
 pkrh0=0.693;
 
-timeMinStr = "15 Jul 2018";
+timeMinStr = "15 Jul 2018"; %does not matter
 timeMaxStr = "31 Jul 2019";
 
 tic 
-[T,T1, timeStamp, wavelength] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
+[T,T1, superMag] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
   superMagFileStr, dascFileStr, omniFileStr,...
   timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0);
 toc 
 
-save([storeDir,'table_of_substorms.mat'],'T1','Dmlat','Dmlt','pkrGLAT','pkrGLON','dascFileStr','amisrDatabaseStr','omniFileStr','superMagFileStr');
+save([storeDir,'table_of_substorms_full.mat'],'T1','superMag','Dmlat','Dmlt','pkrGLAT','pkrGLON','dascFileStr','amisrDatabaseStr','omniFileStr','superMagFileStr');
 
-function [T, T1, timeStamp, wavelength] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
+function [T, T1, superMag] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
   superMagFileStr, dascFileStr, omniFileStr,...
   timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0)
 % Loading database
@@ -119,7 +119,6 @@ superMag.startTime(~isnan(amisrIndx))=amisr.startTime(amisrIndx(~isnan(amisrIndx
 superMag.endTime(~isnan(amisrIndx))=amisr.endTime(amisrIndx(~isnan(amisrIndx)));
 superMag.expBC(~isnan(amisrIndx))=bcFilterIndx(amisrIndx(~isnan(amisrIndx)));
 superMag.numberOfSimultaneousExp(~isnan(amisrIndx))=numExp(amisrIndx(~isnan(amisrIndx)));
-
 
 
 %% Create a table

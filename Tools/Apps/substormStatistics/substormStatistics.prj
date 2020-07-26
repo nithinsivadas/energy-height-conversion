@@ -1,0 +1,67 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="1806383538" file="C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\Apps\substormStatistics.prj" location="C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\Apps" name="substormStatistics" target="target.mlapps" target-name="Package App">
+    <param.appname>substormStatistics</param.appname>
+    <param.authnamewatermark>Nithin Sivadas</param.authnamewatermark>
+    <param.email>nithin@bu.edu</param.email>
+    <param.company>Boston University</param.company>
+    <param.icon />
+    <param.icons />
+    <param.summary>This app plots the distribution of substorms listed in the Super Mag database from 2006 to 2018.</param.summary>
+    <param.description />
+    <param.screenshot>C:\Users\nithin\AppData\Local\Temp\tpefc2e8e0_7eed_4758_9f5f_5626bf150899.png</param.screenshot>
+    <param.version>1.0</param.version>
+    <param.products.name />
+    <param.products.id />
+    <param.products.version />
+    <param.platforms />
+    <param.output>C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\Apps</param.output>
+    <param.guid>8c2bfc00-26be-4b45-9db1-e007a35d32c0</param.guid>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.description />
+      <param.version />
+      <param.products.name />
+      <param.products.id />
+      <param.products.version />
+      <param.platforms />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\substormStatistics.mlapp</file>
+    </fileset.main>
+    <fileset.depfun>
+      <file>C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\External Tools\Colormaps\inferno.m</file>
+      <file>C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\External Tools\googleearth_matlab\googleearth\deg2rad.m</file>
+      <file>C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\External Tools\googleearth_matlab\googleearth\rad2deg.m</file>
+      <file>C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\External Tools\zifredder-histogram2Polar-cad5141\histogram2Polar.m</file>
+    </fileset.depfun>
+    <fileset.resources>
+      <file>G:\My Drive\Research\Projects\Paper 3\Data\table_of_substorms_full.mat</file>
+    </fileset.resources>
+    <fileset.package />
+    <build-deliverables>
+      <file location="C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools" name="Apps" optional="false">C:\Users\nithin\Documents\GitHub\energy-height-conversion\Tools\Apps</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2018b</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

@@ -9,11 +9,13 @@ Ne  = ones(size(alt)) * 10^10;
 %%
 k_i = interp1(data.altitude',data.ionMobility,alt');
 k_e = interp1(data.altitude',data.electronMobility,alt');
-C = interp1(data.altitude,input.ionConcentration,alt);
+C = interp1(data.altitude,input.ionConcentration,alt)*2;
 sigmaPi = zeros(length(alt),1);
 for i=1:1:size(k_i,2)
     sigmaPi = sigmaPi + C(:,i).*k_i(:,i)./(1+(k_i(:,i).^2));
 end
+sigmaPn = sigmaPi*0.8;
+SigmaPi = 
 sigmaPe = (k_e)./(1+k_e.^2);
 
 sigmaHi = zeros(length(alt),1);

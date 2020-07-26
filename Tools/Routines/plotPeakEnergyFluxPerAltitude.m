@@ -7,7 +7,7 @@ lat  = 65;
 long = -147.5;
 time = datenum([2008 03 26 10 00 00]);
 
-A = get_energy_dep_matrix(alt, energyBin, lat, long, time);
+A = get_energy_dep_matrix(alt, energyBin, repmat(lat,length(alt),1), repmat(long,length(alt),1), time);
 
 numFlux = diag(ones(1,length(energyBin)))*10^12;
 

@@ -30,7 +30,7 @@ p.margintop=15;
 p.marginright=15;
 set(gca,'XColor', 'none','YColor','none');
 index = orbit.MLAT>0;
-h = histogram2Polar(orbit.MLT(index)*360./24,90-(orbit.MLAT(index)),1,'RTicks',90-[90,60,30,0]);
+h = histogram2Polar(deg2rad(orbit.MLT(index)*360./24),90-(orbit.MLAT(index)),1,'RTicks',90-[90,60,30,0]);
 h.RAxisLabels(1).String='90';
 h.RAxisLabels(2).String='60';
 h.RAxisLabels(3).String='30';
