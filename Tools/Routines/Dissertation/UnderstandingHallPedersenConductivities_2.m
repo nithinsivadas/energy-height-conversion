@@ -7,14 +7,18 @@ Ne  = ones(size(alt)) * 10^10;
     [], [], [], 0, {'all'}, true);
 
 %%
-NnNi = 0.5; % ratio of negative ions to positive ions
+NnNi = 1; % ratio of negative ions to positive ions
 dmobility = 0.1; % The reduction in mobility due to heavier negative ions
 
 k_i = interp1(data.altitude',data.ionMobility,alt');
 k_e = interp1(data.altitude',data.electronMobility,alt');
 C = interp1(data.altitude,input.ionConcentration,alt);
 Cn = zeros(size(alt))';
-Cn(alt<80) = NnNi;
+y=alt(1:20);x=(y-alt(1))./(alt(20)-alt(1));
+f = -log(x./(1-x));
+f = f-mi
+Cn(1:20)=-log(x./(1-x));
+% Cn(alt<80) = NnNi;
 nNe = 1-Cn; % concentration of electrons
 
 sigmaPi = zeros(length(alt),1);
@@ -22,14 +26,14 @@ for i=1:1:size(k_i,2)
     sigmaPi = sigmaPi + C(:,i).*k_i(:,i)./(1+(k_i(:,i).^2));
 end
 
-sigmaPn = Cn.*(k_i(:,2).*dmobility)./(1+((k_i(:,2).^2).*dmobility));
+sigmaPn = Cn.*(k_i(:,1).*dmobility)./(1+((k_i(:,1).^2).*dmobility));
 sigmaPe = (k_e)./(1+k_e.^2);
 
 sigmaHi = zeros(length(alt),1);
 for i=1:1:size(k_i,2)
     sigmaHi = sigmaHi + C(:,i).*(k_i(:,i).^2)./(1+(k_i(:,i).^2));
 end
-sigmaHn = Cn.*((k_i(:,2).*dmobility).^2)./(1+((k_i(:,2).*dmobility).^2));
+sigmaHn = Cn.*((k_i(:,1).*dmobility).^2)./(1+((k_i(:,1).*dmobility).^2));
 sigmaHe = (k_e.^2)./(1+k_e.^2);
 
 %
