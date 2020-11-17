@@ -129,7 +129,7 @@ thm.qForward = dataAvg.A*energy_to_num(thm.energyFlux, thm.time, thm.energyBin);
 thm.NeForward = q_to_Ne(thm.qForward, thm.alt, thm.time);
 
 %% Creating Panels
-hFig=figure(2);
+hFig=figure;
 resize_figure(hFig);
 
 clf
@@ -146,20 +146,22 @@ p(1).margintop=10;
 p(2).margintop=6;
 % p.fontsize=12;
 p.select('all');
+
 for iPanel=1
     for jPanel=1:1:3
         p(iPanel,jPanel).select();
         set(gca,'XTickLabel','');
-    end;
-end;
+    end
+end
+
 for iPanel=1:1:2
     for jPanel=2
         p(iPanel,jPanel).select();
         set(gca,'YTickLabel','');
-    end;
-end;
+    end
+end
 
-%% Plotting 1-D Validation Plots
+% Plotting 1-D Validation Plots
 
 
 plotThisTime(1,:)='26-Mar-2008 11:46';
