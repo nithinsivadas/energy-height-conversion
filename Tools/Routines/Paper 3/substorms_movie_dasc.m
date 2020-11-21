@@ -38,7 +38,7 @@ end
 calibration = read_h5_data(h5Calibration);
 omni.TotTime = unix_to_matlab_time(h5read(omni.h5File,'/Time'));
 %%
-setSample = true; %% Plot only samples - 99 frames for each substorm
+setSample = false; %% Plot only samples - 99 frames for each substorm
 
 %%
 myCluster = parcluster("ibatch");
@@ -150,13 +150,16 @@ omni = generate_omni_parameters(omni, mainTime(1), mainTime(end));
     end
 
     for iTime = timeArr
-        h=figure('visible','off');
-        h=create_figure(h,Fae,flagPixel,datestr(mainTime(iTime)),...
-            time,ASI,asiPlotVar,wavelengthStr,pfisrData,omni);         
-        if setStoreImage == true
-           export_fig(fullfile(imageDir,strcat('Figure_',datestr(mainTime(iTime),'HH_MM_ss'),'.png')),...
-               '-r300','-png','-nocrop');
-           close(h);
+        fileNameStr = fullfile(imageDir,strcat('Figure_',datestr(mainTime(iTime),'HH_MM_ss'),'.png'));
+        if ~isfile(fileNameStr)
+            h=figure('visible','off');
+            h=create_figure(h,Fae,flagPixel,datestr(mainTime(iTime)),...
+                time,ASI,asiPlotVar,wavelengthStr,pfisrData,omni);
+            if setStoreImage == true
+               export_fig(fileNameStr,...
+                   '-r300','-png','-nocrop');
+               close(h);
+            end
         end
     end
     
