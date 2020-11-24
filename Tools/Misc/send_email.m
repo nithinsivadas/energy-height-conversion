@@ -18,7 +18,7 @@ function send_email(varargin)
 
 p = inputParser;
 
-addParameter(p,'to','nithin@bu.edu');
+addParameter(p,'to','nithin.iitm@gmail.com');
 addParameter(p,'subject','Code executed');
 addParameter(p,'attachments',nan);
 addParameter(p,'errorFlag',0);
@@ -38,7 +38,8 @@ if isnan(p.Results.message)
         10 'on ',get_computer_name...
         10 'at ',nowTimeStr...
         10 10 'Thank you'...
-        10 '- MATLAB ',version];
+        10 'MATLAB -',char(version)...
+        10 ];
         subject = ['[MATLAB] ',p.Results.subject,' ',nowTimeStr];
     else
         message = ['Hello'...
@@ -46,7 +47,8 @@ if isnan(p.Results.message)
         10 'on ',get_computer_name...
         10 'at ',nowTimeStr...
         10 10 'Sorry!'...
-        10 '- MATLAB ',version];
+        10 'MATLAB -',char(version)...
+        10 ];
         subject = ['[MATLAB] ','Error encountered',' ',nowTimeStr];
     end
 end
@@ -63,18 +65,23 @@ if ispc
         sendmail(p.Results.to,subject,message);
     end
 else
-    fileNameEmailBody = tempname('$dataDir');
+    
+    [~,dataDir] = system('echo $dataDir');
+    [~,gitRootDir] = system('echo $gitRootDir');
+    fileNameEmailBody = [tempname(dataDir(1:end-1)),'.txt'];
     fileID = fopen(fileNameEmailBody, 'w');
-    fwrite(fileID, message);
+    fprintf(fileID,'%s',message);
     fclose(fileID);
     
     if ~isnan(p.Results.attachments)
-        unix(['runSendMail ',p.Results.to,subject,fileNameEmailBody,p.Results.attachments]);
+        system(['bash ',gitRootDir(1:end-1),'/Scripts/runSendMail.sh ',p.Results.to,...
+            ' "',subject,'" ',fileNameEmailBody,' ',p.Results.attachments]);
     else
-        unix(['runSendMailNoAttach ',p.Results.to,subject,fileNameEmailBody]);   
+        system(['bash ',gitRootDir(1:end-1),'/Scripts/runSendMailNoAttach.sh ',p.Results.to,...
+            ' "',subject,'" ',fileNameEmailBody,' ',p.Results.attachments]);
     end
     
-    unix(['rm ',fileNameEmailBody]);
+    system(['rm ',fileNameEmailBody]);
 end
 
 

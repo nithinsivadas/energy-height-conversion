@@ -14,7 +14,7 @@ export NAME="Nithin Sivadas"
  echo 'Content-Type: multipart/mixed; boundary="-q1w2e3r4t5"'
  echo
  echo '---q1w2e3r4t5'
- echo "Content-Type: text/html"
+ echo "Content-Type: text/plain"
  echo "Content-Disposition: inline"
  cat $BODY
  echo '---q1w2e3r4t5'
