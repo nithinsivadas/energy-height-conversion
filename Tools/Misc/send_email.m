@@ -56,11 +56,27 @@ props.setProperty('mail.smtp.auth','true');
 props.setProperty('mail.smtp.socketFactory.class', 'javax.net.ssl.SSLSocketFactory');
 props.setProperty('mail.smtp.socketFactory.port','465');
 
-if ~isnan(p.Results.attachments)
-    sendmail(p.Results.to,subject,message,p.Results.attachments);
+if ispc
+    if ~isnan(p.Results.attachments)
+        sendmail(p.Results.to,subject,message,p.Results.attachments);
+    else
+        sendmail(p.Results.to,subject,message);
+    end
 else
-    sendmail(p.Results.to,subject,message);
+    fileNameEmailBody = tempname('$dataDir');
+    fileID = fopen(fileNameEmailBody, 'w');
+    fwrite(fileID, message);
+    fclose(fileID);
+    
+    if ~isnan(p.Results.attachments)
+        unix(['runSendMail ',p.Results.to,subject,fileNameEmailBody,p.Results.attachments]);
+    else
+        unix(['runSendMailNoAttach ',p.Results.to,subject,fileNameEmailBody]);   
+    end
+    
+    unix(['rm ',fileNameEmailBody]);
 end
+
 
 
 end
