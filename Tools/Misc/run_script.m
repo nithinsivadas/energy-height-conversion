@@ -12,16 +12,8 @@ function run_script(scriptFnHandle)
 % Updated on: NA
 %--------------------------------------------------------------------------
 
-diaryFileStr = 'record.txt';
-diaryFile = strcat(pwd,filesep,diaryFileStr);
+diaryFile = [tempname(),'.txt'];
 
-if exist(diaryFile,'file')
-    if ispc
-        system(['del ',diaryFile])
-    else
-        system(['rm ', diaryFile]);
-    end
-end
 
 diary(diaryFile);
 errorFlag = 0;

@@ -18,9 +18,9 @@ export NAME="Nithin Sivadas"
  echo "Content-Disposition: inline"
  cat $BODY
  echo '---q1w2e3r4t5'
- echo 'Content-Type: application; name="'$(basename $ATTACH)'"'
+ echo 'Content-Type: application; name="'$(basename log.txt)'"'
  echo "Content-Transfer-Encoding: base64"
- echo 'Content-Disposition: attachment; filename="'$(basename $ATTACH)'"'
- uuencode --base64 $ATTACH $(basename $ATTACH)
+ echo 'Content-Disposition: attachment; filename="'$(basename log.txt'"'
+ uuencode --base64 $ATTACH $(basename log.txt)
  echo '---q1w2e3r4t5--'
 ) | sendmail $MAILTO
