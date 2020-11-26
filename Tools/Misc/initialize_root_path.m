@@ -24,7 +24,7 @@ if nargin<1
         rootPathStr='/home/nithin/Documents/git-repos/';
 %         dataPathStr = '/home/nithin/Documents/git-repos/Largefiles/';
         dataPathStr = '/media/nithin/PFISR_002_006/Nithin/Data/';
-    elseif strcmp(computer,'scc-lite')
+    elseif contains(computer,'scc')
         rootPathStr = '/usr3/graduate/nithin/git-repos/';
         dataPathStr = '/scratch/nithin/Data/';
     else
