@@ -17,16 +17,30 @@ if nargin<1
     if strcmp(computer,'nithin-surface')
         rootPathStr='C:\Users\Nithin\Documents\GitHub\';
         dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles';
+        if ~isfolder(dataPathStr)
+            mkdir(dataPathStr);
+        end
+        
     elseif strcmp(computer,'nithin-carbon')
         rootPathStr='C:\Users\nithin\Documents\GitHub\';
         dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles';
+        if ~isfolder(dataPathStr)
+            mkdir(dataPathStr);
+        end
+        
     elseif strcmp(computer,'aurora1-optiplex-780')
         rootPathStr='/home/nithin/Documents/git-repos/';
 %         dataPathStr = '/home/nithin/Documents/git-repos/Largefiles/';
-        dataPathStr = '/media/nithin/PFISR_002_006/Nithin/Data/';
+        dataPathStr = '/media/nithin/Elements/Nithin/Data/';
+        if ~isfolder(dataPathStr)
+            mkdir(dataPathStr);
+        end
     elseif contains(computer,'scc')
         rootPathStr = '/usr3/graduate/nithin/git-repos/';
         dataPathStr = '/scratch/nithin/Data/';
+        if ~isfolder(dataPathStr)
+            mkdir(dataPathStr);
+        end
     else
         error('Computer not initialized to run energy-height-conversion/Tools');
     end
