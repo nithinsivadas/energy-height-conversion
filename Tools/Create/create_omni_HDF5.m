@@ -21,16 +21,35 @@ remoteLinkOmniHighRes = '/pub/data/omni/high_res_omni';
 remoteLinkOmni2 = '/pub/data/omni/low_res_omni/extended';
 
 %% OMNI High_res_download
-download_omni_high_res(remoteLinkOmniHighRes, localStorePath);
+missingNo1 = download_omni_high_res(remoteLinkOmniHighRes, localStorePath);
+if missingNo1 ~=0 
+    missingNo1 = download_omni_high_res(remoteLinkOmniHighRes, localStorePath);
+end
+
+if missingNo1 == 0
+    status{1,1} = 'Downloaded High resolution OMNI ASC data';
+else
+    status{1,1} = ['Missing',num2str(missingNo1),' years of OMNI High Res ASC data'];
+end
+    
 
 %% OMNI2
-download_omni_2(remoteLinkOmni2, localStorePath);
-status{1,1} = 'Download complete';
+missingNo2 = download_omni_2(remoteLinkOmni2, localStorePath);
+
+if missingNo2 ~=0 
+    missingNo2 = download_omni_2(remoteLinkOmni2, localStorePath);
+end
+
+if missingNo2 == 0
+    status{2,1} = 'Downloaded Low resolution OMNI ASC data';
+else
+    status{2,1} = ['Missing',num2str(missingNo2),' years of OMNI Low Res ASC data'];
+end
 
 %% Load ASCII Filess
 % OMNI High_Res
 create_omni_HDF5_file(localStorePath,h5FileStr,setCalculateGW);
-status{2,1} = 'Loaded ASCII Files';
+status{3,1} = 'Loaded ASCII Files';
 
 
 end
@@ -199,7 +218,7 @@ data = textscan(fileID, format);
 fclose(fileID);
 end
 
-function download_omni_high_res(remoteLink, localStorePath)
+function missingNo = download_omni_high_res(remoteLink, localStorePath)
 
 host = 'https://spdf.gsfc.nasa.gov';
 remoteFinalLink = [host,remoteLink];
@@ -209,7 +228,7 @@ remoteFileListNameIndx = strncmp(remoteFileListCell(1,:),'omni_min',8);
 remoteFileListName = string(remoteFileListCell(1,remoteFileListNameIndx));
 
 % Download 1-min files
-if isdir(localStorePath)
+if isfolder(localStorePath)
     localFileList = dir(localStorePath);
     localFileListName = strtrim(string(char(localFileList.name)));
     % Identifying identical files in remote and local directories
@@ -258,16 +277,23 @@ else
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
         [status,cmdout]=...
-            unix(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
+            unix(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
     else
         [status,cmdout]=...
-            system(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
+            system(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
     end
+    
 end
 
+    localFileList = dir(localStorePath);
+    localFileListName = strtrim(string(char(localFileList.name)));
+    % Identifying identical files in remote and local directories
+    index = arrayfun(@(k)sum(strcmp(remoteFileListName(k),localFileListName))>0, (1:length(remoteFileListName))','UniformOutput',false);
+    indexMissingFiles = find(~cell2mat(index));
+    missingNo = sum(indexMissingFiles);
 end
 
-function download_omni_2(remoteLink, localStorePath)
+function missingNo = download_omni_2(remoteLink, localStorePath)
 
 %% OMNI-2 Download
 host = 'https://spdf.gsfc.nasa.gov';
@@ -327,11 +353,17 @@ else
     fileID = fopen(urlFilePath,'w'); fprintf(fileID,'%s\r\n',urls');fclose(fileID);
     if isunix
         [status,cmdout]=...
-            unix(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
+            unix(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
     else
         [status,cmdout]=...
-            system(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,'-i ',urlFilePath]);
+            system(['aria2c --allow-overwrite true -V -c -j 50 ','-d ',localStorePath,' -i ',urlFilePath]);
     end
 end
+    localFileList = dir(localStorePath);
+    localFileListName = strtrim(string(char(localFileList.name)));
+    % Identifying identical files in remote and local directories
+    index = arrayfun(@(k)sum(strcmp(remoteFileListName(k),localFileListName))>0, (1:length(remoteFileListName))','UniformOutput',false);
+    indexMissingFiles = find(~cell2mat(index));
+    missingNo = sum(indexMissingFiles);
 
 end
