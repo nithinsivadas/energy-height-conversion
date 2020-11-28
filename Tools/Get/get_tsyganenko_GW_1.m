@@ -25,7 +25,7 @@ function GW=get_tsyganenko_GW_1(yyyy,programDir,omniASCDir)
 %      Status8, kp,akp3,dst,Bz1_6:[Bz1,Bz2,Bz3,Bz4,Bz5,Bz6],W:[W1 W2 W3 W4 W5 W6]
 %      Status6
 %--------------------------------------------------------------------------
-% Modified: 30th May 2019
+% Modified: 30th May 2019; 28th Nov 2020 - change in omni2 format
 % Created : 6th Feb 2017
 % Author  : Nithin Sivadas
 % Ref     :
@@ -45,7 +45,8 @@ end
 
 % Run fortran application only if GW paramters aren't already stored
 %     h = waitbar(12/75,'Calculating G and W values');
-    formatSpecOmni2 = '%4d %4d %3d %5d %3d %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %6.2f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %7.2f %7.2f %6.1f %3d %4d %6d %5d %10.2f %9.2f %9.2f %9.2f %9.2f %9.2f %3d %4d %6.1f %6.1f %6d %6d %5.1f %6.2f';
+    formatSpecOmni2 = '%4d %4d %3d %5d %3d %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %6.2f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %7.2f %7.2f %6.1f %3d %4d %6d %5d %10.2f %9.2f %9.2f %9.2f %9.2f %9.2f %3d %4d %6.1f %6.1f %6d %6d %5.1f %9.6f %7.4f';
+    % Check: https://omniweb.gsfc.nasa.gov/html/ow_data.html#3
     ascOmni2FileStr{1} = ['omni2_',num2str(yyyy-1),'.dat'];
     ascOmni2FileStr{2} = ['omni2_',num2str(yyyy),'.dat'];
     inputFileID1 = fopen([omniASCDir,ascOmni2FileStr{1}],'r');

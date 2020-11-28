@@ -32,6 +32,7 @@ status{1,1} = 'Download complete';
 create_omni_HDF5_file(localStorePath,h5FileStr,setCalculateGW);
 status{2,1} = 'Loaded ASCII Files';
 
+
 end
 function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
 
@@ -42,7 +43,9 @@ function create_omni_HDF5_file(localStorePath, h5FileStr, setCalculateGW)
     files=dir(localStorePath);
     fileListCell = struct2cell(files);
     formatSpecOmni1 = '%4d %4d %3d %3d %3d %3d %4d %4d %4d %7d %7d %6.2f %7d %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.1f %8.1f %8.1f %8.1f %7.2f %9.0f %6.2f %7.2f %7.2f %6.1f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %6d %6d %6d %6d %6d %6d %6d %7.2f %5.1f';
-    formatSpecOmni2 = '%4d %4d %3d %5d %3d %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %6.2f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %7.2f %7.2f %6.1f %3d %4d %6d %5d %10.2f %9.2f %9.2f %9.2f %9.2f %9.2f %3d %4d %6.1f %6.1f %6d %6d %5.1f %6.2f';
+    % Check: https://spdf.gsfc.nasa.gov/pub/data/omni/high_res_omni/hroformat.txt
+    formatSpecOmni2 = '%4d %4d %3d %5d %3d %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %6.1f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %6.2f %9.0f %6.1f %6.0f %6.1f %6.1f %6.3f %7.2f %7.2f %6.1f %3d %4d %6d %5d %10.2f %9.2f %9.2f %9.2f %9.2f %9.2f %3d %4d %6.1f %6.1f %6d %6d %5.1f %9.6f %7.4f';
+    % Check: https://omniweb.gsfc.nasa.gov/html/ow_data.html#3
     fileListMinStr=strcat(fileListCell(2,strncmp(fileListCell(1,:)','omni_min',8))',filesep,fileListCell(1,strncmp(fileListCell(1,:)','omni_min',8))');
     n = length(fileListMinStr);
     k=1;
