@@ -4,8 +4,8 @@ if strcmp(get_computer_name,'nithin-carbon')
     dataDir = 'G:\My Drive\Research\Projects\Data\';
     storeDir = 'G:\My Drive\Research\Projects\Paper 3\Data\';
 elseif strcmp(get_computer_name,'aurora1-optiplex-780')
-    dataDir = '/media/nithin/PFISR_002_006/Nithin/Data/';
-    storeDir = '/media/nithin/PFISR_002_006/Nithin/Data/Paper_3/';
+    dataDir = '/media/nithin/Elements/Nithin/Data/';
+    storeDir = '/media/nithin/Elements/Nithin/Data/Paper_3/';
 elseif strcmp(get_computer_name,'scc-lite')
     dataDir = '/projectnb/semetergrp/nithin/Data/';
     storeDir = '/scratch/nithin/Data/Paper_3/';
