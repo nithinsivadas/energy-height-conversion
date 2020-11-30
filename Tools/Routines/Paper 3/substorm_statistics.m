@@ -45,8 +45,8 @@ pkrGLAT = 65.126;
 pkrGLON = -147.47;
 pkrh0=0.693;
 
-timeMinStr = "15 Jul 2019"; %does not matter
-timeMaxStr = "31 Jul 2020";
+%timeMinStr = "15 Jul 2019"; %does not matter
+%timeMaxStr = "31 Jul 2020";
 
 tic 
 [T,T1, superMag] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
