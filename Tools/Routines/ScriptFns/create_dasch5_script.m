@@ -3,8 +3,8 @@ function create_dasch5_script()
     % Store the data in root data path
     % run this from linux commad line as follows:
     % runMatlabScript @create_dasch5_script
-%    [~, dataPath] = initialize_root_path();
-    dataPath = "/projectnb/semetergrp/nithin/Data/";
+    [~, dataPath] = initialize_root_path();
+%    dataPath = "/projectnb/semetergrp/nithin/Data/";
     outputFileStr = 'dascDatabase.h5';
 %     timeMinStr = '01 Jan 2007';
 %     timeMaxStr = '31 Dec 2019';
