@@ -1,0 +1,16 @@
+Start time: 23-Nov-2020 04:18:20
+
+We are testing send_email function
+Checking the internet preferences
+SMTP_Server   :smtp.gmail.com
+Email         :nithin.iitm@gmail.com
+SMTP_Username :nithin.iitm
+If this much is correct, then the password should be stored fine.
+Displaying the current directory
+/usr3/graduate/nithin/git-repos/energy-height-conversion
+
+End time: 23-Nov-2020 04:18:20
+
+-----------------------------------------
+              Complete
+-----------------------------------------

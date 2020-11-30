@@ -27,7 +27,7 @@ end
 outputAMISRFileStr = 'amisrWebDatabase.h5';
 amisrDatabaseStr = [dataDir,outputAMISRFileStr];
 
-superMagFileStr = [storeDir,'substorms_superMag_20190530.txt'];
+superMagFileStr = [storeDir,'substorms_superMag_20201130.txt'];
 
 dascFileStr = [storeDir,'dascDatabase.h5'];
 outputDASCh5FileStr = 'dascData.h5';
@@ -45,8 +45,8 @@ pkrGLAT = 65.126;
 pkrGLON = -147.47;
 pkrh0=0.693;
 
-timeMinStr = "15 Jul 2018"; %does not matter
-timeMaxStr = "31 Jul 2019";
+timeMinStr = "15 Jul 2019"; %does not matter
+timeMaxStr = "31 Jul 2020";
 
 tic 
 [T,T1, superMag] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...

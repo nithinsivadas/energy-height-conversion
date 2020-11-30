@@ -51,8 +51,8 @@ for iMonth = 1:1:nMonths
     try 
     mm = num2str(startMonth);
     yyyy = num2str(startYear);
-    % Link to the webpage with experiment information
-    amisrDataLink = ['https://amisr.com/database/'...
+    % Link to the webpage with experiment information https://data.amisr.com/database/61/exp-list/2019/7/
+    amisrDataLink = ['https://data.amisr.com/database/'...
         ,num2str(instrumentID),'/exp-list/',yyyy,'/',...
         mm,'/'];
     tempTableCell = htmlTableToCell(amisrDataLink,tables);
