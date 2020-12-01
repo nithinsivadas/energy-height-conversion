@@ -33,8 +33,8 @@ dascFileStr = [storeDir,'dascDatabase.h5'];
 outputDASCh5FileStr = 'dascData.h5';
 omniFileStr = [dataDir,'omni.h5'];
 
-% timeMinStr = "01 Dec 2006";
-% timeMaxStr = "31 Jul 2019";
+timeMinStr = "01 Dec 2006";
+timeMaxStr = "31 Dec 2019";
 
 % Substorms at PFISR [IMPORTANT] : Range of closeness to PFISR
 Dmlt = 2;
@@ -54,7 +54,7 @@ tic
   timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0);
 toc 
 
-save([storeDir,'table_of_substorms_full.mat'],'T1','superMag','Dmlat','Dmlt','pkrGLAT','pkrGLON','dascFileStr','amisrDatabaseStr','omniFileStr','superMagFileStr');
+save([storeDir,'table_of_substorms_full.mat'],'T1','T','superMag','Dmlat','Dmlt','pkrGLAT','pkrGLON','dascFileStr','amisrDatabaseStr','omniFileStr','superMagFileStr');
 
 function [T, T1, superMag] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
   superMagFileStr, dascFileStr, omniFileStr,...
