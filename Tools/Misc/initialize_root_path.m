@@ -16,14 +16,14 @@ computer=get_computer_name();
 if nargin<1
     if strcmp(computer,'nithin-surface')
         rootPathStr='C:\Users\Nithin\Documents\GitHub\';
-        dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles';
+        dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles\';
         if ~isfolder(dataPathStr)
             mkdir(dataPathStr);
         end
         
     elseif strcmp(computer,'nithin-carbon')
         rootPathStr='C:\Users\nithin\Documents\GitHub\';
-        dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles';
+        dataPathStr = 'C:\Users\nithin\Documents\GitHub\LargeFiles\';
         if ~isfolder(dataPathStr)
             mkdir(dataPathStr);
         end

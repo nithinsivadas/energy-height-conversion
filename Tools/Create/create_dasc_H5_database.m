@@ -50,12 +50,14 @@ yearArr = year(date1):year(date2);
 for iYear = 1:1:length(yearArr)
 
    try 
-
+        disp(['Year: ',num2str(yearArr(iYear))]); %Marker
+        
         if iYear == 1
             timeMinStr1 = timeMinStr;
         else
             timeMinStr1 = ['01 Jan ',num2str(yearArr(iYear))];
         end
+        
         if iYear == length(yearArr)
             timeMaxStr1 = timeMaxStr;
         else
@@ -65,18 +67,22 @@ for iYear = 1:1:length(yearArr)
         [data, err] = get_DASC_FITS_times(timeMinStr1, timeMaxStr1);
         
         if ~isempty(data.time)
-        disp('Writing to H5');
-        data.time1=posixtime(data.time);
+        
+            disp('Writing to H5'); %Marker
+            data.time1=posixtime(data.time);
               
-        write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
             '/time'],(data.time1),1,true);
-        write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
             '/wavelength'],(data.wavelength),1,true);
- 
+        
         end
+        
    catch ME
+       
         disp([[10 'Error in documenting Year: '],num2str(yearArr(iYear))]);
         disp(getReport(ME));
+        
    end
 end
         
