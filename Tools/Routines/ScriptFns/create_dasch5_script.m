@@ -18,8 +18,6 @@ function create_dasch5_script()
     disp([10 'Errors: ']);
     disp([err.directory.name,err.directory.message]);
     disp([err.subdirectory.name,err.subdirectory.message]);
-    disp([10 ' ']);
-    disp(['The last program error: ',err.program.message]);
     
     disp([10 'Data stored in ',dataPath,outputFileStr, 10]);
 end

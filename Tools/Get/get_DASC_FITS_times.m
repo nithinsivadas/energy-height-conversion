@@ -59,7 +59,7 @@ err.directory.message =[];
 yearArr = year(date1):year(date2);
 
 for iYear = 1:1:length(yearArr)
-    try
+   try
         % Accessing folders within a particular year
         [status,out] = system([curlcmd,host,remoteStoreLink,num2str(yearArr(iYear)),'/']);
         
@@ -77,7 +77,7 @@ for iYear = 1:1:length(yearArr)
         
         % Going into the folders of interest
             for i = indxNum
-
+               try
                % Collecting the file names within the folder 
                [statusFile,out] = system(strjoin([curlcmd,host,...
                    deblank(strcat(remoteStoreLink,num2str(yearArr(iYear)),...
@@ -105,6 +105,11 @@ for iYear = 1:1:length(yearArr)
                     err.subdirectory.message = [err.subdirectory.message; out];
                     end
 
+               catch ME
+                   disp(strjoin([[10 'Error while documenting Day: '],remoteFileListName(i)]));
+                   disp(getReport(ME));
+               end
+               
             end
         
         else
@@ -113,9 +118,9 @@ for iYear = 1:1:length(yearArr)
             err.directory.message = [err.directory.message; out];
         end
        
-    catch ME
-  
-    end
+   catch ME  
+        disp(getReport(ME));
+   end
       
 end        
 
@@ -130,7 +135,11 @@ data.url = strcat(host,remoteStoreLink,...
     num2str(data.year),'/',data.date,'/',data.file);
 
 % If you need to debug, the last err is stored here. 
-err.program.message = ME.message;
+if isstruct(ME)
+    err.program.message = ME.message;
+else
+    err.program.message = '';
+end
 
 end
 

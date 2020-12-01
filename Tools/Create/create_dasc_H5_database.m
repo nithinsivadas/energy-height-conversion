@@ -49,7 +49,8 @@ instrumentStr = 'DASC';
 yearArr = year(date1):year(date2);
 for iYear = 1:1:length(yearArr)
 
-    try 
+   try 
+
         if iYear == 1
             timeMinStr1 = timeMinStr;
         else
@@ -60,11 +61,11 @@ for iYear = 1:1:length(yearArr)
         else
             timeMaxStr1 = ['31 Dec ',num2str(yearArr(iYear)),' 23:59:59.999'];
         end
-        
+
         [data, err] = get_DASC_FITS_times(timeMinStr1, timeMaxStr1);
         
         if ~isempty(data.time)
- 
+        disp('Writing to H5');
         data.time1=posixtime(data.time);
               
         write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
@@ -73,9 +74,10 @@ for iYear = 1:1:length(yearArr)
             '/wavelength'],(data.wavelength),1,true);
  
         end
-    catch ME
-    
-    end
+   catch ME
+        disp([[10 'Error in documenting Year: '],num2str(yearArr(iYear))]);
+        disp(getReport(ME));
+   end
 end
         
         
