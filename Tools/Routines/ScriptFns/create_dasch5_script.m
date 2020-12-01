@@ -10,15 +10,15 @@ function create_dasch5_script()
 %     timeMaxStr = '31 Dec 2019';
     timeMinStr = '01 Jan 2007';
     timeMaxStr = '29 Nov 2020 11:59:59.999';
-    [status, error] = create_dasc_H5_database(timeMinStr, timeMaxStr, [dataPath,outputFileStr]);
+    [status, err] = create_dasc_H5_database(timeMinStr, timeMaxStr, [dataPath,outputFileStr]);
     disp([10 'Status: ']);
     cellstr(status)
     
     disp([10 'Errors: ']);
-    disp([error.directory.name,error.directory.message]);
-    disp([error.subdirectory.name,error.subdirectory.message]);
+    disp([err.directory.name,err.directory.message]);
+    disp([err.subdirectory.name,err.subdirectory.message]);
     disp([10 ' ']);
-    disp(['The last program error: ',error.program.message]);
+    disp(['The last program error: ',err.program.message]);
     
     disp([10 'Data stored in ',dataPath,outputFileStr, 10]);
 end

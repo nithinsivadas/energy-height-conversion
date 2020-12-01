@@ -1,4 +1,4 @@
-function [status, error] = create_dasc_H5_database...
+function [status, err] = create_dasc_H5_database...
     (timeMinStr,timeMaxStr,outputH5File,writeModeStr)
 %create_amisr_web_experiment_H5_database.h5 Downloads from DASC FTP the data
 % regarding DASC experiments, and stores it in an HDF5 file
@@ -60,7 +60,7 @@ for iYear = 1:1:length(yearArr)
             timeMaxStr1 = ['31 Dec ',num2str(yearArr(iYear)),' 23:59:59.999'];
         end
         
-        [data, error] = get_DASC_FITS_times(timeMinStr1, timeMaxStr1);
+        [data, err] = get_DASC_FITS_times(timeMinStr1, timeMaxStr1);
         
         if ~isempty(data.time)
  
