@@ -35,7 +35,11 @@ if datenum(timeMinStr)>datenum(timeMaxStr)
 end
 
 host = 'ftp://optics.gi.alaska.edu';
-curlcmd = 'curl -ls '; %Silently lists the contents of the directory that is passed
+if ~ispc
+    curlcmd = 'LD_LIBRARY_PATH="" && curl -ls '; %Silently lists the contents of the directory that is passed
+else
+    curlcmd = 'curl -ls ';
+end
 remoteStoreLink = '/PKR/DASC/RAW/';
 date1 = datetime(datenum(timeMinStr),'ConvertFrom','datenum');
 date2 = datetime(datenum(timeMaxStr),'ConvertFrom','datenum');
