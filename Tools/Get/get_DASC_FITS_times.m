@@ -1,4 +1,4 @@
-function [data, error] = get_DASC_FITS_times(timeMinStr, timeMaxStr)
+function [data, err] = get_DASC_FITS_times(timeMinStr, timeMaxStr)
 %GET_DASC_FITS_TIMES Stores details of images available on DASC server. 
 
 % Input
@@ -17,7 +17,10 @@ function [data, error] = get_DASC_FITS_times(timeMinStr, timeMaxStr)
 % --> date       - date [yyyymmdd]  in string
 
 % Created on: 13th Aug 2019
+% Updated on: 1 Dec 2020, used the curl command instead of ftp - to avoid
+% connection issues. 
 % Created by: Nithin Sivadas, Boston University
+
 
 if nargin <2
     timeMaxStr = '20 Jan 2018';
@@ -28,29 +31,34 @@ if nargin <1
 end
 
 if datenum(timeMinStr)>datenum(timeMaxStr)
-    error('Check inputs: the end time is smaller than the start time.');
+    err('Check inputs: the end time is smaller than the start time.');
 end
 
-host = 'optics.gi.alaska.edu';
+host = 'ftp://optics.gi.alaska.edu';
+curlcmd = 'curl -ls '; %Silently lists the contents of the directory that is passed
 remoteStoreLink = '/PKR/DASC/RAW/';
 date1 = datetime(datenum(timeMinStr),'ConvertFrom','datenum');
 date2 = datetime(datenum(timeMaxStr),'ConvertFrom','datenum');
 
-dasc=ftp(host);
 ME = [];
 
 data.time = [];
 data.wavelength = [];
 data.file = [];
+err.subdirectory.name =[];
+err.subdirectory.message =[];
+err.directory.name =[];
+err.directory.message =[];
 
 yearArr = year(date1):year(date2);
 
 for iYear = 1:1:length(yearArr)
     try
         % Accessing folders within a particular year
-        cd(dasc,[remoteStoreLink,num2str(yearArr(iYear))]);
-        remoteFileList = dir(dasc);
-        remoteFileListName = deblank(string(char(remoteFileList.name)));
+        [status,out] = system([curlcmd,host,remoteStoreLink,num2str(yearArr(iYear)),'/']);
+        
+        if status==0
+        remoteFileListName = deblank(string(strsplit(out(1:end-1))))';
         
         dayArr = datetime(remoteFileListName,'InputFormat','uuuuMMdd');
         date11 = datetime(year(date1),month(date1),day(date1));
@@ -62,38 +70,49 @@ for iYear = 1:1:length(yearArr)
         indxNum = indx(indxWantedDays);
         
         % Going into the folders of interest
-        for i = indxNum
-           
-           try
-               
-           % Collecting the file names within the folder    
-           tempFileList = dir(dasc,...
-                deblank(strcat(remoteStoreLink,num2str(yearArr(iYear)),'/',...
-                remoteFileListName(i))));
-            tempFileListName = string(char(tempFileList.name));
-            
-            % Extracting the time stamp and wavelength
-            [timeStamp,wavelength] = fitsfiletimestamp(tempFileListName);
-            timeStamp = datetime(timeStamp,'ConvertFrom','datenum');
-            
-            % Flagging the files that are within the time range
-            indxWantedTimes = timeStamp>=date1 & timeStamp<=date2;
-            
-            % Collecting meta data into a structure
-            data.file = [data.file ; tempFileListName(indxWantedTimes)];
-            data.time = [data.time ; timeStamp(indxWantedTimes)];
-            data.wavelength = [data.wavelength ; wavelength(indxWantedTimes)'];
-            catch ME
+            for i = indxNum
+
+               % Collecting the file names within the folder 
+               [statusFile,out] = system(strjoin([curlcmd,host,...
+                   deblank(strcat(remoteStoreLink,num2str(yearArr(iYear)),...
+                   '/',remoteFileListName(i))),'/'],''));
+
+                    if statusFile==0
+                    tempFileListName = string(strsplit(out(1:end-1)))';
+
+                    % Extracting the time stamp and wavelength
+                    [timeStamp,wavelength] = fitsfiletimestamp(tempFileListName);
+                    timeStamp = datetime(timeStamp,'ConvertFrom','datenum');
+
+                    % Flagging the files that are within the time range
+                    indxWantedTimes = timeStamp>=date1 & timeStamp<=date2;
+
+                    % Collecting meta data into a structure
+                    data.file = [data.file ; tempFileListName(indxWantedTimes)];
+                    data.time = [data.time ; timeStamp(indxWantedTimes)];
+                    data.wavelength = [data.wavelength ; wavelength(indxWantedTimes)'];
+                    else
+                    err.subdirectory.name = [err.subdirectory.name;...
+                        [curlcmd,host,...
+                        deblank(strcat(remoteStoreLink,num2str(yearArr(iYear)),'/',...
+                        remoteFileListName(i)))]];
+                    err.subdirectory.message = [err.subdirectory.message; out];
+                    end
+
             end
+        
+        else
+            err.directory.name = [err.directory.name;...
+                [curlcmd,host,remoteStoreLink,num2str(yearArr(iYear))]];
+            err.directory.message = [err.directory.message; out];
         end
        
     catch ME
-          
+  
     end
       
 end        
 
-close(dasc);    
 
 % Calculating more data from time-stamp and wavelength
 data.date = string(datestr(data.time,'yyyymmdd'));
@@ -104,8 +123,8 @@ data.day = day(data.time);
 data.url = strcat('ftp://',host,remoteStoreLink,...
     num2str(data.year),'/',data.date,'/',data.file);
 
-% If you need to debug, the last error is stored here. 
-error = ME;
+% If you need to debug, the last err is stored here. 
+err.program.message = ME.message;
 
 end
 
