@@ -13,19 +13,34 @@ function [Numlist, Wavelength] = fitsfiletimestamp(file_list)
 % Wavelength - A Nx1 or 1xN array of wavelength in [nm] that the image
 % corresponds to. 
 %% Main
-if ischar(file_list)
-    temp_list = file_list;
+Wavelength = string();
+if ischar(file_list) || isstring(file_list)
+    temp_list = replace(file_list,'__','_');
     N  = size(temp_list,1);
-    file_list = cell(N,1);
+    file_list = {};
     
-    for k = 1:size(file_list,1)
-        file_list{k} = temp_list(k,:);
+    i = 1;
+    for k = 1:N
+        if length(deblank(char(temp_list(k,:))))==38
+            file_list{i} = temp_list(k,:);
+            i=i+1;
+        end
     end
 end
 N = length(file_list);
 Numlist = zeros(size(file_list));
 
 makewarn = false;
+
+if N<k
+    warning([num2str(k-N),' of the FITS file names have a different format.',...
+        ' They have string lengths > 38']);
+end
+
+if N==0
+    error('No FITS files have the right file name length = 38');
+end
+
 for k = 1:N
     temp_str = file_list{k};
     split_cell = regexp(temp_str,'\.','split');
@@ -41,7 +56,7 @@ for k = 1:N
     time_str = [yearstr,'-',time_split{end},'.',split_cell{2}];
     
     Numlist(k) = datenum(time_str,'yyyymmdd-HHMMSS.FFF');
-    Wavelength(k) = str2num(time_split{3});
+    Wavelength(1,k) = string(time_split{3});
 end
 
 if makewarn
