@@ -41,6 +41,8 @@ date1 = datetime(datenum(timeMinStr),'ConvertFrom','datenum');
 date2 = datetime(datenum(timeMaxStr),'ConvertFrom','datenum');
 
 ME = [];
+data = struct();
+err = struct();
 
 data.time = [];
 data.wavelength = [];

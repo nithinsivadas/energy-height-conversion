@@ -34,7 +34,7 @@ if nargin <1 || isempty(timeMinStr)
 end
 
 status = 'failed';
-err = [];
+err = struct();
 
 if isfile(outputH5File)
    movefile(outputH5File, [outputH5File,'_bak']);
