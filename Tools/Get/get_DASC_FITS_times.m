@@ -57,7 +57,7 @@ for iYear = 1:1:length(yearArr)
         % Accessing folders within a particular year
         [status,out] = system([curlcmd,host,remoteStoreLink,num2str(yearArr(iYear)),'/']);
         
-        if status==0
+        if status==0 && ~isempty(out)
         remoteFileListName = deblank(string(strsplit(out(1:end-1))))';
         
         dayArr = datetime(remoteFileListName,'InputFormat','uuuuMMdd');
@@ -77,7 +77,7 @@ for iYear = 1:1:length(yearArr)
                    deblank(strcat(remoteStoreLink,num2str(yearArr(iYear)),...
                    '/',remoteFileListName(i))),'/'],''));
 
-                    if statusFile==0
+                    if statusFile==0 && ~isempty(out)
                     tempFileListName = string(strsplit(out(1:end-1)))';
 
                     % Extracting the time stamp and wavelength
@@ -120,7 +120,7 @@ data.year = year(data.time);
 data.month = month(data.time);
 data.day = day(data.time);
 
-data.url = strcat('ftp://',host,remoteStoreLink,...
+data.url = strcat(host,remoteStoreLink,...
     num2str(data.year),'/',data.date,'/',data.file);
 
 % If you need to debug, the last err is stored here. 
