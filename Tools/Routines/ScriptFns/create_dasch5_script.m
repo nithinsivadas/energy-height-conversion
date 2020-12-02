@@ -6,10 +6,12 @@ function create_dasch5_script()
     [~, dataPath] = initialize_root_path();
 %    dataPath = "/projectnb/semetergrp/nithin/Data/";
     outputFileStr = 'dascDatabase.h5';
-%     timeMinStr = '21 Sep 2011';
-%     timeMaxStr = '22 Sep 2011';
-    timeMinStr = '01 Jan 2007';
-    timeMaxStr = '29 Nov 2020 11:59:59.999';
+
+    timeMinStr = '30 Dec 2007';
+    timeMaxStr = '1 Jan 2008';
+
+%     timeMinStr = '01 Jan 2007';
+%     timeMaxStr = '29 Nov 2020 11:59:59.999';
     
     [status, err] = create_dasc_H5_database(timeMinStr, timeMaxStr, [dataPath,outputFileStr]);
     disp([10 'Status: ']);
