@@ -21,7 +21,7 @@ if ischar(file_list) || isstring(file_list)
     
     i = 1;
     for k = 1:N
-        if length(deblank(char(temp_list(k,:))))==38 || length(deblank(char(temp_list(k,:))))==37
+        if length(deblank(char(temp_list(k,:))))<=38 && length(deblank(char(temp_list(k,:))))>=36
             file_list{i} = temp_list(k,:);
             i=i+1;
         end

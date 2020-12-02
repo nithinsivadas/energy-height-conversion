@@ -135,8 +135,8 @@ data.year = year(data.time);
 data.month = month(data.time);
 data.day = day(data.time);
 
-data.url = strcat(host,remoteStoreLink,...
-    num2str(data.year'),'/',data.date,'/',data.file);
+%data.url = strcat(host,remoteStoreLink,...
+%    num2str(data.year'),'/',data.date,'/',data.file);
 
 % If you need to debug, the last err is stored here. 
 if isstruct(ME)
