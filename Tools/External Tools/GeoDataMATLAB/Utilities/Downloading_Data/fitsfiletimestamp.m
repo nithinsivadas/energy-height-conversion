@@ -21,7 +21,7 @@ if ischar(file_list) || isstring(file_list)
     
     i = 1;
     for k = 1:N
-        if length(deblank(char(temp_list(k,:))))==38
+        if length(deblank(char(temp_list(k,:))))==38 || length(deblank(char(temp_list(k,:))))==37
             file_list{i} = temp_list(k,:);
             i=i+1;
         end
@@ -38,7 +38,7 @@ if N<k
 end
 
 if N==0
-    error('No FITS files have the right file name length = 38');
+    error('No FITS files have the right file name length = 38 or 37');
 end
 
 for k = 1:N
