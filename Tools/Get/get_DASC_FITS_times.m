@@ -95,7 +95,7 @@ for iYear = 1:1:length(yearArr)
 
                     % Collecting meta data into a structure
                     data.file = [data.file ; tempFileListName(indxWantedTimes)];
-                    data.time = [data.time ; timeStamp(indxWantedTimes)];
+                    data.time = [data.time ; timeStamp(indxWantedTimes)'];
                     data.wavelength = [data.wavelength ; wavelength(indxWantedTimes)'];
                     else
                     err.subdirectory.name = [err.subdirectory.name;...
@@ -106,8 +106,11 @@ for iYear = 1:1:length(yearArr)
                     end
 
                catch ME
-                   disp(strjoin([[10 'Error while documenting Day: '],remoteFileListName(i)]));
+                   
+                   disp(strjoin([[10 'ERROR WHILE DOCUMENTING DAY: '],remoteFileListName(i)]));
+                   disp([10 ' ']);
                    disp(getReport(ME));
+                   
                end
                
             end
@@ -119,6 +122,7 @@ for iYear = 1:1:length(yearArr)
         end
        
    catch ME  
+       
         disp(getReport(ME));
    end
       

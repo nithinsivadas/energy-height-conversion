@@ -25,7 +25,7 @@
 %every time the file is modified.
 %
 %@author Pavel Komarov pavel@gatech.edu 941-545-7573
-function h5_create_writestr(filename, dataset, str)
+function h5createwritestr(filename, dataset, str)
 
     %"The class of input data must be cellstring instead of char when the
     %HDF5 class is VARIABLE LENGTH H5T_STRING.", but also I don't want to
@@ -65,24 +65,27 @@ function h5_create_writestr(filename, dataset, str)
 
         %create a dataspace for cellstr
         H5S_UNLIMITED = H5ML.get_constant_value('H5S_UNLIMITED');
-%         spacerank = max(1, sum(size(str) > 1));
-        spacerank = length(size(str));
-        dspace = H5S.create_simple(spacerank, fliplr(size(str)), ones(1, spacerank)*H5S_UNLIMITED);
+        spacerank = max(1, sum(size(str) > 1));
 
+        if ndims(str) == 2 && min(size(str)) == 1
+            dspace = H5S.create_simple(spacerank, length(str), ones(1, spacerank)*H5S_UNLIMITED);        
+        else
+            dspace = H5S.create_simple(spacerank, fliplr(size(str)), ones(1, spacerank)*H5S_UNLIMITED);
+        end
         %create a dataset plist for chunking. (A dataset can't be unlimited
         %unless the chunk size is defined.)
         plist = H5P.create('H5P_DATASET_CREATE');
         chunksize = ones(1, spacerank);
-        chunksize(1) = 100;
-        H5P.set_chunk(plist, fliplr(chunksize));% 2 strings per chunk
-        H5P.set_deflate(plist, 9);
+        chunksize(1) = 2;
+        H5P.set_chunk(plist, chunksize);% 2 strings per chunk
         dset = H5D.create(file, dataset, vlstr_type, dspace, plist);
 
         %close things
         H5P.close(plist);
         H5S.close(dspace);
     end
-
+    
+   
     %write data
     H5D.write(dset, vlstr_type, 'H5S_ALL', 'H5S_ALL', 'H5P_DEFAULT', str);
 

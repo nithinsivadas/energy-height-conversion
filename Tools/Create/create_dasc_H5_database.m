@@ -14,7 +14,9 @@ function [status, err] = create_dasc_H5_database...
 %---------
 %       status - 'Success' or 'Failed'
 %----------------------------------------------------------------------------
-% Modified: 15th Aug 2019
+% Modified: 15th Aug 2019, 
+%           2nd Dec 2020 - changed hdf5 variable wavelength [dependent
+%           functions will need to be also altered]
 % Created : Unknown
 % Author  : Nithin Sivadas
 % Ref     :
@@ -70,12 +72,34 @@ for iYear = 1:1:length(yearArr)
         
             disp('Writing to H5'); %Marker
             data.time1=posixtime(data.time);
-              
+            
+            waveUnique = unique(data.wavelength);
+            waveID = zeros(size(data.wavelength));
+            waveCode = string();
+            for i=1:size(waveUnique,1)
+            waveID = waveID +...
+                strcmp(data.wavelength,waveUnique(i)).*...
+                find(strcmp(waveUnique,waveUnique(i)));
+            waveCode(i,1)=waveUnique(i);
+            waveCode(i,2)=num2str(i);
+            end
+            
+            h5createwritestr(outputH5File, ['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            '/wavelengthCode'],  (waveCode)');
+            h5writeatt(outputH5File, ['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            '/wavelengthCode'], 'Description', ['2D array of unique image wavelengths,',...
+            'recorded during this day, with its corresponding integer identifier.']);
+
+            write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            '/wavelength'],waveID,1,true);
+            h5writeatt(outputH5File, ['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            '/wavelength'], 'Description', ['Wavelength of each recorded image, ',...
+            'identified using an integer code defined in /wavelengthCode.']);
+        
             write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
             '/time'],(data.time1),1,true);
-            write_h5_dataset(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
-            '/wavelength'],(data.wavelength),1,true);
-        
+            h5writeatt(outputH5File,['/',instrumentStr,'/',num2str(yearArr(iYear)),...
+            '/time'],'Description','[1 x nT] Time in POSIX units');       
         end
         
    catch ME
