@@ -32,10 +32,10 @@ Numlist = zeros(size(file_list));
 
 makewarn = false;
 
-if N<k
-    warning([num2str(k-N),' of the FITS file names have a different format.',...
-        ' They have string lengths > 38']);
-end
+% if N<k
+%     warning([num2str(k-N),' of the FITS file names have a different format.',...
+%         ' They have string lengths > 38']);
+% end
 
 if N==0
     error('No FITS files have the right file name length = 38 or 37');
