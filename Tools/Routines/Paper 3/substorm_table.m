@@ -1,4 +1,4 @@
-%% Generate Substorm Statistics
+%% Create a substorm table
 
 if strcmp(get_computer_name,'nithin-carbon')
     dataDir = 'G:\My Drive\Research\Projects\Data\';
@@ -23,7 +23,6 @@ else
     end
 end
 
-
 outputAMISRFileStr = 'amisrWebDatabase.h5';
 amisrDatabaseStr = [dataDir,outputAMISRFileStr];
 
@@ -38,21 +37,21 @@ timeMaxStr = "31 Dec 2019";
 
 % Substorms at PFISR [IMPORTANT] : Range of closeness to PFISR
 Dmlt = 2;
-Dmlat = 20; %desiredMLATIndx = superMag.mlat<superMag.pfisrMlat+Dmlat
+Dmlat = 50; %desiredMLATIndx = superMag.mlat<superMag.pfisrMlat+Dmlat
 
 % Poker Flat geolocation
 pkrGLAT = 65.126;
 pkrGLON = -147.47;
 pkrh0=0.693;
 
-%timeMinStr = "15 Jul 2019"; %does not matter
-%timeMaxStr = "31 Jul 2020";
-
 tic 
 [T,T1, superMag] = substorm_create_table(dataDir,outputAMISRFileStr,amisrDatabaseStr,...
   superMagFileStr, dascFileStr, omniFileStr,...
   timeMinStr, timeMaxStr, Dmlt, Dmlat, pkrGLAT, pkrGLON, pkrh0);
 toc 
+
+disp(['Parameters of the run: Dmlt = ',num2str(Dmlt),' Dmlat = ',num2str(Dmlat)]);
+disp(['The .mat file is stored in: ',storeDir,'table_of_substorms_full.mat']);
 
 save([storeDir,'table_of_substorms_full.mat'],'T1','T','superMag','Dmlat','Dmlt','pkrGLAT','pkrGLON','dascFileStr','amisrDatabaseStr','omniFileStr','superMagFileStr');
 
@@ -124,13 +123,13 @@ superMag.numberOfSimultaneousExp(~isnan(amisrIndx))=numExp(amisrIndx(~isnan(amis
 %% Create a table
 T = table(superMag.datetime(closestSubstormIndx),superMag.stormID(closestSubstormIndx),...
     superMag.AE(closestSubstormIndx), superMag.mlat(closestSubstormIndx),...
-    superMag.mlt(closestSubstormIndx),...
+    superMag.mlt(closestSubstormIndx), superMag.pfisrMlt(closestSubstormIndx),...
     superMag.expID(closestSubstormIndx)',superMag.expName(closestSubstormIndx)',...
     datetime(superMag.startTime(closestSubstormIndx)','ConvertFrom','datenum'),...
     datetime(superMag.endTime(closestSubstormIndx)','ConvertFrom','datenum'),...
     superMag.status(closestSubstormIndx)',...
     superMag.expBC(closestSubstormIndx)',...
-    'VariableNames',{'Time','stormID','AE','MLAT','MLT',...
+    'VariableNames',{'Time','stormID','AE','MLAT','MLT','PFISR_MLT',...
     'PFISR_ExpID','PFISR_ExpName','PFISR_startTime','PFISR_endTime',...
     'PFISR_ExpStatus','BarkerCode'});
 %%
@@ -145,39 +144,37 @@ substormIndx = 1:1:length(superMag.time);
 cIndx = substormIndx(closestSubstormIndx);
 Tdasc = read_h5_data(dascFileStr);
 [timeStamp, wavelength] = restructure_DASC_table_to_time_array(Tdasc);
-superMagCloseStorm.time = datetime(superMag.time(cIndx),'ConvertFrom','datenum');
-tempStart = dateshift(superMagCloseStorm.time,'start','day');
-tempEnd = dateshift(superMagCloseStorm.time,'end','day');
-superMagCloseStorm.DASC_timeMin = repmat(NaT,1,length(cIndx));
-superMagCloseStorm.DASC_timeMax = repmat(NaT,1,length(cIndx));
-superMagCloseStorm.DASC_wavelength = repmat({'nan'},1,length(cIndx));
 
- for cStorm = 1:1:length(cIndx)
-    indxtStamp = timeStamp<tempEnd(cStorm) & timeStamp>=tempStart(cStorm);
-    tempIndx = find(indxtStamp);
-    if ~isempty(tempIndx)
-        wavelengthArr=wavelength(tempIndx(1):tempIndx(end));
-        superMagCloseStorm.DASC_timeMin(cStorm) = timeStamp(tempIndx(1));
-        superMagCloseStorm.DASC_timeMax(cStorm) = timeStamp(tempIndx(end));
-        superMagCloseStorm.DASC_wavelength(cStorm) = {num2str(unique(wavelengthArr)')};
-    end
- end
- 
+timeStamp = datenum(timeStamp);
+superMagCloseStorm.time = datetime(superMag.time(cIndx),'ConvertFrom','datenum');
+tempStart = datenum(dateshift(superMagCloseStorm.time,'start','day'));
+tempEnd = datenum(dateshift(superMagCloseStorm.time,'end','day'));
+superMagCloseStorm.DASC_timeMin = repmat(NaT,length(cIndx),1);
+superMagCloseStorm.DASC_timeMax = repmat(NaT,length(cIndx),1);
+superMagCloseStorm.DASC_wavelength = repmat({"nan"},length(cIndx),1);
+
+Ft = griddedInterpolant(timeStamp,1:numel(timeStamp),'nearest','nearest');
+superMagCloseStorm.DASC_timeMin = datetime(timeStamp(Ft(tempStart)),'ConvertFrom','datenum');
+superMagCloseStorm.DASC_timeMax = datetime(timeStamp(Ft(tempEnd)),'ConvertFrom','datenum');
+
+for cStorm = 1:1:length(cIndx)
+    superMagCloseStorm.DASC_wavelength(cStorm,1) = {unique(wavelength(Ft(tempStart(cStorm)):Ft(tempEnd(cStorm))))};
+end
 
  %% Substorms that are close to PFISR
  T1 = table(superMag.datetime(closestSubstormIndx),superMag.stormID(closestSubstormIndx),...
     superMag.AE(closestSubstormIndx), superMag.mlat(closestSubstormIndx),...
-    superMag.mlt(closestSubstormIndx),...
+    superMag.mlt(closestSubstormIndx), superMag.pfisrMlt(closestSubstormIndx),...
     superMag.expID(closestSubstormIndx)',superMag.expName(closestSubstormIndx)',...
     datetime(superMag.startTime(closestSubstormIndx)','ConvertFrom','datenum'),...
     datetime(superMag.endTime(closestSubstormIndx)','ConvertFrom','datenum'),...
     superMag.status(closestSubstormIndx)',...
     superMag.expBC(closestSubstormIndx)',...
-    superMagCloseStorm.DASC_timeMin',...
-    superMagCloseStorm.DASC_timeMax',...
-    superMagCloseStorm.DASC_wavelength',...
+    superMagCloseStorm.DASC_timeMin,...
+    superMagCloseStorm.DASC_timeMax,...
+    superMagCloseStorm.DASC_wavelength,...
     'VariableNames',...
-    {'Time','stormID','AE','MLAT','MLT','PFISR_ExpID',...
+    {'Time','stormID','AE','MLAT','MLT','PFISR_MLT','PFISR_ExpID',...
     'PFISR_ExpName','PFISR_startTime','PFISR_endTime',...
     'PFISR_ExpStatus','BarkerCode',...
     'DASC_TimeMin','DASC_TimeMax','DASC_Wavelength'});
@@ -259,15 +256,25 @@ expArr =["GenPINOT_PulsatingAurora_TN30          ";
     "MSWinds26.v03                          ";
     "Semeter01                              ";
     "Sporadic04                             ";
-    "ThemisD1.v01                             "];
+    "ThemisD1.v01                             "
+    "MSWinds27.v01                            "];
 end
  
 function [timeStamp, wavelength] = restructure_DASC_table_to_time_array(T)
-    timeStamp = [];
-    wavelength = [];
-    for i = 1:1:length(T.Path)/2
-        timeStamp = [timeStamp; T.Data{1+2*(i-1)}];
-        wavelength = [wavelength; T.Data{2+2*(i-1)}];
+    wavelength = string();
+    timeStamp=cell2mat(T.Data(strcmp(string(T.Name),["time"])));
+    waveCode=T.Data(strcmp(string(T.Name),["wavelengthCode"]));
+    waveLength=T.Data(strcmp(string(T.Name),["wavelength"]));
+    for i = 0:1:length(waveCode)-1
+        if i==0
+            wavelength(end:end+numel(waveLength{i+1})-1,1) = string(waveCode{i+1}(waveLength{i+1},1));
+        else
+            wavelength(end+1:end+numel(waveLength{i+1}),1) = string(waveCode{i+1}(waveLength{i+1},1));
+        end
     end
+    [timeStamp,I] = sort(timeStamp);
+    [timeStamp, w] = unique(timeStamp, 'stable');
+    wavelength = wavelength(I);
+    wavelength = wavelength(w);
     timeStamp = datetime(unix_to_matlab_time(timeStamp),'ConvertFrom','datenum');
 end
