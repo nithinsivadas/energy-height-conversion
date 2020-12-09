@@ -1,4 +1,17 @@
 %% Create a substorm table
+% This routine creates a table of superMag substorms, and connects its time
+% of arrival with the time ranges where data is available from PFISR and/or
+% DASC. 
+% Input:
+%       amisrWebDatabase.h5 (PFISR database)
+%       substorms_superMag_20201130.txt
+%       omni.h5
+% Output: 
+%       table_of_substorms_full.ma
+%       T - Table with all substorms which have PFISR data
+%       T1 - Table with closest substorms that have PFSIR and DASC data
+
+clear all;
 
 if strcmp(get_computer_name,'nithin-carbon')
     dataDir = 'G:\My Drive\Research\Projects\Data\';
@@ -29,7 +42,6 @@ amisrDatabaseStr = [dataDir,outputAMISRFileStr];
 superMagFileStr = [storeDir,'substorms_superMag_20201130.txt'];
 
 dascFileStr = [storeDir,'dascDatabase.h5'];
-outputDASCh5FileStr = 'dascData.h5';
 omniFileStr = [dataDir,'omni.h5'];
 
 timeMinStr = "01 Dec 2006";
@@ -84,7 +96,7 @@ superMag.AE = interp1(omni.time,omni.AE,superMag.time);
 
 %%
 % Selecting substorms closest to PFISR location
-deltaMLT = mod(superMag.pfisrMlt - superMag.mlt,24);
+deltaMLT = absDiffMLT(superMag.pfisrMlt,superMag.mlt);
 desiredMLTIndx = abs(deltaMLT)<Dmlt;
 desiredMLATIndx = superMag.mlat<superMag.pfisrMlat+Dmlat;
 closestSubstormIndx = desiredMLTIndx & desiredMLATIndx; 
@@ -121,14 +133,14 @@ superMag.numberOfSimultaneousExp(~isnan(amisrIndx))=numExp(amisrIndx(~isnan(amis
 
 
 %% Create a table
-T = table(superMag.datetime(closestSubstormIndx),superMag.stormID(closestSubstormIndx),...
-    superMag.AE(closestSubstormIndx), superMag.mlat(closestSubstormIndx),...
-    superMag.mlt(closestSubstormIndx), superMag.pfisrMlt(closestSubstormIndx),...
-    superMag.expID(closestSubstormIndx)',superMag.expName(closestSubstormIndx)',...
-    datetime(superMag.startTime(closestSubstormIndx)','ConvertFrom','datenum'),...
-    datetime(superMag.endTime(closestSubstormIndx)','ConvertFrom','datenum'),...
-    superMag.status(closestSubstormIndx)',...
-    superMag.expBC(closestSubstormIndx)',...
+T = table(superMag.datetime,superMag.stormID,...
+    superMag.AE, superMag.mlat,...
+    superMag.mlt, superMag.pfisrMlt,...
+    superMag.expID',superMag.expName',...
+    datetime(superMag.startTime,'ConvertFrom','datenum')',...
+    datetime(superMag.endTime,'ConvertFrom','datenum')',...
+    superMag.status',...
+    superMag.expBC',...
     'VariableNames',{'Time','stormID','AE','MLAT','MLT','PFISR_MLT',...
     'PFISR_ExpID','PFISR_ExpName','PFISR_startTime','PFISR_endTime',...
     'PFISR_ExpStatus','BarkerCode'});
@@ -156,9 +168,14 @@ superMagCloseStorm.DASC_wavelength = repmat({"nan"},length(cIndx),1);
 Ft = griddedInterpolant(timeStamp,1:numel(timeStamp),'nearest','nearest');
 superMagCloseStorm.DASC_timeMin = datetime(timeStamp(Ft(tempStart)),'ConvertFrom','datenum');
 superMagCloseStorm.DASC_timeMax = datetime(timeStamp(Ft(tempEnd)),'ConvertFrom','datenum');
+tmIndex = superMagCloseStorm.DASC_timeMin==superMagCloseStorm.DASC_timeMax;
+superMagCloseStorm.DASC_timeMin(tmIndex) = NaT;
+superMagCloseStorm.DASC_timeMax(tmIndex) = NaT;
 
 for cStorm = 1:1:length(cIndx)
+    if Ft(tempEnd(cStorm)) ~= Ft(tempStart(cStorm))
     superMagCloseStorm.DASC_wavelength(cStorm,1) = {unique(wavelength(Ft(tempStart(cStorm)):Ft(tempEnd(cStorm))))};
+    end
 end
 
  %% Substorms that are close to PFISR
@@ -253,18 +270,28 @@ expArr =["GenPINOT_PulsatingAurora_TN30          ";
     "Kelley01                               ";
     "MSWinds23                              ";
     "MSWinds23_dt013                        ";
+    "MSWinds23_3dt                            ";
+    "MSWinds23m                               ";
+    "MSWinds23hr                              ";
+    "MSWinds21                                ";
     "MSWinds26.v03                          ";
     "Semeter01                              ";
+    "Sporadic01                             ";
+    "Sporadic02                             ";
+    "Sporadic03                             ";
     "Sporadic04                             ";
+    "Sporadic14                             ";
+    "Sporadic15                             ";
+    "Sporadic15_3dt                         ";
     "ThemisD1.v01                             "
     "MSWinds27.v01                            "];
 end
  
 function [timeStamp, wavelength] = restructure_DASC_table_to_time_array(T)
     wavelength = string();
-    timeStamp=cell2mat(T.Data(strcmp(string(T.Name),["time"])));
-    waveCode=T.Data(strcmp(string(T.Name),["wavelengthCode"]));
-    waveLength=T.Data(strcmp(string(T.Name),["wavelength"]));
+    timeStamp=cell2mat(T.Data(strcmp(string(T.Name),"time")));
+    waveCode=T.Data(strcmp(string(T.Name),"wavelengthCode"));
+    waveLength=T.Data(strcmp(string(T.Name),"wavelength"));
     for i = 0:1:length(waveCode)-1
         if i==0
             wavelength(end:end+numel(waveLength{i+1})-1,1) = string(waveCode{i+1}(waveLength{i+1},1));
@@ -277,4 +304,10 @@ function [timeStamp, wavelength] = restructure_DASC_table_to_time_array(T)
     wavelength = wavelength(I);
     wavelength = wavelength(w);
     timeStamp = datetime(unix_to_matlab_time(timeStamp),'ConvertFrom','datenum');
+end
+
+function dMLT = absDiffMLT(a,b)
+    % Source: https://stackoverflow.com/questions/32276369/calculating-absolute-differences-between-two-angles 
+    normMLT = mod(a-b,24);
+    dMLT = min(24-normMLT, normMLT);
 end

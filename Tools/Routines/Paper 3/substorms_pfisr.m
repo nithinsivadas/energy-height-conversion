@@ -28,14 +28,12 @@ omniFileStr = [dataDir,'omni.h5'];
 outputh5Suffix = 'pfisrData.h5';
 
 % Substorms at PFISR [IMPORTANT]
-Dmlt = 2;
-Dmlat = 1;
 minAlt = 40; % Process electron densities down to 40 km, and not below that. 
 
 % Poker Flat geolocation
-pkrGLAT = 65.126;
-pkrGLON = -147.47;
-pkrh0=0.693;
+% pkrGLAT = 65.126;
+% pkrGLON = -147.47;
+% pkrh0=0.693;
 
 load([storeDir,'table_of_substorms_as_input.mat']);
 
@@ -48,9 +46,10 @@ timeMinStr = "01 Dec 2006";
 timeMaxStr = "31 Jul 2019";
 
 % Table of substorms where DASC is ON
-T2 = T1(~strcmp(T1.DASC_Wavelength,'nan') & T1.Time<T1.DASC_TimeMax & T1.Time>T1.DASC_TimeMin,:);
+% T2 = T1(~strcmp(T1.DASC_Wavelength,'nan') & T1.Time<T1.DASC_TimeMax & T1.Time>T1.DASC_TimeMin,:);
 % Table of substorms with an additional constraint of an operating PFISR barker code mode
-T3 = T2(T2.BarkerCode,:);
+% T3 = T2(T2.BarkerCode,:);
+T3 = T1(T1.BarkerCode,:);
 % Table of substorms within an additional constraing of being within the user defined dates
 T4 = T3(T3.Time>=datetime(datestr(timeMinStr)) & T3.Time<=datetime(datestr(timeMaxStr)),:);
 
@@ -62,6 +61,8 @@ for j=1:1:length(rawFileListStr)
 end
 
 %%
+dn = 1./length(rawFileListStr);
+multiWaitbar('Extract AMISR',0);
 for i = 1:1:length(rawFileListStr)
     stormIDIndx = find(strcmp(deblank(T4.PFISR_ExpID),expID(i)));
     
@@ -74,6 +75,7 @@ for i = 1:1:length(rawFileListStr)
     write_ne_to_h5_v2(outputPrefix, outputh5Suffix, rawFileListStr(i),storeDir,...
         minTime, maxTime, stormTime, minAlt);
     end
+    multiWaitbar('Extract AMISR','Increment',dn);
 end
 
 %% Conductivity and Energy
@@ -81,15 +83,21 @@ fileNameList = struct2cell(dir([storeDir,'*_pfisrData.h5']));
 filePathStr = strcat(storeDir,string(fileNameList(1,:)'));
 
 energyBin = logspace(3,6,25)';
-
+multiWaitbar('Calculate Conductivity',0);
+multiWaitbar('Calculate Energy',0);
+dn = 1./length(filePathStr);
 for i=1:1:length(filePathStr)
     fileName = filePathStr(i);
     [data1] = calculate_conductivity(fileName);
     write_conductivity(data1,fileName);
+    multiWaitbar('Calculate Conductivity','Increment',dn);
     [data2] = calculate_energy(fileName,energyBin);
     write_energy(data2,fileName);
+    multiWaitbar('Calculate Energy','Increment',dn);
+    
 end
-
+multiWaitbar('Close All');
+disp('Complete');
 %% Functions
 function [data] = calculate_energy(fileName,energyBin)
    

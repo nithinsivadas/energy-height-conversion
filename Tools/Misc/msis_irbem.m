@@ -51,7 +51,7 @@ if nargin<3
 end
 
 timeaph = min(timeMSIS(:));
-[F107A, F107, APH] = f107_aph(timeaph);
+[F107A, F107, APH] = f107_aph(timeaph);% This has a problem that needs correcting
 nCoords=size(coords,1);
 
 % Making sure that the number of time elements, equal the number of

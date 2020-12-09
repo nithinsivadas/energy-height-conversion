@@ -44,7 +44,7 @@ data.site.altitude = h5read(fileNameStr,'/Site/Altitude'); % [in m]
 data.site.code = h5read(fileNameStr,'/Site/Code');
 beamCodes = h5read(fileNameStr,'/BeamCodes');
 
-if data.site.code == 61
+if data.site.code == 61 || data.site.code == 0
     data.magBeamNo = find_field_aligned_beam_no(beamCodes,-154.3,77.5);
 end
 
