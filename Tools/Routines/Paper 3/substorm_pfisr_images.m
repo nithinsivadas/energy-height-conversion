@@ -48,7 +48,7 @@ setSample = false; %% Plot only samples - 99 frames for each substorm
 %     delete(myCluster.Jobs);
 % catch
 % end
-for i=1:1:length(filePathStr)
+for i=105:1:length(filePathStr)
     batch_process(i,filePathStr,workDir,setSample,omni,superMag);
 end
 
@@ -74,7 +74,7 @@ function batch_process(i,filePathStr, workDir, setSample, omni, superMag)
     storm.expID = superMag.expID(storm.ID);
     storm.expName = superMag.expName(storm.ID);
     
-    imageDir = 'images';
+    imageDir = 'images2';
     [status,~] = create_images(fileName,imageDir, true, omni, tempStr1(1), storm); 
 
 end
@@ -268,16 +268,16 @@ function p=plot_omni_panels(p, omni, timeStr, viewMode)
             %% AE & AL
             p(1,ip,2,1).select();
             yyaxis left
-            plot(omni.time,omni.AE,'color',color1);
-            ylabel({omni.header.AE,omni.units.AE});
+            plot(omni.time,omni.SML,'color',color1);
+            ylabel({omni.header.SML,omni.units.SML});
             yAlt = get(gca,'YLim');
             ylim(yAlt);
             hold on;
             line(x,yAlt,'Color',color3);
             
             yyaxis right
-            plot(omni.time,omni.AL,'color',color2);
-            ylabel({omni.header.AL});
+            plot(omni.time,omni.SMU,'color',color2);
+            ylabel({omni.header.SMU});
 
             label_time_axis(omni.time, false, 0.5);
             
@@ -399,6 +399,8 @@ function [omni] = generate_omni_parameters(omni ,timeMin, timeMax)
     omni.header.BzGSM = "B_z_-_G_S_M";
     omni.header.AE = "AE";
     omni.header.AL = "AL";
+    omni.header.SML = "SML";
+    omni.header.SMU = "SMU";
 %     omni.header.AU = "AU";
     
 %     omni.units.Kp = "[a.u.]";
@@ -408,8 +410,10 @@ function [omni] = generate_omni_parameters(omni ,timeMin, timeMax)
     omni.units.Psw = "[nPa]";
     omni.units.ByGSM = "[nT]";
     omni.units.BzGSM = "[nT]";
-    omni.units.AE = "[a.u]";
-    omni.units.AL = "[a.u.]";
+    omni.units.AE = "[nT]";
+    omni.units.AL = "[nT]";
+    omni.units.SML = "[nT]";
+    omni.units.SMU = "[nT]";
 %     omni.units.AU = "[a.u.]";
     
 %     omni.Kp = h5read(omniH5FileStr, '/Indices/Kp', [1 minTimeIndx], [1 deltaTimeIndx]);
@@ -421,6 +425,8 @@ function [omni] = generate_omni_parameters(omni ,timeMin, timeMax)
     omni.BzGSM = h5read(omni.h5File, '/BField/BzGSM', [1 minTimeIndx], [1 deltaTimeIndx]);
     omni.AE = h5read(omni.h5File, '/Indices/AE', [1 minTimeIndx], [1 deltaTimeIndx]);
     omni.AL = h5read(omni.h5File, '/Indices/AL', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.SML = h5read(omni.h5File, '/Indices/SML', [1 minTimeIndx], [1 deltaTimeIndx]);
+    omni.SMU = h5read(omni.h5File, '/Indices/SMU', [1 minTimeIndx], [1 deltaTimeIndx]);
 %     omni.AU = h5read(omniH5FileStr, '/Indices/AU', [1 minTimeIndx], [1 deltaTimeIndx]);
     omni.time = omni.TotTime(timeIndx);
 end

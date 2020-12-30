@@ -68,7 +68,7 @@ for i=1:N
     if ~exist(local{i},'file') || setForceDownload
         websave(local{i},remote{i},options);% download dataset
     else
-        warning(['File ',local{i},' alread exists']);
+        warning(['File ',local{i},' already exists']);
     end
 end
 
@@ -88,7 +88,7 @@ APH=-1*ones(M,7); % preallocate APH matrix
 
 % define and construct APH matrix
 if (X(end)<daten)
-    error(['The file ',url,datestr(daten,'yyyy'),' has only entries up to ',datestr(X(end))]);
+    error(['The file ',url,datestr(daten,'yyyy'),' has only entries up to ',datestr(X(end)),'. PLease manually delete the file and let the tool redownload it.']);
 end
 
 for k=1:M
@@ -102,35 +102,37 @@ end
 % ----- finished magnetic index, starting solar flux -----
 
 % create tracking file if not present (first time running)
-if ~exist([localFolder,'f107.txt'],'file')
-    fid = fopen([localFolder,'f107.txt'],'a');
-    fwrite(fid,'0')
-    fclose(fid);
-end
+% if ~exist([localFolder,'f107.txt'],'file')
+%     fid = fopen([localFolder,'f107.txt'],'a');
+%     fwrite(fid,'0')
+%     fclose(fid);
+% end
+% 
+% % read date of previous file's modification
+% fid = fopen([localFolder,'f107.txt']);update = fscanf(fid,'%f');fclose(fid);
+% 
+% % determine when FTP server file last modified
+% f=ftp('ftp.ngdc.noaa.gov');
+% solar_dir = '/STP/space-weather/solar-data/solar-features/solar-radio/noontime-flux/penticton/penticton_observed/listings/';
+% cd(f,solar_dir);
+% latest = dir(f);
+% close(f);
+% last = latest(2).datenum;
+% filename = [localFolder 'listing_drao_noontime-flux-observed_daily.txt'];
+% 
+% % update if new data available
+% if ~exist(filename,'file') || last>(update+1000)
+%     f=ftp('ftp.ngdc.noaa.gov'); % open ftp session
+%     disp('downloading solar data...') 
+%     cd(f,solar_dir);
+%     mget(f,'listing_drao_noontime-flux-observed_daily.txt',localFolder);
+%     close(f); % close session
+%     fid = fopen([localFolder,'f107.txt'],'w');fprintf(fid,'%f',last);fclose(fid);
+% end
 
-% read date of previous file's modification
-fid = fopen([localFolder,'f107.txt']);update = fscanf(fid,'%f');fclose(fid);
+[x, y] = get_solar_flux_from_penticton(localFolder);
 
-% determine when FTP server file last modified
-f=ftp('ftp.ngdc.noaa.gov');
-solar_dir = '/STP/space-weather/solar-data/solar-features/solar-radio/noontime-flux/penticton/penticton_observed/listings/';
-cd(f,solar_dir);
-latest = dir(f);
-close(f);
-last = latest(2).datenum;
-filename = [localFolder 'listing_drao_noontime-flux-observed_daily.txt'];
-
-% update if new data available
-if ~exist(filename,'file') || last>(update+1000)
-    f=ftp('ftp.ngdc.noaa.gov'); % open ftp session
-    disp('downloading solar data...') 
-    cd(f,solar_dir);
-    mget(f,'listing_drao_noontime-flux-observed_daily.txt',localFolder);
-    close(f); % close session
-    fid = fopen([localFolder,'f107.txt'],'w');fprintf(fid,'%f',last);fclose(fid);
-end
-
-[x, y] = read_solarflux(filename); % read solar flux data
+% [x, y] = read_solarflux(filename); % read solar flux data
 
 if x(end)<(max(daten)+40)
     warning('on')
@@ -139,7 +141,8 @@ end
 
 warning('off') % turn off NaN warnings during interp
 
-F107 = interp1(x,y,daten-1,'spline'); % interp F10.7 for requested dates
+[~,uindx] = unique(x);
+F107 = interp1(x(uindx),y(uindx),daten-1,'spline'); % interp F10.7 for requested dates
 
 % calculate F10.7 81-day centered mean about doy
 F107A = -1*ones(M,1);

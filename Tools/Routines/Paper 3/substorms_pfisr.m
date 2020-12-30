@@ -42,8 +42,11 @@ load([storeDir,'table_of_substorms_as_input.mat']);
 rawFileListStr = select_PFISR_raw_data(storeDir);
 
 %% Loading database
-timeMinStr = "01 Dec 2006";
-timeMaxStr = "31 Jul 2019";
+% timeMinStr = "01 Dec 2006";
+% timeMaxStr = "31 Jul 2019";
+
+timeMinStr = "15 Mar 2018";
+timeMaxStr = "19 Dec 2019";
 
 % Table of substorms where DASC is ON
 % T2 = T1(~strcmp(T1.DASC_Wavelength,'nan') & T1.Time<T1.DASC_TimeMax & T1.Time>T1.DASC_TimeMin,:);
@@ -121,6 +124,7 @@ function [data] = calculate_energy(fileName,energyBin)
    nhour = length(hourArr);
 
    for iHour = 1:1:nhour
+
        minTimeIndx = find_time(time,datenum(hourArr(iHour)));
        if iHour ~=nhour 
         maxTimeIndx = find_time(time,datenum(hourArr(iHour+1)));
@@ -333,7 +337,7 @@ end
 
 function rawFileListStr = select_PFISR_raw_data(storeDir)
         
-    dataDir = strcat(storeDir,'PFISR',filesep);
+    dataDir = strcat(storeDir,'PFISR',filesep,'Batch2',filesep);
    
     if isfolder(dataDir)
         rawFileList = struct2cell(dir([dataDir,'*.h5']))'; 

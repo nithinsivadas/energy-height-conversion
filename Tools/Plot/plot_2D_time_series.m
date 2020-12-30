@@ -70,7 +70,9 @@ function h=plot_2D_time_series(time, yAxis, zValue, timeTick, mode, timeMinStr, 
 	ylim([miny maxy]);
 
 	minz=min(min(zValue)); maxz=max(max(zValue));
-	caxis([minz maxz]);
+    if ~isnan(minz) && ~isnan(maxz)
+        caxis([minz maxz]);
+    end
 % 	colorbar;
 
 %% Defining necessary labels according to different modes
