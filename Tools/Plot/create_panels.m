@@ -22,6 +22,7 @@ addParameter(po,'demargin',4,validScalarPosNum); % in mm
 addParameter(po,'marginleft',35,validScalarPosNum);
 addParameter(po,'marginright',25,validScalarPosNum);
 addParameter(po,'margintop',10,validScalarPosNum);
+addParameter(po,'marginbottom',0,validScalarPosNum);
 addRequired(po,'figureHandle',@(x)isfigure(x));
 
 parse(po,figureHandle,varargin{:});
@@ -44,6 +45,7 @@ p(1).pack(panelDefinition);
 p.marginleft=po.Results.marginleft;
 p.marginright=po.Results.marginright;
 p.margintop = po.Results.margintop;
+p.marginbottom = po.Results.marginbottom;
 p(1).de.margin=demargin;
 % p.fontsize=12;
 if ~isempty(po.Results.panelBreadth)
@@ -51,7 +53,7 @@ if ~isempty(po.Results.panelBreadth)
 else
     panelBreadth = [];
 end
-resize_figure(figureHandle, (panelHeight+demargin)*totalPanelNo+4*(totalPanelNo+1),...
+resize_figure(figureHandle, (panelHeight+demargin)*totalPanelNo+4*(totalPanelNo+1) + po.Results.marginbottom,...
     panelBreadth);
 p.select('all');
   

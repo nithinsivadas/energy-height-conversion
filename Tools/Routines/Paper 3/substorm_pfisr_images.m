@@ -48,7 +48,8 @@ setSample = false; %% Plot only samples - 99 frames for each substorm
 %     delete(myCluster.Jobs);
 % catch
 % end
-for i=105:1:length(filePathStr)
+% for i=137:1:length(filePathStr)
+for i=1:1:104
     batch_process(i,filePathStr,workDir,setSample,omni,superMag);
 end
 
@@ -88,6 +89,9 @@ status = 'Failed';
    tempStr = strsplit(fileName,filesep);
    h5pfisr = fullfile(fileName);
    pfisrData.time = h5read(h5pfisr,'/time');
+   
+   if length(pfisrData.time)>2
+       
    pfisrData.energyBin = h5read(h5pfisr,'/energy/energyBin');
    pfisrData.energyFlux = h5read(h5pfisr,'/energy/energyFlux');
    pfisrData.alt = h5read(h5pfisr,'/alt');
@@ -157,6 +161,9 @@ omni = generate_omni_parameters(omni, pfisrData.time(1),pfisrData.time(end));
             end
     end
  
+   else
+       imageDir = nan;
+   end
     
 end
 

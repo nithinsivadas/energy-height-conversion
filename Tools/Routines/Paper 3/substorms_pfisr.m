@@ -42,11 +42,11 @@ load([storeDir,'table_of_substorms_as_input.mat']);
 rawFileListStr = select_PFISR_raw_data(storeDir);
 
 %% Loading database
-% timeMinStr = "01 Dec 2006";
-% timeMaxStr = "31 Jul 2019";
+timeMinStr = "01 Dec 2006";
+timeMaxStr = "31 Dec 2019";
 
-timeMinStr = "15 Mar 2018";
-timeMaxStr = "19 Dec 2019";
+% timeMinStr = "15 Mar 2018";
+% timeMaxStr = "19 Dec 2019";
 
 % Table of substorms where DASC is ON
 % T2 = T1(~strcmp(T1.DASC_Wavelength,'nan') & T1.Time<T1.DASC_TimeMax & T1.Time>T1.DASC_TimeMin,:);
@@ -72,8 +72,8 @@ for i = 1:1:length(rawFileListStr)
     for k=1:1:length(stormIDIndx)
     % Can be a batch file if we need to
     stormTime = T4.Time(stormIDIndx(k));
-    minTime = stormTime-hours(2);
-    maxTime = stormTime+hours(1);
+    minTime = stormTime-hours(3); % 3 hours before
+    maxTime = stormTime+hours(3); %3 hours after
     outputPrefix = num2str(T4.stormID(stormIDIndx(k)));
     write_ne_to_h5_v2(outputPrefix, outputh5Suffix, rawFileListStr(i),storeDir,...
         minTime, maxTime, stormTime, minAlt);
@@ -89,7 +89,7 @@ energyBin = logspace(3,6,25)';
 multiWaitbar('Calculate Conductivity',0);
 multiWaitbar('Calculate Energy',0);
 dn = 1./length(filePathStr);
-for i=1:1:length(filePathStr)
+for i=64:1:length(filePathStr)
     fileName = filePathStr(i);
     [data1] = calculate_conductivity(fileName);
     write_conductivity(data1,fileName);
@@ -337,7 +337,7 @@ end
 
 function rawFileListStr = select_PFISR_raw_data(storeDir)
         
-    dataDir = strcat(storeDir,'PFISR',filesep,'Batch2',filesep);
+    dataDir = strcat(storeDir,'PFISR',filesep);
    
     if isfolder(dataDir)
         rawFileList = struct2cell(dir([dataDir,'*.h5']))'; 

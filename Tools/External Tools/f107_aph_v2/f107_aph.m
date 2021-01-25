@@ -130,7 +130,7 @@ end
 %     fid = fopen([localFolder,'f107.txt'],'w');fprintf(fid,'%f',last);fclose(fid);
 % end
 
-[x, y] = get_solar_flux_from_penticton(localFolder);
+[x, y] = get_solar_flux_from_penticton(daten,localFolder);
 
 % [x, y] = read_solarflux(filename); % read solar flux data
 

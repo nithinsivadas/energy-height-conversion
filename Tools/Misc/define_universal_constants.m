@@ -19,6 +19,9 @@ function [C] = define_universal_constants()
   C.epsilon0 = 8.85418782e-12;
   C.info.epsilon0 = 'Electric constant [m-3 kg-1 s4 A2]';
 
+  C.mu0 = 4*pi*1e-7; %% [H/m] = [N/A^2]
+  C.info.mu = 'Magnetic permeability [H/m] or [N/A^2]';
+  
    C.RE = 6.371*10^6;
    C.info.RE = 'Average Radius of Earth [m]';
    
@@ -27,4 +30,6 @@ function [C] = define_universal_constants()
    
    C.mp = 1.672621898*10^-27;
    C.info.me = 'Proton mass [kg]';
+   
+  
 end
