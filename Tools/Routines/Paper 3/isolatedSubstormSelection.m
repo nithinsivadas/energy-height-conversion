@@ -56,6 +56,8 @@ velocity = h5read(omniFile,'/Velocity/V');
 Fv = griddedInterpolant(time,velocity);
 
 %%
+MLT_qualification = T.MLT>=16 | T.MLT<=4;
+T = T(MLT_qualification,:);
 isolatedSubstormDuration = repmat(duration,length(T.Time),1);
 isolatedSubstormDuration(2:end) = T.Time(2:end) - T.Time(1:end-1);
 
@@ -142,8 +144,8 @@ T5.alphaArray = Falpha(TMatrix);
 toc
 
 %%
-condition = T5.previousSubstormDuration>duration(3,0,0)... %    
-    & T5.nextSubstormDuration<duration(3,0,0)...
+condition = T5.previousSubstormDuration>duration(6,0,0)... %    
+    & T5.nextSubstormDuration>duration(3,0,0)...
     & ~ismissing(T5.storageLocation)...
     & absDiffMLT(T5.MLT, T5.PFISR_MLT)<2 ...
     & T5.MLAT<66;

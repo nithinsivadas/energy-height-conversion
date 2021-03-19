@@ -53,7 +53,7 @@ if ~isempty(po.Results.panelBreadth)
 else
     panelBreadth = [];
 end
-resize_figure(figureHandle, (panelHeight+demargin)*totalPanelNo+4*(totalPanelNo+1) + po.Results.marginbottom,...
+resize_figure(figureHandle, (panelHeight+demargin)*totalPanelNo+10 + po.Results.marginbottom,...
     panelBreadth);
 p.select('all');
   
