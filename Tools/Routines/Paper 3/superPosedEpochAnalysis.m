@@ -475,9 +475,550 @@ set(gca,'YScale','linear','XScale','log','XLim',[5*10^3,10^6],'YLim',[-1400,0]);
 xlabel('Post-onset: $\langle \int_{t_0}^{t_0 +2\mathrm{Hr}} V B^2 \sin^4 \frac{\theta_c}{2} L_0^2 \ \mathrm{d}t \rangle_{substorm-samples}$ [GJ]','Interpreter','latex'); 
 ylabel('$\langle \mathrm{Peak \ SML} \rangle_{substorm-samples}$ [nT]','Interpreter','latex'); 
 legend([p1,p2],{'Single-onset','Multi-onset'});
+%% Plot of Driving E_M vs SML of all data points (not just substorm modes)
+
+clearvars imfData
+cmap = inferno;
+SML = -100:-100:-2400;
+
+C=define_universal_constants;
+
+xa = (2./C.mu0).*omni.Fsml(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019')).*10^-6;
+ya = omni.Fekl(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019'))*10^-3;
+nBoot = 100;
+
+for j=1:length(SML)-1
+    
+    SML_max = SML(j);
+    SML_min = SML(j+1);
+    index = xa<SML_max & xa>SML_min & ~isnan(xa) & ~isnan(ya);
+    imfData.index(j,:) = index;
+    
+    try
+        imfData.xab(j,:) = bootstrp(nBoot,@mean,xa(imfData.index(j,:)));
+    catch
+        imfData.xab(j,:) = nan(1,nBoot);
+    end
+    
+    try
+        imfData.yab(j,:) = bootstrp(nBoot,@mean,ya(imfData.index(j,:)));
+    catch
+        imfData.yab(j,:) = nan(1,nBoot);
+    end
+    
+end
+[~,imfDataID]=(ind2sub(size(imfData.index),find(imfData.index)));
+
+figure;
+xab = imfData.xab(:);
+yab = imfData.yab(:);
+xmab = mean(imfData.xab,2);
+ymab = mean(imfData.yab,2);
+scatter(yab,abs(xab),10,'filled','MarkerFaceColor',cmap(80,:),'MarkerFaceAlpha',0.4);
+hold on;
+plot(ymab,abs(xmab));
+xlim([0,10]);
+ylim([0,2500]);
+
+[fab,gofab] = fit(ymab(~isnan(ymab)),xmab(~isnan(ymab)),'poly1','Robust','Bisquare','Exclude', xmab(~isnan(ymab)) > 1200);
+hold on;
+x=linspace(0,5,10);
+
+p1=plot(x,f1(x),'Color',cmap(80,:),'LineWidth',2);
+
+%% Plot of Driving (EMF) vs SML (current_estimate) to demonstrate linearity 
+%% through substorm [BINNING  the Driving, instead of SML)
+%% Plotting: <SML|E>
+clearvars multiStorm singleStorm neitherStorm imfData
+cmap = inferno;
+
+yAxisRange = [0,4500];
+% yLabelStr = '$\langle J_{iono}(SML) \rangle_{substorm-samples}$ [mA/m$^2$]';
+yLabelStr = '$ \langle |SML| | E_M, C \rangle $ [nT]';
+
+xAxisBootRange = [0,40];
+xLabelBootStr = '$ E_M $ [mV/m]';
+yLabelBootStr = yLabelStr;
+
+C=define_universal_constants;
+
+% sml = (2./C.mu0).*omni.Fsml(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019')).*10^-6;
+sml = omni.Fsml(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019'));
+ekl =  omni.Fekl(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019'))*10^-3;
+
+EKL = linspace(0,40,41);
+SML = -1*logspace(log10(100),log10(4500),52);
+
+
+multiSubstorm = T.previousSubstormDuration>duration(3,0,0) & T.nextSubstormDuration<duration(3,0,0);
+singleSubstorm = T.previousSubstormDuration>duration(3,0,0) & T.nextSubstormDuration>duration(3,0,0);
+imfData.index =  ~isnan(sml) & ~isnan(ekl);
+% %     neitherSubstorm = ~(multiSubstorm | singleSubstorm) & peakSML<SML_max & peakSML>SML_min;
+
+
+
+eklS = T.eklArray(singleSubstorm,:).*10^-3;
+% % x11 = EArray2(singleSubstorm,180);
+% smlS = (2./C.mu0).*T.smlArray(singleSubstorm,:).*10^-6;
+smlS = T.smlArray(singleSubstorm,:);
+
+eklM = T.eklArray(multiSubstorm,:).*10^-3;
+% % x22 = EArray2(multiSubstorm,180);
+% smlM = (2./C.mu0).*T.smlArray(multiSubstorm,:).*10^-6;
+smlM = T.smlArray(multiSubstorm,:);
+
+eklI = ekl(imfData.index);
+smlI = sml(imfData.index);
+
+
+
+% Bootstrap the above, binning in EKL
+nBoot = 200;
+for iEKL= 1:length(EKL)-1
+    eklSRange = eklS>EKL(iEKL) & eklS<EKL(iEKL+1) & ~isnan(eklS) & ~isnan(smlS);
+    try 
+        if sum(sum(eklSRange)) >10
+            singleStorm.ekl(iEKL,:) = bootstrp(nBoot,@mean,eklS(eklSRange));
+            singleStorm.sml(iEKL,:) = bootstrp(nBoot,@mean,smlS(eklSRange));
+        else
+            singleStorm.ekl(iEKL,:) = nan(1,nBoot);
+            singleStorm.sml(iEKL,:) = nan(1,nBoot);
+        end
+        
+    catch
+        singleStorm.ekl(iEKL,:) = nan(1,nBoot);
+        singleStorm.sml(iEKL,:) = nan(1,nBoot);
+    end
+    
+    eklMRange = eklM>EKL(iEKL) & eklM<EKL(iEKL+1) & ~isnan(eklM) & ~isnan(smlM);
+    try 
+        if sum(sum(eklMRange)) >10
+            multiStorm.ekl(iEKL,:) = bootstrp(nBoot,@mean,eklM(eklMRange));
+            multiStorm.sml(iEKL,:) = bootstrp(nBoot,@mean,smlM(eklMRange));
+        else
+            multiStorm.ekl(iEKL,:) = nan(1,nBoot);
+            multiStorm.sml(iEKL,:) = nan(1,nBoot);
+        end
+        
+    catch
+        multiStorm.ekl(iEKL,:) = nan(1,nBoot);
+        multiStorm.sml(iEKL,:) = nan(1,nBoot);
+    end
+    
+    eklIRange = eklI>EKL(iEKL) & eklI<EKL(iEKL+1) & ~isnan(eklI) & ~isnan(smlI);
+    try 
+        if sum(sum(eklIRange)) >10
+            imfData.ekl(iEKL,:) = bootstrp(nBoot,@mean,eklI(eklIRange));
+            imfData.sml(iEKL,:) = bootstrp(nBoot,@mean,smlI(eklIRange));
+        else
+            imfData.ekl(iEKL,:) = nan(1,nBoot);
+            imfData.sml(iEKL,:) = nan(1,nBoot);
+        end
+        
+    catch
+        imfData.ekl(iEKL,:) = nan(1,nBoot);
+        imfData.sml(iEKL,:) = nan(1,nBoot);
+    end
+    
+    
+    
+end
+%%
+figure; 
+x1 = singleStorm.ekl(:);
+% xm1 = mean(singleStorm.preOnsetE,2);
+
+y1 = abs(singleStorm.sml(:));
+% ym1 = abs(mean(singleStorm.peakSML,2));
+
+
+
+x2 = multiStorm.ekl(:);
+% xm2 = mean(multiStorm.preOnsetE,2);
+y2 = abs(multiStorm.sml(:));
+% ym2 = abs(mean(multiStorm.peakSML,2));
+
+xab = imfData.ekl(:);
+% xmab = mean(imfData.preOnsetE,2);
+
+yab = abs(imfData.sml(:));
+% ymab = abs(mean(imfData.peakSML,2));
+
+p1=scatter(x1,y1,10,'filled','MarkerFaceColor',cmap(1,:),'MarkerFaceAlpha',0.4);
+hold on;
+
+p2=scatter(x2,y2,10,'filled','MarkerFaceColor',cmap(160,:),'MarkerFaceAlpha',0.4);
+hold on;
+p3=scatter(xab,yab,10,'filled','MarkerFaceColor',cmap(80,:),'MarkerFaceAlpha',0.4);
+hold on;
+
+
+
+set(gca,'YScale','linear','XScale','linear','XLim',xAxisBootRange,'YLim',yAxisRange);
+xlabel(xLabelBootStr,'Interpreter','latex'); 
+ylabel(yLabelBootStr,'Interpreter','latex'); 
+
+legend([p1,p2,p3],{'C: Single-onset','C: Multi-onset','C: All data (1968-2019)'},'Location','northeast');
+
+
+%% Continuation of the above for SML binning
+%% Plotting: <E|SML>
+clearvars multiStorm singleStorm neitherStorm imfData
+cmap = inferno;
+
+yAxisRange = [0,4500];
+% yLabelStr = '$J_{iono}(SML) $ [mA/m$^2$]';
+yLabelStr = '$ |SML| $ [nT]';
+
+xAxisBootRange = [0,40];
+xLabelBootStr = '$ \langle  E_M \ | \ |SML|, C \rangle $ [mV/m]';
+yLabelBootStr = yLabelStr;
+
+C=define_universal_constants;
+
+% sml = (2./C.mu0).*omni.Fsml(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019')).*10^-6;
+sml = omni.Fsml(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019')); %[nT]
+ekl =  omni.Fekl(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019'))*10^-3;
+
+EKL = linspace(0,20,21);
+SML = -1*logspace(log10(100),log10(4500),52);
+
+
+multiSubstorm = T.previousSubstormDuration>duration(3,0,0) & T.nextSubstormDuration<duration(3,0,0);
+singleSubstorm = T.previousSubstormDuration>duration(3,0,0) & T.nextSubstormDuration>duration(3,0,0);
+imfData.index =  ~isnan(sml) & ~isnan(ekl);
+% %     neitherSubstorm = ~(multiSubstorm | singleSubstorm) & peakSML<SML_max & peakSML>SML_min;
+
+
+
+eklS = T.eklArray(singleSubstorm,:).*10^-3;
+% % x11 = EArray2(singleSubstorm,180);
+% smlS = (2./C.mu0).*T.smlArray(singleSubstorm,:).*10^-6;
+smlS = T.smlArray(singleSubstorm,:);
+
+eklM = T.eklArray(multiSubstorm,:).*10^-3;
+% % x22 = EArray2(multiSubstorm,180);
+% smlM = (2./C.mu0).*T.smlArray(multiSubstorm,:).*10^-6;
+smlM = T.smlArray(multiSubstorm,:);
+
+eklI = ekl(imfData.index);
+smlI = sml(imfData.index);
+
+% Bootstrap the above, binning in SML
+nBoot = 300;
+for iSML = 1:length(SML)-1
+    try
+        if sum(sum(smlS<SML(iSML) & smlS>SML(iSML+1) & ~isnan(eklS) & ~isnan(smlS))) >10
+            singleStorm.preOnsetE(iSML,:) = bootstrp(nBoot,@mean,eklS(smlS<SML(iSML)&smlS>SML(iSML+1) & ~isnan(eklS) & ~isnan(smlS)));
+        else
+            singleStorm.preOnsetE(iSML,:)=nan(1,nBoot);    
+        end
+    catch
+        singleStorm.preOnsetE(iSML,:)=nan(1,nBoot);
+    end
+    
+    try
+        if sum(sum(smlS<SML(iSML) & smlS>SML(iSML+1) & ~isnan(eklS) & ~isnan(smlS))) >10
+            singleStorm.peakSML(iSML,:) = bootstrp(nBoot,@mean,smlS(smlS<SML(iSML)&smlS>SML(iSML+1) & ~isnan(eklS) & ~isnan(smlS)));
+        else
+            singleStorm.peakSML(iSML,:) = nan(1,nBoot);
+        end
+    catch
+        singleStorm.peakSML(iSML,:) = nan(1,nBoot);
+    end
+    
+    try
+        if sum(sum(smlM<SML(iSML)&smlM>SML(iSML+1) & ~isnan(eklM) & ~isnan(smlM))) >10
+            multiStorm.preOnsetE(iSML,:) = bootstrp(nBoot,@mean,eklM(smlM<SML(iSML)&smlM>SML(iSML+1) & ~isnan(eklM) & ~isnan(smlM)));
+        else
+            multiStorm.preOnsetE(iSML,:) = nan(1,nBoot);
+        end
+    catch
+        multiStorm.preOnsetE(iSML,:) = nan(1,nBoot);
+        
+    end
+    
+    try
+        if sum(sum(smlM<SML(iSML)&smlM>SML(iSML+1) & ~isnan(eklM) & ~isnan(smlM))) >10
+            multiStorm.peakSML(iSML,:) = bootstrp(nBoot,@mean,smlM(smlM<SML(iSML)&smlM>SML(iSML+1) & ~isnan(eklM) & ~isnan(smlM)));
+        else
+            multiStorm.peakSML(iSML,:) = nan(1,nBoot);
+        end
+        
+    catch
+        multiStorm.peakSML(iSML,:) = nan(1,nBoot);
+    end
+    
+    try
+        if sum(smlI<SML(iSML)&smlI>SML(iSML+1))>10
+            imfData.peakSML(iSML,:) = bootstrp(nBoot,@mean,smlI(smlI<SML(iSML)&smlI>SML(iSML+1)));
+        else
+            imfData.peakSML(iSML,:) = nan(1,nBoot);
+        end
+    catch
+        imfData.peakSML(iSML,:) = nan(1,nBoot);
+    end
+    
+    try
+        if sum(smlI<SML(iSML)&smlI>SML(iSML+1))>10
+            imfData.preOnsetE(iSML,:) = bootstrp(nBoot,@mean,eklI(smlI<SML(iSML)&smlI>SML(iSML+1)));
+        else
+            imfData.preOnsetE(iSML,:) = nan(1,nBoot);
+        end
+        
+    catch
+        imfData.preOnsetE(iSML,:) = nan(1,nBoot);
+    end
+    
+    
+end
+%%
+figure; 
+% x=linspace(xAxisRange(1),xAxisRange(2),1000);
+x1 = singleStorm.preOnsetE(:);
+% xm1 = mean(singleStorm.preOnsetE,2);
+
+y1 = abs(singleStorm.peakSML(:));
+% ym1 = abs(mean(singleStorm.peakSML,2));
+
+
+
+x2 = multiStorm.preOnsetE(:);
+% xm2 = mean(multiStorm.preOnsetE,2);
+y2 = abs(multiStorm.peakSML(:));
+% ym2 = abs(mean(multiStorm.peakSML,2));
+
+xab = imfData.preOnsetE(:);
+xmab = mean(imfData.preOnsetE,2);
+
+yab = abs(imfData.peakSML(:));
+ymab = abs(mean(imfData.peakSML,2));
+
+p1=scatter(x1,y1,10,'filled','MarkerFaceColor',cmap(1,:),'MarkerFaceAlpha',0.4);
+hold on;
+
+p2=scatter(x2,y2,10,'filled','MarkerFaceColor',cmap(160,:),'MarkerFaceAlpha',0.4);
+hold on;
+p3=scatter(xab,yab,10,'filled','MarkerFaceColor',cmap(80,:),'MarkerFaceAlpha',0.4);
+hold on;
+
+
+
+set(gca,'YScale','linear','XScale','linear','XLim',xAxisBootRange,'YLim',yAxisRange);
+xlabel(xLabelBootStr,'Interpreter','latex'); 
+ylabel(yLabelBootStr,'Interpreter','latex'); 
+
+legend([p1,p2,p3],{'C: Single-onset','C: Multi-onset','C: All data (1968-2019)'},'Location','southeast');
 
 
 %% Plot of Driving (EMF) vs SML (current_estimate) to demonstrate linearity 
+%% through substorm
+clearvars multiStorm singleStorm neitherStorm imfData
+cmap = inferno;
+% growthTIndex = (60:180); %Minutes
+% growthTIndex = 300;
+% expansionTIndex = (181:361); %Minutes
+
+xAxisRange = [0,20];
+yAxisRange = [0,6500];
+% xLabelStr = 'Pre-onset: $\int_{t_0-2\mathrm{Hr}}^{t_0} V B^2 \sin^4 \frac{\theta_c}{2} L_0^2 \ \mathrm{d}t$ [GJ]';
+% xLabelStr = ['$E_M(V,B_T,\theta_c)$ [mV/m] at $t=t_0+$',num2str(growthTIndex-180),'min ']; 
+% yLabelStr = 'Peak $|SML|$ [nT]';
+yLabelStr = '$J_{iono}(SML)$ [mA/m$^2$]';
+
+xAxisBootRange = [0,20];
+% xLabelBootStr = 'Pre-onset: $\langle \int_{t_0-2\mathrm{Hr}}^{t_0 \mathrm{Hr}} V B^2 \sin^4 \frac{\theta_c}{2} L_0^2 \ \mathrm{d}t \rangle_{substorm-samples}$ [GJ]';
+xLabelBootStr = ['$\langle E_M \rangle_{substorm-samples}$ [mV/m]'];
+% yLabelBootStr = '$\langle \mathrm{Peak \ |SML|} \rangle_{substorm-samples}$ [nT]';
+yLabelBootStr = yLabelStr;
+
+% EArray2 = interp_nans(T.EArray')';
+C=define_universal_constants;
+% peakSML = (2./C.mu0)*T.smlArray(:,growthTIndex).*10^-6;%[mA/m^2 (?)]
+sml = (2./C.mu0).*omni.Fsml(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019')).*10^-6;
+ekl =  omni.Fekl(datenum('01 Jan 1967'):1/1440:datenum('01 Jan 2019'))*10^-3;
+% preOnsetE = nansum(T.EArray(:,growthTIndex),2);
+% preOnsetE = nansum(T.eklArray(:,growthTIndex),2).*10^-3; %[mV/m] See Kan and 
+% postOnsetE = nansum(T.eklArray(:,expansionTIndex),2).*10^-3;
+
+% multiSubstorm = T.previousSubstormDuration>duration(3,0,0) &...
+%  T.nextSubstormDuration<duration(3,0,0)...
+%  & sum(~isnan(T.EArray),2)>320;
+
+% singleSubstorm = T.previousSubstormDuration>duration(3,0,0) &...
+%     T.nextSubstormDuration>duration(3,0,0) & sum(~isnan(T.EArray),2)>320;
+
+SML = -1*logspace(log10(100),log10(65000),52);
+
+for j=1:length(SML)-1
+    
+    SML_max = SML(j);
+    SML_min = SML(j+1);
+    multiSubstorm = T.previousSubstormDuration>duration(3,0,0) & T.nextSubstormDuration<duration(3,0,0) & peakSML<SML_max & peakSML>SML_min;
+    singleSubstorm = T.previousSubstormDuration>duration(3,0,0) & T.nextSubstormDuration>duration(3,0,0) & peakSML<SML_max & peakSML>SML_min;
+    % multiSubstorm = T.previousSubstormDuration>duration(3,0,0) & T.nextSubstormDuration<duration(3,0,0);
+    % singleSubstorm = T.previousSubstormDuration>duration(3,0,0) & T.nextSubstormDuration>duration(3,0,0);
+%     neitherSubstorm = ~(multiSubstorm | singleSubstorm) & peakSML<SML_max & peakSML>SML_min;
+    imfData.index(j,:) = sml<SML_max & sml>SML_min & ~isnan(sml) & ~isnan(ekl);
+    
+    multiStorm.index(j,:) = multiSubstorm;
+    singleStorm.index(j,:) = singleSubstorm;
+%     neitherStorm.index(j,:) = neitherSubstorm;
+    
+end
+
+[~,singleStormID]=(ind2sub(size(singleStorm.index),find(singleStorm.index)));
+[~,multiStormID]=(ind2sub(size(multiStorm.index),find(multiStorm.index)));
+
+x1a = T.eklArray(singleStormID,:).*10^-3;
+% % x11 = EArray2(singleSubstorm,180);
+y1a = (2./C.mu0).*T.smlArray(singleStormID,:).*10^-6;
+x2a = T.eklArray(multiStormID,:).*10^-3;
+% % x22 = EArray2(multiSubstorm,180);
+y2a = (2./C.mu0).*T.smlArray(multiStormID,:).*10^-6;
+% 
+% figure; 
+% scatter(x1a(:),abs(y1a(:)),10,'filled','MarkerFaceColor',cmap(1,:),'MarkerFaceAlpha',0.4);
+% hold on;
+% scatter(x2a(:),abs(y2a(:)),10,'filled','MarkerFaceColor',cmap(160,:),'MarkerFaceAlpha',0.4);
+% % b1 = [ones(length(x1),1) x1]\y1;
+% x = logspace(2,6,100);
+% % hold on;
+% % plot(x,x*b1(2)+b1(1),'Color',cmap(1,:));
+% % c1 = corrcoef(x1,y1);
+% % text(0.7,0.6,['r_0_0 = ', num2str(c1(1,2),2)],'Units','Normalized','Color',cmap(1,:));
+% set(gca,'YScale','linear','XScale','linear','XLim',xAxisRange,'YLim',yAxisRange);
+% xlabel(xLabelStr,'Interpreter','latex'); 
+% ylabel(yLabelStr,'Interpreter','latex'); 
+% legend('Single-onset','Multi-onset');
+
+% Bootstrap the above
+nBoot = 200;
+for iSML = 1:length(SML)-1
+    try
+        if sum(sum(y1a<SML(iSML) & y1a>SML(iSML+1) & ~isnan(x1a) & ~isnan(y1a))) >10
+            singleStorm.preOnsetE(iSML,:) = bootstrp(nBoot,@mean,x1a(y1a<SML(iSML)&y1a>SML(iSML+1) & ~isnan(x1a) & ~isnan(y1a)));
+        else
+            singleStorm.preOnsetE(iSML,:)=nan(1,nBoot);    
+        end
+    catch
+        singleStorm.preOnsetE(iSML,:)=nan(1,nBoot);
+    end
+    
+    try
+        if sum(sum(y1a<SML(iSML) & y1a>SML(iSML+1) & ~isnan(x1a) & ~isnan(y1a))) >10
+            singleStorm.peakSML(iSML,:) = bootstrp(nBoot,@mean,y1a(y1a<SML(iSML)&y1a>SML(iSML+1) & ~isnan(x1a) & ~isnan(y1a)));
+        else
+            singleStorm.peakSML(iSML,:) = nan(1,nBoot);
+        end
+    catch
+        singleStorm.peakSML(iSML,:) = nan(1,nBoot);
+    end
+    
+    try
+        if sum(sum(y2a<SML(iSML)&y2a>SML(iSML+1) & ~isnan(x2a) & ~isnan(y2a))) >10
+            multiStorm.preOnsetE(iSML,:) = bootstrp(nBoot,@mean,x2a(y2a<SML(iSML)&y2a>SML(iSML+1) & ~isnan(x2a) & ~isnan(y2a)));
+        else
+            multiStorm.preOnsetE(iSML,:) = nan(1,nBoot);
+        end
+    catch
+        multiStorm.preOnsetE(iSML,:) = nan(1,nBoot);
+        
+    end
+    
+    try
+        if sum(sum(y2a<SML(iSML)&y2a>SML(iSML+1) & ~isnan(x2a) & ~isnan(y2a))) >10
+            multiStorm.peakSML(iSML,:) = bootstrp(nBoot,@mean,y2a(y2a<SML(iSML)&y2a>SML(iSML+1) & ~isnan(x2a) & ~isnan(y2a)));
+        else
+            multiStorm.peakSML(iSML,:) = nan(1,nBoot);
+        end
+        
+    catch
+        multiStorm.peakSML(iSML,:) = nan(1,nBoot);
+    end
+    
+    try
+        if sum(imfData.index(iSML,:))>10
+            imfData.peakSML(iSML,:) = bootstrp(nBoot,@mean,sml(imfData.index(iSML,:)));
+        else
+            imfData.peakSML(iSML,:) = nan(1,nBoot);
+        end
+    catch
+        imfData.peakSML(iSML,:) = nan(1,nBoot);
+    end
+    
+    try
+        if sum(imfData.index(iSML,:))>10
+            imfData.preOnsetE(iSML,:) = bootstrp(nBoot,@mean,ekl(imfData.index(iSML,:)));
+        else
+            imfData.preOnsetE(iSML,:) = nan(1,nBoot);
+        end
+        
+    catch
+        imfData.preOnsetE(iSML,:) = nan(1,nBoot);
+    end
+    
+    
+end
+
+figure; 
+x=linspace(xAxisRange(1),xAxisRange(2),1000);
+x1 = singleStorm.preOnsetE(:);
+% xm1 = mean(singleStorm.preOnsetE,2);
+
+y1 = abs(singleStorm.peakSML(:));
+% ym1 = abs(mean(singleStorm.peakSML,2));
+
+
+
+x2 = multiStorm.preOnsetE(:);
+% xm2 = mean(multiStorm.preOnsetE,2);
+y2 = abs(multiStorm.peakSML(:));
+% ym2 = abs(mean(multiStorm.peakSML,2));
+
+xab = imfData.preOnsetE(:);
+xmab = mean(imfData.preOnsetE,2);
+
+yab = abs(imfData.peakSML(:));
+ymab = abs(mean(imfData.peakSML,2));
+
+% fit
+% [f1,gof1] = fit(x1(~isnan(x1)),y1(~isnan(x1)),'power2','Exclude',y1(~isnan(x1))>2200);
+% [f2,gof2] = fit(x2(~isnan(x2)),y2(~isnan(x2)),'power2','Exclude',y2(~isnan(x2))>3000);
+% [fab,gofab] = fit(xab(~isnan(xab)),yab(~isnan(xab)),'power2','Exclude',yab(~isnan(xab))>4000);
+
+
+% plot
+% p1=plot(x,f1(x),'-','Color',cmap(1,:),'LineWidth',1);
+% hold on;
+% p2=plot(x,f2(x),'-','Color',cmap(160,:),'LineWidth',1);
+% hold on;
+% p3=plot(x,fab(x),'-','Color',cmap(80,:),'LineWidth',1);
+% hold on;
+p1=scatter(x1,y1,10,'filled','MarkerFaceColor',cmap(1,:),'MarkerFaceAlpha',0.4);
+hold on;
+
+p2=scatter(x2,y2,10,'filled','MarkerFaceColor',cmap(160,:),'MarkerFaceAlpha',0.4);
+hold on;
+p3=scatter(xab,yab,10,'filled','MarkerFaceColor',cmap(80,:),'MarkerFaceAlpha',0.4);
+hold on;
+
+
+
+set(gca,'YScale','linear','XScale','linear','XLim',xAxisBootRange,'YLim',yAxisRange);
+xlabel(xLabelBootStr,'Interpreter','latex'); 
+ylabel(yLabelBootStr,'Interpreter','latex'); 
+% text(0.6,0.5,['\sigma_{single-onset} = ',num2str(f1.p1,4),' \Omega^{-1} m^{-1}'],'Units','Normalized','Color',cmap(1,:));
+% text(0.6,0.4,['\sigma_{multi-onset} = ',num2str(f2.p1,4),' \Omega^{-1} m^{-1}'],'Units','Normalized','Color',cmap(160,:));
+% text(0.6,0.3,['\sigma_{All-data} = ',num2str(fab.p1,4),' \Omega^{-1} m^{-1}'],'Units','Normalized','Color',cmap(80,:));
+
+% text(0.6,0.5,[num2str(f1.a,5),' x^{',num2str(f1.b,2),'}+',num2str(f1.c,5)],'Units','Normalized','Color',cmap(1,:));
+% text(0.6,0.4,[num2str(f2.a,5),' x^{',num2str(f2.b,2),'}+',num2str(f2.c,5)],'Units','Normalized','Color',cmap(160,:));
+% text(0.6,0.3,[num2str(fab.a,4),' x^{',num2str(fab.b,2),'}+',num2str(fab.c,5)],'Units','Normalized','Color',cmap(80,:));
+
+legend([p1,p2,p3],{'Single-onset','Multi-onset','All data points (1968-2019)'},'Location','southeast');
+
+%% Plot of Driving (EMF) vs SML (current_estimate) to demonstrate linearity per time instant
 clearvars multiStorm singleStorm neitherStorm
 cmap = inferno;
 % growthTIndex = (60:180); %Minutes
@@ -533,6 +1074,7 @@ end
 
 [~,singleStormID]=(ind2sub(size(singleStorm.index),find(singleStorm.index)));
 [~,multiStormID]=(ind2sub(size(multiStorm.index),find(multiStorm.index)));
+
 x1 = preOnsetE(singleStormID);
 % x11 = EArray2(singleSubstorm,180);
 y1 = peakSML(singleStormID);
@@ -616,7 +1158,7 @@ hold on;
 p1=plot(x,f1(x),'Color',cmap(60,:),'LineWidth',2);
 hold on;
 p2=plot(x,f2(x),'Color',cmap(200,:),'LineWidth',2);
-x = logspace(2,6,100);
+
 set(gca,'YScale','linear','XScale','linear','XLim',xAxisBootRange,'YLim',yAxisRange);
 xlabel(xLabelBootStr,'Interpreter','latex'); 
 ylabel(yLabelBootStr,'Interpreter','latex'); 
