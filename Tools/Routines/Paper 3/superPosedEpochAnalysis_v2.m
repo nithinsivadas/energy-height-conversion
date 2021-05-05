@@ -42,11 +42,18 @@ end
 if prevSuperMagFileType == 0 % For the first run of this routine
     
     % Cataloging stored substorms
-    fileNameList = struct2cell(dir([workDir,strcat(filesep,'*_pfisrData.h5')]));
-    filePathStr = strcat(strcat(workDir,filesep),string(fileNameList(1,:)'));
+    fileNameList = struct2cell(dir([storeDir,strcat('Processed',filesep,'*_pfisrData.h5')]));
+    filePathStr = strcat(strcat(storeDir,'Processed',filesep),string(fileNameList(1,:)'));
     for i=1:1:length(filePathStr)
-        storedStormID(:,i) = str2double(fileNameList{1,i}(1:regexp(fileNameList{1,i},'_')-1));
+        storedStorm.TimeArray{:,i} = datetime(h5read(filePathStr{i},'/time'),'ConvertFrom','datenum');
+        storedStorm.beg(i) =storedStorm.TimeArray{i}(1);
+        storedStorm.end(i) =storedStorm.TimeArray{i}(end);
+        storedStorm.filePathStr{i} = filePathStr{i};
     end
+    
+%     for i=1:1:length(filePathStr)
+%         storedStormID(:,i) = str2double(fileNameList{1,i}(1:regexp(fileNameList{1,i},'_')-1));
+%     end
     
     % Loading all relevant data variables
     omni = extract_omni_data(omniFile);
@@ -69,8 +76,8 @@ if ~(exist('T','var') && prevSuperMagFileType == superMagFileType)
     
     for i=1:1:length(T.stormID)
      
-        if sum(storedStormID==T.stormID(i))>0
-            T.storageLocation(i) = filePathStr(storedStormID==T.stormID(i));
+        if storedStorm.beg<=T.Time(i) && storedStorm.end>T.Time(i)
+            T.storageLocation(i) = filePathStr(storedStorm.beg<=T.Time(i) & storedStorm.end>T.Time(i));
         end
     
     tempTime = T.Time(i)-duration(1,0,0):duration(0,1,0):T.Time(i)+duration(0,30,0);
