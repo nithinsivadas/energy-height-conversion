@@ -16,7 +16,7 @@ wind = wind1(wi,:);
 
 %% Specifying a grid
 gride = -5:0.1:5;
-gridx = 0:0.4:40;
+gridx = 0:0.4:20;
 [E, X] = meshgrid(gride,gridx);
 
 % Generating a Kernal density estimate, to have a model of the continous
@@ -24,7 +24,7 @@ gridx = 0:0.4:40;
 
 [fx,xi] = ksdensity((wind.E_kl*10^-3),gridx);
 Fx = griddedInterpolant(xi,fx);
-[fex,xii] = ksdensity([(ace.E_kl-wind.E_kl)*10^-3, ace.E_kl*10^-3],[E(:),X(:)]);
+[fex,xii] = ksdensity([(wind.E_kl-ace.E_kl)*10^-3, wind.E_kl*10^-3],[E(:),X(:)]);
 Fex = scatteredInterpolant(xii(:,1),xii(:,2),fex);
 
 Dx = diff(gridx);
@@ -37,7 +37,7 @@ Dx(end+1) = Dx(end);
 
 
 gride1 = -5:0.1:5;
-gridx1 = 0:0.1:40;
+gridx1 = 0:0.1:20;
 [E1, X1] = meshgrid(gride1,gridx1);
 figure; 
 p=pcolor(E1,X1,(Fex(E1,X1)./(Fx(gridx1)')));

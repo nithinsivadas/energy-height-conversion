@@ -16,7 +16,7 @@ cPos=get(c,'Position');
 cPos(3)=p.Results.Width*cPos(3);
 set(c, 'Position',cPos);
 
-ylabel(c,p.Results.YLabel);
+ylabel(c,p.Results.YLabel,'Interpreter','Latex');
 
 end
 
