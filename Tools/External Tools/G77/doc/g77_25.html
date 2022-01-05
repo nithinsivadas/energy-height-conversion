@@ -1,0 +1,584 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Projects</TITLE>
+<link href="g77_26.html" rel=Next>
+<link href="g77_24.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_24.html">previous</A>, <A HREF="g77_26.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC677" HREF="g77_toc.html#TOC677">Projects</A></H1>
+<P>
+<A NAME="IDX2303"></A>
+
+</P>
+<P>
+If you want to contribute to <CODE>g77</CODE> by doing research,
+design, specification, documentation, coding, or testing,
+the following information should give you some ideas.
+More relevant information might be available from
+<A HREF="ftp://alpha.gnu.org/gnu/g77/projects/"><TT>ftp://alpha.gnu.org/gnu/g77/projects/</TT></A>.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_25.html#SEC678">Efficiency</A>: Make <CODE>g77</CODE> itself compile code faster.
+<LI><A HREF="g77_25.html#SEC679">Better Optimization</A>: Teach <CODE>g77</CODE> to generate faster code.
+<LI><A HREF="g77_25.html#SEC680">Simplify Porting</A>: Make <CODE>g77</CODE> easier to configure, build,
+                             and install.
+<LI><A HREF="g77_25.html#SEC681">More Extensions</A>: Features many users won't know to ask for.
+<LI><A HREF="g77_25.html#SEC682">Machine Model</A>: <CODE>g77</CODE> should better leverage <CODE>gcc</CODE>.
+<LI><A HREF="g77_25.html#SEC683">Internals Documentation</A>: Make maintenance easier.
+<LI><A HREF="g77_25.html#SEC684">Internals Improvements</A>: Make internals more robust.
+<LI><A HREF="g77_25.html#SEC685">Better Diagnostics</A>: Make using <CODE>g77</CODE> on new code easier.
+</UL>
+
+
+
+<H2><A NAME="SEC678" HREF="g77_toc.html#TOC678">Improve Efficiency</A></H2>
+<P>
+<A NAME="IDX2304"></A>
+
+</P>
+<P>
+Don't bother doing any performance analysis until most of the
+following items are taken care of, because there's no question
+they represent serious space/time problems, although some of
+them show up only given certain kinds of (popular) input.
+
+</P>
+
+<UL>
+<LI>
+
+Improve <CODE>malloc</CODE> package and its uses to specify more info about
+memory pools and, where feasible, use obstacks to implement them.
+
+<LI>
+
+Skip over uninitialized portions of aggregate areas (arrays,
+<CODE>COMMON</CODE> areas, <CODE>EQUIVALENCE</CODE> areas) so zeros need not be output.
+This would reduce memory usage for large initialized aggregate
+areas, even ones with only one initialized element.
+
+As of version 0.5.18, a portion of this item has already been
+accomplished.
+
+<LI>
+
+Prescan the statement (in <TT>`sta.c'</TT>) so that the nature of the statement
+is determined as much as possible by looking entirely at its form,
+and not looking at any context (previous statements, including types
+of symbols).
+This would allow ripping out of the statement-confirmation,
+symbol retraction/confirmation, and diagnostic inhibition
+mechanisms.
+Plus, it would result in much-improved diagnostics.
+For example, <SAMP>`CALL some-intrinsic(...)'</SAMP>, where the intrinsic
+is not a subroutine intrinsic, would result actual error instead of the
+unimplemented-statement catch-all.
+
+<LI>
+
+Throughout <CODE>g77</CODE>, don't pass line/column pairs where
+a simple <CODE>ffewhere</CODE> type, which points to the error as much as is
+desired by the configuration, will do, and don't pass <CODE>ffelexToken</CODE> types
+where a simple <CODE>ffewhere</CODE> type will do.
+Then, allow new default
+configuration of <CODE>ffewhere</CODE> such that the source line text is not
+preserved, and leave it to things like Emacs' next-error function
+to point to them (now that <SAMP>`next-error'</SAMP> supports column,
+or, perhaps, character-offset, numbers).
+The change in calling sequences should improve performance somewhat,
+as should not having to save source lines.
+(Whether this whole
+item will improve performance is questionable, but it should
+improve maintainability.)
+
+<LI>
+
+Handle <SAMP>`DATA (A(I),I=1,1000000)/1000000*2/'</SAMP> more efficiently, especially
+as regards the assembly output.
+Some of this might require improving
+the back end, but lots of improvement in space/time required in <CODE>g77</CODE>
+itself can be fairly easily obtained without touching the back end.
+Maybe type-conversion, where necessary, can be speeded up as well in
+cases like the one shown (converting the <SAMP>`2'</SAMP> into <SAMP>`2.'</SAMP>).
+
+<LI>
+
+If analysis shows it to be worthwhile, optimize <TT>`lex.c'</TT>.
+
+<LI>
+
+Consider redesigning <TT>`lex.c'</TT> to not need any feedback
+during tokenization, by keeping track of enough parse state on its
+own.
+</UL>
+
+
+
+<H2><A NAME="SEC679" HREF="g77_toc.html#TOC679">Better Optimization</A></H2>
+<P>
+<A NAME="IDX2305"></A>
+<A NAME="IDX2306"></A>
+
+</P>
+<P>
+Much of this work should be put off until after <CODE>g77</CODE> has
+all the features necessary for its widespread acceptance as a
+useful F77 compiler.
+However, perhaps this work can be done in parallel during
+the feature-adding work.
+
+</P>
+
+<UL>
+<LI>
+
+Do the equivalent of the trick of putting <SAMP>`extern inline'</SAMP> in front
+of every function definition in <CODE>libg2c</CODE> and #include'ing the resulting
+file in <CODE>f2c</CODE>+<CODE>gcc</CODE>---that is, inline all run-time-library functions
+that are at all worth inlining.
+(Some of this has already been done, such as for integral exponentiation.)
+
+<LI>
+
+When doing <SAMP>`CHAR_VAR = CHAR_FUNC(...)'</SAMP>,
+and it's clear that types line up
+and <SAMP>`CHAR_VAR'</SAMP> is addressable or not a <CODE>VAR_DECL</CODE>,
+make <SAMP>`CHAR_VAR'</SAMP>, not a
+temporary, be the receiver for <SAMP>`CHAR_FUNC'</SAMP>.
+(This is now done for <CODE>COMPLEX</CODE> variables.)
+
+<LI>
+
+Design and implement Fortran-specific optimizations that don't
+really belong in the back end, or where the front end needs to
+give the back end more info than it currently does.
+
+<LI>
+
+Design and implement a new run-time library interface, with the
+code going into <CODE>libgcc</CODE> so no special linking is required to
+link Fortran programs using standard language features.
+This library
+would speed up lots of things, from I/O (using precompiled formats,
+doing just one, or, at most, very few, calls for arrays or array sections,
+and so on) to general computing (array/section implementations of
+various intrinsics, implementation of commonly performed loops that
+aren't likely to be optimally compiled otherwise, etc.).
+
+Among the important things the library would do are:
+
+
+<UL>
+<LI>
+
+Be a one-stop-shop-type
+library, hence shareable and usable by all, in that what are now
+library-build-time options in <CODE>libg2c</CODE> would be moved at least to the
+<CODE>g77</CODE> compile phase, if not to finer grains (such as choosing how
+list-directed I/O formatting is done by default at <CODE>OPEN</CODE> time, for
+preconnected units via options or even statements in the main program
+unit, maybe even on a per-I/O basis with appropriate pragma-like
+devices).
+</UL>
+
+<LI>
+
+Probably requiring the new library design, change interface to
+normally have <CODE>COMPLEX</CODE> functions return their values in the way
+<CODE>gcc</CODE> would if they were declared <CODE>__complex__ float</CODE>,
+rather than using
+the mechanism currently used by <CODE>CHARACTER</CODE> functions (whereby the
+functions are compiled as returning void and their first arg is
+a pointer to where to store the result).
+(Don't append underscores to
+external names for <CODE>COMPLEX</CODE> functions in some cases once <CODE>g77</CODE> uses
+<CODE>gcc</CODE> rather than <CODE>f2c</CODE> calling conventions.)
+
+<LI>
+
+Do something useful with <CODE>doiter</CODE> references where possible.
+For example, <SAMP>`CALL FOO(I)'</SAMP> cannot modify <SAMP>`I'</SAMP> if within
+a <CODE>DO</CODE> loop that uses <SAMP>`I'</SAMP> as the
+iteration variable, and the back end might find that info useful
+in determining whether it needs to read <SAMP>`I'</SAMP> back into a register after
+the call.
+(It normally has to do that, unless it knows <SAMP>`FOO'</SAMP> never
+modifies its passed-by-reference argument, which is rarely the case
+for Fortran-77 code.)
+</UL>
+
+
+
+<H2><A NAME="SEC680" HREF="g77_toc.html#TOC680">Simplify Porting</A></H2>
+<P>
+<A NAME="IDX2307"></A>
+<A NAME="IDX2308"></A>
+
+</P>
+<P>
+Making <CODE>g77</CODE> easier to configure, port, build, and install, either
+as a single-system compiler or as a cross-compiler, would be
+very useful.
+
+</P>
+
+<UL>
+<LI>
+
+A new library (replacing <CODE>libg2c</CODE>) should improve portability as well as
+produce more optimal code.
+Further, <CODE>g77</CODE> and the new library should
+conspire to simplify naming of externals, such as by removing unnecessarily
+added underscores, and to reduce/eliminate the possibility of naming
+conflicts, while making debugger more straightforward.
+
+Also, it should
+make multi-language applications more feasible, such as by providing
+Fortran intrinsics that get Fortran unit numbers given C <CODE>FILE *</CODE>
+descriptors.
+
+<LI>
+
+Possibly related to a new library, <CODE>g77</CODE> should produce the equivalent
+of a <CODE>gcc</CODE> <SAMP>`main(argc, argv)'</SAMP> function when it compiles a
+main program unit, instead of compiling something that must be
+called by a library
+implementation of <CODE>main()</CODE>.
+
+This would do many useful things such as
+provide more flexibility in terms of setting up exception handling,
+not requiring programmers to start their debugging sessions with
+<KBD>breakpoint MAIN__</KBD> followed by <KBD>run</KBD>, and so on.
+
+<LI>
+
+The GBE needs to understand the difference between alignment
+requirements and desires.
+For example, on Intel x86 machines, <CODE>g77</CODE> currently imposes
+overly strict alignment requirements, due to the back end, but it
+would be useful for Fortran and C programmers to be able to override
+these <EM>recommendations</EM> as long as they don't violate the actual
+processor <EM>requirements</EM>.
+</UL>
+
+
+
+<H2><A NAME="SEC681" HREF="g77_toc.html#TOC681">More Extensions</A></H2>
+<P>
+<A NAME="IDX2309"></A>
+
+</P>
+<P>
+These extensions are not the sort of things users ask for "by name",
+but they might improve the usability of <CODE>g77</CODE>, and Fortran in
+general, in the long run.
+Some of these items really pertain to improving <CODE>g77</CODE> internals
+so that some popular extensions can be more easily supported.
+
+</P>
+
+<UL>
+<LI>
+
+Look through all the documentation on the GNU Fortran language,
+dialects, compiler, missing features, bugs, and so on.
+Many mentions of incomplete or missing features are
+sprinkled throughout.
+It is not worth repeating them here.
+
+<LI>
+
+Consider adding a <CODE>NUMERIC</CODE> type to designate typeless numeric constants,
+named and unnamed.
+The idea is to provide a forward-looking, effective
+replacement for things like the old-style <CODE>PARAMETER</CODE> statement
+when people
+really need typelessness in a maintainable, portable, clearly documented
+way.
+Maybe <CODE>TYPELESS</CODE> would include <CODE>CHARACTER</CODE>, <CODE>POINTER</CODE>,
+and whatever else might come along.
+(This is not really a call for polymorphism per se, just
+an ability to express limited, syntactic polymorphism.)
+
+<LI>
+
+Support <SAMP>`OPEN(...,KEY=(...),...)'</SAMP>.
+
+<LI>
+
+Support arbitrary file unit numbers, instead of limiting them
+to 0 through <SAMP>`MXUNIT-1'</SAMP>.
+(This is a <CODE>libg2c</CODE> issue.)
+
+<LI>
+
+<SAMP>`OPEN(NOSPANBLOCKS,...)'</SAMP> is treated as
+<SAMP>`OPEN(UNIT=NOSPANBLOCKS,...)'</SAMP>, so a
+later <CODE>UNIT=</CODE> in the first example is invalid.
+Make sure this is what users of this feature would expect.
+
+<LI>
+
+Currently <CODE>g77</CODE> disallows <SAMP>`READ(1'10)'</SAMP> since
+it is an obnoxious syntax, but
+supporting it might be pretty easy if needed.
+More details are needed, such
+as whether general expressions separated by an apostrophe are supported,
+or maybe the record number can be a general expression, and so on.
+
+<LI>
+
+Support <CODE>STRUCTURE</CODE>, <CODE>UNION</CODE>, <CODE>MAP</CODE>, and <CODE>RECORD</CODE>
+fully.
+Currently there is no support at all
+for <CODE>%FILL</CODE> in <CODE>STRUCTURE</CODE> and related syntax,
+whereas the rest of the
+stuff has at least some parsing support.
+This requires either major
+changes to <CODE>libg2c</CODE> or its replacement.
+
+<LI>
+
+F90 and <CODE>g77</CODE> probably disagree about label scoping relative to
+<CODE>INTERFACE</CODE> and <CODE>END INTERFACE</CODE>, and their contained
+procedure interface bodies (blocks?).
+
+<LI>
+
+<CODE>ENTRY</CODE> doesn't support F90 <CODE>RESULT()</CODE> yet,
+since that was added after S8.112.
+
+<LI>
+
+Empty-statement handling (10 ;;CONTINUE;;) probably isn't consistent
+with the final form of the standard (it was vague at S8.112).
+
+<LI>
+
+It seems to be an "open" question whether a file, immediately after being
+<CODE>OPEN</CODE>ed,is positioned at the beginning, the end, or wherever--it
+might be nice to offer an option of opening to "undefined" status, requiring
+an explicit absolute-positioning operation to be performed before any
+other (besides <CODE>CLOSE</CODE>) to assist in making applications port to systems
+(some IBM?) that <CODE>OPEN</CODE> to the end of a file or some such thing.
+</UL>
+
+
+
+<H2><A NAME="SEC682" HREF="g77_toc.html#TOC682">Machine Model</A></H2>
+
+<P>
+This items pertain to generalizing <CODE>g77</CODE>'s view of
+the machine model to more fully accept whatever the GBE
+provides it via its configuration.
+
+</P>
+
+<UL>
+<LI>
+
+Switch to using <CODE>REAL_VALUE_TYPE</CODE> to represent floating-point constants
+exclusively so the target float format need not be required.
+This
+means changing the way <CODE>g77</CODE> handles initialization of aggregate areas
+having more than one type, such as <CODE>REAL</CODE> and <CODE>INTEGER</CODE>,
+because currently
+it initializes them as if they were arrays of <CODE>char</CODE> and uses the
+bit patterns of the constants of the various types in them to determine
+what to stuff in elements of the arrays.
+
+<LI>
+
+Rely more and more on back-end info and capabilities, especially in the
+area of constants (where having the <CODE>g77</CODE> front-end's IL just store
+the appropriate tree nodes containing constants might be best).
+
+<LI>
+
+Suite of C and Fortran programs that a user/administrator can run on a
+machine to help determine the configuration for <CODE>g77</CODE> before building
+and help determine if the compiler works (especially with whatever
+libraries are installed) after building.
+</UL>
+
+
+
+<H2><A NAME="SEC683" HREF="g77_toc.html#TOC683">Internals Documentation</A></H2>
+
+<P>
+Better info on how <CODE>g77</CODE> works and how to port it is needed.
+Much of this should be done only after the redesign planned for
+0.6 is complete.
+
+</P>
+<P>
+See section <A HREF="g77_26.html#SEC686">Front End</A>, which contains some information
+on <CODE>g77</CODE> internals.
+
+</P>
+
+
+<H2><A NAME="SEC684" HREF="g77_toc.html#TOC684">Internals Improvements</A></H2>
+
+<P>
+Some more items that would make <CODE>g77</CODE> more reliable
+and easier to maintain:
+
+</P>
+
+<UL>
+<LI>
+
+Generally make expression handling focus
+more on critical syntax stuff, leaving semantics to callers.
+For example,
+anything a caller can check, semantically, let it do so, rather
+than having <TT>`expr.c'</TT> do it.
+(Exceptions might include things like
+diagnosing <SAMP>`FOO(I--K:)=BAR'</SAMP> where <SAMP>`FOO'</SAMP> is a <CODE>PARAMETER</CODE>---if
+it seems
+important to preserve the left-to-right-in-source order of production
+of diagnostics.)
+
+<LI>
+
+Come up with better naming conventions for <SAMP>`-D'</SAMP> to establish requirements
+to achieve desired implementation dialect via <TT>`proj.h'</TT>.
+
+<LI>
+
+Clean up used tokens and <CODE>ffewhere</CODE>s in <CODE>ffeglobal_terminate_1</CODE>.
+
+<LI>
+
+Replace <TT>`sta.c'</TT> <CODE>outpooldisp</CODE> mechanism with <CODE>malloc_pool_use</CODE>.
+
+<LI>
+
+Check for <CODE>opANY</CODE> in more places in <TT>`com.c'</TT>, <TT>`std.c'</TT>,
+and <TT>`ste.c'</TT>, and get rid of the <SAMP>`opCONVERT(opANY)'</SAMP> kludge
+(after determining if there is indeed no real need for it).
+
+<LI>
+
+Utility to read and check <TT>`bad.def'</TT> messages and their references in the
+code, to make sure calls are consistent with message templates.
+
+<LI>
+
+Search and fix <SAMP>`&#38;ffe...'</SAMP> and similar so that
+<SAMP>`ffe...ptr...'</SAMP> macros are
+available instead (a good argument for wishing this could have written all
+this stuff in C++, perhaps).
+On the other hand, it's questionable whether this sort of
+improvement is really necessary, given the availability of
+tools such as Emacs and Perl, which make finding any
+address-taking of structure members easy enough?
+
+<LI>
+
+Some modules truly export the member names of their structures (and the
+structures themselves), maybe fix this, and fix other modules that just
+appear to as well (by appending <SAMP>`_'</SAMP>, though it'd be ugly and probably
+not worth the time).
+
+<LI>
+
+Implement C macros <SAMP>`RETURNS(value)'</SAMP> and <SAMP>`SETS(something,value)'</SAMP>
+in <TT>`proj.h'</TT>
+and use them throughout <CODE>g77</CODE> source code (especially in the definitions
+of access macros in <SAMP>`.h'</SAMP> files) so they can be tailored
+to catch code writing into a <SAMP>`RETURNS()'</SAMP> or reading from a <SAMP>`SETS()'</SAMP>.
+
+<LI>
+
+Decorate throughout with <CODE>const</CODE> and other such stuff.
+
+<LI>
+
+All F90 notational derivations in the source code are still based
+on the S8.112 version of the draft standard.
+Probably should update
+to the official standard, or put documentation of the rules as used
+in the code...uh...in the code.
+
+<LI>
+
+Some <CODE>ffebld_new</CODE> calls (those outside of <TT>`ffeexpr.c'</TT> or
+inside but invoked via paths not involving <CODE>ffeexpr_lhs</CODE> or
+<CODE>ffeexpr_rhs</CODE>) might be creating things
+in improper pools, leading to such things staying around too long or
+(doubtful, but possible and dangerous) not long enough.
+
+<LI>
+
+Some <CODE>ffebld_list_new</CODE> (or whatever) calls might not be matched by
+<CODE>ffebld_list_bottom</CODE> (or whatever) calls, which might someday matter.
+(It definitely is not a problem just yet.)
+
+<LI>
+
+Probably not doing clean things when we fail to <CODE>EQUIVALENCE</CODE> something
+due to alignment/mismatch or other problems--they end up without
+<CODE>ffestorag</CODE> objects, so maybe the backend (and other parts of the front
+end) can notice that and handle like an <CODE>opANY</CODE> (do what it wants, just
+don't complain or crash).
+Most of this seems to have been addressed
+by now, but a code review wouldn't hurt.
+</UL>
+
+
+
+<H2><A NAME="SEC685" HREF="g77_toc.html#TOC685">Better Diagnostics</A></H2>
+
+<P>
+These are things users might not ask about, or that need to
+be looked into, before worrying about.
+Also here are items that involve reducing unnecessary diagnostic
+clutter.
+
+</P>
+
+<UL>
+<LI>
+
+When <CODE>FUNCTION</CODE> and <CODE>ENTRY</CODE> point types disagree (<CODE>CHARACTER</CODE>
+lengths, type classes, and so on),
+<CODE>ANY</CODE>-ize the offending <CODE>ENTRY</CODE> point and any <EM>new</EM> dummies
+it specifies.
+
+<LI>
+
+Speed up and improve error handling for data when repeat-count is
+specified.
+For example, don't output 20 unnecessary messages after the
+first necessary one for:
+
+
+<PRE>
+INTEGER X(20)
+CONTINUE
+DATA (X(I), J= 1, 20) /20*5/
+END
+</PRE>
+
+(The <CODE>CONTINUE</CODE> statement ensures the <CODE>DATA</CODE> statement
+is processed in the context of executable, not specification,
+statements.)
+</UL>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_24.html">previous</A>, <A HREF="g77_26.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

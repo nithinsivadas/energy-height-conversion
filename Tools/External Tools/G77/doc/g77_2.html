@@ -1,0 +1,160 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Contributors to GNU Fortran</TITLE>
+<link href="g77_3.html" rel=Next>
+<link href="g77_1.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_1.html">previous</A>, <A HREF="g77_3.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC5" HREF="g77_toc.html#TOC5">Contributors to GNU Fortran</A></H1>
+<P>
+<A NAME="IDX2"></A>
+<A NAME="IDX3"></A>
+
+</P>
+<P>
+In addition to James Craig Burley, who wrote the front end,
+many people have helped create and improve GNU Fortran.
+
+</P>
+
+<UL>
+<LI>
+
+The packaging and compiler portions of GNU Fortran are based largely
+on the GNU CC compiler.
+See section `Contributors to GNU CC' in <CITE>Using and Porting GNU CC</CITE>,
+for more information.
+
+<LI>
+
+The run-time library used by GNU Fortran is a repackaged version
+of the <CODE>libf2c</CODE> library (combined from the <CODE>libF77</CODE> and
+<CODE>libI77</CODE> libraries) provided as part of <CODE>f2c</CODE>, available for
+free from <CODE>netlib</CODE> sites on the Internet.
+
+<LI>
+
+Cygnus Support and The Free Software Foundation contributed
+significant money and/or equipment to Craig's efforts.
+
+<LI>
+
+The following individuals served as alpha testers prior to <CODE>g77</CODE>'s
+public release.  This work consisted of testing, researching, sometimes
+debugging, and occasionally providing small amounts of code and fixes
+for <CODE>g77</CODE>, plus offering plenty of helpful advice to Craig:
+
+
+<UL>
+<LI>
+
+Jonathan Corbet
+<LI>
+
+Dr. Mark Fernyhough
+<LI>
+
+Takafumi Hayashi (The University of Aizu)---<A HREF="mailto:takafumi@u-aizu.ac.jp"><TT>takafumi@u-aizu.ac.jp</TT></A>
+<LI>
+
+Kate Hedstrom
+<LI>
+
+Michel Kern (INRIA and Rice University)---<A HREF="mailto:Michel.Kern@inria.fr"><TT>Michel.Kern@inria.fr</TT></A>
+<LI>
+
+Dr. A. O. V. Le Blanc
+<LI>
+
+Dave Love
+<LI>
+
+Rick Lutowski
+<LI>
+
+Toon Moene
+<LI>
+
+Rick Niles
+<LI>
+
+Derk Reefman
+<LI>
+
+Wayne K. Schroll
+<LI>
+
+Bill Thorson
+<LI>
+
+Pedro A. M. Vazquez
+<LI>
+
+Ian Watson
+</UL>
+
+<LI>
+
+Scott Snyder (<A HREF="mailto:snyder@d0sgif.fnal.gov"><TT>snyder@d0sgif.fnal.gov</TT></A>)
+provided the patch to add rudimentary support
+for <CODE>INTEGER*1</CODE>, <CODE>INTEGER*2</CODE>, and
+<CODE>LOGICAL*1</CODE>.
+This inspired Craig to add further support,
+even though the resulting support
+would still be incomplete, because version 0.6 is still
+a ways off.
+
+<LI>
+
+David Ronis (<A HREF="mailto:ronis@onsager.chem.mcgill.ca"><TT>ronis@onsager.chem.mcgill.ca</TT></A>) inspired
+and encouraged Craig to rewrite the documentation in texinfo
+format by contributing a first pass at a translation of the
+old <TT>`g77-0.5.16/f/DOC'</TT> file.
+
+<LI>
+
+Toon Moene (<A HREF="mailto:toon@moene.indiv.nluug.nl"><TT>toon@moene.indiv.nluug.nl</TT></A>) performed
+some analysis of generated code as part of an overall project
+to improve <CODE>g77</CODE> code generation to at least be as good
+as <CODE>f2c</CODE> used in conjunction with <CODE>gcc</CODE>.
+So far, this has resulted in the three, somewhat
+experimental, options added by <CODE>g77</CODE> to the <CODE>gcc</CODE>
+compiler and its back end.
+
+(These, in turn, have made their way into the <CODE>egcs</CODE>
+version of the compiler, and do not exist in <CODE>gcc</CODE>
+version 2.8 or versions of <CODE>g77</CODE> based on that version
+of <CODE>gcc</CODE>.)
+
+<LI>
+
+John Carr (<A HREF="mailto:jfc@mit.edu"><TT>jfc@mit.edu</TT></A>) wrote the alias analysis improvements.
+
+<LI>
+
+Thanks to Mary Cortani and the staff at Craftwork Solutions
+(<A HREF="mailto:support@craftwork.com"><TT>support@craftwork.com</TT></A>) for all of their support.
+
+<LI>
+
+Many other individuals have helped debug, test, and improve <CODE>g77</CODE>
+over the past several years, and undoubtedly more people
+will be doing so in the future.
+If you have done so, and would like
+to see your name listed in the above list, please ask!
+The default is that people wish to remain anonymous.
+</UL>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_1.html">previous</A>, <A HREF="g77_3.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

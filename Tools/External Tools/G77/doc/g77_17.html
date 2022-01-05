@@ -1,0 +1,679 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Installing GNU Fortran</TITLE>
+<link href="g77_18.html" rel=Next>
+<link href="g77_16.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_16.html">previous</A>, <A HREF="g77_18.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC528" HREF="g77_toc.html#TOC528">Installing GNU Fortran</A></H1>
+<P>
+<A NAME="IDX1812"></A>
+
+</P>
+<P>
+The following information describes how to install <CODE>g77</CODE>.
+
+</P>
+
+<P>
+Note that, for users of the GCC-2.95 version of <CODE>g77</CODE>,
+much of the information is obsolete,
+and is superceded by the
+GCC installation procedures.
+Such information is accordingly omitted and flagged as such.
+
+</P>
+
+<P>
+The following information was last updated on 1999-07-17:
+
+</P>
+
+<UL>
+<LI><A HREF="g77_17.html#SEC529">Prerequisites</A>: Make sure your system is ready for <CODE>g77</CODE>.
+<LI><A HREF="g77_17.html#SEC530">Problems Installing</A>: Known trouble areas.
+<LI><A HREF="g77_17.html#SEC540">Settings</A>: Changing <CODE>g77</CODE> internals before building.
+<LI><A HREF="g77_17.html#SEC547">Quick Start</A>: The easier procedure for non-experts.
+<LI><A HREF="g77_17.html#SEC548">Complete Installation</A>: For experts, or those who want to be: the details.
+<LI><A HREF="g77_17.html#SEC549">Distributing Binaries</A>: If you plan on distributing your <CODE>g77</CODE>.
+</UL>
+
+
+
+<H2><A NAME="SEC529" HREF="g77_toc.html#TOC529">Prerequisites</A></H2>
+<P>
+<A NAME="IDX1813"></A>
+
+</P>
+<P>
+For users of the GCC-2.95 version of <CODE>g77</CODE>,
+this information is superceded by the
+GCC installation instructions.
+
+</P>
+
+
+
+<H2><A NAME="SEC530" HREF="g77_toc.html#TOC530">Problems Installing</A></H2>
+<P>
+<A NAME="IDX1814"></A>
+<A NAME="IDX1815"></A>
+
+</P>
+<P>
+This is a list of problems (and some apparent problems which don't
+really mean anything is wrong) that show up when configuring,
+building, installing, or porting GNU Fortran.
+
+</P>
+<P>
+See section `Installation Problems' in <CITE>Using and Porting GNU CC</CITE>,
+for more information on installation problems that can afflict
+either <CODE>gcc</CODE> or <CODE>g77</CODE>.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_17.html#SEC531">General Problems</A>: Problems afflicting most or all systems.
+<LI><A HREF="g77_17.html#SEC538">System-specific Problems</A>: Problems afflicting particular systems.
+<LI><A HREF="g77_17.html#SEC539">Cross-compiler Problems</A>: Problems afflicting cross-compilation setups.
+</UL>
+
+
+
+<H3><A NAME="SEC531" HREF="g77_toc.html#TOC531">General Problems</A></H3>
+
+<P>
+These problems can occur on most or all systems.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_17.html#SEC532">GNU C Required</A>: Why even ANSI C is not enough.
+<LI><A HREF="g77_17.html#SEC533">Patching GNU CC</A>: Why <CODE>gcc</CODE> needn't be patched.
+<LI><A HREF="g77_17.html#SEC534">Building GNU CC Necessary</A>: Why you can't build <EM>just</EM> Fortran.
+<LI><A HREF="g77_17.html#SEC535">Missing strtoul or bsearch</A>: When linking <CODE>f771</CODE> fails.
+<LI><A HREF="g77_17.html#SEC536">Cleanup Kills Stage Directories</A>: For <CODE>g77</CODE> developers.
+<LI><A HREF="g77_17.html#SEC537">LANGUAGES Macro Ignored</A>: Sometimes <CODE>LANGUAGES</CODE> is ignored.
+</UL>
+
+
+
+<H4><A NAME="SEC532" HREF="g77_toc.html#TOC532">GNU C Required</A></H4>
+<P>
+<A NAME="IDX1816"></A>
+<A NAME="IDX1817"></A>
+
+</P>
+<P>
+Compiling <CODE>g77</CODE> requires GNU C, not just ANSI C.
+Fixing this wouldn't
+be very hard (just tedious), but the code using GNU extensions to
+the C language is expected to be rewritten for 0.6 anyway,
+so there are no plans for an interim fix.
+
+</P>
+<P>
+This requirement does not mean you must already have <CODE>gcc</CODE>
+installed to build <CODE>g77</CODE>.
+As long as you have a working C compiler, you can use a
+"bootstrap" build to automate the process of first building
+<CODE>gcc</CODE> using the working C compiler you have, then building
+<CODE>g77</CODE> and rebuilding <CODE>gcc</CODE> using that just-built <CODE>gcc</CODE>,
+and so on.
+
+</P>
+
+
+<H4><A NAME="SEC533" HREF="g77_toc.html#TOC533">Patching GNU CC</A></H4>
+<P>
+<A NAME="IDX1818"></A>
+<A NAME="IDX1819"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> no longer requires application of a patch file
+to the <CODE>gcc</CODE> compiler tree.
+In fact, no such patch file is distributed with <CODE>g77</CODE>.
+This is as of version 0.5.23
+and <CODE>egcs</CODE> version 1.0.
+
+</P>
+
+
+<H4><A NAME="SEC534" HREF="g77_toc.html#TOC534">Building GNU CC Necessary</A></H4>
+<P>
+<A NAME="IDX1820"></A>
+<A NAME="IDX1821"></A>
+
+</P>
+<P>
+It should be possible to build the runtime without building <CODE>cc1</CODE>
+and other non-Fortran items, but, for now, an easy way to do that
+is not yet established.
+
+</P>
+
+
+<H4><A NAME="SEC535" HREF="g77_toc.html#TOC535">Missing strtoul or bsearch</A></H4>
+<P>
+<A NAME="IDX1822"></A>
+<A NAME="IDX1823"></A>
+<A NAME="IDX1824"></A>
+<A NAME="IDX1825"></A>
+<A NAME="IDX1826"></A>
+<A NAME="IDX1827"></A>
+<A NAME="IDX1828"></A>
+<A NAME="IDX1829"></A>
+<A NAME="IDX1830"></A>
+<A NAME="IDX1831"></A>
+<A NAME="IDX1832"></A>
+<A NAME="IDX1833"></A>
+
+</P>
+<P>
+This information does not apply to
+the GCC-2.95 version of <CODE>g77</CODE>,
+
+</P>
+
+
+
+<H4><A NAME="SEC536" HREF="g77_toc.html#TOC536">Cleanup Kills Stage Directories</A></H4>
+<P>
+<A NAME="IDX1834"></A>
+<A NAME="IDX1835"></A>
+
+</P>
+<P>
+It'd be helpful if <CODE>g77</CODE>'s <TT>`Makefile.in'</TT> or <TT>`Make-lang.in'</TT>
+would create the various <TT>`stage<VAR>n</VAR>'</TT> directories and their
+subdirectories, so developers and expert installers wouldn't have to
+reconfigure after cleaning up.
+
+</P>
+<P>
+That help has arrived as of version 0.5.23 of <CODE>g77</CODE>
+and version 1.1 of <CODE>egcs</CODE>.
+Configuration itself no longer creates any particular directories
+that are unique to <CODE>g77</CODE>.
+The build procedures in <TT>`Make-lang.in'</TT> take care of
+that, on demand.
+
+</P>
+
+
+<H4><A NAME="SEC537" HREF="g77_toc.html#TOC537">LANGUAGES Macro Ignored</A></H4>
+<P>
+<A NAME="IDX1836"></A>
+<A NAME="IDX1837"></A>
+
+</P>
+<P>
+Prior to version 0.5.23 of <CODE>g77</CODE>
+and version 1.1 of <CODE>egcs</CODE>,
+<CODE>g77</CODE> would sometimes ignore
+the absence of <CODE>f77</CODE> and <CODE>F77</CODE> in the
+<CODE>LANGUAGES</CODE> macro definition used for the
+<CODE>make</CODE> command being processed.
+
+</P>
+<P>
+As of <CODE>g77</CODE> version 0.5.23
+and <CODE>egcs</CODE> version 1.1,
+<CODE>g77</CODE> now obeys this macro
+in all relevant situations.
+
+</P>
+<P>
+However, in versions of <CODE>gcc</CODE> through 2.8.1,
+non-<CODE>g77</CODE> portions of <CODE>gcc</CODE>,
+such as <CODE>g++</CODE>,
+are known to go ahead and perform various
+language-specific activities when their
+respective language strings do not appear
+in the <CODE>LANGUAGES</CODE> macro in effect
+during that invocation of <CODE>make</CODE>.
+
+</P>
+<P>
+It is expected that these remaining problems will
+be fixed in a future version of <CODE>gcc</CODE>.
+
+</P>
+
+
+<H3><A NAME="SEC538" HREF="g77_toc.html#TOC538">System-specific Problems</A></H3>
+
+<P>
+<A NAME="IDX1838"></A>
+A linker bug on some versions of AIX 4.1 might prevent building
+when <CODE>g77</CODE> is built within <CODE>gcc</CODE>.
+It might also occur when building within <CODE>egcs</CODE>.
+See section <A HREF="g77_27.html#SEC724"><CODE>LINKFAIL</CODE></A>.
+
+</P>
+
+
+<H3><A NAME="SEC539" HREF="g77_toc.html#TOC539">Cross-compiler Problems</A></H3>
+<P>
+<A NAME="IDX1839"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> has been in alpha testing since September of
+1992, and in public beta testing since February of 1995.
+Alpha testing was done by a small number of people worldwide on a fairly
+wide variety of machines, involving self-compilation in most or
+all cases.
+Beta testing has been done primarily via self-compilation,
+but in more and more cases, cross-compilation (and "criss-cross
+compilation", where a version of a compiler is built on one machine
+to run on a second and generate code that runs on a third) has
+been tried and has succeeded, to varying extents.
+
+</P>
+<P>
+Generally, <CODE>g77</CODE> can be ported to any configuration to which
+<CODE>gcc</CODE>, <CODE>f2c</CODE>, and <CODE>libf2c</CODE> can be ported and made
+to work together, aside from the known problems described in this
+manual.
+If you want to port <CODE>g77</CODE> to a particular configuration,
+you should first make sure <CODE>gcc</CODE> and <CODE>libf2c</CODE> can be
+ported to that configuration before focusing on <CODE>g77</CODE>, because
+<CODE>g77</CODE> is so dependent on them.
+
+</P>
+<P>
+Even for cases where <CODE>gcc</CODE> and <CODE>libf2c</CODE> work,
+you might run into problems with cross-compilation on certain machines,
+for several reasons.
+
+</P>
+
+<UL>
+<LI>
+
+There is one known bug
+(a design bug to be fixed in 0.6) that prevents configuration of
+<CODE>g77</CODE> as a cross-compiler in some cases,
+though there are assumptions made during
+configuration that probably make doing non-self-hosting builds
+a hassle, requiring manual intervention.
+
+<LI>
+
+<CODE>gcc</CODE> might still have some trouble being configured
+for certain combinations of machines.
+For example, it might not know how to handle floating-point
+constants.
+
+<LI>
+
+Improvements to the way <CODE>libg2c</CODE> is built could make
+building <CODE>g77</CODE> as a cross-compiler easier--for example,
+passing and using <SAMP>`$(LD)'</SAMP> and <SAMP>`$(AR)'</SAMP> in the appropriate
+ways.
+(This is improved in the <CODE>egcs</CODE> version of <CODE>g77</CODE>,
+especially as of version 1.1.)
+
+<LI>
+
+There are still some challenges putting together the right
+run-time libraries (needed by <CODE>libg2c</CODE>) for a target
+system, depending on the systems involved in the configuration.
+(This is a general problem with cross-compilation, and with
+<CODE>gcc</CODE> in particular.)
+</UL>
+
+
+
+<H2><A NAME="SEC540" HREF="g77_toc.html#TOC540">Changing Settings Before Building</A></H2>
+
+<P>
+Here are some internal <CODE>g77</CODE> settings that can be changed
+by editing source files in <TT>`egcs/gcc/f/'</TT> before building.
+
+</P>
+<P>
+This information, and perhaps even these settings, represent
+stop-gap solutions to problems people doing various ports
+of <CODE>g77</CODE> have encountered.
+As such, none of the following information is expected to
+be pertinent in future versions of <CODE>g77</CODE>.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_17.html#SEC541">Larger File Unit Numbers</A>: Raising <CODE>MXUNIT</CODE>.
+<LI><A HREF="g77_17.html#SEC542">Always Flush Output</A>: Synchronizing write errors.
+<LI><A HREF="g77_17.html#SEC543">Maximum Stackable Size</A>: Large arrays forced off the stack.
+<LI><A HREF="g77_17.html#SEC544">Floating-point Bit Patterns</A>: Possible programs building <CODE>g77</CODE>
+                                   as a cross-compiler.
+<LI><A HREF="g77_17.html#SEC545">Large Initialization</A>: Large arrays with <CODE>DATA</CODE>
+                                   initialization.
+<LI><A HREF="g77_17.html#SEC546">Alpha Problems Fixed</A>: Problems with 64-bit systems like
+                                   Alphas now fixed?
+</UL>
+
+
+
+<H3><A NAME="SEC541" HREF="g77_toc.html#TOC541">Larger File Unit Numbers</A></H3>
+<P>
+<A NAME="IDX1840"></A>
+<A NAME="IDX1841"></A>
+<A NAME="IDX1842"></A>
+<A NAME="IDX1843"></A>
+<A NAME="IDX1844"></A>
+
+</P>
+<P>
+As distributed, whether as part of <CODE>f2c</CODE> or <CODE>g77</CODE>,
+<CODE>libf2c</CODE> accepts file unit numbers only in the range
+0 through 99.
+For example, a statement such as <SAMP>`WRITE (UNIT=100)'</SAMP> causes
+a run-time crash in <CODE>libf2c</CODE>, because the unit number,
+100, is out of range.
+
+</P>
+<P>
+If you know that Fortran programs at your installation require
+the use of unit numbers higher than 99, you can change the
+value of the <CODE>MXUNIT</CODE> macro, which represents the maximum unit
+number, to an appropriately higher value.
+
+</P>
+<P>
+To do this, edit the file <TT>`egcs/libf2c/libI77/fio.h'</TT> in your
+<CODE>g77</CODE> source tree, changing the following line:
+
+</P>
+
+<PRE>
+#define MXUNIT 100
+</PRE>
+
+<P>
+Change the line so that the value of <CODE>MXUNIT</CODE> is defined to be
+at least one <EM>greater</EM> than the maximum unit number used by
+the Fortran programs on your system.
+
+</P>
+<P>
+(For example, a program that does <SAMP>`WRITE (UNIT=255)'</SAMP> would require
+<CODE>MXUNIT</CODE> set to at least 256 to avoid crashing.)
+
+</P>
+<P>
+Then build or rebuild <CODE>g77</CODE> as appropriate.
+
+</P>
+<P>
+<EM>Note:</EM> Changing this macro has <EM>no</EM> effect on other limits
+your system might place on the number of files open at the same time.
+That is, the macro might allow a program to do <SAMP>`WRITE (UNIT=100)'</SAMP>,
+but the library and operating system underlying <CODE>libf2c</CODE> might
+disallow it if many other files have already been opened (via <CODE>OPEN</CODE> or
+implicitly via <CODE>READ</CODE>, <CODE>WRITE</CODE>, and so on).
+Information on how to increase these other limits should be found
+in your system's documentation.
+
+</P>
+
+
+<H3><A NAME="SEC542" HREF="g77_toc.html#TOC542">Always Flush Output</A></H3>
+<P>
+<A NAME="IDX1845"></A>
+<A NAME="IDX1846"></A>
+<A NAME="IDX1847"></A>
+<A NAME="IDX1848"></A>
+<A NAME="IDX1849"></A>
+<A NAME="IDX1850"></A>
+<A NAME="IDX1851"></A>
+<A NAME="IDX1852"></A>
+<A NAME="IDX1853"></A>
+<A NAME="IDX1854"></A>
+
+</P>
+<P>
+Some Fortran programs require output
+(writes) to be flushed to the operating system (under UNIX,
+via the <CODE>fflush()</CODE> library call) so that errors,
+such as disk full, are immediately flagged via the relevant
+<CODE>ERR=</CODE> and <CODE>IOSTAT=</CODE> mechanism, instead of such
+errors being flagged later as subsequent writes occur, forcing
+the previously written data to disk, or when the file is
+closed.
+
+</P>
+<P>
+Essentially, the difference can be viewed as synchronous error
+reporting (immediate flagging of errors during writes) versus
+asynchronous, or, more precisely, buffered error reporting
+(detection of errors might be delayed).
+
+</P>
+<P>
+<CODE>libg2c</CODE> supports flagging write errors immediately when
+it is built with the <CODE>ALWAYS_FLUSH</CODE> macro defined.
+This results in a <CODE>libg2c</CODE> that runs slower, sometimes
+quite a bit slower, under certain circumstances--for example,
+accessing files via the networked file system NFS--but the
+effect can be more reliable, robust file I/O.
+
+</P>
+<P>
+If you know that Fortran programs requiring this level of precision
+of error reporting are to be compiled using the
+version of <CODE>g77</CODE> you are building, you might wish to
+modify the <CODE>g77</CODE> source tree so that the version of
+<CODE>libg2c</CODE> is built with the <CODE>ALWAYS_FLUSH</CODE> macro
+defined, enabling this behavior.
+
+</P>
+<P>
+To do this, find this line in <TT>`egcs/libf2c/f2c.h'</TT> in
+your <CODE>g77</CODE> source tree:
+
+</P>
+
+<PRE>
+/* #define ALWAYS_FLUSH */
+</PRE>
+
+<P>
+Remove the leading <SAMP>`/* '</SAMP>,
+so the line begins with <SAMP>`#define'</SAMP>,
+and the trailing <SAMP>` */'</SAMP>.
+
+</P>
+<P>
+Then build or rebuild <CODE>g77</CODE> as appropriate.
+
+</P>
+
+
+<H3><A NAME="SEC543" HREF="g77_toc.html#TOC543">Maximum Stackable Size</A></H3>
+<P>
+<A NAME="IDX1855"></A>
+<A NAME="IDX1856"></A>
+<A NAME="IDX1857"></A>
+<A NAME="IDX1858"></A>
+<A NAME="IDX1859"></A>
+<CODE>g77</CODE>, on most machines, puts many variables and arrays on the stack
+where possible, and can be configured (by changing
+<CODE>FFECOM_sizeMAXSTACKITEM</CODE> in <TT>`egcs/gcc/f/com.c'</TT>) to force
+smaller-sized entities into static storage (saving
+on stack space) or permit larger-sized entities to be put on the
+stack (which can improve run-time performance, as it presents
+more opportunities for the GBE to optimize the generated code).
+
+</P>
+<P>
+<EM>Note:</EM> Putting more variables and arrays on the stack
+might cause problems due to system-dependent limits on stack size.
+Also, the value of <CODE>FFECOM_sizeMAXSTACKITEM</CODE> has no
+effect on automatic variables and arrays.
+See section <A HREF="g77_20.html#SEC594">Bugs Not In GNU Fortran</A>, for more information.
+
+</P>
+
+
+<H3><A NAME="SEC544" HREF="g77_toc.html#TOC544">Floating-point Bit Patterns</A></H3>
+
+<P>
+<A NAME="IDX1860"></A>
+<A NAME="IDX1861"></A>
+<A NAME="IDX1862"></A>
+The <CODE>g77</CODE> build will crash if an attempt is made to build
+it as a cross-compiler
+for a target when <CODE>g77</CODE> cannot reliably determine the bit pattern of
+floating-point constants for the target.
+Planned improvements for version 0.6 of <CODE>g77</CODE>
+will give it the capabilities it needs to not have to crash the build
+but rather generate correct code for the target.
+(Currently, <CODE>g77</CODE>
+would generate bad code under such circumstances if it didn't crash
+during the build, e.g. when compiling a source file that does
+something like <SAMP>`EQUIVALENCE (I,R)'</SAMP> and <SAMP>`DATA R/9.43578/'</SAMP>.)
+
+</P>
+
+
+<H3><A NAME="SEC545" HREF="g77_toc.html#TOC545">Initialization of Large Aggregate Areas</A></H3>
+
+<P>
+<A NAME="IDX1863"></A>
+<A NAME="IDX1864"></A>
+<A NAME="IDX1865"></A>
+<A NAME="IDX1866"></A>
+<A NAME="IDX1867"></A>
+A warning message is issued when <CODE>g77</CODE> sees code that provides
+initial values (e.g. via <CODE>DATA</CODE>) to an aggregate area (<CODE>COMMON</CODE>
+or <CODE>EQUIVALENCE</CODE>, or even a large enough array or <CODE>CHARACTER</CODE>
+variable)
+that is large enough to increase <CODE>g77</CODE>'s compile time by roughly
+a factor of 10.
+
+</P>
+<P>
+This size currently is quite small, since <CODE>g77</CODE>
+currently has a known bug requiring too much memory
+and time to handle such cases.
+In <TT>`egcs/gcc/f/data.c'</TT>, the macro
+<CODE>FFEDATA_sizeTOO_BIG_INIT_</CODE> is defined
+to the minimum size for the warning to appear.
+The size is specified in storage units,
+which can be bytes, words, or whatever, on a case-by-case basis.
+
+</P>
+<P>
+After changing this macro definition, you must
+(of course) rebuild and reinstall <CODE>g77</CODE> for
+the change to take effect.
+
+</P>
+<P>
+Note that, as of version 0.5.18, improvements have
+reduced the scope of the problem for <EM>sparse</EM>
+initialization of large arrays, especially those
+with large, contiguous uninitialized areas.
+However, the warning is issued at a point prior to
+when <CODE>g77</CODE> knows whether the initialization is sparse,
+and delaying the warning could mean it is produced
+too late to be helpful.
+
+</P>
+<P>
+Therefore, the macro definition should not be adjusted to
+reflect sparse cases.
+Instead, adjust it to generate the warning when densely
+initialized arrays begin to cause responses noticeably slower
+than linear performance would suggest.
+
+</P>
+
+
+<H3><A NAME="SEC546" HREF="g77_toc.html#TOC546">Alpha Problems Fixed</A></H3>
+
+<P>
+<A NAME="IDX1868"></A>
+<A NAME="IDX1869"></A>
+<CODE>g77</CODE> used to warn when it was used to compile Fortran code
+for a target configuration that is not basically a 32-bit
+machine (such as an Alpha, which is a 64-bit machine, especially
+if it has a 64-bit operating system running on it).
+That was because <CODE>g77</CODE> was known to not work
+properly on such configurations.
+
+</P>
+<P>
+As of version 0.5.20, <CODE>g77</CODE> is believed to work well
+enough on such systems.
+So, the warning is no longer needed or provided.
+
+</P>
+<P>
+However, support for 64-bit systems, especially in
+areas such as cross-compilation and handling of
+intrinsics, is still incomplete.
+The symptoms
+are believed to be compile-time diagnostics rather
+than the generation of bad code.
+It is hoped that version 0.6 will completely support 64-bit
+systems.
+
+</P>
+
+
+<H2><A NAME="SEC547" HREF="g77_toc.html#TOC547">Quick Start</A></H2>
+<P>
+<A NAME="IDX1870"></A>
+
+</P>
+<P>
+For users of the GCC-2.95 version of <CODE>g77</CODE>,
+this information is superceded by the
+GCC installation instructions.
+
+</P>
+
+
+
+<H2><A NAME="SEC548" HREF="g77_toc.html#TOC548">Complete Installation</A></H2>
+
+<P>
+For users of the GCC-2.95 version of <CODE>g77</CODE>,
+this information is superceded by the
+GCC installation instructions.
+
+</P>
+
+
+
+<H2><A NAME="SEC549" HREF="g77_toc.html#TOC549">Distributing Binaries</A></H2>
+<P>
+<A NAME="IDX1871"></A>
+<A NAME="IDX1872"></A>
+
+</P>
+<P>
+For users of the GCC-2.95 version of <CODE>g77</CODE>,
+this information is superceded by the
+GCC installation instructions.
+
+</P>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_16.html">previous</A>, <A HREF="g77_18.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

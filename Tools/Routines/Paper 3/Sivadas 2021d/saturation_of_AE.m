@@ -1,4 +1,8 @@
 %% Saturation of AE given E_M
+% Showing the difference in slopes of ionospheric response when using
+% OMNI data without any error correction, and after selecting for
+% data with less error. 
+
 tic
 dataFolder = 'G:\My Drive\Research\Projects\Data\omni_components\';
 omniFile = 'G:\My Drive\Research\Projects\Data\omni.h5';
@@ -22,9 +26,9 @@ wind = wind1(wi,:);
 geotail = geotail1(gi,:);
 
 %%
-ace_filter = ((ace.noseYGSE-ace.YGSE).^2 + (ace.noseZGSE-ace.ZGSE).^2).^0.5 < 10;
-wind_filter = ((wind.noseYGSE-wind.YGSE).^2 + (wind.noseZGSE-wind.ZGSE).^2).^0.5 < 10;
-geo_filter = ((geotail.noseYGSE-geotail.YGSE).^2 + (geotail.noseZGSE-geotail.ZGSE).^2).^0.5 < 10;
+ace_filter = ((ace.noseYGSE-ace.YGSE).^2 + (ace.noseZGSE-ace.ZGSE).^2).^0.5 < 20;
+wind_filter = ((wind.noseYGSE-wind.YGSE).^2 + (wind.noseZGSE-wind.ZGSE).^2).^0.5 < 20;
+geo_filter = ((geotail.noseYGSE-geotail.YGSE).^2 + (geotail.noseZGSE-geotail.ZGSE).^2).^0.5 < 20;
 
 %%
 figure;
@@ -80,7 +84,7 @@ end
 filter = sqrt((wind.YGSE-wind.noseYGSE).^2 + (wind.ZGSE-wind.noseZGSE).^2)<300; 
 
 errorPercentageThreshold = 5;
-error = abs(geotail.E_kl-wind.E_kl).*10^-3;
+error = abs(ace.E_kl-wind.E_kl).*10^-3;
 X1 = wind.E_kl.*10^-3;
 errorPercentage = 100.*(error./X1);
 errorPercentage(errorPercentage==Inf)=nan;
@@ -114,7 +118,8 @@ p1=plot(XBins, YgX,'k');
 hold on;
 plot_ci(XBins,CI1,'k',0.2);
 ylim([-1800 0]);
-xlim([0 15]);
+xlim([0 20]);
+
 hold on;
 
 
@@ -122,12 +127,12 @@ CI2 = interp_nans(CI2);
 p2=plot(XBins2, Y2gX2,'r');
 hold on;
 plot_ci(XBins2,CI2,'r',0.2);
-hold on;
-plot(XBins2, smooth(CI2(:,1),10),'--m');
+% hold on;
+% plot(XBins2, smooth(CI2(:,1),10),'--m');
 
-xlabel({'E_m [mV/m]','Geoeffective electric field'});
-ylabel({'<SML|E_m> [nT]','Westward auroral electrojet current'});
-legend([p1,p2],{'1998-2019','Error in E_m < 5%'},'Location','southwest');
+xlabel({'$E_m$ [mV/m]','Geoeffective electric field'});
+ylabel({'$<SML|E_m>$ [nT]','Auroral electrojet strength'});
+legend([p1,p2],{'WIND 1998-2019','Uncertainty < 5%'},'Location','southwest','Interpreter','latex');
 % legend(p1,{'1998-2019'},'Location','southwest');
 
 %%

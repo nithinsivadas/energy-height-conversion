@@ -1,0 +1,865 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - User-visible Changes</TITLE>
+<link href="g77_12.html" rel=Next>
+<link href="g77_10.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_10.html">previous</A>, <A HREF="g77_12.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC25" HREF="g77_toc.html#TOC25">User-visible Changes</A></H1>
+<P>
+<A NAME="IDX623"></A>
+<A NAME="IDX624"></A>
+<A NAME="IDX625"></A>
+<A NAME="IDX626"></A>
+
+</P>
+<P>
+This chapter describes changes to <CODE>g77</CODE> that are visible
+to the programmers who actually write and maintain Fortran
+code they compile with <CODE>g77</CODE>.
+Information on changes to installation procedures,
+changes to the documentation, and bug fixes is
+not provided here, unless it is likely to affect how
+users use <CODE>g77</CODE>.
+See section <A HREF="g77_10.html#SEC24">News About GNU Fortran</A>, for information on
+such changes to <CODE>g77</CODE>.
+
+</P>
+
+<P>
+Note that two variants of <CODE>g77</CODE> are tracked below.
+The <CODE>egcs</CODE> variant is described vis-a-vis
+previous versions of <CODE>egcs</CODE> and/or
+an official FSF version,
+as appropriate.
+
+</P>
+<P>
+Therefore, <CODE>egcs</CODE> versions sometimes have multiple listings
+to help clarify how they differ from other versions,
+though this can make getting a complete picture
+of what a particular <CODE>egcs</CODE> version contains
+somewhat more difficult.
+
+</P>
+<P>
+For information on bugs in the GCC-2.95 version of <CODE>g77</CODE>,
+see section <A HREF="g77_20.html#SEC604">Known Bugs In GNU Fortran</A>.
+
+</P>
+
+<P>
+The following information was last updated on 1999-07-08:
+
+</P>
+
+<H2>In 0.5.25, <CODE>GCC</CODE> 2.95 (<CODE>EGCS</CODE> 1.2) versus <CODE>EGCS</CODE> 1.1.2:</H2>
+
+<UL>
+
+<LI>
+
+The new <SAMP>`-fbounds-check'</SAMP> option
+causes <CODE>g77</CODE> to compile run-time bounds checks
+of array subscripts, as well as of substring start and end points.
+
+<LI>
+
+<CODE>libg2c</CODE> now supports building as multilibbed library,
+which provides better support for systems
+that require options such as <SAMP>`-mieee'</SAMP>
+to work properly.
+
+<LI>
+
+Source file names with the suffixes <SAMP>`.FOR'</SAMP> and <SAMP>`.FPP'</SAMP>
+now are recognized by <CODE>g77</CODE>
+as if they ended in <SAMP>`.for'</SAMP> and <SAMP>`.fpp'</SAMP>, respectively.
+
+<LI>
+
+The order of arguments to the <EM>subroutine</EM> forms of the
+<CODE>CTime</CODE>, <CODE>DTime</CODE>, <CODE>ETime</CODE>, and <CODE>TtyNam</CODE>
+intrinsics has been swapped.
+The argument serving as the returned value
+for the corresponding function forms
+now is the <EM>second</EM> argument,
+making these consistent with the other subroutine forms
+of <CODE>libU77</CODE> intrinsics.
+
+<LI>
+
+<CODE>g77</CODE> now warns about a reference to an intrinsic
+that has an interface that is not Year 2000 (Y2K) compliant.
+Also, <CODE>libg2c</CODE> has been changed to increase the likelihood
+of catching references to the implementations of these intrinsics
+using the <CODE>EXTERNAL</CODE> mechanism
+(which would avoid the new warnings).
+
+See section <A HREF="g77_14.html#SEC372">Year 2000 (Y2K) Problems</A>, for more information.
+
+<LI>
+
+<SAMP>`-fno-emulate-complex'</SAMP> is now the default option.
+This should result in improved performance
+of code that uses the <CODE>COMPLEX</CODE> data type.
+
+<A NAME="IDX627"></A>
+<A NAME="IDX628"></A>
+<A NAME="IDX629"></A>
+<LI>
+
+The <SAMP>`-malign-double'</SAMP> option
+now reliably aligns <EM>all</EM> double-precision variables and arrays
+on Intel x86 targets.
+
+<LI>
+
+<CODE>g77</CODE> no longer generates code to maintain <CODE>errno</CODE>,
+a C-language concept,
+when performing operations such as the <CODE>SqRt</CODE> intrinsic.
+
+<LI>
+
+Support for the <SAMP>`-fugly'</SAMP> option has been removed.
+
+</UL>
+
+
+<H2>In 0.5.24 versus 0.5.23:</H2>
+
+<P>
+There is no <CODE>g77</CODE> version 0.5.24 at this time,
+or planned.
+0.5.24 is the version number designated for bug fixes and,
+perhaps, some new features added,
+to 0.5.23.
+Version 0.5.23 requires <CODE>gcc</CODE> 2.8.1,
+as 0.5.24 was planned to require.
+
+</P>
+<P>
+Due to <CODE>EGCS</CODE> becoming <CODE>GCC</CODE>
+(which is now an acronym for "GNU Compiler Collection"),
+and <CODE>EGCS</CODE> 1.2 becoming officially designated <CODE>GCC</CODE> 2.95,
+there seems to be no need for an actual 0.5.24 release.
+
+</P>
+<P>
+To reduce the confusion already resulting from use of 0.5.24
+to designate <CODE>g77</CODE> versions within <CODE>EGCS</CODE> versions 1.0 and 1.1,
+as well as in versions of <CODE>g77</CODE> documentation and notices
+during that period,
+"mainline" <CODE>g77</CODE> version numbering resumes
+at 0.5.25 with <CODE>GCC</CODE> 2.95 (<CODE>EGCS</CODE> 1.2),
+skipping over 0.5.24 as a placeholder version number.
+
+</P>
+<P>
+To repeat, there is no <CODE>g77</CODE> 0.5.24, but there is now a 0.5.25.
+Please remain calm and return to your keypunch units.
+
+</P>
+
+<H2>In <CODE>EGCS</CODE> 1.1.2 versus <CODE>EGCS</CODE> 1.1.1:</H2>
+
+
+<H2>In <CODE>EGCS</CODE> 1.1.1 versus <CODE>EGCS</CODE> 1.1:</H2>
+
+
+<H2>In <CODE>EGCS</CODE> 1.1 versus <CODE>EGCS</CODE> 1.0.3:</H2>
+
+<UL>
+
+<LI>
+
+Support <SAMP>`FORMAT(I&#60;<VAR>expr</VAR>&#62;)'</SAMP> when <VAR>expr</VAR> is a
+compile-time constant <CODE>INTEGER</CODE> expression.
+
+<LI>
+
+Fix <CODE>g77</CODE> <SAMP>`-g'</SAMP> option so procedures that
+use <CODE>ENTRY</CODE> can be stepped through, line by line,
+in <CODE>gdb</CODE>.
+
+<LI>
+
+Allow any <CODE>REAL</CODE> argument to intrinsics
+<CODE>Second</CODE> and <CODE>CPU_Time</CODE>.
+
+<LI>
+
+Use <CODE>tempnam</CODE>, if available, to open scratch files
+(as in <SAMP>`OPEN(STATUS='SCRATCH')'</SAMP>)
+so that the <CODE>TMPDIR</CODE> environment variable,
+if present, is used.
+
+<LI>
+
+<CODE>g77</CODE>'s version of <CODE>libf2c</CODE> separates out
+the setting of global state
+(such as command-line arguments and signal handling)
+from <TT>`main.o'</TT> into distinct, new library
+archive members.
+
+This should make it easier to write portable applications
+that have their own (non-Fortran) <CODE>main()</CODE> routine
+properly set up the <CODE>libf2c</CODE> environment, even
+when <CODE>libf2c</CODE> (now <CODE>libg2c</CODE>) is a shared library.
+
+<LI>
+
+The <CODE>g77</CODE> command now expects the run-time library
+to be named <CODE>libg2c.a</CODE> instead of <CODE>libf2c.a</CODE>,
+to ensure that a version other than the one built and
+installed as part of the same <CODE>g77</CODE> version is picked up.
+
+<LI>
+
+Some diagnostics have been changed from warnings to errors,
+to prevent inadvertent use of the resulting, probably buggy,
+programs.
+These mostly include diagnostics about use of unsupported features
+in the <CODE>OPEN</CODE>, <CODE>INQUIRE</CODE>, <CODE>READ</CODE>, and
+<CODE>WRITE</CODE> statements,
+and about truncations of various sorts of constants.
+
+</UL>
+
+
+<H2>In <CODE>EGCS</CODE> 1.1 versus <CODE>g77</CODE> 0.5.23:</H2>
+
+<UL>
+
+<LI>
+
+<CODE>g77</CODE> now treats <SAMP>`%LOC(<VAR>expr</VAR>)'</SAMP> and
+<SAMP>`LOC(<VAR>expr</VAR>)'</SAMP> as "ordinary" expressions
+when they are used as arguments in procedure calls.
+This change applies only to global (filewide) analysis,
+making it consistent with
+how <CODE>g77</CODE> actually generates code
+for these cases.
+
+Previously, <CODE>g77</CODE> treated these expressions
+as denoting special "pointer" arguments
+for the purposes of filewide analysis.
+
+<A NAME="IDX630"></A>
+<A NAME="IDX631"></A>
+<A NAME="IDX632"></A>
+<LI>
+
+Align static double-precision variables and arrays
+on Intel x86 targets
+regardless of whether <SAMP>`-malign-double'</SAMP> is specified.
+
+Generally, this affects only local variables and arrays
+having the <CODE>SAVE</CODE> attribute
+or given initial values via <CODE>DATA</CODE>.
+
+<LI>
+
+The <CODE>g77</CODE> driver now ensures that <SAMP>`-lg2c'</SAMP>
+is specified in the link phase prior to any
+occurrence of <SAMP>`-lm'</SAMP>.
+This prevents accidentally linking to a routine
+in the SunOS4 <SAMP>`-lm'</SAMP> library
+when the generated code wants to link to the one
+in <CODE>libf2c</CODE> (<CODE>libg2c</CODE>).
+
+<LI>
+
+<CODE>g77</CODE> emits more debugging information when
+<SAMP>`-g'</SAMP> is used.
+
+This new information allows, for example,
+<KBD>which __g77_length_a</KBD> to be used in <CODE>gdb</CODE>
+to determine the type of the phantom length argument
+supplied with <CODE>CHARACTER</CODE> variables.
+
+This information pertains to internally-generated
+type, variable, and other information,
+not to the longstanding deficiencies vis-a-vis
+<CODE>COMMON</CODE> and <CODE>EQUIVALENCE</CODE>.
+
+<LI>
+
+The F90 <CODE>Date_and_Time</CODE> intrinsic now is
+supported.
+
+<LI>
+
+The F90 <CODE>System_Clock</CODE> intrinsic allows
+the optional arguments (except for the <CODE>Count</CODE>
+argument) to be omitted.
+
+</UL>
+
+
+<H2>In 0.5.23 versus 0.5.22:</H2>
+
+<UL>
+<LI>
+
+This release contains several regressions against
+version 0.5.22 of <CODE>g77</CODE>, due to using the
+"vanilla" <CODE>gcc</CODE> back end instead of patching
+it to fix a few bugs and improve performance in a
+few cases.
+
+Features that have been dropped from this version
+of <CODE>g77</CODE> due to their being implemented
+via <CODE>g77</CODE>-specific patches to the <CODE>gcc</CODE>
+back end in previous releases include:
+
+
+<UL>
+<LI>
+
+Support for <CODE>__restrict__</CODE> keyword,
+the options <SAMP>`-fargument-alias'</SAMP>, <SAMP>`-fargument-noalias'</SAMP>,
+and <SAMP>`-fargument-noalias-global'</SAMP>,
+and the corresponding alias-analysis code.
+
+(<CODE>egcs</CODE> has the alias-analysis
+code, but not the <CODE>__restrict__</CODE> keyword.
+<CODE>egcs</CODE> <CODE>g77</CODE> users benefit from the alias-analysis
+code despite the lack of the <CODE>__restrict__</CODE> keyword,
+which is a C-language construct.)
+
+<LI>
+
+Support for the GNU compiler options
+<SAMP>`-fmove-all-movables'</SAMP>,
+<SAMP>`-freduce-all-givs'</SAMP>,
+and <SAMP>`-frerun-loop-opt'</SAMP>.
+
+(<CODE>egcs</CODE> supports these options.
+<CODE>g77</CODE> users of <CODE>egcs</CODE> benefit from them even if
+they are not explicitly specified,
+because the defaults are optimized for <CODE>g77</CODE> users.)
+
+<LI>
+
+Support for the <SAMP>`-W'</SAMP> option warning about
+integer division by zero.
+
+<LI>
+
+The Intel x86-specific option <SAMP>`-malign-double'</SAMP>
+applying to stack-allocated data
+as well as statically-allocate data.
+</UL>
+
+<LI>
+
+Support <CODE>gcc</CODE> version 2.8,
+and remove support for prior versions of <CODE>gcc</CODE>.
+
+<A NAME="IDX633"></A>
+<A NAME="IDX634"></A>
+<A NAME="IDX635"></A>
+<LI>
+
+Remove support for the <SAMP>`--driver'</SAMP> option,
+as <CODE>g77</CODE> now does all the driving,
+just like <CODE>gcc</CODE>.
+
+<LI>
+
+The <CODE>g77</CODE> command now expects the run-time library
+to be named <CODE>libg2c.a</CODE> instead of <CODE>libf2c.a</CODE>,
+to ensure that a version other than the one built and
+installed as part of the same <CODE>g77</CODE> version is picked up.
+
+<LI>
+
+<CODE>g77</CODE>'s version of <CODE>libf2c</CODE> separates out
+the setting of global state
+(such as command-line arguments and signal handling)
+from <TT>`main.o'</TT> into distinct, new library
+archive members.
+
+This should make it easier to write portable applications
+that have their own (non-Fortran) <CODE>main()</CODE> routine
+properly set up the <CODE>libf2c</CODE> environment, even
+when <CODE>libf2c</CODE> (now <CODE>libg2c</CODE>) is a shared library.
+
+<LI>
+
+Some diagnostics have been changed from warnings to errors,
+to prevent inadvertent use of the resulting, probably buggy,
+programs.
+These mostly include diagnostics about use of unsupported features
+in the <CODE>OPEN</CODE>, <CODE>INQUIRE</CODE>, <CODE>READ</CODE>, and
+<CODE>WRITE</CODE> statements,
+and about truncations of various sorts of constants.
+
+</UL>
+
+
+<H2>In 0.5.22 versus 0.5.21:</H2>
+
+<UL>
+
+<LI>
+
+Fix <CODE>Signal</CODE> intrinsic so it offers portable
+support for 64-bit systems (such as Digital Alphas
+running GNU/Linux).
+
+<LI>
+
+Support <SAMP>`FORMAT(I&#60;<VAR>expr</VAR>&#62;)'</SAMP> when <VAR>expr</VAR> is a
+compile-time constant <CODE>INTEGER</CODE> expression.
+
+<LI>
+
+Fix <CODE>g77</CODE> <SAMP>`-g'</SAMP> option so procedures that
+use <CODE>ENTRY</CODE> can be stepped through, line by line,
+in <CODE>gdb</CODE>.
+
+<LI>
+
+Allow any <CODE>REAL</CODE> argument to intrinsics
+<CODE>Second</CODE> and <CODE>CPU_Time</CODE>.
+
+<LI>
+
+Allow any numeric argument to intrinsics
+<CODE>Int2</CODE> and <CODE>Int8</CODE>.
+
+<LI>
+
+Use <CODE>tempnam</CODE>, if available, to open scratch files
+(as in <SAMP>`OPEN(STATUS='SCRATCH')'</SAMP>)
+so that the <CODE>TMPDIR</CODE> environment variable,
+if present, is used.
+
+<LI>
+
+Rename the <CODE>gcc</CODE> keyword <CODE>restrict</CODE> to
+<CODE>__restrict__</CODE>, to avoid rejecting valid, existing,
+C programs.
+Support for <CODE>restrict</CODE> is now more like support
+for <CODE>complex</CODE>.
+
+<LI>
+
+Fix <SAMP>`-fugly-comma'</SAMP> to affect invocations of
+only external procedures.
+Restore rejection of gratuitous trailing omitted
+arguments to intrinsics, as in <SAMP>`I=MAX(3,4,,)'</SAMP>.
+
+<LI>
+
+Fix compiler so it accepts <SAMP>`-fgnu-intrinsics-*'</SAMP> and
+<SAMP>`-fbadu77-intrinsics-*'</SAMP> options.
+
+</UL>
+
+
+<H2>In <CODE>EGCS</CODE> 1.0.2 versus <CODE>EGCS</CODE> 1.0.1:</H2>
+
+<UL>
+
+<LI>
+
+Fix compiler so it accepts <SAMP>`-fgnu-intrinsics-*'</SAMP> and
+<SAMP>`-fbadu77-intrinsics-*'</SAMP> options.
+</UL>
+
+
+<H2>In <CODE>EGCS</CODE> 1.0.1 versus <CODE>EGCS</CODE> 1.0:</H2>
+
+
+<H2>In <CODE>EGCS</CODE> 1.0 versus <CODE>g77</CODE> 0.5.21:</H2>
+
+<UL>
+<LI>
+
+Version 1.0 of <CODE>egcs</CODE>
+contains several regressions against
+version 0.5.21 of <CODE>g77</CODE>,
+due to using the
+"vanilla" <CODE>gcc</CODE> back end instead of patching
+it to fix a few bugs and improve performance in a
+few cases.
+
+Features that have been dropped from this version
+of <CODE>g77</CODE> due to their being implemented
+via <CODE>g77</CODE>-specific patches to the <CODE>gcc</CODE>
+back end in previous releases include:
+
+
+<UL>
+<LI>
+
+Support for the C-language <CODE>restrict</CODE> keyword.
+
+<LI>
+
+Support for the <SAMP>`-W'</SAMP> option warning about
+integer division by zero.
+
+<LI>
+
+The Intel x86-specific option <SAMP>`-malign-double'</SAMP>
+applying to stack-allocated data
+as well as statically-allocate data.
+</UL>
+
+<A NAME="IDX636"></A>
+<A NAME="IDX637"></A>
+<A NAME="IDX638"></A>
+<LI>
+
+Remove support for the <SAMP>`--driver'</SAMP> option,
+as <CODE>g77</CODE> now does all the driving,
+just like <CODE>gcc</CODE>.
+
+<LI>
+
+Allow any numeric argument to intrinsics
+<CODE>Int2</CODE> and <CODE>Int8</CODE>.
+
+</UL>
+
+
+<H2>In 0.5.21:</H2>
+
+<UL>
+
+<LI>
+
+When the <SAMP>`-W'</SAMP> option is specified, <CODE>gcc</CODE>, <CODE>g77</CODE>,
+and other GNU compilers that incorporate the <CODE>gcc</CODE>
+back end as modified by <CODE>g77</CODE>, issue
+a warning about integer division by constant zero.
+
+<LI>
+
+New option <SAMP>`-Wno-globals'</SAMP> disables warnings
+about "suspicious" use of a name both as a global
+name and as the implicit name of an intrinsic, and
+warnings about disagreements over the number or natures of
+arguments passed to global procedures, or the
+natures of the procedures themselves.
+
+The default is to issue such warnings, which are
+new as of this version of <CODE>g77</CODE>.
+
+<LI>
+
+New option <SAMP>`-fno-globals'</SAMP> disables diagnostics
+about potentially fatal disagreements
+analysis problems, such as disagreements over the
+number or natures of arguments passed to global
+procedures, or the natures of those procedures themselves.
+
+The default is to issue such diagnostics and flag
+the compilation as unsuccessful.
+With this option, the diagnostics are issued as
+warnings, or, if <SAMP>`-Wno-globals'</SAMP> is specified,
+are not issued at all.
+
+This option also disables inlining of global procedures,
+to avoid compiler crashes resulting from coding errors
+that these diagnostics normally would identify.
+
+<LI>
+
+Fix <CODE>libU77</CODE> routines that accept file and other names
+to strip trailing blanks from them, for consistency
+with other implementations.
+Blanks may be forcibly appended to such names by
+appending a single null character (<SAMP>`CHAR(0)'</SAMP>)
+to the significant trailing blanks.
+
+<LI>
+
+Fix <CODE>CHMOD</CODE> intrinsic to work with file names
+that have embedded blanks, commas, and so on.
+
+<LI>
+
+Fix <CODE>SIGNAL</CODE> intrinsic so it accepts an
+optional third <CODE>Status</CODE> argument.
+
+<LI>
+
+Make many changes to <CODE>libU77</CODE> intrinsics to
+support existing code more directly.
+
+Such changes include allowing both subroutine and
+function forms of many routines, changing <CODE>MCLOCK()</CODE>
+and <CODE>TIME()</CODE> to return <CODE>INTEGER(KIND=1)</CODE> values,
+introducing <CODE>MCLOCK8()</CODE> and <CODE>TIME8()</CODE> to
+return <CODE>INTEGER(KIND=2)</CODE> values,
+and placing functions that are intended to perform
+side effects in a new intrinsic group, <CODE>badu77</CODE>.
+
+<LI>
+
+Add options <SAMP>`-fbadu77-intrinsics-delete'</SAMP>,
+<SAMP>`-fbadu77-intrinsics-hide'</SAMP>, and so on.
+
+<LI>
+
+Add <CODE>INT2</CODE> and <CODE>INT8</CODE> intrinsics.
+
+<LI>
+
+Add <CODE>CPU_TIME</CODE> intrinsic.
+
+<LI>
+
+Add <CODE>ALARM</CODE> intrinsic.
+
+<LI>
+
+<CODE>CTIME</CODE> intrinsic now accepts any <CODE>INTEGER</CODE>
+argument, not just <CODE>INTEGER(KIND=2)</CODE>.
+
+<LI>
+
+<CODE>g77</CODE> driver now prints version information (such as produced
+by <KBD>g77 -v</KBD>) to <CODE>stderr</CODE> instead of <CODE>stdout</CODE>.
+
+<LI>
+
+The <SAMP>`.r'</SAMP> suffix now designates a Ratfor source file,
+to be preprocessed via the <CODE>ratfor</CODE> command, available
+separately.
+
+</UL>
+
+
+<H2>In 0.5.20:</H2>
+
+<UL>
+<LI>
+
+The <SAMP>`-fno-typeless-boz'</SAMP> option is now the default.
+
+This option specifies that non-decimal-radix
+constants using the prefixed-radix form (such as <SAMP>`Z'1234''</SAMP>)
+are to be interpreted as <CODE>INTEGER(KIND=1)</CODE> constants.
+Specify <SAMP>`-ftypeless-boz'</SAMP> to cause such
+constants to be interpreted as typeless.
+
+(Version 0.5.19 introduced <SAMP>`-fno-typeless-boz'</SAMP> and
+its inverse.)
+
+See section <A HREF="g77_9.html#SEC16">Options Controlling Fortran Dialect</A>,
+for information on the <SAMP>`-ftypeless-boz'</SAMP> option.
+
+<LI>
+
+Options <SAMP>`-ff90-intrinsics-enable'</SAMP> and
+<SAMP>`-fvxt-intrinsics-enable'</SAMP> now are the
+defaults.
+
+Some programs might use names that clash with
+intrinsic names defined (and now enabled) by these
+options or by the new <CODE>libU77</CODE> intrinsics.
+Users of such programs might need to compile them
+differently (using, for example, <SAMP>`-ff90-intrinsics-disable'</SAMP>)
+or, better yet, insert appropriate <CODE>EXTERNAL</CODE>
+statements specifying that these names are not intended
+to be names of intrinsics.
+
+<LI>
+
+The <CODE>ALWAYS_FLUSH</CODE> macro is no longer defined when
+building <CODE>libf2c</CODE>, which should result in improved
+I/O performance, especially over NFS.
+
+<EM>Note:</EM> If you have code that depends on the behavior
+of <CODE>libf2c</CODE> when built with <CODE>ALWAYS_FLUSH</CODE> defined,
+you will have to modify <CODE>libf2c</CODE> accordingly before
+building it from this and future versions of <CODE>g77</CODE>.
+
+See section <A HREF="g77_19.html#SEC583">Output Assumed To Flush</A>, for more information.
+
+<LI>
+
+Dave Love's implementation of <CODE>libU77</CODE> has been
+added to the version of <CODE>libf2c</CODE> distributed with
+and built as part of <CODE>g77</CODE>.
+<CODE>g77</CODE> now knows about the routines in this library
+as intrinsics.
+
+<LI>
+
+New option <SAMP>`-fvxt'</SAMP> specifies that the
+source file is written in VXT Fortran, instead of GNU Fortran.
+
+See section <A HREF="g77_13.html#SEC355">VXT Fortran</A>, for more information on the constructs
+recognized when the <SAMP>`-fvxt'</SAMP> option is specified.
+
+<LI>
+
+The <SAMP>`-fvxt-not-f90'</SAMP> option has been deleted,
+along with its inverse, <SAMP>`-ff90-not-vxt'</SAMP>.
+
+If you used one of these deleted options, you should
+re-read the pertinent documentation to determine which
+options, if any, are appropriate for compiling your
+code with this version of <CODE>g77</CODE>.
+
+See section <A HREF="g77_13.html#SEC344">Other Dialects</A>, for more information.
+
+<LI>
+
+The <SAMP>`-fugly'</SAMP> option now issues a warning, as it
+likely will be removed in a future version.
+
+(Enabling all the <SAMP>`-fugly-*'</SAMP> options is unlikely
+to be feasible, or sensible, in the future,
+so users should learn to specify only those
+<SAMP>`-fugly-*'</SAMP> options they really need for a
+particular source file.)
+
+<LI>
+
+The <SAMP>`-fugly-assumed'</SAMP> option, introduced in
+version 0.5.19, has been changed to
+better accommodate old and new code.
+
+See section <A HREF="g77_13.html#SEC362">Ugly Assumed-Size Arrays</A>, for more information.
+
+<LI>
+
+Related to supporting Alpha (AXP) machines, the <CODE>LOC()</CODE>
+intrinsic and <CODE>%LOC()</CODE> construct now return
+values of <CODE>INTEGER(KIND=0)</CODE> type,
+as defined by the GNU Fortran language.
+
+This type is wide enough
+(holds the same number of bits)
+as the character-pointer type on the machine.
+
+On most machines, this won't make a difference,
+whereas, on Alphas and other systems with 64-bit pointers,
+the <CODE>INTEGER(KIND=0)</CODE> type is equivalent to <CODE>INTEGER(KIND=2)</CODE>
+(often referred to as <CODE>INTEGER*8</CODE>)
+instead of the more common <CODE>INTEGER(KIND=1)</CODE>
+(often referred to as <CODE>INTEGER*4</CODE>).
+
+<LI>
+
+Emulate <CODE>COMPLEX</CODE> arithmetic in the <CODE>g77</CODE> front
+end, to avoid bugs in <CODE>complex</CODE> support in the
+<CODE>gcc</CODE> back end.
+New option <SAMP>`-fno-emulate-complex'</SAMP>
+causes <CODE>g77</CODE> to revert the 0.5.19 behavior.
+
+<LI>
+
+Dummy arguments are no longer assumed to potentially alias
+(overlap)
+other dummy arguments or <CODE>COMMON</CODE> areas when any of
+these are defined (assigned to) by Fortran code.
+
+This can result in faster and/or smaller programs when
+compiling with optimization enabled, though on some
+systems this effect is observed only when <SAMP>`-fforce-addr'</SAMP>
+also is specified.
+
+New options <SAMP>`-falias-check'</SAMP>, <SAMP>`-fargument-alias'</SAMP>,
+<SAMP>`-fargument-noalias'</SAMP>,
+and <SAMP>`-fno-argument-noalias-global'</SAMP> control the
+way <CODE>g77</CODE> handles potential aliasing.
+
+See section <A HREF="g77_19.html#SEC582">Aliasing Assumed To Work</A>, for detailed information on why the
+new defaults might result in some programs no longer working the way they
+did when compiled by previous versions of <CODE>g77</CODE>.
+
+<LI>
+
+New option <SAMP>`-fugly-assign'</SAMP> specifies that the
+same memory locations are to be used to hold the
+values assigned by both statements <SAMP>`I = 3'</SAMP> and
+<SAMP>`ASSIGN 10 TO I'</SAMP>, for example.
+(Normally, <CODE>g77</CODE> uses a separate memory location
+to hold assigned statement labels.)
+
+See section <A HREF="g77_13.html#SEC367">Ugly Assigned Labels</A>, for more information.
+
+<LI>
+
+<CODE>FORMAT</CODE> and <CODE>ENTRY</CODE> statements now are allowed to
+precede <CODE>IMPLICIT NONE</CODE> statements.
+
+<LI>
+
+Enable full support of <CODE>INTEGER(KIND=2)</CODE>
+(often referred to as <CODE>INTEGER*8</CODE>)
+available in
+<CODE>libf2c</CODE> and <TT>`f2c.h'</TT> so that <CODE>f2c</CODE> users
+may make full use of its features via the <CODE>g77</CODE>
+version of <TT>`f2c.h'</TT> and the <CODE>INTEGER(KIND=2)</CODE>
+support routines in the <CODE>g77</CODE> version of <CODE>libf2c</CODE>.
+
+<LI>
+
+Improve <CODE>g77</CODE> driver and <CODE>libf2c</CODE> so that <SAMP>`g77 -v'</SAMP>
+yields version information on the library.
+
+<LI>
+
+The <CODE>SNGL</CODE> and <CODE>FLOAT</CODE> intrinsics now are
+specific intrinsics, instead of synonyms for the
+generic intrinsic <CODE>REAL</CODE>.
+
+<LI>
+
+New intrinsics have been added.
+These are <CODE>REALPART</CODE>, <CODE>IMAGPART</CODE>,
+<CODE>COMPLEX</CODE>,
+<CODE>LONG</CODE>, and <CODE>SHORT</CODE>.
+
+<LI>
+
+A new group of intrinsics, <CODE>gnu</CODE>, has been added
+to contain the new <CODE>REALPART</CODE>, <CODE>IMAGPART</CODE>,
+and <CODE>COMPLEX</CODE> intrinsics.
+An old group, <CODE>dcp</CODE>, has been removed.
+
+<LI>
+
+Complain about industry-wide ambiguous references
+<SAMP>`REAL(<VAR>expr</VAR>)'</SAMP> and <SAMP>`AIMAG(<VAR>expr</VAR>)'</SAMP>,
+where <VAR>expr</VAR> is <CODE>DOUBLE COMPLEX</CODE> (or any
+complex type other than <CODE>COMPLEX</CODE>), unless
+<SAMP>`-ff90'</SAMP> option specifies Fortran 90 interpretation
+or new <SAMP>`-fugly-complex'</SAMP> option, in conjunction with
+<SAMP>`-fnot-f90'</SAMP>, specifies <CODE>f2c</CODE> interpretation.
+
+</UL>
+
+
+<H2>In previous versions:</H2>
+
+<P>
+Information on previous versions is archived
+in <TT>`egcs/gcc/f/news.texi'</TT>
+following the test of the <CODE>DOC-OLDNEWS</CODE> macro.
+
+</P>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_10.html">previous</A>, <A HREF="g77_12.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

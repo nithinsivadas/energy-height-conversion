@@ -1,0 +1,3305 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Known Causes of Trouble with GNU Fortran</TITLE>
+<link href="g77_21.html" rel=Next>
+<link href="g77_19.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_19.html">previous</A>, <A HREF="g77_21.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC593" HREF="g77_toc.html#TOC593">Known Causes of Trouble with GNU Fortran</A></H1>
+<P>
+<A NAME="IDX2060"></A>
+<A NAME="IDX2061"></A>
+<A NAME="IDX2062"></A>
+
+</P>
+<P>
+This section describes known problems that affect users of GNU Fortran.
+Most of these are not GNU Fortran bugs per se--if they were, we would
+fix them.
+But the result for a user might be like the result of a bug.
+
+</P>
+<P>
+Some of these problems are due to bugs in other software, some are
+missing features that are too much work to add, and some are places
+where people's opinions differ as to what is best.
+
+</P>
+<P>
+Information on bugs that show up when configuring, porting, building,
+or installing <CODE>g77</CODE> is not provided here.
+See section <A HREF="g77_17.html#SEC530">Problems Installing</A>.
+
+</P>
+<P>
+To find out about major bugs discovered in the current release and
+possible workarounds for them, see
+<A HREF="ftp://alpha.gnu.org/g77.plan"><TT>ftp://alpha.gnu.org/g77.plan</TT></A>.
+
+</P>
+<P>
+(Note that some of this portion of the manual is lifted
+directly from the <CODE>gcc</CODE> manual, with minor modifications
+to tailor it to users of <CODE>g77</CODE>.
+Anytime a bug seems to have more to do with the <CODE>gcc</CODE>
+portion of <CODE>g77</CODE>, see
+section `Known Causes of Trouble with GNU CC' in <CITE>Using and Porting GNU CC</CITE>.)
+
+</P>
+
+<UL>
+<LI><A HREF="g77_20.html#SEC594">But-bugs</A>: Bugs really in other programs or elsewhere.
+<LI><A HREF="g77_20.html#SEC604">Known Bugs</A>: Bugs known to be in this version of <CODE>g77</CODE>.
+<LI><A HREF="g77_20.html#SEC605">Missing Features</A>: Features we already know we want to add later.
+<LI><A HREF="g77_20.html#SEC657">Disappointments</A>: Regrettable things we can't change.
+<LI><A HREF="g77_20.html#SEC661">Non-bugs</A>: Things we think are right, but some others disagree.
+<LI><A HREF="g77_20.html#SEC668">Warnings and Errors</A>: Which problems in your code get warnings,
+                        and which get errors.
+</UL>
+
+
+
+<H2><A NAME="SEC594" HREF="g77_toc.html#TOC594">Bugs Not In GNU Fortran</A></H2>
+<P>
+<A NAME="IDX2063"></A>
+
+</P>
+<P>
+These are bugs to which the maintainers often have to reply,
+"but that isn't a bug in <CODE>g77</CODE>...".
+Some of these already are fixed in new versions of other
+software; some still need to be fixed; some are problems
+with how <CODE>g77</CODE> is installed or is being used;
+some are the result of bad hardware that causes software
+to misbehave in sometimes bizarre ways;
+some just cannot be addressed at this time until more
+is known about the problem.
+
+</P>
+<P>
+Please don't re-report these bugs to the <CODE>g77</CODE> maintainers--if
+you must remind someone how important it is to you that the problem
+be fixed, talk to the people responsible for the other products
+identified below, but preferably only after you've tried the
+latest versions of those products.
+The <CODE>g77</CODE> maintainers have their hands full working on
+just fixing and improving <CODE>g77</CODE>, without serving as a
+clearinghouse for all bugs that happen to affect <CODE>g77</CODE>
+users.
+
+</P>
+<P>
+See section <A HREF="g77_19.html#SEC564">Collected Fortran Wisdom</A>, for information on behavior
+of Fortran programs, and the programs that compile them, that
+might be <EM>thought</EM> to indicate bugs.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_20.html#SEC595">Signal 11 and Friends</A>: Strange behavior by any software.
+<LI><A HREF="g77_20.html#SEC596">Cannot Link Fortran Programs</A>: Unresolved references.
+<LI><A HREF="g77_20.html#SEC597">Large Common Blocks</A>: Problems on older GNU/Linux systems.
+<LI><A HREF="g77_20.html#SEC598">Debugger Problems</A>: When the debugger crashes.
+<LI><A HREF="g77_20.html#SEC599">NeXTStep Problems</A>: Misbehaving executables.
+<LI><A HREF="g77_20.html#SEC600">Stack Overflow</A>: More misbehaving executables.
+<LI><A HREF="g77_20.html#SEC601">Nothing Happens</A>: Less behaving executables.
+<LI><A HREF="g77_20.html#SEC602">Strange Behavior at Run Time</A>: Executables misbehaving due to
+                            bugs in your program.
+<LI><A HREF="g77_20.html#SEC603">Floating-point Errors</A>: The results look wrong, but....
+</UL>
+
+
+
+<H3><A NAME="SEC595" HREF="g77_toc.html#TOC595">Signal 11 and Friends</A></H3>
+<P>
+<A NAME="IDX2064"></A>
+<A NAME="IDX2065"></A>
+
+</P>
+<P>
+A whole variety of strange behaviors can occur when the
+software, or the way you are using the software,
+stresses the hardware in a way that triggers hardware bugs.
+This might seem hard to believe, but it happens frequently
+enough that there exist documents explaining in detail
+what the various causes of the problems are, what
+typical symptoms look like, and so on.
+
+</P>
+<P>
+Generally these problems are referred to in this document
+as "signal 11" crashes, because the Linux kernel, running
+on the most popular hardware (the Intel x86 line), often
+stresses the hardware more than other popular operating
+systems.
+When hardware problems do occur under GNU/Linux on x86
+systems, these often manifest themselves as "signal 11"
+problems, as illustrated by the following diagnostic:
+
+</P>
+
+<PRE>
+sh# <KBD>g77 myprog.f</KBD>
+gcc: Internal compiler error: program f771 got fatal signal 11
+sh#
+</PRE>
+
+<P>
+It is <EM>very</EM> important to remember that the above
+message is <EM>not</EM> the only one that indicates a
+hardware problem, nor does it always indicate a hardware
+problem.
+
+</P>
+<P>
+In particular, on systems other than those running the Linux
+kernel, the message might appear somewhat or very different,
+as it will if the error manifests itself while running a
+program other than the <CODE>g77</CODE> compiler.
+For example,
+it will appear somewhat different when running your program,
+when running Emacs, and so on.
+
+</P>
+<P>
+How to cope with such problems is well beyond the scope
+of this manual.
+
+</P>
+<P>
+However, users of Linux-based systems (such as GNU/Linux)
+should review <A HREF="http://www.bitwizard.nl/sig11/"><TT>http://www.bitwizard.nl/sig11/</TT></A>, a source
+of detailed information on diagnosing hardware problems,
+by recognizing their common symptoms.
+
+</P>
+<P>
+Users of other operating systems and hardware might
+find this reference useful as well.
+If you know of similar material for another hardware/software
+combination, please let us know so we can consider including
+a reference to it in future versions of this manual.
+
+</P>
+
+
+<H3><A NAME="SEC596" HREF="g77_toc.html#TOC596">Cannot Link Fortran Programs</A></H3>
+<P>
+<A NAME="IDX2066"></A>
+<A NAME="IDX2067"></A>
+<A NAME="IDX2068"></A>
+<A NAME="IDX2069"></A>
+<A NAME="IDX2070"></A>
+On some systems, perhaps just those with out-of-date (shared?)
+libraries, unresolved-reference errors happen when linking <CODE>g77</CODE>-compiled
+programs (which should be done using <CODE>g77</CODE>).
+
+</P>
+<P>
+If this happens to you, try appending <SAMP>`-lc'</SAMP> to the command you
+use to link the program, e.g. <SAMP>`g77 foo.f -lc'</SAMP>.
+<CODE>g77</CODE> already specifies <SAMP>`-lg2c -lm'</SAMP> when it calls the linker,
+but it cannot also specify <SAMP>`-lc'</SAMP> because not all systems have a
+file named <TT>`libc.a'</TT>.
+
+</P>
+<P>
+It is unclear at this point whether there are legitimately installed
+systems where <SAMP>`-lg2c -lm'</SAMP> is insufficient to resolve code produced
+by <CODE>g77</CODE>.
+
+</P>
+<P>
+<A NAME="IDX2071"></A>
+<A NAME="IDX2072"></A>
+<A NAME="IDX2073"></A>
+<A NAME="IDX2074"></A>
+<A NAME="IDX2075"></A>
+If your program doesn't link due to unresolved references to names
+like <SAMP>`_main'</SAMP>, make sure you're using the <CODE>g77</CODE> command to do the
+link, since this command ensures that the necessary libraries are
+loaded by specifying <SAMP>`-lg2c -lm'</SAMP> when it invokes the <CODE>gcc</CODE>
+command to do the actual link.
+(Use the <SAMP>`-v'</SAMP> option to discover
+more about what actually happens when you use the <CODE>g77</CODE> and <CODE>gcc</CODE>
+commands.)
+
+</P>
+<P>
+Also, try specifying <SAMP>`-lc'</SAMP> as the last item on the <CODE>g77</CODE>
+command line, in case that helps.
+
+</P>
+
+
+<H3><A NAME="SEC597" HREF="g77_toc.html#TOC597">Large Common Blocks</A></H3>
+<P>
+<A NAME="IDX2076"></A>
+<A NAME="IDX2077"></A>
+<A NAME="IDX2078"></A>
+<A NAME="IDX2079"></A>
+<A NAME="IDX2080"></A>
+On some older GNU/Linux systems, programs with common blocks larger
+than 16MB cannot be linked without some kind of error
+message being produced.
+
+</P>
+<P>
+This is a bug in older versions of <CODE>ld</CODE>, fixed in
+more recent versions of <CODE>binutils</CODE>, such as version 2.6.
+
+</P>
+
+
+<H3><A NAME="SEC598" HREF="g77_toc.html#TOC598">Debugger Problems</A></H3>
+<P>
+<A NAME="IDX2081"></A>
+<A NAME="IDX2082"></A>
+There are some known problems when using <CODE>gdb</CODE> on code
+compiled by <CODE>g77</CODE>.
+Inadequate investigation as of the release of 0.5.16 results in not
+knowing which products are the culprit, but <TT>`gdb-4.14'</TT> definitely
+crashes when, for example, an attempt is made to print the contents
+of a <CODE>COMPLEX(KIND=2)</CODE> dummy array, on at least some GNU/Linux
+machines, plus some others.
+Attempts to access assumed-size arrays are
+also known to crash recent versions of <CODE>gdb</CODE>.
+(<CODE>gdb</CODE>'s Fortran support was done for a different compiler
+and isn't properly compatible with <CODE>g77</CODE>.)
+
+</P>
+
+
+<H3><A NAME="SEC599" HREF="g77_toc.html#TOC599">NeXTStep Problems</A></H3>
+<P>
+<A NAME="IDX2083"></A>
+<A NAME="IDX2084"></A>
+<A NAME="IDX2085"></A>
+Developers of Fortran code on NeXTStep (all architectures) have to
+watch out for the following problem when writing programs with
+large, statically allocated (i.e. non-stack based) data structures
+(common blocks, saved arrays).
+
+</P>
+<P>
+Due to the way the native loader (<TT>`/bin/ld'</TT>) lays out
+data structures in virtual memory, it is very easy to create an
+executable wherein the <SAMP>`__DATA'</SAMP> segment overlaps (has addresses in
+common) with the <SAMP>`UNIX STACK'</SAMP> segment.
+
+</P>
+<P>
+This leads to all sorts of trouble, from the executable simply not
+executing, to bus errors.
+The NeXTStep command line tool <CODE>ebadexec</CODE> points to
+the problem as follows:
+
+</P>
+
+<PRE>
+% <KBD>/bin/ebadexec a.out</KBD>
+/bin/ebadexec: __LINKEDIT segment (truncated address = 0x3de000
+rounded size = 0x2a000) of executable file: a.out overlaps with UNIX
+STACK segment (truncated address = 0x400000 rounded size =
+0x3c00000) of executable file: a.out
+</PRE>
+
+<P>
+(In the above case, it is the <SAMP>`__LINKEDIT'</SAMP> segment that overlaps the
+stack segment.)
+
+</P>
+<P>
+This can be cured by assigning the <SAMP>`__DATA'</SAMP> segment
+(virtual) addresses beyond the stack segment.
+A conservative
+estimate for this is from address 6000000 (hexadecimal) onwards--this
+has always worked for me [Toon Moene]:
+
+</P>
+
+<PRE>
+% <KBD>g77 -segaddr __DATA 6000000 test.f</KBD>
+% <KBD>ebadexec a.out</KBD>
+ebadexec: file: a.out appears to be executable
+%
+</PRE>
+
+<P>
+Browsing through <TT>`egcs/gcc/f/Makefile.in'</TT>,
+you will find that the <CODE>f771</CODE> program itself also has to be
+linked with these flags--it has large statically allocated
+data structures.
+(Version 0.5.18 reduces this somewhat, but probably
+not enough.)
+
+</P>
+<P>
+(The above item was contributed by Toon Moene
+(<A HREF="mailto:toon@moene.indiv.nluug.nl"><TT>toon@moene.indiv.nluug.nl</TT></A>).)
+
+</P>
+
+
+<H3><A NAME="SEC600" HREF="g77_toc.html#TOC600">Stack Overflow</A></H3>
+<P>
+<A NAME="IDX2086"></A>
+<A NAME="IDX2087"></A>
+<CODE>g77</CODE> code might fail at runtime (probably with a "segmentation
+violation") due to overflowing the stack.
+This happens most often on systems with an environment
+that provides substantially more heap space (for use
+when arbitrarily allocating and freeing memory) than stack
+space.
+
+</P>
+<P>
+Often this can be cured by
+increasing or removing your shell's limit on stack usage, typically
+using <KBD>limit stacksize</KBD> (in <CODE>csh</CODE> and derivatives) or
+<KBD>ulimit -s</KBD> (in <CODE>sh</CODE> and derivatives).
+
+</P>
+<P>
+Increasing the allowed stack size might, however, require
+changing some operating system or system configuration parameters.
+
+</P>
+<P>
+You might be able to work around the problem by compiling with the
+<SAMP>`-fno-automatic'</SAMP> option to reduce stack usage, probably at the
+expense of speed.
+
+</P>
+<P>
+See section <A HREF="g77_17.html#SEC543">Maximum Stackable Size</A>, for information on patching
+<CODE>g77</CODE> to use different criteria for placing local
+non-automatic variables and arrays on the stack.
+
+</P>
+<P>
+<A NAME="IDX2088"></A>
+<A NAME="IDX2089"></A>
+However, if your program uses large automatic arrays
+(for example, has declarations like <SAMP>`REAL A(N)'</SAMP> where
+<SAMP>`A'</SAMP> is a local array and <SAMP>`N'</SAMP> is a dummy or
+<CODE>COMMON</CODE> variable that can have a large value),
+neither use of <SAMP>`-fno-automatic'</SAMP>,
+nor changing the cut-off point for <CODE>g77</CODE> for using the stack,
+will solve the problem by changing the placement of these
+large arrays, as they are <EM>necessarily</EM> automatic.
+
+</P>
+<P>
+<CODE>g77</CODE> currently provides no means to specify that
+automatic arrays are to be allocated on the heap instead
+of the stack.
+So, other than increasing the stack size, your best bet is to
+change your source code to avoid large automatic arrays.
+Methods for doing this currently are outside the scope of
+this document.
+
+</P>
+<P>
+(<EM>Note:</EM> If your system puts stack and heap space in the
+same memory area, such that they are effectively combined, then
+a stack overflow probably indicates a program that is either
+simply too large for the system, or buggy.)
+
+</P>
+
+
+<H3><A NAME="SEC601" HREF="g77_toc.html#TOC601">Nothing Happens</A></H3>
+<P>
+<A NAME="IDX2090"></A>
+<A NAME="IDX2091"></A>
+<A NAME="IDX2092"></A>
+<A NAME="IDX2093"></A>
+It is occasionally reported that a "simple" program,
+such as a "Hello, World!" program, does nothing when
+it is run, even though the compiler reported no errors,
+despite the program containing nothing other than a
+simple <CODE>PRINT</CODE> statement.
+
+</P>
+<P>
+This most often happens because the program has been
+compiled and linked on a UNIX system and named <CODE>test</CODE>,
+though other names can lead to similarly unexpected
+run-time behavior on various systems.
+
+</P>
+<P>
+Essentially this problem boils down to giving
+your program a name that is already known to
+the shell you are using to identify some other program,
+which the shell continues to execute instead of your
+program when you invoke it via, for example:
+
+</P>
+
+<PRE>
+sh# <KBD>test</KBD>
+sh#
+</PRE>
+
+<P>
+Under UNIX and many other system, a simple command name
+invokes a searching mechanism that might well not choose
+the program located in the current working directory if
+there is another alternative (such as the <CODE>test</CODE>
+command commonly installed on UNIX systems).
+
+</P>
+<P>
+The reliable way to invoke a program you just linked in
+the current directory under UNIX is to specify it using
+an explicit pathname, as in:
+
+</P>
+
+<PRE>
+sh# <KBD>./test</KBD>
+ Hello, World!
+sh#
+</PRE>
+
+<P>
+Users who encounter this problem should take the time to
+read up on how their shell searches for commands, how to
+set their search path, and so on.
+The relevant UNIX commands to learn about include
+<CODE>man</CODE>, <CODE>info</CODE> (on GNU systems), <CODE>setenv</CODE> (or
+<CODE>set</CODE> and <CODE>env</CODE>), <CODE>which</CODE>, and <CODE>find</CODE>.
+
+</P>
+
+
+<H3><A NAME="SEC602" HREF="g77_toc.html#TOC602">Strange Behavior at Run Time</A></H3>
+<P>
+<A NAME="IDX2094"></A>
+<A NAME="IDX2095"></A>
+<A NAME="IDX2096"></A>
+<A NAME="IDX2097"></A>
+<CODE>g77</CODE> code might fail at runtime with "segmentation violation",
+"bus error", or even something as subtle as a procedure call
+overwriting a variable or array element that it is not supposed
+to touch.
+
+</P>
+<P>
+These can be symptoms of a wide variety of actual bugs that
+occurred earlier during the program's run, but manifested
+themselves as <EM>visible</EM> problems some time later.
+
+</P>
+<P>
+Overflowing the bounds of an array--usually by writing beyond
+the end of it--is one of two kinds of bug that often occurs
+in Fortran code.
+(Compile your code with the <SAMP>`-fbounds-check'</SAMP> option
+to catch many of these kinds of errors at program run time.)
+
+</P>
+<P>
+The other kind of bug is a mismatch between the actual arguments
+passed to a procedure and the dummy arguments as declared by that
+procedure.
+
+</P>
+<P>
+Both of these kinds of bugs, and some others as well, can be
+difficult to track down, because the bug can change its behavior,
+or even appear to not occur, when using a debugger.
+
+</P>
+<P>
+That is, these bugs can be quite sensitive to data, including
+data representing the placement of other data in memory (that is,
+pointers, such as the placement of stack frames in memory).
+
+</P>
+<P>
+<CODE>g77</CODE> now offers the
+ability to catch and report some of these problems at compile, link, or
+run time, such as by generating code to detect references to
+beyond the bounds of most arrays (except assumed-size arrays),
+and checking for agreement between calling and called procedures.
+Future improvements are likely to be made in the procedure-mismatch area,
+at least.
+
+</P>
+<P>
+In the meantime, finding and fixing the programming
+bugs that lead to these behaviors is, ultimately, the user's
+responsibility, as difficult as that task can sometimes be.
+
+</P>
+<P>
+<A NAME="IDX2098"></A>
+<A NAME="IDX2099"></A>
+<A NAME="IDX2100"></A>
+<A NAME="IDX2101"></A>
+<A NAME="IDX2102"></A>
+<A NAME="IDX2103"></A>
+One runtime problem that has been observed might have a simple solution.
+If a formatted <CODE>WRITE</CODE> produces an endless stream of spaces, check
+that your program is linked against the correct version of the C library.
+The configuration process takes care to account for your
+system's normal <TT>`libc'</TT> not being ANSI-standard, which will
+otherwise cause this behaviour.
+If your system's default library is
+ANSI-standard and you subsequently link against a non-ANSI one, there
+might be problems such as this one.
+
+</P>
+<P>
+Specifically, on Solaris2 systems,
+avoid picking up the <CODE>BSD</CODE> library from <TT>`/usr/ucblib'</TT>.
+
+</P>
+
+
+<H3><A NAME="SEC603" HREF="g77_toc.html#TOC603">Floating-point Errors</A></H3>
+<P>
+<A NAME="IDX2104"></A>
+<A NAME="IDX2105"></A>
+<A NAME="IDX2106"></A>
+<A NAME="IDX2107"></A>
+Some programs appear to produce inconsistent floating-point
+results compiled by <CODE>g77</CODE> versus by other compilers.
+
+</P>
+<P>
+Often the reason for this behavior is the fact that floating-point
+values are represented on almost all Fortran systems by
+<EM>approximations</EM>, and these approximations are inexact
+even for apparently simple values like 0.1, 0.2, 0.3, 0.4, 0.6,
+0.7, 0.8, 0.9, 1.1, and so on.
+Most Fortran systems, including all current ports of <CODE>g77</CODE>,
+use binary arithmetic to represent these approximations.
+
+</P>
+<P>
+Therefore, the exact value of any floating-point approximation
+as manipulated by <CODE>g77</CODE>-compiled code is representable by
+adding some combination of the values 1.0, 0.5, 0.25, 0.125, and
+so on (just keep dividing by two) through the precision of the
+fraction (typically around 23 bits for <CODE>REAL(KIND=1)</CODE>, 52 for
+<CODE>REAL(KIND=2)</CODE>), then multiplying the sum by a integral
+power of two (in Fortran, by <SAMP>`2**N'</SAMP>) that typically is between
+-127 and +128 for <CODE>REAL(KIND=1)</CODE> and -1023 and +1024 for
+<CODE>REAL(KIND=2)</CODE>, then multiplying by -1 if the number
+is negative.
+
+</P>
+<P>
+So, a value like 0.2 is exactly represented in decimal--since
+it is a fraction, <SAMP>`2/10'</SAMP>, with a denominator that is compatible
+with the base of the number system (base 10).
+However, <SAMP>`2/10'</SAMP> cannot be represented by any finite number
+of sums of any of 1.0, 0.5, 0.25, and so on, so 0.2 cannot
+be exactly represented in binary notation.
+
+</P>
+<P>
+(On the other hand, decimal notation can represent any binary
+number in a finite number of digits.
+Decimal notation cannot do so with ternary, or base-3,
+notation, which would represent floating-point numbers as
+sums of any of <SAMP>`1/1'</SAMP>, <SAMP>`1/3'</SAMP>, <SAMP>`1/9'</SAMP>, and so on.
+After all, no finite number of decimal digits can exactly
+represent <SAMP>`1/3'</SAMP>.
+Fortunately, few systems use ternary notation.)
+
+</P>
+<P>
+Moreover, differences in the way run-time I/O libraries convert
+between these approximations and the decimal representation often
+used by programmers and the programs they write can result in
+apparent differences between results that do not actually exist,
+or exist to such a small degree that they usually are not worth
+worrying about.
+
+</P>
+<P>
+For example, consider the following program:
+
+</P>
+
+<PRE>
+PRINT *, 0.2
+END
+</PRE>
+
+<P>
+When compiled by <CODE>g77</CODE>, the above program might output
+<SAMP>`0.20000003'</SAMP>, while another compiler might produce a
+executable that outputs <SAMP>`0.2'</SAMP>.
+
+</P>
+<P>
+This particular difference is due to the fact that, currently,
+conversion of floating-point values by the <CODE>libg2c</CODE> library,
+used by <CODE>g77</CODE>, handles only double-precision values.
+
+</P>
+<P>
+Since <SAMP>`0.2'</SAMP> in the program is a single-precision value, it
+is converted to double precision (still in binary notation)
+before being converted back to decimal.
+The conversion to binary appends <EM>binary</EM> zero digits to the
+original value--which, again, is an inexact approximation of
+0.2--resulting in an approximation that is much less exact
+than is connoted by the use of double precision.
+
+</P>
+<P>
+(The appending of binary zero digits has essentially the same
+effect as taking a particular decimal approximation of
+<SAMP>`1/3'</SAMP>, such as <SAMP>`0.3333333'</SAMP>, and appending decimal
+zeros to it, producing <SAMP>`0.33333330000000000'</SAMP>.
+Treating the resulting decimal approximation as if it really
+had 18 or so digits of valid precision would make it seem
+a very poor approximation of <SAMP>`1/3'</SAMP>.)
+
+</P>
+<P>
+As a result of converting the single-precision approximation
+to double precision by appending binary zeros, the conversion
+of the resulting double-precision
+value to decimal produces what looks like an incorrect
+result, when in fact the result is <EM>inexact</EM>, and
+is probably no less inaccurate or imprecise an approximation
+of 0.2 than is produced by other compilers that happen to output
+the converted value as "exactly" <SAMP>`0.2'</SAMP>.
+(Some compilers behave in a way that can make them appear
+to retain more accuracy across a conversion of a single-precision
+constant to double precision.
+See section <A HREF="g77_20.html#SEC665">Context-Sensitive Constants</A>, to see why
+this practice is illusory and even dangerous.)
+
+</P>
+<P>
+Note that a more exact approximation of the constant is
+computed when the program is changed to specify a
+double-precision constant:
+
+</P>
+
+<PRE>
+PRINT *, 0.2D0
+END
+</PRE>
+
+<P>
+Future versions of <CODE>g77</CODE> and/or <CODE>libg2c</CODE> might convert
+single-precision values directly to decimal,
+instead of converting them to double precision first.
+This would tend to result in output that is more consistent
+with that produced by some other Fortran implementations.
+
+</P>
+<P>
+A useful source of information on floating-point computation is David
+Goldberg, `What Every Computer Scientist Should Know About
+Floating-Point Arithmetic', Computing Surveys, 23, March 1991, pp.
+5-48.
+An online version is available at
+<A HREF="http://docs.sun.com/"><TT>http://docs.sun.com/</TT></A>,
+and there is a supplemented version, in PostScript form, at
+<A HREF="http://www.validgh.com/goldberg/paper.ps"><TT>http://www.validgh.com/goldberg/paper.ps</TT></A>.
+
+</P>
+<P>
+Information related to the IEEE 754
+floating-point standard by a leading light can be found at
+<A HREF="http://http.cs.berkeley.edu/%7Ewkahan/ieee754status/"><TT>http://http.cs.berkeley.edu/%7Ewkahan/ieee754status/</TT></A>;
+see also slides from the short course referenced from
+<A HREF="http://http.cs.berkeley.edu/%7Efateman/"><TT>http://http.cs.berkeley.edu/%7Efateman/</TT></A>.
+<A HREF="http://www.linuxsupportline.com/%7Ebillm/"><TT>http://www.linuxsupportline.com/%7Ebillm/</TT></A> has a brief
+guide to IEEE 754, a somewhat x86-GNU/Linux-specific FAQ,
+and library code for GNU/Linux x86 systems.
+
+</P>
+<P>
+The supplement to the PostScript-formatted Goldberg document,
+referenced above, is available in HTML format.
+See `Differences Among IEEE 754 Implementations' by Doug Priest,
+available online at
+<A HREF="http://www.validgh.com/goldberg/addendum.html"><TT>http://www.validgh.com/goldberg/addendum.html</TT></A>.
+This document explores some of the issues surrounding computing
+of extended (80-bit) results on processors such as the x86,
+especially when those results are arbitrarily truncated
+to 32-bit or 64-bit values by the compiler
+as "spills".
+
+</P>
+<P>
+<A NAME="IDX2108"></A>
+<A NAME="IDX2109"></A>
+<A NAME="IDX2110"></A>
+(<EM>Note:</EM> <CODE>g77</CODE> specifically, and <CODE>gcc</CODE> generally,
+does arbitrarily truncate 80-bit results during spills
+as of this writing.
+It is not yet clear whether a future version of
+the GNU compiler suite will offer 80-bit spills
+as an option, or perhaps even as the default behavior.)
+
+</P>
+<P>
+The GNU C library provides routines for controlling the FPU, and other
+documentation about this.
+
+</P>
+<P>
+See section <A HREF="g77_19.html#SEC585">Floating-point precision</A>, regarding IEEE 754 conformance.
+
+</P>
+
+
+
+<H2><A NAME="SEC604" HREF="g77_toc.html#TOC604">Known Bugs In GNU Fortran</A></H2>
+
+<P>
+This section identifies bugs that <CODE>g77</CODE> <EM>users</EM>
+might run into in the GCC-2.95 version
+of <CODE>g77</CODE>.
+This includes bugs that are actually in the <CODE>gcc</CODE>
+back end (GBE) or in <CODE>libf2c</CODE>, because those
+sets of code are at least somewhat under the control
+of (and necessarily intertwined with) <CODE>g77</CODE>,
+so it isn't worth separating them out.
+
+</P>
+<P>
+For information on bugs in <EM>other</EM> versions of <CODE>g77</CODE>,
+see section <A HREF="g77_10.html#SEC24">News About GNU Fortran</A>.
+There, lists of bugs fixed in various versions of <CODE>g77</CODE>
+can help determine what bugs existed in prior versions.
+
+</P>
+
+<P>
+An online, "live" version of this document
+(derived directly from the mainline, development version
+of <CODE>g77</CODE> within <CODE>egcs</CODE>)
+is available via
+<A HREF="http://egcs.cygnus.com/onlinedocs/g77_bugs.html"><TT>http://egcs.cygnus.com/onlinedocs/g77_bugs.html</TT></A>.
+Follow the "Known Bugs" link.
+
+</P>
+<P>
+For information on bugs that might afflict people who
+configure, port, build, and install <CODE>g77</CODE>,
+see section <A HREF="g77_17.html#SEC530">Problems Installing</A>.
+
+</P>
+
+<P>
+The following information was last updated on 1999-06-29:
+
+</P>
+
+<UL>
+<LI>
+
+<CODE>g77</CODE> fails to warn about
+use of a "live" iterative-DO variable
+as an implied-DO variable
+in a <CODE>WRITE</CODE> or <CODE>PRINT</CODE> statement
+(although it does warn about this in a <CODE>READ</CODE> statement).
+
+<LI>
+
+Something about <CODE>g77</CODE>'s straightforward handling of
+label references and definitions sometimes prevents the GBE
+from unrolling loops.
+Until this is solved, try inserting or removing <CODE>CONTINUE</CODE>
+statements as the terminal statement, using the <CODE>END DO</CODE>
+form instead, and so on.
+
+<LI>
+
+Some confusion in diagnostics concerning failing <CODE>INCLUDE</CODE>
+statements from within <CODE>INCLUDE</CODE>'d or <CODE>#include</CODE>'d files.
+
+<A NAME="IDX2111"></A>
+<A NAME="IDX2112"></A>
+<LI>
+
+<CODE>g77</CODE> assumes that <CODE>INTEGER(KIND=1)</CODE> constants range
+from <SAMP>`-2**31'</SAMP> to <SAMP>`2**31-1'</SAMP> (the range for
+two's-complement 32-bit values),
+instead of determining their range from the actual range of the
+type for the configuration (and, someday, for the constant).
+
+Further, it generally doesn't implement the handling
+of constants very well in that it makes assumptions about the
+configuration that it no longer makes regarding variables (types).
+
+Included with this item is the fact that <CODE>g77</CODE> doesn't recognize
+that, on IEEE-754/854-compliant systems, <SAMP>`0./0.'</SAMP> should produce a NaN
+and no warning instead of the value <SAMP>`0.'</SAMP> and a warning.
+This is to be fixed in version 0.6, when <CODE>g77</CODE> will use the
+<CODE>gcc</CODE> back end's constant-handling mechanisms to replace its own.
+
+<A NAME="IDX2113"></A>
+<A NAME="IDX2114"></A>
+<A NAME="IDX2115"></A>
+<A NAME="IDX2116"></A>
+<A NAME="IDX2117"></A>
+<A NAME="IDX2118"></A>
+<A NAME="IDX2119"></A>
+<A NAME="IDX2120"></A>
+<LI>
+
+<CODE>g77</CODE> uses way too much memory and CPU time to process large aggregate
+areas having any initialized elements.
+
+For example, <SAMP>`REAL A(1000000)'</SAMP> followed by <SAMP>`DATA A(1)/1/'</SAMP>
+takes up way too much time and space, including
+the size of the generated assembler file.
+This is to be mitigated somewhat in version 0.6.
+
+Version 0.5.18 improves cases like this--specifically,
+cases of <EM>sparse</EM> initialization that leave large, contiguous
+areas uninitialized--significantly.
+However, even with the improvements, these cases still
+require too much memory and CPU time.
+
+(Version 0.5.18 also improves cases where the initial values are
+zero to a much greater degree, so if the above example
+ends with <SAMP>`DATA A(1)/0/'</SAMP>, the compile-time performance
+will be about as good as it will ever get, aside from unrelated
+improvements to the compiler.)
+
+Note that <CODE>g77</CODE> does display a warning message to
+notify the user before the compiler appears to hang.
+See section <A HREF="g77_17.html#SEC545">Initialization of Large Aggregate Areas</A>,
+for information on how to change the point at which
+<CODE>g77</CODE> decides to issue this warning.
+
+<A NAME="IDX2121"></A>
+<A NAME="IDX2122"></A>
+<A NAME="IDX2123"></A>
+<A NAME="IDX2124"></A>
+<LI>
+
+<CODE>g77</CODE> doesn't emit variable and array members of common blocks for use
+with a debugger (the <SAMP>`-g'</SAMP> command-line option).
+The code is present to do this, but doesn't work with at least
+one debug format--perhaps it works with others.
+And it turns out there's a similar bug for
+local equivalence areas, so that has been disabled as well.
+
+As of Version 0.5.19, a temporary kludge solution is provided whereby
+some rudimentary information on a member is written as a string that
+is the member's value as a character string.
+
+See section <A HREF="g77_9.html#SEC22">Options for Code Generation Conventions</A>,
+for information on the <SAMP>`-fdebug-kludge'</SAMP> option.
+
+<A NAME="IDX2125"></A>
+<A NAME="IDX2126"></A>
+<A NAME="IDX2127"></A>
+<A NAME="IDX2128"></A>
+<LI>
+
+When debugging, after starting up the debugger but before being able
+to see the source code for the main program unit, the user must currently
+set a breakpoint at <CODE>MAIN__</CODE> (or <CODE>MAIN___</CODE> or <CODE>MAIN_</CODE> if
+<CODE>MAIN__</CODE> doesn't exist)
+and run the program until it hits the breakpoint.
+At that point, the
+main program unit is activated and about to execute its first
+executable statement, but that's the state in which the debugger should
+start up, as is the case for languages like C.
+
+<A NAME="IDX2129"></A>
+<LI>
+
+Debugging <CODE>g77</CODE>-compiled code using debuggers other than
+<CODE>gdb</CODE> is likely not to work.
+
+Getting <CODE>g77</CODE> and <CODE>gdb</CODE> to work together is a known
+problem--getting <CODE>g77</CODE> to work properly with other
+debuggers, for which source code often is unavailable to <CODE>g77</CODE>
+developers, seems like a much larger, unknown problem,
+and is a lower priority than making <CODE>g77</CODE> and <CODE>gdb</CODE>
+work together properly.
+
+On the other hand, information about problems other debuggers
+have with <CODE>g77</CODE> output might make it easier to properly
+fix <CODE>g77</CODE>, and perhaps even improve <CODE>gdb</CODE>, so it
+is definitely welcome.
+Such information might even lead to all relevant products
+working together properly sooner.
+
+<A NAME="IDX2130"></A>
+<A NAME="IDX2131"></A>
+<LI>
+
+<CODE>g77</CODE> doesn't work perfectly on 64-bit configurations
+such as the Digital Semiconductor ("DEC") Alpha.
+
+This problem is largely resolved as of version 0.5.23.
+Version 0.6 should solve most or all remaining problems
+(such as cross-compiling involving 64-bit machines).
+
+<A NAME="IDX2132"></A>
+<A NAME="IDX2133"></A>
+<A NAME="IDX2134"></A>
+<A NAME="IDX2135"></A>
+<LI>
+
+<CODE>g77</CODE> currently inserts needless padding for things like
+<SAMP>`COMMON A,IPAD'</SAMP> where <SAMP>`A'</SAMP> is <CODE>CHARACTER*1</CODE> and <SAMP>`IPAD'</SAMP>
+is <CODE>INTEGER(KIND=1)</CODE> on machines like x86,
+because the back end insists that <SAMP>`IPAD'</SAMP>
+be aligned to a 4-byte boundary,
+but the processor has no such requirement
+(though it is usually good for performance).
+
+The <CODE>gcc</CODE> back end needs to provide a wider array
+of specifications of alignment requirements and preferences for targets,
+and front ends like <CODE>g77</CODE> should take advantage of this
+when it becomes available.
+
+<A NAME="IDX2136"></A>
+<A NAME="IDX2137"></A>
+<LI>
+
+The <CODE>libf2c</CODE> routines that perform some run-time
+arithmetic on <CODE>COMPLEX</CODE> operands
+were modified circa version 0.5.20 of <CODE>g77</CODE>
+to work properly even in the presence of aliased operands.
+
+While the <CODE>g77</CODE> and <CODE>netlib</CODE> versions of <CODE>libf2c</CODE>
+differ on how this is accomplished,
+the main differences are that we believe
+the <CODE>g77</CODE> version works properly
+even in the presence of <EM>partially</EM> aliased operands.
+
+However, these modifications have reduced performance
+on targets such as x86,
+due to the extra copies of operands involved.
+</UL>
+
+
+
+<H2><A NAME="SEC605" HREF="g77_toc.html#TOC605">Missing Features</A></H2>
+
+<P>
+This section lists features we know are missing from <CODE>g77</CODE>,
+and which we want to add someday.
+(There is no priority implied in the ordering below.)
+
+</P>
+
+<UL>
+GNU Fortran language:
+<LI><A HREF="g77_20.html#SEC606">Better Source Model</A>
+<LI><A HREF="g77_20.html#SEC607">Fortran 90 Support</A>
+<LI><A HREF="g77_20.html#SEC608">Intrinsics in PARAMETER Statements</A>
+<LI><A HREF="g77_20.html#SEC609">Arbitrary Concatenation</A>
+<LI><A HREF="g77_20.html#SEC610">SELECT CASE on CHARACTER Type</A>
+<LI><A HREF="g77_20.html#SEC611">RECURSIVE Keyword</A>
+<LI><A HREF="g77_20.html#SEC613">Popular Non-standard Types</A>
+<LI><A HREF="g77_20.html#SEC614">Full Support for Compiler Types</A>
+<LI><A HREF="g77_20.html#SEC615">Array Bounds Expressions</A>
+<LI><A HREF="g77_20.html#SEC616">POINTER Statements</A>
+<LI><A HREF="g77_20.html#SEC617">Sensible Non-standard Constructs</A>
+<LI><A HREF="g77_20.html#SEC618">READONLY Keyword</A>
+<LI><A HREF="g77_20.html#SEC619">FLUSH Statement</A>
+<LI><A HREF="g77_20.html#SEC620">Expressions in FORMAT Statements</A>
+<LI><A HREF="g77_20.html#SEC621">Explicit Assembler Code</A>
+<LI><A HREF="g77_20.html#SEC622">Q Edit Descriptor</A>
+
+GNU Fortran dialects:
+<LI><A HREF="g77_20.html#SEC623">Old-style PARAMETER Statements</A>
+<LI><A HREF="g77_20.html#SEC624">TYPE and ACCEPT I/O Statements</A>
+<LI><A HREF="g77_20.html#SEC625">STRUCTURE UNION RECORD MAP</A>
+<LI><A HREF="g77_20.html#SEC626">OPEN CLOSE and INQUIRE Keywords</A>
+<LI><A HREF="g77_20.html#SEC627">ENCODE and DECODE</A>
+<LI><A HREF="g77_20.html#SEC628">AUTOMATIC Statement</A>
+<LI><A HREF="g77_20.html#SEC629">Suppressing Space Padding</A>
+<LI><A HREF="g77_20.html#SEC630">Fortran Preprocessor</A>
+<LI><A HREF="g77_20.html#SEC631">Bit Operations on Floating-point Data</A>
+<LI><A HREF="g77_20.html#SEC632">Really Ugly Character Assignments</A>
+
+New facilities:
+<LI><A HREF="g77_20.html#SEC633">POSIX Standard</A>
+<LI><A HREF="g77_20.html#SEC634">Floating-point Exception Handling</A>
+<LI><A HREF="g77_20.html#SEC635">Nonportable Conversions</A>
+<LI><A HREF="g77_20.html#SEC636">Large Automatic Arrays</A>
+<LI><A HREF="g77_20.html#SEC637">Support for Threads</A>
+<LI><A HREF="g77_20.html#SEC612">Increasing Precision/Range</A>
+<LI><A HREF="g77_20.html#SEC638">Enabling Debug Lines</A>
+
+Better diagnostics:
+<LI><A HREF="g77_20.html#SEC639">Better Warnings</A>
+<LI><A HREF="g77_20.html#SEC640">Gracefully Handle Sensible Bad Code</A>
+<LI><A HREF="g77_20.html#SEC641">Non-standard Conversions</A>
+<LI><A HREF="g77_20.html#SEC642">Non-standard Intrinsics</A>
+<LI><A HREF="g77_20.html#SEC643">Modifying DO Variable</A>
+<LI><A HREF="g77_20.html#SEC644">Better Pedantic Compilation</A>
+<LI><A HREF="g77_20.html#SEC645">Warn About Implicit Conversions</A>
+<LI><A HREF="g77_20.html#SEC646">Invalid Use of Hollerith Constant</A>
+<LI><A HREF="g77_20.html#SEC647">Dummy Array Without Dimensioning Dummy</A>
+<LI><A HREF="g77_20.html#SEC648">Invalid FORMAT Specifiers</A>
+<LI><A HREF="g77_20.html#SEC649">Ambiguous Dialects</A>
+<LI><A HREF="g77_20.html#SEC650">Unused Labels</A>
+<LI><A HREF="g77_20.html#SEC651">Informational Messages</A>
+
+Run-time facilities:
+<LI><A HREF="g77_20.html#SEC652">Uninitialized Variables at Run Time</A>
+<LI><A HREF="g77_20.html#SEC653">Portable Unformatted Files</A>
+<LI><A HREF="g77_20.html#SEC654">Better List-directed I/O</A>
+<LI><A HREF="g77_20.html#SEC655">Default to Console I/O</A>
+
+Debugging:
+<LI><A HREF="g77_20.html#SEC656">Labels Visible to Debugger</A>
+</UL>
+
+
+
+<H3><A NAME="SEC606" HREF="g77_toc.html#TOC606">Better Source Model</A></H3>
+
+<P>
+<CODE>g77</CODE> needs to provide, as the default source-line model,
+a "pure visual" mode, where
+the interpretation of a source program in this mode can be accurately
+determined by a user looking at a traditionally displayed rendition
+of the program (assuming the user knows whether the program is fixed
+or free form).
+
+</P>
+<P>
+The design should assume the user cannot tell tabs from spaces
+and cannot see trailing spaces on lines, but has canonical tab stops
+and, for fixed-form source, has the ability to always know exactly
+where column 72 is (since the Fortran standard itself requires
+this for fixed-form source).
+
+</P>
+<P>
+This would change the default treatment of fixed-form source
+to not treat lines with tabs as if they were infinitely long--instead,
+they would end at column 72 just as if the tabs were replaced
+by spaces in the canonical way.
+
+</P>
+<P>
+As part of this, provide common alternate models (Digital, <CODE>f2c</CODE>,
+and so on) via command-line options.
+This includes allowing arbitrarily long
+lines for free-form source as well as fixed-form source and providing
+various limits and diagnostics as appropriate.
+
+</P>
+<P>
+<A NAME="IDX2138"></A>
+<A NAME="IDX2139"></A>
+Also, <CODE>g77</CODE> should offer, perhaps even default to, warnings
+when characters beyond the last valid column are anything other
+than spaces.
+This would mean code with "sequence numbers" in columns 73 through 80
+would be rejected, and there's a lot of that kind of code around,
+but one of the most frequent bugs encountered by new users is
+accidentally writing fixed-form source code into and beyond
+column 73.
+So, maybe the users of old code would be able to more easily handle
+having to specify, say, a <SAMP>`-Wno-col73to80'</SAMP> option.
+
+</P>
+
+
+<H3><A NAME="SEC607" HREF="g77_toc.html#TOC607">Fortran 90 Support</A></H3>
+<P>
+<A NAME="IDX2140"></A>
+<A NAME="IDX2141"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> does not support many of the features that
+distinguish Fortran 90 (and, now, Fortran 95) from
+ANSI FORTRAN 77.
+
+</P>
+<P>
+Some Fortran 90 features are supported, because they
+make sense to offer even to die-hard users of F77.
+For example, many of them codify various ways F77 has
+been extended to meet users' needs during its tenure,
+so <CODE>g77</CODE> might as well offer them as the primary
+way to meet those same needs, even if it offers compatibility
+with one or more of the ways those needs were met
+by other F77 compilers in the industry.
+
+</P>
+<P>
+Still, many important F90 features are not supported,
+because no attempt has been made to research each and
+every feature and assess its viability in <CODE>g77</CODE>.
+In the meantime, users who need those features must
+use Fortran 90 compilers anyway, and the best approach
+to adding some F90 features to GNU Fortran might well be
+to fund a comprehensive project to create GNU Fortran 95.
+
+</P>
+
+
+<H3><A NAME="SEC608" HREF="g77_toc.html#TOC608">Intrinsics in <CODE>PARAMETER</CODE> Statements</A></H3>
+<P>
+<A NAME="IDX2142"></A>
+<A NAME="IDX2143"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't allow intrinsics in <CODE>PARAMETER</CODE> statements.
+This feature is considered to be absolutely vital, even though it
+is not standard-conforming, and is scheduled for version 0.6.
+
+</P>
+<P>
+Related to this, <CODE>g77</CODE> doesn't allow non-integral
+exponentiation in <CODE>PARAMETER</CODE> statements, such as
+<SAMP>`PARAMETER (R=2**.25)'</SAMP>.
+It is unlikely <CODE>g77</CODE> will ever support this feature,
+as doing it properly requires complete emulation of
+a target computer's floating-point facilities when
+building <CODE>g77</CODE> as a cross-compiler.
+But, if the <CODE>gcc</CODE> back end is enhanced to provide
+such a facility, <CODE>g77</CODE> will likely use that facility
+in implementing this feature soon afterwards.
+
+</P>
+
+
+<H3><A NAME="SEC609" HREF="g77_toc.html#TOC609">Arbitrary Concatenation</A></H3>
+<P>
+<A NAME="IDX2144"></A>
+<A NAME="IDX2145"></A>
+<A NAME="IDX2146"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support arbitrary operands for concatenation
+in contexts where run-time allocation is required.
+For example:
+
+</P>
+
+<PRE>
+SUBROUTINE X(A)
+CHARACTER*(*) A
+CALL FOO(A // 'suffix')
+</PRE>
+
+
+
+<H3><A NAME="SEC610" HREF="g77_toc.html#TOC610"><CODE>SELECT CASE</CODE> on <CODE>CHARACTER</CODE> Type</A></H3>
+
+<P>
+Character-type selector/cases for <CODE>SELECT CASE</CODE> currently
+are not supported.
+
+</P>
+
+
+<H3><A NAME="SEC611" HREF="g77_toc.html#TOC611"><CODE>RECURSIVE</CODE> Keyword</A></H3>
+<P>
+<A NAME="IDX2147"></A>
+<A NAME="IDX2148"></A>
+<A NAME="IDX2149"></A>
+<A NAME="IDX2150"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support the <CODE>RECURSIVE</CODE> keyword that
+F90 compilers do.
+Nor does it provide any means for compiling procedures
+designed to do recursion.
+
+</P>
+<P>
+All recursive code can be rewritten to not use recursion,
+but the result is not pretty.
+
+</P>
+
+
+<H3><A NAME="SEC612" HREF="g77_toc.html#TOC612">Increasing Precision/Range</A></H3>
+<P>
+<A NAME="IDX2151"></A>
+<A NAME="IDX2152"></A>
+<A NAME="IDX2153"></A>
+<A NAME="IDX2154"></A>
+<A NAME="IDX2155"></A>
+<A NAME="IDX2156"></A>
+<A NAME="IDX2157"></A>
+<A NAME="IDX2158"></A>
+<A NAME="IDX2159"></A>
+<A NAME="IDX2160"></A>
+
+</P>
+<P>
+Some compilers, such as <CODE>f2c</CODE>, have an option (<SAMP>`-r8'</SAMP>,
+<SAMP>`-qrealsize=8'</SAMP> or
+similar) that provides automatic treatment of <CODE>REAL</CODE>
+entities such that they have twice the storage size, and
+a corresponding increase in the range and precision, of what
+would normally be the <CODE>REAL(KIND=1)</CODE> (default <CODE>REAL</CODE>) type.
+(This affects <CODE>COMPLEX</CODE> the same way.)
+
+</P>
+<P>
+They also typically offer another option (<SAMP>`-i8'</SAMP>) to increase
+<CODE>INTEGER</CODE> entities so they are twice as large
+(with roughly twice as much range).
+
+</P>
+<P>
+(There are potential pitfalls in using these options.)
+
+</P>
+<P>
+<CODE>g77</CODE> does not yet offer any option that performs these
+kinds of transformations.
+Part of the problem is the lack of detailed specifications regarding
+exactly how these options affect the interpretation of constants,
+intrinsics, and so on.
+
+</P>
+<P>
+Until <CODE>g77</CODE> addresses this need, programmers could improve
+the portability of their code by modifying it to not require
+compile-time options to produce correct results.
+Some free tools are available which may help, specifically
+in Toolpack (which one would expect to be sound) and the <TT>`fortran'</TT>
+section of the Netlib repository.
+
+</P>
+<P>
+Use of preprocessors can provide a fairly portable means
+to work around the lack of widely portable methods in the Fortran
+language itself (though increasing acceptance of Fortran 90 would
+alleviate this problem).
+
+</P>
+
+
+<H3><A NAME="SEC613" HREF="g77_toc.html#TOC613">Popular Non-standard Types</A></H3>
+<P>
+<A NAME="IDX2161"></A>
+<A NAME="IDX2162"></A>
+<A NAME="IDX2163"></A>
+<A NAME="IDX2164"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't fully support <CODE>INTEGER*2</CODE>, <CODE>LOGICAL*1</CODE>,
+and similar.
+Version 0.6 will provide full support for this very
+popular set of features.
+In the meantime, version 0.5.18 provides rudimentary support
+for them.
+
+</P>
+
+
+<H3><A NAME="SEC614" HREF="g77_toc.html#TOC614">Full Support for Compiler Types</A></H3>
+
+<P>
+<A NAME="IDX2165"></A>
+<A NAME="IDX2166"></A>
+<A NAME="IDX2167"></A>
+<A NAME="IDX2168"></A>
+<CODE>g77</CODE> doesn't support <CODE>INTEGER</CODE>, <CODE>REAL</CODE>, and <CODE>COMPLEX</CODE> equivalents
+for <EM>all</EM> applicable back-end-supported types (<CODE>char</CODE>, <CODE>short int</CODE>,
+<CODE>int</CODE>, <CODE>long int</CODE>, <CODE>long long int</CODE>, and <CODE>long double</CODE>).
+This means providing intrinsic support, and maybe constant
+support (using F90 syntax) as well, and, for most
+machines will result in automatic support of <CODE>INTEGER*1</CODE>,
+<CODE>INTEGER*2</CODE>, <CODE>INTEGER*8</CODE>, maybe even <CODE>REAL*16</CODE>,
+and so on.
+This is scheduled for version 0.6.
+
+</P>
+
+
+<H3><A NAME="SEC615" HREF="g77_toc.html#TOC615">Array Bounds Expressions</A></H3>
+<P>
+<A NAME="IDX2169"></A>
+<A NAME="IDX2170"></A>
+<A NAME="IDX2171"></A>
+<A NAME="IDX2172"></A>
+<A NAME="IDX2173"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support more general expressions to dimension
+arrays, such as array element references, function
+references, etc.
+
+</P>
+<P>
+For example, <CODE>g77</CODE> currently does not accept the following:
+
+</P>
+
+<PRE>
+SUBROUTINE X(M, N)
+INTEGER N(10), M(N(2), N(1))
+</PRE>
+
+
+
+<H3><A NAME="SEC616" HREF="g77_toc.html#TOC616">POINTER Statements</A></H3>
+<P>
+<A NAME="IDX2174"></A>
+<A NAME="IDX2175"></A>
+<A NAME="IDX2176"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support pointers or allocatable objects
+(other than automatic arrays).
+This set of features is
+probably considered just behind intrinsics
+in <CODE>PARAMETER</CODE> statements on the list of large,
+important things to add to <CODE>g77</CODE>.
+
+</P>
+<P>
+In the meantime, consider using the <CODE>INTEGER(KIND=7)</CODE>
+declaration to specify that a variable must be
+able to hold a pointer.
+This construct is not portable to other non-GNU compilers,
+but it is portable to all machines GNU Fortran supports
+when <CODE>g77</CODE> is used.
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC66">Functions and Subroutines</A>, for information on
+<CODE>%VAL()</CODE>, <CODE>%REF()</CODE>, and <CODE>%DESCR()</CODE>
+constructs, which are useful for passing pointers to
+procedures written in languages other than Fortran.
+
+</P>
+
+
+<H3><A NAME="SEC617" HREF="g77_toc.html#TOC617">Sensible Non-standard Constructs</A></H3>
+
+<P>
+<CODE>g77</CODE> rejects things other compilers accept,
+like <SAMP>`INTRINSIC SQRT,SQRT'</SAMP>.
+As time permits in the future, some of these things that are easy for
+humans to read and write and unlikely to be intended to mean something
+else will be accepted by <CODE>g77</CODE> (though <SAMP>`-fpedantic'</SAMP> should
+trigger warnings about such non-standard constructs).
+
+</P>
+<P>
+Until <CODE>g77</CODE> no longer gratuitously rejects sensible code,
+you might as well fix your code
+to be more standard-conforming and portable.
+
+</P>
+<P>
+The kind of case that is important to except from the
+recommendation to change your code is one where following
+good coding rules would force you to write non-standard
+code that nevertheless has a clear meaning.
+
+</P>
+<P>
+For example, when writing an <CODE>INCLUDE</CODE> file that
+defines a common block, it might be appropriate to
+include a <CODE>SAVE</CODE> statement for the common block
+(such as <SAMP>`SAVE /CBLOCK/'</SAMP>), so that variables
+defined in the common block retain their values even
+when all procedures declaring the common block become
+inactive (return to their callers).
+
+</P>
+<P>
+However, putting <CODE>SAVE</CODE> statements in an <CODE>INCLUDE</CODE>
+file would prevent otherwise standard-conforming code
+from also specifying the <CODE>SAVE</CODE> statement, by itself,
+to indicate that all local variables and arrays are to
+have the <CODE>SAVE</CODE> attribute.
+
+</P>
+<P>
+For this reason, <CODE>g77</CODE> already has been changed to
+allow this combination, because although the general
+problem of gratuitously rejecting unambiguous and
+"safe" constructs still exists in <CODE>g77</CODE>, this
+particular construct was deemed useful enough that
+it was worth fixing <CODE>g77</CODE> for just this case.
+
+</P>
+<P>
+So, while there is no need to change your code
+to avoid using this particular construct, there
+might be other, equally appropriate but non-standard
+constructs, that you shouldn't have to stop using
+just because <CODE>g77</CODE> (or any other compiler)
+gratuitously rejects it.
+
+</P>
+<P>
+Until the general problem is solved, if you have
+any such construct you believe is worthwhile
+using (e.g. not just an arbitrary, redundant
+specification of an attribute), please submit a
+bug report with an explanation, so we can consider
+fixing <CODE>g77</CODE> just for cases like yours.
+
+</P>
+
+
+<H3><A NAME="SEC618" HREF="g77_toc.html#TOC618"><CODE>READONLY</CODE> Keyword</A></H3>
+<P>
+<A NAME="IDX2177"></A>
+
+</P>
+<P>
+Support for <CODE>READONLY</CODE>, in <CODE>OPEN</CODE> statements,
+requires <CODE>libg2c</CODE> support,
+to make sure that <SAMP>`CLOSE(...,STATUS='DELETE')'</SAMP>
+does not delete a file opened on a unit
+with the <CODE>READONLY</CODE> keyword,
+and perhaps to trigger a fatal diagnostic
+if a <CODE>WRITE</CODE> or <CODE>PRINT</CODE>
+to such a unit is attempted.
+
+</P>
+<P>
+<EM>Note:</EM> It is not sufficient for <CODE>g77</CODE> and <CODE>libg2c</CODE>
+(its version of <CODE>libf2c</CODE>)
+to assume that <CODE>READONLY</CODE> does not need some kind of explicit support
+at run time,
+due to UNIX systems not (generally) needing it.
+<CODE>g77</CODE> is not just a UNIX-based compiler!
+
+</P>
+<P>
+Further, mounting of non-UNIX filesystems on UNIX systems
+(such as via NFS)
+might require proper <CODE>READONLY</CODE> support.
+
+</P>
+<P>
+<A NAME="IDX2178"></A>
+(Similar issues might be involved with supporting the <CODE>SHARED</CODE>
+keyword.)
+
+</P>
+
+
+<H3><A NAME="SEC619" HREF="g77_toc.html#TOC619"><CODE>FLUSH</CODE> Statement</A></H3>
+
+<P>
+<CODE>g77</CODE> could perhaps use a <CODE>FLUSH</CODE> statement that
+does what <SAMP>`CALL FLUSH'</SAMP> does,
+but that supports <SAMP>`*'</SAMP> as the unit designator (same unit as for
+<CODE>PRINT</CODE>) and accepts <CODE>ERR=</CODE> and/or <CODE>IOSTAT=</CODE>
+specifiers.
+
+</P>
+
+
+<H3><A NAME="SEC620" HREF="g77_toc.html#TOC620">Expressions in <CODE>FORMAT</CODE> Statements</A></H3>
+<P>
+<A NAME="IDX2179"></A>
+<A NAME="IDX2180"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support <SAMP>`FORMAT(I&#60;J&#62;)'</SAMP> and the like.
+Supporting this requires a significant redesign or replacement
+of <CODE>libg2c</CODE>.
+
+</P>
+<P>
+However, <CODE>g77</CODE> does support
+this construct when the expression is constant
+(as of version 0.5.22).
+For example:
+
+</P>
+
+<PRE>
+      PARAMETER (IWIDTH = 12)
+10    FORMAT (I&#60;IWIDTH&#62;)
+</PRE>
+
+<P>
+Otherwise, at least for output (<CODE>PRINT</CODE> and
+<CODE>WRITE</CODE>), Fortran code making use of this feature can
+be rewritten to avoid it by constructing the <CODE>FORMAT</CODE>
+string in a <CODE>CHARACTER</CODE> variable or array, then
+using that variable or array in place of the <CODE>FORMAT</CODE>
+statement label to do the original <CODE>PRINT</CODE> or <CODE>WRITE</CODE>.
+
+</P>
+<P>
+Many uses of this feature on input can be rewritten this way
+as well, but not all can.
+For example, this can be rewritten:
+
+</P>
+
+<PRE>
+      READ 20, I
+20    FORMAT (I&#60;J&#62;)
+</PRE>
+
+<P>
+However, this cannot, in general, be rewritten, especially
+when <CODE>ERR=</CODE> and <CODE>END=</CODE> constructs are employed:
+
+</P>
+
+<PRE>
+      READ 30, J, I
+30    FORMAT (I&#60;J&#62;)
+</PRE>
+
+
+
+<H3><A NAME="SEC621" HREF="g77_toc.html#TOC621">Explicit Assembler Code</A></H3>
+
+<P>
+<CODE>g77</CODE> needs to provide some way, a la <CODE>gcc</CODE>, for <CODE>g77</CODE>
+code to specify explicit assembler code.
+
+</P>
+
+
+<H3><A NAME="SEC622" HREF="g77_toc.html#TOC622">Q Edit Descriptor</A></H3>
+<P>
+<A NAME="IDX2181"></A>
+<A NAME="IDX2182"></A>
+<A NAME="IDX2183"></A>
+
+</P>
+<P>
+The <CODE>Q</CODE> edit descriptor in <CODE>FORMAT</CODE>s isn't supported.
+(This is meant to get the number of characters remaining in an input record.)
+Supporting this requires a significant redesign or replacement
+of <CODE>libg2c</CODE>.
+
+</P>
+<P>
+A workaround might be using internal I/O or the stream-based intrinsics.
+See section <A HREF="g77_12.html#SEC179">FGetC Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H3><A NAME="SEC623" HREF="g77_toc.html#TOC623">Old-style PARAMETER Statements</A></H3>
+<P>
+<A NAME="IDX2184"></A>
+<A NAME="IDX2185"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't accept <SAMP>`PARAMETER I=1'</SAMP>.
+Supporting this obsolete form of
+the <CODE>PARAMETER</CODE> statement would not be particularly hard, as most of the
+parsing code is already in place and working.
+
+</P>
+<P>
+Until time/money is
+spent implementing it, you might as well fix your code to use the
+standard form, <SAMP>`PARAMETER (I=1)'</SAMP> (possibly needing
+<SAMP>`INTEGER I'</SAMP> preceding the <CODE>PARAMETER</CODE> statement as well,
+otherwise, in the obsolete form of <CODE>PARAMETER</CODE>, the
+type of the variable is set from the type of the constant being
+assigned to it).
+
+</P>
+
+
+<H3><A NAME="SEC624" HREF="g77_toc.html#TOC624"><CODE>TYPE</CODE> and <CODE>ACCEPT</CODE> I/O Statements</A></H3>
+<P>
+<A NAME="IDX2186"></A>
+<A NAME="IDX2187"></A>
+<A NAME="IDX2188"></A>
+<A NAME="IDX2189"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support the I/O statements <CODE>TYPE</CODE> and
+<CODE>ACCEPT</CODE>.
+These are common extensions that should be easy to support,
+but also are fairly easy to work around in user code.
+
+</P>
+<P>
+Generally, any <SAMP>`TYPE fmt,list'</SAMP> I/O statement can be replaced
+by <SAMP>`PRINT fmt,list'</SAMP>.
+And, any <SAMP>`ACCEPT fmt,list'</SAMP> statement can be
+replaced by <SAMP>`READ fmt,list'</SAMP>.
+
+</P>
+
+
+<H3><A NAME="SEC625" HREF="g77_toc.html#TOC625"><CODE>STRUCTURE</CODE>, <CODE>UNION</CODE>, <CODE>RECORD</CODE>, <CODE>MAP</CODE></A></H3>
+<P>
+<A NAME="IDX2190"></A>
+<A NAME="IDX2191"></A>
+<A NAME="IDX2192"></A>
+<A NAME="IDX2193"></A>
+<A NAME="IDX2194"></A>
+<A NAME="IDX2195"></A>
+<A NAME="IDX2196"></A>
+<A NAME="IDX2197"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support <CODE>STRUCTURE</CODE>, <CODE>UNION</CODE>, <CODE>RECORD</CODE>,
+<CODE>MAP</CODE>.
+This set of extensions is quite a bit
+lower on the list of large, important things to add to <CODE>g77</CODE>, partly
+because it requires a great deal of work either upgrading or
+replacing <CODE>libg2c</CODE>.
+
+</P>
+
+
+<H3><A NAME="SEC626" HREF="g77_toc.html#TOC626"><CODE>OPEN</CODE>, <CODE>CLOSE</CODE>, and <CODE>INQUIRE</CODE> Keywords</A></H3>
+<P>
+<A NAME="IDX2198"></A>
+<A NAME="IDX2199"></A>
+<A NAME="IDX2200"></A>
+<A NAME="IDX2201"></A>
+<A NAME="IDX2202"></A>
+<A NAME="IDX2203"></A>
+<A NAME="IDX2204"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't have support for keywords such as <CODE>DISP='DELETE'</CODE> in
+the <CODE>OPEN</CODE>, <CODE>CLOSE</CODE>, and <CODE>INQUIRE</CODE> statements.
+These extensions are easy to add to <CODE>g77</CODE> itself, but
+require much more work on <CODE>libg2c</CODE>.
+
+</P>
+<P>
+<A NAME="IDX2205"></A>
+<A NAME="IDX2206"></A>
+<A NAME="IDX2207"></A>
+<A NAME="IDX2208"></A>
+<A NAME="IDX2209"></A>
+<CODE>g77</CODE> doesn't support <CODE>FORM='PRINT'</CODE> or an equivalent to
+translate the traditional `carriage control' characters in column 1 of
+output to use backspaces, carriage returns and the like.  However
+programs exist to translate them in output files (or standard output).
+These are typically called either <CODE>fpr</CODE> or <CODE>asa</CODE>.  You can get
+a version of <CODE>asa</CODE> from
+<A HREF="ftp://sunsite.unc.edu/pub/Linux/devel/lang/fortran"><TT>ftp://sunsite.unc.edu/pub/Linux/devel/lang/fortran</TT></A> for GNU
+systems which will probably build easily on other systems.
+Alternatively, <CODE>fpr</CODE> is in BSD distributions in various archive
+sites.
+
+</P>
+
+
+
+<H3><A NAME="SEC627" HREF="g77_toc.html#TOC627"><CODE>ENCODE</CODE> and <CODE>DECODE</CODE></A></H3>
+<P>
+<A NAME="IDX2210"></A>
+<A NAME="IDX2211"></A>
+<A NAME="IDX2212"></A>
+<A NAME="IDX2213"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support <CODE>ENCODE</CODE> or <CODE>DECODE</CODE>.
+
+</P>
+<P>
+These statements are best replaced by READ and WRITE statements
+involving internal files (CHARACTER variables and arrays).
+
+</P>
+<P>
+For example, replace a code fragment like
+
+</P>
+
+<PRE>
+      INTEGER*1 LINE(80)
+...
+      DECODE (80, 9000, LINE) A, B, C
+...
+9000  FORMAT (1X, 3(F10.5))
+</PRE>
+
+<P>
+with:
+
+</P>
+
+<PRE>
+      CHARACTER*80 LINE
+...
+      READ (UNIT=LINE, FMT=9000) A, B, C
+...
+9000  FORMAT (1X, 3(F10.5))
+</PRE>
+
+<P>
+Similarly, replace a code fragment like
+
+</P>
+
+<PRE>
+      INTEGER*1 LINE(80)
+...
+      ENCODE (80, 9000, LINE) A, B, C
+...
+9000  FORMAT (1X, 'OUTPUT IS ', 3(F10.5))
+</PRE>
+
+<P>
+with:
+
+</P>
+
+<PRE>
+      CHARACTER*80 LINE
+...
+      WRITE (UNIT=LINE, FMT=9000) A, B, C
+...
+9000  FORMAT (1X, 'OUTPUT IS ', 3(F10.5))
+</PRE>
+
+<P>
+It is entirely possible that <CODE>ENCODE</CODE> and <CODE>DECODE</CODE> will
+be supported by a future version of <CODE>g77</CODE>.
+
+</P>
+
+
+<H3><A NAME="SEC628" HREF="g77_toc.html#TOC628"><CODE>AUTOMATIC</CODE> Statement</A></H3>
+<P>
+<A NAME="IDX2214"></A>
+<A NAME="IDX2215"></A>
+<A NAME="IDX2216"></A>
+<A NAME="IDX2217"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't support the <CODE>AUTOMATIC</CODE> statement that
+<CODE>f2c</CODE> does.
+
+</P>
+<P>
+<CODE>AUTOMATIC</CODE> would identify a variable or array
+as not being <CODE>SAVE</CODE>'d, which is normally the default,
+but which would be especially useful for code that, <EM>generally</EM>,
+needed to be compiled with the <SAMP>`-fno-automatic'</SAMP> option.
+
+</P>
+<P>
+<CODE>AUTOMATIC</CODE> also would serve as a hint to the compiler that placing
+the variable or array--even a very large array--on the stack is acceptable.
+
+</P>
+<P>
+<CODE>AUTOMATIC</CODE> would not, by itself, designate the containing procedure
+as recursive.
+
+</P>
+<P>
+<CODE>AUTOMATIC</CODE> should work syntactically like <CODE>SAVE</CODE>,
+in that <CODE>AUTOMATIC</CODE> with no variables listed should apply to
+all pertinent variables and arrays
+(which would not include common blocks or their members).
+
+</P>
+<P>
+Variables and arrays denoted as <CODE>AUTOMATIC</CODE>
+would not be permitted to be initialized via <CODE>DATA</CODE>
+or other specification of any initial values,
+requiring explicit initialization,
+such as via assignment statements.
+
+</P>
+<P>
+<A NAME="IDX2218"></A>
+<A NAME="IDX2219"></A>
+Perhaps <CODE>UNSAVE</CODE> and <CODE>STATIC</CODE>,
+as strict semantic opposites to <CODE>SAVE</CODE> and <CODE>AUTOMATIC</CODE>,
+should be provided as well.
+
+</P>
+
+
+<H3><A NAME="SEC629" HREF="g77_toc.html#TOC629">Suppressing Space Padding of Source Lines</A></H3>
+
+<P>
+<CODE>g77</CODE> should offer VXT-Fortran-style suppression of virtual
+spaces at the end of a source line
+if an appropriate command-line option is specified.
+
+</P>
+<P>
+This affects cases where
+a character constant is continued onto the next line in a fixed-form
+source file, as in the following example:
+
+</P>
+
+<PRE>
+10    PRINT *,'HOW MANY
+     1 SPACES?'
+</PRE>
+
+<P>
+<CODE>g77</CODE>, and many other compilers, virtually extend
+the continued line through column 72 with spaces that become part
+of the character constant, but Digital Fortran normally didn't,
+leaving only one space between <SAMP>`MANY'</SAMP> and <SAMP>`SPACES?'</SAMP>
+in the output of the above statement.
+
+</P>
+<P>
+Fairly recently, at least one version of Digital Fortran
+was enhanced to provide the other behavior when a
+command-line option is specified, apparently due to demand
+from readers of the USENET group <TT>`comp.lang.fortran'</TT>
+to offer conformance to this widespread practice in the
+industry.
+<CODE>g77</CODE> should return the favor by offering conformance
+to Digital's approach to handling the above example.
+
+</P>
+
+
+<H3><A NAME="SEC630" HREF="g77_toc.html#TOC630">Fortran Preprocessor</A></H3>
+
+<P>
+<CODE>g77</CODE> should offer a preprocessor designed specifically
+for Fortran to replace <SAMP>`cpp -traditional'</SAMP>.
+There are several out there worth evaluating, at least.
+
+</P>
+<P>
+Such a preprocessor would recognize Hollerith constants,
+properly parse comments and character constants, and so on.
+It might also recognize, process, and thus preprocess
+files included via the <CODE>INCLUDE</CODE> directive.
+
+</P>
+
+
+<H3><A NAME="SEC631" HREF="g77_toc.html#TOC631">Bit Operations on Floating-point Data</A></H3>
+<P>
+<A NAME="IDX2220"></A>
+<A NAME="IDX2221"></A>
+<A NAME="IDX2222"></A>
+<A NAME="IDX2223"></A>
+<A NAME="IDX2224"></A>
+<A NAME="IDX2225"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> does not allow <CODE>REAL</CODE> and other non-integral types for
+arguments to intrinsics like <CODE>And</CODE>, <CODE>Or</CODE>, and <CODE>Shift</CODE>.
+
+</P>
+<P>
+For example, this program is rejected by <CODE>g77</CODE>, because
+the intrinsic <CODE>Iand</CODE> does not accept <CODE>REAL</CODE> arguments:
+
+</P>
+
+<PRE>
+DATA A/7.54/, B/9.112/
+PRINT *, IAND(A, B)
+END
+</PRE>
+
+
+
+<H3><A NAME="SEC632" HREF="g77_toc.html#TOC632">Really Ugly Character Assignments</A></H3>
+
+<P>
+An option such as <SAMP>`-fugly-char'</SAMP> should be provided
+to allow
+
+</P>
+
+<PRE>
+REAL*8 A1
+DATA A1 / '12345678' /
+</PRE>
+
+<P>
+and:
+
+</P>
+
+<PRE>
+REAL*8 A1
+A1 = 'ABCDEFGH'
+</PRE>
+
+
+
+<H3><A NAME="SEC633" HREF="g77_toc.html#TOC633"><CODE>POSIX</CODE> Standard</A></H3>
+
+<P>
+<CODE>g77</CODE> should support the POSIX standard for Fortran.
+
+</P>
+
+
+<H3><A NAME="SEC634" HREF="g77_toc.html#TOC634">Floating-point Exception Handling</A></H3>
+<P>
+<A NAME="IDX2226"></A>
+<A NAME="IDX2227"></A>
+<A NAME="IDX2228"></A>
+<A NAME="IDX2229"></A>
+
+</P>
+<P>
+The <CODE>gcc</CODE> backend and, consequently, <CODE>g77</CODE>, currently provides no
+general control over whether or not floating-point exceptions are trapped or
+ignored.
+(Ignoring them typically results in NaN values being
+propagated in systems that conform to IEEE 754.)
+The behaviour is normally inherited from the system-dependent startup
+code, though some targets, such as the Alpha, have code generation
+options which change the behaviour.
+
+</P>
+<P>
+Most systems provide some C-callable mechanism to change this; this can
+be invoked at startup using <CODE>gcc</CODE>'s <CODE>constructor</CODE> attribute.
+For example, just compiling and linking the following C code with your
+program will turn on exception trapping for the "common" exceptions
+on an x86-based GNU system:
+
+</P>
+
+<PRE>
+#include &#60;fpu_control.h&#62;
+static void __attribute__ ((constructor))
+trapfpe ()
+{
+  __setfpucw (_FPU_DEFAULT &#38;
+              ~(_FPU_MASK_IM | _FPU_MASK_ZM | _FPU_MASK_OM));
+}
+</PRE>
+
+<P>
+A convenient trick is to compile this something like:
+
+<PRE>
+gcc -o libtrapfpe.a trapfpe.c
+</PRE>
+
+<P>
+and then use it by adding <SAMP>`-trapfpe'</SAMP> to the <CODE>g77</CODE> command line
+when linking.
+
+</P>
+
+
+<H3><A NAME="SEC635" HREF="g77_toc.html#TOC635">Nonportable Conversions</A></H3>
+<P>
+<A NAME="IDX2230"></A>
+<A NAME="IDX2231"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't accept some particularly nonportable,
+silent data-type conversions such as <CODE>LOGICAL</CODE>
+to <CODE>REAL</CODE> (as in <SAMP>`A=.FALSE.'</SAMP>, where <SAMP>`A'</SAMP>
+is type <CODE>REAL</CODE>), that other compilers might
+quietly accept.
+
+</P>
+<P>
+Some of these conversions are accepted by <CODE>g77</CODE>
+when the <SAMP>`-fugly-logint'</SAMP> option is specified.
+Perhaps it should accept more or all of them.
+
+</P>
+
+
+<H3><A NAME="SEC636" HREF="g77_toc.html#TOC636">Large Automatic Arrays</A></H3>
+<P>
+<A NAME="IDX2232"></A>
+<A NAME="IDX2233"></A>
+
+</P>
+<P>
+Currently, automatic arrays always are allocated on the stack.
+For situations where the stack cannot be made large enough,
+<CODE>g77</CODE> should offer a compiler option that specifies
+allocation of automatic arrays in heap storage.
+
+</P>
+
+
+<H3><A NAME="SEC637" HREF="g77_toc.html#TOC637">Support for Threads</A></H3>
+<P>
+<A NAME="IDX2234"></A>
+<A NAME="IDX2235"></A>
+
+</P>
+<P>
+Neither the code produced by <CODE>g77</CODE> nor the <CODE>libg2c</CODE> library
+are thread-safe, nor does <CODE>g77</CODE> have support for parallel processing
+(other than the instruction-level parallelism available on some
+processors).
+A package such as PVM might help here.
+
+</P>
+
+
+<H3><A NAME="SEC638" HREF="g77_toc.html#TOC638">Enabling Debug Lines</A></H3>
+<P>
+<A NAME="IDX2236"></A>
+<A NAME="IDX2237"></A>
+
+</P>
+<P>
+An option such as <SAMP>`-fdebug-lines'</SAMP> should be provided
+to turn fixed-form lines beginning with <SAMP>`D'</SAMP>
+to be treated as if they began with a space,
+instead of as if they began with a <SAMP>`C'</SAMP>
+(as comment lines).
+
+</P>
+
+
+<H3><A NAME="SEC639" HREF="g77_toc.html#TOC639">Better Warnings</A></H3>
+
+<P>
+Because of how <CODE>g77</CODE> generates code via the back end,
+it doesn't always provide warnings the user wants.
+Consider:
+
+</P>
+
+<PRE>
+PROGRAM X
+PRINT *, A
+END
+</PRE>
+
+<P>
+Currently, the above is not flagged as a case of
+using an uninitialized variable,
+because <CODE>g77</CODE> generates a run-time library call that looks,
+to the GBE, like it might actually <EM>modify</EM> <SAMP>`A'</SAMP> at run time.
+(And, in fact, depending on the previous run-time library call,
+it would!)
+
+</P>
+<P>
+Fixing this requires one of the following:
+
+</P>
+
+<UL>
+<LI>
+
+Switch to new library, <CODE>libg77</CODE>, that provides
+a more "clean" interface,
+vis-a-vis input, output, and modified arguments,
+so the GBE can tell what's going on.
+
+This would provide a pretty big performance improvement,
+at least theoretically, and, ultimately, in practice,
+for some types of code.
+
+<LI>
+
+Have <CODE>g77</CODE> pass a pointer to a temporary
+containing a copy of <SAMP>`A'</SAMP>,
+instead of to <SAMP>`A'</SAMP> itself.
+The GBE would then complain about the copy operation
+involving a potentially uninitialized variable.
+
+This might also provide a performance boost for some code,
+because <SAMP>`A'</SAMP> might then end up living in a register,
+which could help with inner loops.
+
+<LI>
+
+Have <CODE>g77</CODE> use a GBE construct similar to <CODE>ADDR_EXPR</CODE>
+but with extra information on the fact that the
+item pointed to won't be modified
+(a la <CODE>const</CODE> in C).
+
+Probably the best solution for now, but not quite trivial
+to implement in the general case.
+Worth considering after <CODE>g77</CODE> 0.6 is considered
+pretty solid.
+</UL>
+
+
+
+<H3><A NAME="SEC640" HREF="g77_toc.html#TOC640">Gracefully Handle Sensible Bad Code</A></H3>
+
+<P>
+<CODE>g77</CODE> generally should continue processing for
+warnings and recoverable (user) errors whenever possible--that
+is, it shouldn't gratuitously make bad or useless code.
+
+</P>
+<P>
+For example:
+
+</P>
+
+<PRE>
+INTRINSIC ZABS
+CALL FOO(ZABS)
+END
+</PRE>
+
+<P>
+When compiling the above with <SAMP>`-ff2c-intrinsics-disable'</SAMP>,
+<CODE>g77</CODE> should indeed complain about passing <CODE>ZABS</CODE>,
+but it still should compile, instead of rejecting
+the entire <CODE>CALL</CODE> statement.
+(Some of this is related to improving
+the compiler internals to improve how statements are analyzed.)
+
+</P>
+
+
+<H3><A NAME="SEC641" HREF="g77_toc.html#TOC641">Non-standard Conversions</A></H3>
+
+<P>
+<SAMP>`-Wconversion'</SAMP> and related should flag places where non-standard
+conversions are found.
+Perhaps much of this would be part of <SAMP>`-Wugly*'</SAMP>.
+
+</P>
+
+
+<H3><A NAME="SEC642" HREF="g77_toc.html#TOC642">Non-standard Intrinsics</A></H3>
+
+<P>
+<CODE>g77</CODE> needs a new option, like <SAMP>`-Wintrinsics'</SAMP>, to warn about use of
+non-standard intrinsics without explicit <CODE>INTRINSIC</CODE> statements for them.
+This would help find code that might fail silently when ported to another
+compiler.
+
+</P>
+
+
+<H3><A NAME="SEC643" HREF="g77_toc.html#TOC643">Modifying <CODE>DO</CODE> Variable</A></H3>
+
+<P>
+<CODE>g77</CODE> should warn about modifying <CODE>DO</CODE> variables
+via <CODE>EQUIVALENCE</CODE>.
+(The internal information gathered to produce this warning
+might also be useful in setting the
+internal "doiter" flag for a variable or even array
+reference within a loop, since that might produce faster code someday.)
+
+</P>
+<P>
+For example, this code is invalid, so <CODE>g77</CODE> should warn about
+the invalid assignment to <SAMP>`NOTHER'</SAMP>:
+
+</P>
+
+<PRE>
+EQUIVALENCE (I, NOTHER)
+DO I = 1, 100
+   IF (I.EQ. 10) NOTHER = 20
+END DO
+</PRE>
+
+
+
+<H3><A NAME="SEC644" HREF="g77_toc.html#TOC644">Better Pedantic Compilation</A></H3>
+
+<P>
+<CODE>g77</CODE> needs to support <SAMP>`-fpedantic'</SAMP> more thoroughly,
+and use it only to generate
+warnings instead of rejecting constructs outright.
+Have it warn:
+if a variable that dimensions an array is not a dummy or placed
+explicitly in <CODE>COMMON</CODE> (F77 does not allow it to be
+placed in <CODE>COMMON</CODE> via <CODE>EQUIVALENCE</CODE>); if specification statements
+follow statement-function-definition statements; about all sorts of
+syntactic extensions.
+
+</P>
+
+
+<H3><A NAME="SEC645" HREF="g77_toc.html#TOC645">Warn About Implicit Conversions</A></H3>
+
+<P>
+<CODE>g77</CODE> needs a <SAMP>`-Wpromotions'</SAMP> option to warn if source code appears
+to expect automatic, silent, and
+somewhat dangerous compiler-assisted conversion of <CODE>REAL(KIND=1)</CODE>
+constants to <CODE>REAL(KIND=2)</CODE> based on context.
+
+</P>
+<P>
+For example, it would warn about cases like this:
+
+</P>
+
+<PRE>
+DOUBLE PRECISION FOO
+PARAMETER (TZPHI = 9.435784839284958)
+FOO = TZPHI * 3D0
+</PRE>
+
+
+
+<H3><A NAME="SEC646" HREF="g77_toc.html#TOC646">Invalid Use of Hollerith Constant</A></H3>
+
+<P>
+<CODE>g77</CODE> should disallow statements like <SAMP>`RETURN 2HAB'</SAMP>,
+which are invalid in both source forms
+(unlike <SAMP>`RETURN (2HAB)'</SAMP>,
+which probably still makes no sense but at least can
+be reliably parsed).
+Fixed-form processing rejects it, but not free-form, except
+in a way that is a bit difficult to understand.
+
+</P>
+
+
+<H3><A NAME="SEC647" HREF="g77_toc.html#TOC647">Dummy Array Without Dimensioning Dummy</A></H3>
+
+<P>
+<CODE>g77</CODE> should complain when a list of dummy arguments containing an
+adjustable dummy array does
+not also contain every variable listed in the dimension list of the
+adjustable array.
+
+</P>
+<P>
+Currently, <CODE>g77</CODE> does complain about a variable that
+dimensions an array but doesn't appear in any dummy list or <CODE>COMMON</CODE>
+area, but this needs to be extended to catch cases where it doesn't appear in
+every dummy list that also lists any arrays it dimensions.
+
+</P>
+<P>
+For example, <CODE>g77</CODE> should warn about the entry point <SAMP>`ALT'</SAMP>
+below, since it includes <SAMP>`ARRAY'</SAMP> but not <SAMP>`ISIZE'</SAMP> in its
+list of arguments:
+
+</P>
+
+<PRE>
+SUBROUTINE PRIMARY(ARRAY, ISIZE)
+REAL ARRAY(ISIZE)
+ENTRY ALT(ARRAY)
+</PRE>
+
+
+
+<H3><A NAME="SEC648" HREF="g77_toc.html#TOC648">Invalid FORMAT Specifiers</A></H3>
+
+<P>
+<CODE>g77</CODE> should check <CODE>FORMAT</CODE> specifiers for validity
+as it does <CODE>FORMAT</CODE> statements.
+
+</P>
+<P>
+For example, a diagnostic would be produced for:
+
+</P>
+
+<PRE>
+PRINT 'HI THERE!'  !User meant PRINT *, 'HI THERE!'
+</PRE>
+
+
+
+<H3><A NAME="SEC649" HREF="g77_toc.html#TOC649">Ambiguous Dialects</A></H3>
+
+<P>
+<CODE>g77</CODE> needs a set of options such as <SAMP>`-Wugly*'</SAMP>, <SAMP>`-Wautomatic'</SAMP>,
+<SAMP>`-Wvxt'</SAMP>, <SAMP>`-Wf90'</SAMP>, and so on.
+These would warn about places in the user's source where ambiguities
+are found, helpful in resolving ambiguities in the program's
+dialect or dialects.
+
+</P>
+
+
+<H3><A NAME="SEC650" HREF="g77_toc.html#TOC650">Unused Labels</A></H3>
+
+<P>
+<CODE>g77</CODE> should warn about unused labels when <SAMP>`-Wunused'</SAMP> is in effect.
+
+</P>
+
+
+<H3><A NAME="SEC651" HREF="g77_toc.html#TOC651">Informational Messages</A></H3>
+
+<P>
+<CODE>g77</CODE> needs an option to suppress information messages (notes).
+<SAMP>`-w'</SAMP> does this but also suppresses warnings.
+The default should be to suppress info messages.
+
+</P>
+<P>
+Perhaps info messages should simply be eliminated.
+
+</P>
+
+
+<H3><A NAME="SEC652" HREF="g77_toc.html#TOC652">Uninitialized Variables at Run Time</A></H3>
+
+<P>
+<CODE>g77</CODE> needs an option to initialize everything (not otherwise
+explicitly initialized) to "weird"
+(machine-dependent) values, e.g. NaNs, bad (non-<CODE>NULL</CODE>) pointers, and
+largest-magnitude integers, would help track down references to
+some kinds of uninitialized variables at run time.
+
+</P>
+<P>
+Note that use of the options <SAMP>`-O -Wuninitialized'</SAMP> can catch
+many such bugs at compile time.
+
+</P>
+
+
+<H3><A NAME="SEC653" HREF="g77_toc.html#TOC653">Portable Unformatted Files</A></H3>
+
+<P>
+<A NAME="IDX2238"></A>
+<A NAME="IDX2239"></A>
+<A NAME="IDX2240"></A>
+<A NAME="IDX2241"></A>
+<CODE>g77</CODE> has no facility for exchanging unformatted files with systems
+using different number formats--even differing only in endianness (byte
+order)---or written by other compilers.  Some compilers provide
+facilities at least for doing byte-swapping during unformatted I/O.
+
+</P>
+<P>
+It is unrealistic to expect to cope with exchanging unformatted files
+with arbitrary other compiler runtimes, but the <CODE>g77</CODE> runtime
+should at least be able to read files written by <CODE>g77</CODE> on systems
+with different number formats, particularly if they differ only in byte
+order.
+
+</P>
+<P>
+In case you do need to write a program to translate to or from
+<CODE>g77</CODE> (<CODE>libf2c</CODE>) unformatted files, they are written as
+follows:
+<DL COMPACT>
+
+<DT>Sequential
+<DD>
+Unformatted sequential records consist of
+
+<OL>
+<LI>
+
+A number giving the length of the record contents;
+<LI>
+
+the length of record contents again (for backspace).
+</OL>
+
+The record length is of C type
+<CODE>long</CODE>; this means that it is 8 bytes on 64-bit systems such as
+Alpha GNU/Linux and 4 bytes on other systems, such as x86 GNU/Linux.
+Consequently such files cannot be exchanged between 64-bit and 32-bit
+systems, even with the same basic number format.
+<DT>Direct access
+<DD>
+Unformatted direct access files form a byte stream of length
+<VAR>records</VAR>*<VAR>recl</VAR> bytes, where <VAR>records</VAR> is the maximum
+record number (<CODE>REC=<VAR>records</VAR></CODE>) written and <VAR>recl</VAR> is the
+record length in bytes specified in the <CODE>OPEN</CODE> statement
+(<CODE>RECL=<VAR>recl</VAR></CODE>).  Data appear in the records as determined by
+the relevant <CODE>WRITE</CODE> statement.  Dummy records with arbitrary
+contents appear in the file in place of records which haven't been
+written.
+</DL>
+
+<P>
+Thus for exchanging a sequential or direct access unformatted file
+between big- and little-endian 32-bit systems using IEEE 754 floating
+point it would be sufficient to reverse the bytes in consecutive words
+in the file if, and <EM>only</EM> if, only <CODE>REAL*4</CODE>, <CODE>COMPLEX</CODE>,
+<CODE>INTEGER*4</CODE> and/or <CODE>LOGICAL*4</CODE> data have been written to it by
+<CODE>g77</CODE>.
+
+</P>
+<P>
+If necessary, it is possible to do byte-oriented i/o with <CODE>g77</CODE>'s
+<CODE>FGETC</CODE> and <CODE>FPUTC</CODE> intrinsics.  Byte-swapping can be done in
+Fortran by equivalencing larger sized variables to an <CODE>INTEGER*1</CODE>
+array or a set of scalars.
+
+</P>
+<P>
+<A NAME="IDX2242"></A>
+<A NAME="IDX2243"></A>
+If you need to exchange binary data between arbitrary system and
+compiler variations, we recommend using a portable binary format with
+Fortran bindings, such as NCSA's HDF (<A HREF="http://hdf.ncsa.uiuc.edu/"><TT>http://hdf.ncsa.uiuc.edu/</TT></A>)
+or PACT's PDB<A NAME="DOCF3" HREF="g77_foot.html#FOOT3">(3)</A>
+(<A HREF="http://www.llnl.gov/def_sci/pact/pact_homepage.html"><TT>http://www.llnl.gov/def_sci/pact/pact_homepage.html</TT></A>).  (Unlike,
+say, CDF or XDR, HDF-like systems write in the native number formats and
+only incur overhead when they are read on a system with a different
+format.)  A future <CODE>g77</CODE> runtime library should use such
+techniques.
+
+</P>
+
+
+<H3><A NAME="SEC654" HREF="g77_toc.html#TOC654">Better List-directed I/O</A></H3>
+
+<P>
+Values output using list-directed I/O
+(<SAMP>`PRINT *, R, D'</SAMP>)
+should be written with a field width, precision, and so on
+appropriate for the type (precision) of each value.
+
+</P>
+<P>
+(Currently, no distinction is made between single-precision
+and double-precision values
+by <CODE>libf2c</CODE>.)
+
+</P>
+<P>
+It is likely this item will require the <CODE>libg77</CODE> project
+to be undertaken.
+
+</P>
+<P>
+In the meantime, use of formatted I/O is recommended.
+While it might be of little consolation,
+<CODE>g77</CODE> does support <SAMP>`FORMAT(F&#60;WIDTH&#62;.4)'</SAMP>, for example,
+as long as <SAMP>`WIDTH'</SAMP> is defined as a named constant
+(via <CODE>PARAMETER</CODE>).
+That at least allows some compile-time specification
+of the precision of a data type,
+perhaps controlled by preprocessing directives.
+
+</P>
+
+
+<H3><A NAME="SEC655" HREF="g77_toc.html#TOC655">Default to Console I/O</A></H3>
+
+<P>
+The default I/O units,
+specified by <SAMP>`READ <VAR>fmt</VAR>'</SAMP>,
+<SAMP>`READ (UNIT=*)'</SAMP>,
+<SAMP>`WRITE (UNIT=*)'</SAMP>, and
+<SAMP>`PRINT <VAR>fmt</VAR>'</SAMP>,
+should not be units 5 (input) and 6 (output),
+but, rather, unit numbers not normally available
+for use in statements such as <CODE>OPEN</CODE> and <CODE>CLOSE</CODE>.
+
+</P>
+<P>
+Changing this would allow a program to connect units 5 and 6
+to files via <CODE>OPEN</CODE>,
+but still use <SAMP>`READ (UNIT=*)'</SAMP> and <SAMP>`PRINT'</SAMP>
+to do I/O to the "console".
+
+</P>
+<P>
+This change probably requires the <CODE>libg77</CODE> project.
+
+</P>
+
+
+<H3><A NAME="SEC656" HREF="g77_toc.html#TOC656">Labels Visible to Debugger</A></H3>
+
+<P>
+<CODE>g77</CODE> should output debugging information for statements labels,
+for use by debuggers that know how to support them.
+Same with weirder things like construct names.
+It is not yet known if any debug formats or debuggers support these.
+
+</P>
+
+
+<H2><A NAME="SEC657" HREF="g77_toc.html#TOC657">Disappointments and Misunderstandings</A></H2>
+
+<P>
+These problems are perhaps regrettable, but we don't know any practical
+way around them for now.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_20.html#SEC658">Mangling of Names</A>: <SAMP>`SUBROUTINE FOO'</SAMP> is given
+                                              external name <SAMP>`foo_'</SAMP>.
+<LI><A HREF="g77_20.html#SEC659">Multiple Definitions of External Names</A>: No doing both <SAMP>`COMMON /FOO/'</SAMP>
+                                              and <SAMP>`SUBROUTINE FOO'</SAMP>.
+<LI><A HREF="g77_20.html#SEC660">Limitation on Implicit Declarations</A>: No <SAMP>`IMPLICIT CHARACTER*(*)'</SAMP>.
+</UL>
+
+
+
+<H3><A NAME="SEC658" HREF="g77_toc.html#TOC658">Mangling of Names in Source Code</A></H3>
+<P>
+<A NAME="IDX2244"></A>
+<A NAME="IDX2245"></A>
+<A NAME="IDX2246"></A>
+<A NAME="IDX2247"></A>
+<A NAME="IDX2248"></A>
+
+</P>
+<P>
+The current external-interface design, which includes naming of
+external procedures, COMMON blocks, and the library interface,
+has various usability problems, including things like adding
+underscores where not really necessary (and preventing easier
+inter-language operability) and yet not providing complete
+namespace freedom for user C code linked with Fortran apps (due
+to the naming of functions in the library, among other things).
+
+</P>
+<P>
+Project GNU should at least get all this "right" for systems
+it fully controls, such as the Hurd, and provide defaults and
+options for compatibility with existing systems and interoperability
+with popular existing compilers.
+
+</P>
+
+
+<H3><A NAME="SEC659" HREF="g77_toc.html#TOC659">Multiple Definitions of External Names</A></H3>
+<P>
+<A NAME="IDX2249"></A>
+<A NAME="IDX2250"></A>
+<A NAME="IDX2251"></A>
+<A NAME="IDX2252"></A>
+<A NAME="IDX2253"></A>
+<A NAME="IDX2254"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> doesn't allow a common block and an external procedure or
+<CODE>BLOCK DATA</CODE> to have the same name.
+Some systems allow this, but <CODE>g77</CODE> does not,
+to be compatible with <CODE>f2c</CODE>.
+
+</P>
+<P>
+<CODE>g77</CODE> could special-case the way it handles
+<CODE>BLOCK DATA</CODE>, since it is not compatible with <CODE>f2c</CODE> in this
+particular area (necessarily, since <CODE>g77</CODE> offers an
+important feature here), but
+it is likely that such special-casing would be very annoying to people
+with programs that use <SAMP>`EXTERNAL FOO'</SAMP>, with no other mention of
+<SAMP>`FOO'</SAMP> in the same program unit, to refer to external procedures, since
+the result would be that <CODE>g77</CODE> would treat these references as requests to
+force-load BLOCK DATA program units.
+
+</P>
+<P>
+In that case, if <CODE>g77</CODE> modified
+names of <CODE>BLOCK DATA</CODE> so they could have the same names as
+<CODE>COMMON</CODE>, users
+would find that their programs wouldn't link because the <SAMP>`FOO'</SAMP> procedure
+didn't have its name translated the same way.
+
+</P>
+<P>
+(Strictly speaking,
+<CODE>g77</CODE> could emit a null-but-externally-satisfying definition of
+<SAMP>`FOO'</SAMP> with its name transformed as if it had been a
+<CODE>BLOCK DATA</CODE>, but that probably invites more trouble than it's
+worth.)
+
+</P>
+
+
+<H3><A NAME="SEC660" HREF="g77_toc.html#TOC660">Limitation on Implicit Declarations</A></H3>
+<P>
+<A NAME="IDX2255"></A>
+<A NAME="IDX2256"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> disallows <CODE>IMPLICIT CHARACTER*(*)</CODE>.
+This is not standard-conforming.
+
+</P>
+
+
+<H2><A NAME="SEC661" HREF="g77_toc.html#TOC661">Certain Changes We Don't Want to Make</A></H2>
+
+<P>
+This section lists changes that people frequently request, but which
+we do not make because we think GNU Fortran is better without them.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_20.html#SEC662">Backslash in Constants</A>: Why <SAMP>`'\\''</SAMP> is a constant that
+                                       is one, not two, characters long.
+<LI><A HREF="g77_20.html#SEC663">Initializing Before Specifying</A>: Why <SAMP>`DATA VAR/1/'</SAMP> can't precede
+                                       <SAMP>`COMMON VAR'</SAMP>.
+<LI><A HREF="g77_20.html#SEC664">Context-Sensitive Intrinsicness</A>: Why <SAMP>`CALL SQRT'</SAMP> won't work.
+<LI><A HREF="g77_20.html#SEC665">Context-Sensitive Constants</A>: Why <SAMP>`9.435784839284958'</SAMP> is a
+                                       single-precision constant,
+                                       and might be interpreted as
+                                       <SAMP>`9.435785'</SAMP> or similar.
+<LI><A HREF="g77_20.html#SEC666">Equivalence Versus Equality</A>: Why <SAMP>`.TRUE. .EQ. .TRUE.'</SAMP> won't work.
+<LI><A HREF="g77_20.html#SEC667">Order of Side Effects</A>: Why <SAMP>`J = IFUNC() - IFUNC()'</SAMP> might
+                                       not behave as expected.
+</UL>
+
+
+
+<H3><A NAME="SEC662" HREF="g77_toc.html#TOC662">Backslash in Constants</A></H3>
+<P>
+<A NAME="IDX2257"></A>
+<A NAME="IDX2258"></A>
+<A NAME="IDX2259"></A>
+
+</P>
+<P>
+In the opinion of many experienced Fortran users,
+<SAMP>`-fno-backslash'</SAMP> should be the default, not <SAMP>`-fbackslash'</SAMP>,
+as currently set by <CODE>g77</CODE>.
+
+</P>
+<P>
+First of all, you can always specify
+<SAMP>`-fno-backslash'</SAMP> to turn off this processing.
+
+</P>
+<P>
+Despite not being within the spirit (though apparently within the
+letter) of the ANSI FORTRAN 77 standard, <CODE>g77</CODE> defaults to
+<SAMP>`-fbackslash'</SAMP> because that is what most UNIX <CODE>f77</CODE> commands
+default to, and apparently lots of code depends on this feature.
+
+</P>
+<P>
+This is a particularly troubling issue.
+The use of a C construct in the midst of Fortran code
+is bad enough, worse when it makes existing Fortran
+programs stop working (as happens when programs written
+for non-UNIX systems are ported to UNIX systems with
+compilers that provide the <SAMP>`-fbackslash'</SAMP> feature
+as the default--sometimes with no option to turn it off).
+
+</P>
+<P>
+The author of GNU Fortran wished, for reasons of linguistic
+purity, to make <SAMP>`-fno-backslash'</SAMP> the default for GNU
+Fortran and thus require users of UNIX <CODE>f77</CODE> and <CODE>f2c</CODE>
+to specify <SAMP>`-fbackslash'</SAMP> to get the UNIX behavior.
+
+</P>
+<P>
+However, the realization that <CODE>g77</CODE> is intended as
+a replacement for <EM>UNIX</EM> <CODE>f77</CODE>, caused the author
+to choose to make <CODE>g77</CODE> as compatible with
+<CODE>f77</CODE> as feasible, which meant making <SAMP>`-fbackslash'</SAMP>
+the default.
+
+</P>
+<P>
+The primary focus on compatibility is at the source-code
+level, and the question became "What will users expect
+a replacement for <CODE>f77</CODE> to do, by default?"
+Although at least one UNIX <CODE>f77</CODE> does not provide
+<SAMP>`-fbackslash'</SAMP> as a default, it appears that
+the majority of them do, which suggests that
+the majority of code that is compiled by UNIX <CODE>f77</CODE>
+compilers expects <SAMP>`-fbackslash'</SAMP> to be the default.
+
+</P>
+<P>
+It is probably the case that more code exists
+that would <EM>not</EM> work with <SAMP>`-fbackslash'</SAMP>
+in force than code that requires it be in force.
+
+</P>
+<P>
+However, most of <EM>that</EM> code is not being compiled
+with <CODE>f77</CODE>,
+and when it is, new build procedures (shell scripts,
+makefiles, and so on) must be set up anyway so that
+they work under UNIX.
+That makes a much more natural and safe opportunity for
+non-UNIX users to adapt their build procedures for
+<CODE>g77</CODE>'s default of <SAMP>`-fbackslash'</SAMP> than would
+exist for the majority of UNIX <CODE>f77</CODE> users who
+would have to modify existing, working build procedures
+to explicitly specify <SAMP>`-fbackslash'</SAMP> if that was
+not the default.
+
+</P>
+<P>
+One suggestion has been to configure the default for
+<SAMP>`-fbackslash'</SAMP> (and perhaps other options as well)
+based on the configuration of <CODE>g77</CODE>.
+
+</P>
+<P>
+This is technically quite straightforward, but will be avoided
+even in cases where not configuring defaults to be
+dependent on a particular configuration greatly inconveniences
+some users of legacy code.
+
+</P>
+<P>
+Many users appreciate the GNU compilers because they provide an
+environment that is uniform across machines.
+These users would be
+inconvenienced if the compiler treated things like the
+format of the source code differently on certain machines.
+
+</P>
+<P>
+Occasionally users write programs intended only for a particular machine
+type.
+On these occasions, the users would benefit if the GNU Fortran compiler
+were to support by default the same dialect as the other compilers on
+that machine.
+But such applications are rare.
+And users writing a
+program to run on more than one type of machine cannot possibly benefit
+from this kind of compatibility.
+(This is consistent with the design goals for <CODE>gcc</CODE>.
+To change them for <CODE>g77</CODE>, you must first change them
+for <CODE>gcc</CODE>.
+Do not ask the maintainers of <CODE>g77</CODE> to do this for you,
+or to disassociate <CODE>g77</CODE> from the widely understood, if
+not widely agreed-upon, goals for GNU compilers in general.)
+
+</P>
+<P>
+This is why GNU Fortran does and will treat backslashes in the same
+fashion on all types of machines (by default).
+See section <A HREF="g77_12.html#SEC27">Direction of Language Development</A>, for more information on
+this overall philosophy guiding the development of the GNU Fortran
+language.
+
+</P>
+<P>
+Of course, users strongly concerned about portability should indicate
+explicitly in their build procedures which options are expected
+by their source code, or write source code that has as few such
+expectations as possible.
+
+</P>
+<P>
+For example, avoid writing code that depends on backslash (<SAMP>`\'</SAMP>)
+being interpreted either way in particular, such as by
+starting a program unit with:
+
+</P>
+
+<PRE>
+CHARACTER BACKSL
+PARAMETER (BACKSL = '\\')
+</PRE>
+
+<P>
+Then, use concatenation of <SAMP>`BACKSL'</SAMP> anyplace a backslash
+is desired.
+In this way, users can write programs which have the same meaning
+in many Fortran dialects.
+
+</P>
+<P>
+(However, this technique does not work for Hollerith constants--which
+is just as well, since the only generally portable uses for Hollerith
+constants are in places where character constants can and should
+be used instead, for readability.)
+
+</P>
+
+
+<H3><A NAME="SEC663" HREF="g77_toc.html#TOC663">Initializing Before Specifying</A></H3>
+<P>
+<A NAME="IDX2260"></A>
+<A NAME="IDX2261"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> does not allow <SAMP>`DATA VAR/1/'</SAMP> to appear in the
+source code before <SAMP>`COMMON VAR'</SAMP>,
+<SAMP>`DIMENSION VAR(10)'</SAMP>, <SAMP>`INTEGER VAR'</SAMP>, and so on.
+In general, <CODE>g77</CODE> requires initialization of a variable
+or array to be specified <EM>after</EM> all other specifications
+of attributes (type, size, placement, and so on) of that variable
+or array are specified (though <EM>confirmation</EM> of data type is
+permitted).
+
+</P>
+<P>
+It is <EM>possible</EM> <CODE>g77</CODE> will someday allow all of this,
+even though it is not allowed by the FORTRAN 77 standard.
+
+</P>
+<P>
+Then again, maybe it is better to have
+<CODE>g77</CODE> always require placement of <CODE>DATA</CODE>
+so that it can possibly immediately write constants
+to the output file, thus saving time and space.
+
+</P>
+<P>
+That is, <SAMP>`DATA A/1000000*1/'</SAMP> should perhaps always
+be immediately writable to canonical assembler, unless it's already known
+to be in a <CODE>COMMON</CODE> area following as-yet-uninitialized stuff,
+and to do this it cannot be followed by <SAMP>`COMMON A'</SAMP>.
+
+</P>
+
+
+<H3><A NAME="SEC664" HREF="g77_toc.html#TOC664">Context-Sensitive Intrinsicness</A></H3>
+<P>
+<A NAME="IDX2262"></A>
+<A NAME="IDX2263"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> treats procedure references to <EM>possible</EM> intrinsic
+names as always enabling their intrinsic nature, regardless of
+whether the <EM>form</EM> of the reference is valid for that
+intrinsic.
+
+</P>
+<P>
+For example, <SAMP>`CALL SQRT'</SAMP> is interpreted by <CODE>g77</CODE> as
+an invalid reference to the <CODE>SQRT</CODE> intrinsic function,
+because the reference is a subroutine invocation.
+
+</P>
+<P>
+First, <CODE>g77</CODE> recognizes the statement <SAMP>`CALL SQRT'</SAMP>
+as a reference to a <EM>procedure</EM> named <SAMP>`SQRT'</SAMP>, not
+to a <EM>variable</EM> with that name (as it would for a statement
+such as <SAMP>`V = SQRT'</SAMP>).
+
+</P>
+<P>
+Next, <CODE>g77</CODE> establishes that, in the program unit being compiled,
+<CODE>SQRT</CODE> is an intrinsic--not a subroutine that
+happens to have the same name as an intrinsic (as would be
+the case if, for example, <SAMP>`EXTERNAL SQRT'</SAMP> was present).
+
+</P>
+<P>
+Finally, <CODE>g77</CODE> recognizes that the <EM>form</EM> of the
+reference is invalid for that particular intrinsic.
+That is, it recognizes that it is invalid for an intrinsic
+<EM>function</EM>, such as <CODE>SQRT</CODE>, to be invoked as
+a <EM>subroutine</EM>.
+
+</P>
+<P>
+At that point, <CODE>g77</CODE> issues a diagnostic.
+
+</P>
+<P>
+Some users claim that it is "obvious" that <SAMP>`CALL SQRT'</SAMP>
+references an external subroutine of their own, not an
+intrinsic function.
+
+</P>
+<P>
+However, <CODE>g77</CODE> knows about intrinsic
+subroutines, not just functions, and is able to support both having
+the same names, for example.
+
+</P>
+<P>
+As a result of this, <CODE>g77</CODE> rejects calls
+to intrinsics that are not subroutines, and function invocations
+of intrinsics that are not functions, just as it (and most compilers)
+rejects invocations of intrinsics with the wrong number (or types)
+of arguments.
+
+</P>
+<P>
+So, use the <SAMP>`EXTERNAL SQRT'</SAMP> statement in a program unit that calls
+a user-written subroutine named <SAMP>`SQRT'</SAMP>.
+
+</P>
+
+
+<H3><A NAME="SEC665" HREF="g77_toc.html#TOC665">Context-Sensitive Constants</A></H3>
+<P>
+<A NAME="IDX2264"></A>
+<A NAME="IDX2265"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> does not use context to determine the types of
+constants or named constants (<CODE>PARAMETER</CODE>), except
+for (non-standard) typeless constants such as <SAMP>`'123'O'</SAMP>.
+
+</P>
+<P>
+For example, consider the following statement:
+
+</P>
+
+<PRE>
+PRINT *, 9.435784839284958 * 2D0
+</PRE>
+
+<P>
+<CODE>g77</CODE> will interpret the (truncated) constant
+<SAMP>`9.435784839284958'</SAMP> as a <CODE>REAL(KIND=1)</CODE>, not <CODE>REAL(KIND=2)</CODE>,
+constant, because the suffix <CODE>D0</CODE> is not specified.
+
+</P>
+<P>
+As a result, the output of the above statement when
+compiled by <CODE>g77</CODE> will appear to have "less precision"
+than when compiled by other compilers.
+
+</P>
+<P>
+In these and other cases, some compilers detect the
+fact that a single-precision constant is used in
+a double-precision context and therefore interpret the
+single-precision constant as if it was <EM>explicitly</EM>
+specified as a double-precision constant.
+(This has the effect of appending <EM>decimal</EM>, not
+<EM>binary</EM>, zeros to the fractional part of the
+number--producing different computational results.)
+
+</P>
+<P>
+The reason this misfeature is dangerous is that a slight,
+apparently innocuous change to the source code can change
+the computational results.
+Consider:
+
+</P>
+
+<PRE>
+REAL ALMOST, CLOSE
+DOUBLE PRECISION FIVE
+PARAMETER (ALMOST = 5.000000000001)
+FIVE = 5
+CLOSE = 5.000000000001
+PRINT *, 5.000000000001 - FIVE
+PRINT *, ALMOST - FIVE
+PRINT *, CLOSE - FIVE
+END
+</PRE>
+
+<P>
+Running the above program should
+result in the same value being
+printed three times.
+With <CODE>g77</CODE> as the compiler,
+it does.
+
+</P>
+<P>
+However, compiled by many other compilers,
+running the above program would print
+two or three distinct values, because
+in two or three of the statements, the
+constant <SAMP>`5.000000000001'</SAMP>, which
+on most systems is exactly equal to <SAMP>`5.'</SAMP>
+when interpreted as a single-precision constant,
+is instead interpreted as a double-precision
+constant, preserving the represented
+precision.
+However, this "clever" promotion of
+type does not extend to variables or,
+in some compilers, to named constants.
+
+</P>
+<P>
+Since programmers often are encouraged to replace manifest
+constants or permanently-assigned variables with named
+constants (<CODE>PARAMETER</CODE> in Fortran), and might need
+to replace some constants with variables having the same
+values for pertinent portions of code,
+it is important that compilers treat code so modified in the
+same way so that the results of such programs are the same.
+<CODE>g77</CODE> helps in this regard by treating constants just
+the same as variables in terms of determining their types
+in a context-independent way.
+
+</P>
+<P>
+Still, there is a lot of existing Fortran code that has
+been written to depend on the way other compilers freely
+interpret constants' types based on context, so anything
+<CODE>g77</CODE> can do to help flag cases of this in such code
+could be very helpful.
+
+</P>
+
+
+<H3><A NAME="SEC666" HREF="g77_toc.html#TOC666">Equivalence Versus Equality</A></H3>
+<P>
+<A NAME="IDX2266"></A>
+<A NAME="IDX2267"></A>
+<A NAME="IDX2268"></A>
+
+</P>
+<P>
+Use of <CODE>.EQ.</CODE> and <CODE>.NE.</CODE> on <CODE>LOGICAL</CODE> operands
+is not supported, except via <SAMP>`-fugly-logint'</SAMP>, which is not
+recommended except for legacy code (where the behavior expected
+by the <EM>code</EM> is assumed).
+
+</P>
+<P>
+Legacy code should be changed, as resources permit, to use <CODE>.EQV.</CODE>
+and <CODE>.NEQV.</CODE> instead, as these are permitted by the various
+Fortran standards.
+
+</P>
+<P>
+New code should never be written expecting <CODE>.EQ.</CODE> or <CODE>.NE.</CODE>
+to work if either of its operands is <CODE>LOGICAL</CODE>.
+
+</P>
+<P>
+The problem with supporting this "feature" is that there is
+unlikely to be consensus on how it works, as illustrated by the
+following sample program:
+
+</P>
+
+<PRE>
+LOGICAL L,M,N
+DATA L,M,N /3*.FALSE./
+IF (L.AND.M.EQ.N) PRINT *,'L.AND.M.EQ.N'
+END
+</PRE>
+
+<P>
+The issue raised by the above sample program is: what is the
+precedence of <CODE>.EQ.</CODE> (and <CODE>.NE.</CODE>) when applied to
+<CODE>LOGICAL</CODE> operands?
+
+</P>
+<P>
+Some programmers will argue that it is the same as the precedence
+for <CODE>.EQ.</CODE> when applied to numeric (such as <CODE>INTEGER</CODE>)
+operands.
+By this interpretation, the subexpression <SAMP>`M.EQ.N'</SAMP> must be
+evaluated first in the above program, resulting in a program that,
+when run, does not execute the <CODE>PRINT</CODE> statement.
+
+</P>
+<P>
+Other programmers will argue that the precedence is the same as
+the precedence for <CODE>.EQV.</CODE>, which is restricted by the standards
+to <CODE>LOGICAL</CODE> operands.
+By this interpretation, the subexpression <SAMP>`L.AND.M'</SAMP> must be
+evaluated first, resulting in a program that <EM>does</EM> execute
+the <CODE>PRINT</CODE> statement.
+
+</P>
+<P>
+Assigning arbitrary semantic interpretations to syntactic expressions
+that might legitimately have more than one "obvious" interpretation
+is generally unwise.
+
+</P>
+<P>
+The creators of the various Fortran standards have done a good job
+in this case, requiring a distinct set of operators (which have their
+own distinct precedence) to compare <CODE>LOGICAL</CODE> operands.
+This requirement results in expression syntax with more certain
+precedence (without requiring substantial context), making it easier
+for programmers to read existing code.
+<CODE>g77</CODE> will avoid muddying up elements of the Fortran language
+that were well-designed in the first place.
+
+</P>
+<P>
+(Ask C programmers about the precedence of expressions such as
+<SAMP>`(a) &#38; (b)'</SAMP> and <SAMP>`(a) - (b)'</SAMP>---they cannot even tell
+you, without knowing more context, whether the <SAMP>`&#38;'</SAMP> and <SAMP>`-'</SAMP>
+operators are infix (binary) or unary!)
+
+</P>
+<P>
+Most dangerous of all is the fact that,
+even assuming consensus on its meaning,
+an expression like <SAMP>`L.AND.M.EQ.N'</SAMP>,
+if it is the result of a typographical error,
+doesn't <EM>look</EM> like it has such a typo.
+Even experienced Fortran programmers would not likely notice that
+<SAMP>`L.AND.M.EQV.N'</SAMP> was, in fact, intended.
+
+</P>
+<P>
+So, this is a prime example of a circumstance in which
+a quality compiler diagnoses the code,
+instead of leaving it up to someone debugging it
+to know to turn on special compiler options
+that might diagnose it.
+
+</P>
+
+
+<H3><A NAME="SEC667" HREF="g77_toc.html#TOC667">Order of Side Effects</A></H3>
+<P>
+<A NAME="IDX2269"></A>
+<A NAME="IDX2270"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> does not necessarily produce code that, when run, performs
+side effects (such as those performed by function invocations)
+in the same order as in some other compiler--or even in the same
+order as another version, port, or invocation (using different
+command-line options) of <CODE>g77</CODE>.
+
+</P>
+<P>
+It is never safe to depend on the order of evaluation of side effects.
+For example, an expression like this may very well behave differently
+from one compiler to another:
+
+</P>
+
+<PRE>
+J = IFUNC() - IFUNC()
+</PRE>
+
+<P>
+There is no guarantee that <SAMP>`IFUNC'</SAMP> will be evaluated in any particular
+order.
+Either invocation might happen first.
+If <SAMP>`IFUNC'</SAMP> returns 5 the first time it is invoked, and
+returns 12 the second time, <SAMP>`J'</SAMP> might end up with the
+value <SAMP>`7'</SAMP>, or it might end up with <SAMP>`-7'</SAMP>.
+
+</P>
+<P>
+Generally, in Fortran, procedures with side-effects intended to
+be visible to the caller are best designed as <EM>subroutines</EM>,
+not functions.
+Examples of such side-effects include:
+
+</P>
+
+<UL>
+<LI>
+
+The generation of random numbers
+that are intended to influence return values.
+
+<LI>
+
+Performing I/O
+(other than internal I/O to local variables).
+
+<LI>
+
+Updating information in common blocks.
+</UL>
+
+<P>
+An example of a side-effect that is not intended to be visible
+to the caller is a function that maintains a cache of recently
+calculated results, intended solely to speed repeated invocations
+of the function with identical arguments.
+Such a function can be safely used in expressions, because
+if the compiler optimizes away one or more calls to the
+function, operation of the program is unaffected (aside
+from being speeded up).
+
+</P>
+
+
+<H2><A NAME="SEC668" HREF="g77_toc.html#TOC668">Warning Messages and Error Messages</A></H2>
+
+<P>
+<A NAME="IDX2271"></A>
+<A NAME="IDX2272"></A>
+<A NAME="IDX2273"></A>
+The GNU compiler can produce two kinds of diagnostics: errors and
+warnings.
+Each kind has a different purpose:
+
+</P>
+
+<UL>
+<LI>
+
+<EM>Errors</EM> report problems that make it impossible to compile your
+program.
+GNU Fortran reports errors with the source file name, line
+number, and column within the line where the problem is apparent.
+
+<LI>
+
+<EM>Warnings</EM> report other unusual conditions in your code that
+<EM>might</EM> indicate a problem, although compilation can (and does)
+proceed.
+Warning messages also report the source file name, line number,
+and column information,
+but include the text <SAMP>`warning:'</SAMP> to distinguish them
+from error messages.
+</UL>
+
+<P>
+Warnings might indicate danger points where you should check to make sure
+that your program really does what you intend; or the use of obsolete
+features; or the use of nonstandard features of GNU Fortran.
+Many warnings are issued only if you ask for them, with one of the
+<SAMP>`-W'</SAMP> options (for instance, <SAMP>`-Wall'</SAMP> requests a variety of
+useful warnings).
+
+</P>
+<P>
+<EM>Note:</EM> Currently, the text of the line and a pointer to the column
+is printed in most <CODE>g77</CODE> diagnostics.
+Probably, as of version 0.6, <CODE>g77</CODE> will
+no longer print the text of the source line, instead printing
+the column number following the file name and line number in
+a form that GNU Emacs recognizes.
+This change is expected to speed up and reduce the memory usage
+of the <CODE>g77</CODE> compiler.
+
+</P>
+<P>
+See section <A HREF="g77_9.html#SEC17">Options to Request or Suppress Warnings</A>, for
+more detail on these and related command-line options.
+
+</P>
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_19.html">previous</A>, <A HREF="g77_21.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

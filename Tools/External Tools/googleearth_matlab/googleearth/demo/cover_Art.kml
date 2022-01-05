@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+<Document>
+<name>
+cover_Art.kml
+</name>
+<GroundOverlay id="groundoverlay">
+<name>
+ge_imagesc
+</name>
+<description>
+<![CDATA[]]>
+</description>
+<color>
+ffffffff
+</color>
+<visibility>
+1
+</visibility>
+<extrude>0</extrude>
+<altitude>100000.00</altitude><altitudeMode>absolute</altitudeMode><Icon>
+<href>
+coverArt.png
+</href>
+<viewBoundScale>
+1
+</viewBoundScale>
+</Icon>
+<LatLonAltBox>
+<north>-138.910927</north><south>-153.806073</south><east>67.146659</east><west>61.291841</west><minAltitude>100000.00</minAltitude><maxAltitude>100000.00</maxAltitude>
+</LatLonAltBox>
+</GroundOverlay>
+
+</Document>
+</kml>

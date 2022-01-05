@@ -1,0 +1,793 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Diagnostics</TITLE>
+<link href="g77_28.html" rel=Next>
+<link href="g77_26.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_26.html">previous</A>, <A HREF="g77_28.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC718" HREF="g77_toc.html#TOC718">Diagnostics</A></H1>
+<P>
+<A NAME="IDX2323"></A>
+
+</P>
+<P>
+Some diagnostics produced by <CODE>g77</CODE> require sufficient explanation
+that the explanations are given below, and the diagnostics themselves
+identify the appropriate explanation.
+
+</P>
+<P>
+Identification uses the GNU Info format--specifically, the <CODE>info</CODE>
+command that displays the explanation is given within square
+brackets in the diagnostic.
+For example:
+
+</P>
+
+<PRE>
+foo.f:5: Invalid statement [info -f g77 M FOOEY]
+</PRE>
+
+<P>
+More details about the above diagnostic is found in the <CODE>g77</CODE> Info
+documentation, menu item <SAMP>`M'</SAMP>, submenu item <SAMP>`FOOEY'</SAMP>,
+which is displayed by typing the UNIX command
+<SAMP>`info -f g77 M FOOEY'</SAMP>.
+
+</P>
+<P>
+Other Info readers, such as EMACS, may be just as easily used to display
+the pertinent node.
+In the above example, <SAMP>`g77'</SAMP> is the Info document name,
+<SAMP>`M'</SAMP> is the top-level menu item to select,
+and, in that node (named <SAMP>`Diagnostics'</SAMP>, the name of
+this chapter, which is the very text you're reading now),
+<SAMP>`FOOEY'</SAMP> is the menu item to select.
+
+</P>
+<P>
+In this printed version of the <CODE>g77</CODE> manual, the above example
+points to a section, below, entitled <SAMP>`FOOEY'</SAMP>---though, of course,
+as the above is just a sample, no such section exists.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_27.html#SEC719">CMPAMBIG</A>: Ambiguous use of intrinsic.
+<LI><A HREF="g77_27.html#SEC720">EXPIMP</A>: Intrinsic used explicitly and implicitly.
+<LI><A HREF="g77_27.html#SEC721">INTGLOB</A>: Intrinsic also used as name of global.
+<LI><A HREF="g77_27.html#SEC722">LEX</A>: Various lexer messages
+<LI><A HREF="g77_27.html#SEC723">GLOBALS</A>: Disagreements about globals.
+<LI><A HREF="g77_27.html#SEC724">LINKFAIL</A>: When linking <CODE>f771</CODE> fails.
+<LI><A HREF="g77_27.html#SEC725">Y2KBAD</A>: Use of non-Y2K-compliant intrinsic.
+</UL>
+
+
+
+<H2><A NAME="SEC719" HREF="g77_toc.html#TOC719"><CODE>CMPAMBIG</CODE></A></H2>
+
+<P>
+
+<PRE>
+Ambiguous use of intrinsic <VAR>intrinsic</VAR> ...
+</PRE>
+
+<P>
+The type of the argument to the invocation of the <VAR>intrinsic</VAR>
+intrinsic is a <CODE>COMPLEX</CODE> type other than <CODE>COMPLEX(KIND=1)</CODE>.
+Typically, it is <CODE>COMPLEX(KIND=2)</CODE>, also known as
+<CODE>DOUBLE COMPLEX</CODE>.
+
+</P>
+<P>
+The interpretation of this invocation depends on the particular
+dialect of Fortran for which the code was written.
+Some dialects convert the real part of the argument to
+<CODE>REAL(KIND=1)</CODE>, thus losing precision; other dialects,
+and Fortran 90, do no such conversion.
+
+</P>
+<P>
+So, GNU Fortran rejects such invocations except under certain
+circumstances, to avoid making an incorrect assumption that results
+in generating the wrong code.
+
+</P>
+<P>
+To determine the dialect of the program unit, perhaps even whether
+that particular invocation is properly coded, determine how the
+result of the intrinsic is used.
+
+</P>
+<P>
+The result of <VAR>intrinsic</VAR> is expected (by the original programmer)
+to be <CODE>REAL(KIND=1)</CODE> (the non-Fortran-90 interpretation) if:
+
+</P>
+
+<UL>
+<LI>
+
+It is passed as an argument to a procedure that explicitly or
+implicitly declares that argument <CODE>REAL(KIND=1)</CODE>.
+
+For example,
+a procedure with no <CODE>DOUBLE PRECISION</CODE> or <CODE>IMPLICIT DOUBLE PRECISION</CODE>
+statement specifying the dummy argument corresponding to an
+actual argument of <SAMP>`REAL(Z)'</SAMP>, where <SAMP>`Z'</SAMP> is declared
+<CODE>DOUBLE COMPLEX</CODE>, strongly suggests that the programmer
+expected <SAMP>`REAL(Z)'</SAMP> to return <CODE>REAL(KIND=1)</CODE> instead
+of <CODE>REAL(KIND=2)</CODE>.
+
+<LI>
+
+It is used in a context that would otherwise not include
+any <CODE>REAL(KIND=2)</CODE> but where treating the <VAR>intrinsic</VAR>
+invocation as <CODE>REAL(KIND=2)</CODE> would result in unnecessary
+promotions and (typically) more expensive operations on the
+wider type.
+
+For example:
+
+
+<PRE>
+DOUBLE COMPLEX Z
+...
+R(1) = T * REAL(Z)
+</PRE>
+
+The above example suggests the programmer expected the real part
+of <SAMP>`Z'</SAMP> to be converted to <CODE>REAL(KIND=1)</CODE> before being
+multiplied by <SAMP>`T'</SAMP> (presumed, along with <SAMP>`R'</SAMP> above, to
+be type <CODE>REAL(KIND=1)</CODE>).
+
+Otherwise, the conversion would have to be delayed until after
+the multiplication, requiring not only an extra conversion
+(of <SAMP>`T'</SAMP> to <CODE>REAL(KIND=2)</CODE>), but a (typically) more
+expensive multiplication (a double-precision multiplication instead
+of a single-precision one).
+</UL>
+
+<P>
+The result of <VAR>intrinsic</VAR> is expected (by the original programmer)
+to be <CODE>REAL(KIND=2)</CODE> (the Fortran 90 interpretation) if:
+
+</P>
+
+<UL>
+<LI>
+
+It is passed as an argument to a procedure that explicitly or
+implicitly declares that argument <CODE>REAL(KIND=2)</CODE>.
+
+For example, a procedure specifying a <CODE>DOUBLE PRECISION</CODE>
+dummy argument corresponding to an
+actual argument of <SAMP>`REAL(Z)'</SAMP>, where <SAMP>`Z'</SAMP> is declared
+<CODE>DOUBLE COMPLEX</CODE>, strongly suggests that the programmer
+expected <SAMP>`REAL(Z)'</SAMP> to return <CODE>REAL(KIND=2)</CODE> instead
+of <CODE>REAL(KIND=1)</CODE>.
+
+<LI>
+
+It is used in an expression context that includes
+other <CODE>REAL(KIND=2)</CODE> operands,
+or is assigned to a <CODE>REAL(KIND=2)</CODE> variable or array element.
+
+For example:
+
+
+<PRE>
+DOUBLE COMPLEX Z
+DOUBLE PRECISION R, T
+...
+R(1) = T * REAL(Z)
+</PRE>
+
+The above example suggests the programmer expected the real part
+of <SAMP>`Z'</SAMP> to <EM>not</EM> be converted to <CODE>REAL(KIND=1)</CODE>
+by the <CODE>REAL()</CODE> intrinsic.
+
+Otherwise, the conversion would have to be immediately followed
+by a conversion back to <CODE>REAL(KIND=2)</CODE>, losing
+the original, full precision of the real part of <CODE>Z</CODE>,
+before being multiplied by <SAMP>`T'</SAMP>.
+</UL>
+
+<P>
+Once you have determined whether a particular invocation of <VAR>intrinsic</VAR>
+expects the Fortran 90 interpretation, you can:
+
+</P>
+
+<UL>
+<LI>
+
+Change it to <SAMP>`DBLE(<VAR>expr</VAR>)'</SAMP> (if <VAR>intrinsic</VAR> is
+<CODE>REAL</CODE>) or <SAMP>`DIMAG(<VAR>expr</VAR>)'</SAMP> (if <VAR>intrinsic</VAR>
+is <CODE>AIMAG</CODE>)
+if it expected the Fortran 90 interpretation.
+
+This assumes <VAR>expr</VAR> is <CODE>COMPLEX(KIND=2)</CODE>---if it is
+some other type, such as <CODE>COMPLEX*32</CODE>, you should use the
+appropriate intrinsic, such as the one to convert to <CODE>REAL*16</CODE>
+(perhaps <CODE>DBLEQ()</CODE> in place of <CODE>DBLE()</CODE>, and
+<CODE>QIMAG()</CODE> in place of <CODE>DIMAG()</CODE>).
+
+<LI>
+
+Change it to <SAMP>`REAL(<VAR>intrinsic</VAR>(<VAR>expr</VAR>))'</SAMP>,
+otherwise.
+This converts to <CODE>REAL(KIND=1)</CODE> in all working
+Fortran compilers.
+</UL>
+
+<P>
+If you don't want to change the code, and you are certain that all
+ambiguous invocations of <VAR>intrinsic</VAR> in the source file have
+the same expectation regarding interpretation, you can:
+
+</P>
+
+<UL>
+<LI>
+
+Compile with the <CODE>g77</CODE> option <SAMP>`-ff90'</SAMP>, to enable the
+Fortran 90 interpretation.
+
+<LI>
+
+Compile with the <CODE>g77</CODE> options <SAMP>`-fno-f90 -fugly-complex'</SAMP>,
+to enable the non-Fortran-90 interpretations.
+</UL>
+
+<P>
+See section <A HREF="g77_12.html#SEC71"><CODE>REAL()</CODE> and <CODE>AIMAG()</CODE> of Complex</A>, for more information on this
+issue.
+
+</P>
+<P>
+Note: If the above suggestions don't produce enough evidence
+as to whether a particular program expects the Fortran 90
+interpretation of this ambiguous invocation of <VAR>intrinsic</VAR>,
+there is one more thing you can try.
+
+</P>
+<P>
+If you have access to most or all the compilers used on the
+program to create successfully tested and deployed executables,
+read the documentation for, and <EM>also</EM> test out, each compiler
+to determine how it treats the <VAR>intrinsic</VAR> intrinsic in
+this case.
+(If all the compilers don't agree on an interpretation, there
+might be lurking bugs in the deployed versions of the program.)
+
+</P>
+<P>
+The following sample program might help:
+
+</P>
+<P>
+<A NAME="IDX2324"></A>
+
+<PRE>
+      PROGRAM JCB003
+C
+C Written by James Craig Burley 1997-02-23.
+C
+C Determine how compilers handle non-standard REAL
+C and AIMAG on DOUBLE COMPLEX operands.
+C
+      DOUBLE COMPLEX Z
+      REAL R
+      Z = (3.3D0, 4.4D0)
+      R = Z
+      CALL DUMDUM(Z, R)
+      R = REAL(Z) - R
+      IF (R .NE. 0.) PRINT *, 'REAL() is Fortran 90'
+      IF (R .EQ. 0.) PRINT *, 'REAL() is not Fortran 90'
+      R = 4.4D0
+      CALL DUMDUM(Z, R)
+      R = AIMAG(Z) - R
+      IF (R .NE. 0.) PRINT *, 'AIMAG() is Fortran 90'
+      IF (R .EQ. 0.) PRINT *, 'AIMAG() is not Fortran 90'
+      END
+C
+C Just to make sure compiler doesn't use naive flow
+C analysis to optimize away careful work above,
+C which might invalidate results....
+C
+      SUBROUTINE DUMDUM(Z, R)
+      DOUBLE COMPLEX Z
+      REAL R
+      END
+</PRE>
+
+<P>
+If the above program prints contradictory results on a
+particular compiler, run away!
+
+</P>
+
+
+<H2><A NAME="SEC720" HREF="g77_toc.html#TOC720"><CODE>EXPIMP</CODE></A></H2>
+
+<P>
+
+<PRE>
+Intrinsic <VAR>intrinsic</VAR> referenced ...
+</PRE>
+
+<P>
+The <VAR>intrinsic</VAR> is explicitly declared in one program
+unit in the source file and implicitly used as an intrinsic
+in another program unit in the same source file.
+
+</P>
+<P>
+This diagnostic is designed to catch cases where a program
+might depend on using the name <VAR>intrinsic</VAR> as an intrinsic
+in one program unit and as a global name (such as the name
+of a subroutine or function) in another, but <CODE>g77</CODE> recognizes
+the name as an intrinsic in both cases.
+
+</P>
+<P>
+After verifying that the program unit making implicit use
+of the intrinsic is indeed written expecting the intrinsic,
+add an <SAMP>`INTRINSIC <VAR>intrinsic</VAR>'</SAMP> statement to that
+program unit to prevent this warning.
+
+</P>
+<P>
+This and related warnings are disabled by using
+the <SAMP>`-Wno-globals'</SAMP> option when compiling.
+
+</P>
+<P>
+Note that this warning is not issued for standard intrinsics.
+Standard intrinsics include those described in the FORTRAN 77
+standard and, if <SAMP>`-ff90'</SAMP> is specified, those described
+in the Fortran 90 standard.
+Such intrinsics are not as likely to be confused with user
+procedures as intrinsics provided as extensions to the
+standard by <CODE>g77</CODE>.
+
+</P>
+
+
+<H2><A NAME="SEC721" HREF="g77_toc.html#TOC721"><CODE>INTGLOB</CODE></A></H2>
+
+<P>
+
+<PRE>
+Same name `<VAR>intrinsic</VAR>' given ...
+</PRE>
+
+<P>
+The name <VAR>intrinsic</VAR> is used for a global entity (a common
+block or a program unit) in one program unit and implicitly
+used as an intrinsic in another program unit.
+
+</P>
+<P>
+This diagnostic is designed to catch cases where a program
+intends to use a name entirely as a global name, but <CODE>g77</CODE>
+recognizes the name as an intrinsic in the program unit that
+references the name, a situation that would likely produce
+incorrect code.
+
+</P>
+<P>
+For example:
+
+</P>
+
+<PRE>
+INTEGER FUNCTION TIME()
+...
+END
+...
+PROGRAM SAMP
+INTEGER TIME
+PRINT *, 'Time is ', TIME()
+END
+</PRE>
+
+<P>
+The above example defines a program unit named <SAMP>`TIME'</SAMP>, but
+the reference to <SAMP>`TIME'</SAMP> in the main program unit <SAMP>`SAMP'</SAMP>
+is normally treated by <CODE>g77</CODE> as a reference to the intrinsic
+<CODE>TIME()</CODE> (unless a command-line option that prevents such
+treatment has been specified).
+
+</P>
+<P>
+As a result, the program <SAMP>`SAMP'</SAMP> will <EM>not</EM>
+invoke the <SAMP>`TIME'</SAMP> function in the same source file.
+
+</P>
+<P>
+Since <CODE>g77</CODE> recognizes <CODE>libU77</CODE> procedures as
+intrinsics, and since some existing code uses the same names
+for its own procedures as used by some <CODE>libU77</CODE>
+procedures, this situation is expected to arise often enough
+to make this sort of warning worth issuing.
+
+</P>
+<P>
+After verifying that the program unit making implicit use
+of the intrinsic is indeed written expecting the intrinsic,
+add an <SAMP>`INTRINSIC <VAR>intrinsic</VAR>'</SAMP> statement to that
+program unit to prevent this warning.
+
+</P>
+<P>
+Or, if you believe the program unit is designed to invoke the
+program-defined procedure instead of the intrinsic (as
+recognized by <CODE>g77</CODE>), add an <SAMP>`EXTERNAL <VAR>intrinsic</VAR>'</SAMP>
+statement to the program unit that references the name to
+prevent this warning.
+
+</P>
+<P>
+This and related warnings are disabled by using
+the <SAMP>`-Wno-globals'</SAMP> option when compiling.
+
+</P>
+<P>
+Note that this warning is not issued for standard intrinsics.
+Standard intrinsics include those described in the FORTRAN 77
+standard and, if <SAMP>`-ff90'</SAMP> is specified, those described
+in the Fortran 90 standard.
+Such intrinsics are not as likely to be confused with user
+procedures as intrinsics provided as extensions to the
+standard by <CODE>g77</CODE>.
+
+</P>
+
+
+<H2><A NAME="SEC722" HREF="g77_toc.html#TOC722"><CODE>LEX</CODE></A></H2>
+
+<P>
+
+<PRE>
+Unrecognized character ...
+Invalid first character ...
+Line too long ...
+Non-numeric character ...
+Continuation indicator ...
+Label at ... invalid with continuation line indicator ...
+Character constant ...
+Continuation line ...
+Statement at ... begins with invalid token
+</PRE>
+
+<P>
+Although the diagnostics identify specific problems, they can
+be produced when general problems such as the following occur:
+
+</P>
+
+<UL>
+<LI>
+
+The source file contains something other than Fortran code.
+
+If the code in the file does not look like many of the examples
+elsewhere in this document, it might not be Fortran code.
+(Note that Fortran code often is written in lower case letters,
+while the examples in this document use upper case letters,
+for stylistic reasons.)
+
+For example, if the file contains lots of strange-looking
+characters, it might be APL source code; if it contains lots
+of parentheses, it might be Lisp source code; if it
+contains lots of bugs, it might be C++ source code.
+
+<LI>
+
+The source file contains free-form Fortran code, but <SAMP>`-ffree-form'</SAMP>
+was not specified on the command line to compile it.
+
+Free form is a newer form for Fortran code.
+The older, classic form is called fixed form.
+
+<A NAME="IDX2325"></A>
+<A NAME="IDX2326"></A>
+Fixed-form code is visually fairly distinctive, because
+numerical labels and comments are all that appear in
+the first five columns of a line, the sixth column is
+reserved to denote continuation lines,
+and actual statements start at or beyond column 7.
+Spaces generally are not significant, so if you
+see statements such as <SAMP>`REALX,Y'</SAMP> and <SAMP>`DO10I=1,100'</SAMP>,
+you are looking at fixed-form code.
+<A NAME="IDX2327"></A>
+<A NAME="IDX2328"></A>
+Comment lines are indicated by the letter <SAMP>`C'</SAMP> or the symbol
+<SAMP>`*'</SAMP> in column 1.
+<A NAME="IDX2329"></A>
+<A NAME="IDX2330"></A>
+<A NAME="IDX2331"></A>
+<A NAME="IDX2332"></A>
+<A NAME="IDX2333"></A>
+(Some code uses <SAMP>`!'</SAMP> or <SAMP>`/*'</SAMP> to begin in-line comments,
+which many compilers support.)
+
+Free-form code is distinguished from fixed-form source
+primarily by the fact that statements may start anywhere.
+(If lots of statements start in columns 1 through 6,
+that's a strong indicator of free-form source.)
+Consecutive keywords must be separated by spaces, so
+<SAMP>`REALX,Y'</SAMP> is not valid, while <SAMP>`REAL X,Y'</SAMP> is.
+There are no comment lines per se, but <SAMP>`!'</SAMP> starts a
+comment anywhere in a line (other than within a character or
+Hollerith constant).
+
+See section <A HREF="g77_13.html#SEC345">Source Form</A>, for more information.
+
+<LI>
+
+The source file is in fixed form and has been edited without
+sensitivity to the column requirements.
+
+Statements in fixed-form code must be entirely contained within
+columns 7 through 72 on a given line.
+Starting them "early" is more likely to result in diagnostics
+than finishing them "late", though both kinds of errors are
+often caught at compile time.
+
+For example, if the following code fragment is edited by following
+the commented instructions literally, the result, shown afterward,
+would produce a diagnostic when compiled:
+
+
+<PRE>
+C On XYZZY systems, remove "C" on next line:
+C     CALL XYZZY_RESET
+</PRE>
+
+The result of editing the above line might be:
+
+
+<PRE>
+C On XYZZY systems, remove "C" on next line:
+     CALL XYZZY_RESET
+</PRE>
+
+However, that leaves the first <SAMP>`C'</SAMP> in the <CODE>CALL</CODE>
+statement in column 6, making it a comment line, which is
+not really what the author intended, and which is likely
+to result in one of the above-listed diagnostics.
+
+<EM>Replacing</EM> the <SAMP>`C'</SAMP> in column 1 with a space
+is the proper change to make, to ensure the <CODE>CALL</CODE>
+keyword starts in or after column 7.
+
+Another common mistake like this is to forget that fixed-form
+source lines are significant through only column 72, and that,
+normally, any text beyond column 72 is ignored or is diagnosed
+at compile time.
+
+See section <A HREF="g77_13.html#SEC345">Source Form</A>, for more information.
+
+<LI>
+
+The source file requires preprocessing, and the preprocessing
+is not being specified at compile time.
+
+A source file containing lines beginning with <CODE>#define</CODE>,
+<CODE>#include</CODE>, <CODE>#if</CODE>, and so on is likely one that
+requires preprocessing.
+
+If the file's suffix is <SAMP>`.f'</SAMP>, <SAMP>`.for'</SAMP>, or <SAMP>`.FOR'</SAMP>,
+the file normally will be compiled <EM>without</EM> preprocessing
+by <CODE>g77</CODE>.
+
+Change the file's suffix from <SAMP>`.f'</SAMP> to <SAMP>`.F'</SAMP>
+(or, on systems with case-insensitive file names,
+to <SAMP>`.fpp'</SAMP> or <SAMP>`.FPP'</SAMP>),
+from <SAMP>`.for'</SAMP> to <SAMP>`.fpp'</SAMP>,
+or from <SAMP>`.FOR'</SAMP> to <SAMP>`.FPP'</SAMP>.
+<CODE>g77</CODE> compiles files with such names <EM>with</EM>
+preprocessing.
+
+<A NAME="IDX2334"></A>
+<A NAME="IDX2335"></A>
+<A NAME="IDX2336"></A>
+<A NAME="IDX2337"></A>
+<A NAME="IDX2338"></A>
+<A NAME="IDX2339"></A>
+Or, learn how to use <CODE>gcc</CODE>'s <SAMP>`-x'</SAMP> option to specify
+the language <SAMP>`f77-cpp-input'</SAMP> for Fortran files that
+require preprocessing.
+See section <A HREF="g77_9.html#SEC14">Options Controlling the Kind of Output</A>.
+
+<LI>
+
+The source file is preprocessed, and the results of preprocessing
+result in syntactic errors that are not necessarily obvious to
+someone examining the source file itself.
+
+Examples of errors resulting from preprocessor macro expansion
+include exceeding the line-length limit, improperly starting,
+terminating, or incorporating the apostrophe or double-quote in
+a character constant, improperly forming a Hollerith constant,
+and so on.
+
+See section <A HREF="g77_9.html#SEC14">Options Controlling the Kind of Output</A>,
+for suggestions about how to use, and not use, preprocessing
+for Fortran code.
+</UL>
+
+
+
+<H2><A NAME="SEC723" HREF="g77_toc.html#TOC723"><CODE>GLOBALS</CODE></A></H2>
+
+<P>
+
+<PRE>
+Global name <VAR>name</VAR> defined at ... already defined...
+Global name <VAR>name</VAR> at ... has different type...
+Too many arguments passed to <VAR>name</VAR> at ...
+Too few arguments passed to <VAR>name</VAR> at ...
+Argument #<VAR>n</VAR> of <VAR>name</VAR> is ...
+</PRE>
+
+<P>
+These messages all identify disagreements about the
+global procedure named <VAR>name</VAR> among different program units
+(usually including <VAR>name</VAR> itself).
+
+</P>
+<P>
+Whether a particular disagreement is reported
+as a warning or an error
+can depend on the relative order
+of the disagreeing portions of the source file.
+
+</P>
+<P>
+Disagreements between a procedure invocation
+and the <EM>subsequent</EM> procedure itself
+are, usually, diagnosed as errors
+when the procedure itself <EM>precedes</EM> the invocation.
+Other disagreements are diagnosed via warnings.
+
+</P>
+<P>
+<A NAME="IDX2340"></A>
+<A NAME="IDX2341"></A>
+<A NAME="IDX2342"></A>
+This distinction, between warnings and errors,
+is due primarily to the present tendency of the <CODE>gcc</CODE> back end
+to inline only those procedure invocations that are
+<EM>preceded</EM> by the corresponding procedure definitions.
+If the <CODE>gcc</CODE> back end is changed
+to inline "forward references",
+in which invocations precede definitions,
+the <CODE>g77</CODE> front end will be changed
+to treat both orderings as errors, accordingly.
+
+</P>
+<P>
+The sorts of disagreements that are diagnosed by <CODE>g77</CODE> include
+whether a procedure is a subroutine or function;
+if it is a function, the type of the return value of the procedure;
+the number of arguments the procedure accepts;
+and the type of each argument.
+
+</P>
+<P>
+Disagreements regarding global names among program units
+in a Fortran program <EM>should</EM> be fixed in the code itself.
+However, if that is not immediately practical,
+and the code has been working for some time,
+it is possible it will work
+when compiled with the <SAMP>`-fno-globals'</SAMP> option.
+
+</P>
+<P>
+The <SAMP>`-fno-globals'</SAMP> option
+causes these diagnostics to all be warnings
+and disables all inlining of references to global procedures
+(to avoid subsequent compiler crashes and bad-code generation).
+Use of the <SAMP>`-Wno-globals'</SAMP> option as well as <SAMP>`-fno-globals'</SAMP>
+suppresses all of these diagnostics.
+(<SAMP>`-Wno-globals'</SAMP> by itself disables only the warnings,
+not the errors.)
+
+</P>
+<P>
+After using <SAMP>`-fno-globals'</SAMP> to work around these problems,
+it is wise to stop using that option and address them by fixing
+the Fortran code, because such problems, while they might not
+actually result in bugs on some systems, indicate that the code
+is not as portable as it could be.
+In particular, the code might appear to work on a particular
+system, but have bugs that affect the reliability of the data
+without exhibiting any other outward manifestations of the bugs.
+
+</P>
+
+
+<H2><A NAME="SEC724" HREF="g77_toc.html#TOC724"><CODE>LINKFAIL</CODE></A></H2>
+
+<P>
+
+<PRE>
+If the above command failed due to an unresolved reference
+to strtoul, _strtoul, bsearch, _bsearch, or similar, see
+[info -f g77 M LINKFAIL] (a node in the g77 documentation)
+for information on what causes this, how to work around
+the problem by editing ${srcdir}/proj.c, and what else to do.
+</PRE>
+
+<P>
+See section <A HREF="g77_17.html#SEC535">Missing strtoul or bsearch</A>, for more information on
+this problem,
+which occurs only in releases of <CODE>g77</CODE>
+based on <CODE>gcc</CODE>.
+(It does not occur in <CODE>egcs</CODE>.)
+
+</P>
+<P>
+On AIX 4.1, <CODE>g77</CODE> might not build with the native (non-GNU) tools
+due to a linker bug in coping with the <SAMP>`-bbigtoc'</SAMP> option which
+leads to a <SAMP>`Relocation overflow'</SAMP> error.  The GNU linker is not
+recommended on current AIX versions, though; it was developed under a
+now-unsupported version.  This bug is said to be fixed by `update PTF
+U455193 for APAR IX75823'.
+
+</P>
+<P>
+Compiling with <SAMP>`-mminimal-toc'</SAMP>
+might solve this problem, e.g. by adding
+
+<PRE>
+BOOT_CFLAGS='-mminimal-toc -O2 -g'
+</PRE>
+
+<P>
+to the <CODE>make bootstrap</CODE> command line.
+
+</P>
+
+
+<H2><A NAME="SEC725" HREF="g77_toc.html#TOC725"><CODE>Y2KBAD</CODE></A></H2>
+<P>
+<A NAME="IDX2343"></A>
+<A NAME="IDX2344"></A>
+
+</P>
+<P>
+
+<PRE>
+Intrinsic `<VAR>name</VAR>', invoked at (^), known to be non-Y2K-compliant...
+</PRE>
+
+<P>
+This diagnostic indicates that
+the specific intrinsic invoked by the name <VAR>name</VAR>
+is known to have an interface
+that is not Year-2000 (Y2K) compliant.
+
+</P>
+<P>
+See section <A HREF="g77_14.html#SEC372">Year 2000 (Y2K) Problems</A>.
+
+</P>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_26.html">previous</A>, <A HREF="g77_28.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

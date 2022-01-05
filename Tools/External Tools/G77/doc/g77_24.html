@@ -1,0 +1,178 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Adding Options</TITLE>
+<link href="g77_25.html" rel=Next>
+<link href="g77_23.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_23.html">previous</A>, <A HREF="g77_25.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC676" HREF="g77_toc.html#TOC676">Adding Options</A></H1>
+<P>
+<A NAME="IDX2301"></A>
+<A NAME="IDX2302"></A>
+
+</P>
+<P>
+To add a new command-line option to <CODE>g77</CODE>, first decide
+what kind of option you wish to add.
+Search the <CODE>g77</CODE> and <CODE>gcc</CODE> documentation for one
+or more options that is most closely like the one you want to add
+(in terms of what kind of effect it has, and so on) to
+help clarify its nature.
+
+</P>
+
+<UL>
+<LI>
+
+<EM>Fortran options</EM> are options that apply only
+when compiling Fortran programs.
+They are accepted by <CODE>g77</CODE> and <CODE>gcc</CODE>, but
+they apply only when compiling Fortran programs.
+
+<LI>
+
+<EM>Compiler options</EM> are options that apply
+when compiling most any kind of program.
+</UL>
+
+<P>
+<EM>Fortran options</EM> are listed in the file
+<TT>`egcs/gcc/f/lang-options.h'</TT>,
+which is used during the build of <CODE>gcc</CODE> to
+build a list of all options that are accepted by
+at least one language's compiler.
+This list goes into the <CODE>lang_options</CODE> array
+in <TT>`gcc/toplev.c'</TT>, which uses this array to
+determine whether a particular option should be
+offered to the linked-in front end for processing
+by calling <CODE>lang_option_decode</CODE>, which, for
+<CODE>g77</CODE>, is in <TT>`egcs/gcc/f/com.c'</TT> and just
+calls <CODE>ffe_decode_option</CODE>.
+
+</P>
+<P>
+If the linked-in front end "rejects" a
+particular option passed to it, <TT>`toplev.c'</TT>
+just ignores the option, because <EM>some</EM>
+language's compiler is willing to accept it.
+
+</P>
+<P>
+This allows commands like <SAMP>`gcc -fno-asm foo.c bar.f'</SAMP>
+to work, even though Fortran compilation does
+not currently support the <SAMP>`-fno-asm'</SAMP> option;
+even though the <CODE>f771</CODE> version of <CODE>lang_decode_option</CODE>
+rejects <SAMP>`-fno-asm'</SAMP>, <TT>`toplev.c'</TT> doesn't
+produce a diagnostic because some other language (C)
+does accept it.
+
+</P>
+<P>
+This also means that commands like
+<SAMP>`g77 -fno-asm foo.f'</SAMP> yield no diagnostics,
+despite the fact that no phase of the command was
+able to recognize and process <SAMP>`-fno-asm'</SAMP>---perhaps
+a warning about this would be helpful if it were
+possible.
+
+</P>
+<P>
+Code that processes Fortran options is found in
+<TT>`egcs/gcc/f/top.c'</TT>, function <CODE>ffe_decode_option</CODE>.
+This code needs to check positive and negative forms
+of each option.
+
+</P>
+<P>
+The defaults for Fortran options are set in their
+global definitions, also found in <TT>`egcs/gcc/f/top.c'</TT>.
+Many of these defaults are actually macros defined
+in <TT>`egcs/gcc/f/target.h'</TT>, since they might be
+machine-specific.
+However, since, in practice, GNU compilers
+should behave the same way on all configurations
+(especially when it comes to language constructs),
+the practice of setting defaults in <TT>`target.h'</TT>
+is likely to be deprecated and, ultimately, stopped
+in future versions of <CODE>g77</CODE>.
+
+</P>
+<P>
+Accessor macros for Fortran options, used by code
+in the <CODE>g77</CODE> FFE, are defined in <TT>`egcs/gcc/f/top.h'</TT>.
+
+</P>
+<P>
+<EM>Compiler options</EM> are listed in <TT>`gcc/toplev.c'</TT>
+in the array <CODE>f_options</CODE>.
+An option not listed in <CODE>lang_options</CODE> is
+looked up in <CODE>f_options</CODE> and handled from there.
+
+</P>
+<P>
+The defaults for compiler options are set in the
+global definitions for the corresponding variables,
+some of which are in <TT>`gcc/toplev.c'</TT>.
+
+</P>
+<P>
+You can set different defaults for <EM>Fortran-oriented</EM>
+or <EM>Fortran-reticent</EM> compiler options by changing
+the source code of <CODE>g77</CODE> and rebuilding.
+How to do this depends on the version of <CODE>g77</CODE>:
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>G77 0.5.24 (EGCS 1.1)</CODE>
+<DD>
+<DT><CODE>G77 0.5.25 (EGCS 1.2)</CODE>
+<DD>
+Change the <CODE>lang_init_options</CODE> routine in <TT>`egcs/gcc/f/com.c'</TT>.
+
+(Note that these versions of <CODE>g77</CODE>
+perform internal consistency checking automatically
+when the <SAMP>`-fversion'</SAMP> option is specified.)
+
+<DT><CODE>G77 0.5.23</CODE>
+<DD>
+<DT><CODE>G77 0.5.24 (EGCS 1.0)</CODE>
+<DD>
+Change the way <CODE>f771</CODE> handles the <SAMP>`-fset-g77-defaults'</SAMP>
+option, which is always provided as the first option when
+called by <CODE>g77</CODE> or <CODE>gcc</CODE>.
+
+This code is in <CODE>ffe_decode_options</CODE> in <TT>`egcs/gcc/f/top.c'</TT>.
+Have it change just the variables that you want to default
+to a different setting for Fortran compiles compared to
+compiles of other languages.
+
+The <SAMP>`-fset-g77-defaults'</SAMP> option is passed to <CODE>f771</CODE>
+automatically because of the specification information
+kept in <TT>`egcs/gcc/f/lang-specs.h'</TT>.
+This file tells the <CODE>gcc</CODE> command how to recognize,
+in this case, Fortran source files (those to be preprocessed,
+and those that are not), and further, how to invoke the
+appropriate programs (including <CODE>f771</CODE>) to process
+those source files.
+
+It is in <TT>`egcs/gcc/f/lang-specs.h'</TT> that <SAMP>`-fset-g77-defaults'</SAMP>,
+<SAMP>`-fversion'</SAMP>, and other options are passed, as appropriate,
+even when the user has not explicitly specified them.
+Other "internal" options such as <SAMP>`-quiet'</SAMP> also
+are passed via this mechanism.
+</DL>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_23.html">previous</A>, <A HREF="g77_25.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

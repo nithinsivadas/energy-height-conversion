@@ -1,0 +1,4208 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - The GNU Fortran Compiler</TITLE>
+<link href="g77_15.html" rel=Next>
+<link href="g77_13.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_13.html">previous</A>, <A HREF="g77_15.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC368" HREF="g77_toc.html#TOC368">The GNU Fortran Compiler</A></H1>
+
+<P>
+The GNU Fortran compiler, <CODE>g77</CODE>, supports programs written
+in the GNU Fortran language and in some other dialects of Fortran.
+
+</P>
+<P>
+Some aspects of how <CODE>g77</CODE> works are universal regardless
+of dialect, and yet are not properly part of the GNU Fortran
+language itself.
+These are described below.
+
+</P>
+<P>
+<EM>Note: This portion of the documentation definitely needs a lot
+of work!</EM>
+
+</P>
+
+<UL>
+<LI><A HREF="g77_14.html#SEC369">Compiler Limits</A>
+<LI><A HREF="g77_14.html#SEC370">Run-time Environment Limits</A>
+<LI><A HREF="g77_14.html#SEC376">Compiler Types</A>
+<LI><A HREF="g77_14.html#SEC377">Compiler Constants</A>
+<LI><A HREF="g77_14.html#SEC378">Compiler Intrinsics</A>
+</UL>
+
+
+
+<H2><A NAME="SEC369" HREF="g77_toc.html#TOC369">Compiler Limits</A></H2>
+<P>
+<A NAME="IDX1421"></A>
+<A NAME="IDX1422"></A>
+
+</P>
+<P>
+<CODE>g77</CODE>, as with GNU tools in general, imposes few arbitrary restrictions
+on lengths of identifiers, number of continuation lines, number of external
+symbols in a program, and so on.
+
+</P>
+<P>
+<A NAME="IDX1423"></A>
+<A NAME="IDX1424"></A>
+<A NAME="IDX1425"></A>
+<A NAME="IDX1426"></A>
+<A NAME="IDX1427"></A>
+<A NAME="IDX1428"></A>
+For example, some other Fortran compiler have an option
+(such as <SAMP>`-Nl<VAR>x</VAR>'</SAMP>) to increase the limit on the
+number of continuation lines.
+Also, some Fortran compilation systems have an option
+(such as <SAMP>`-Nx<VAR>x</VAR>'</SAMP>) to increase the limit on the
+number of external symbols.
+
+</P>
+<P>
+<CODE>g77</CODE>, <CODE>gcc</CODE>, and GNU <CODE>ld</CODE> (the GNU linker) have
+no equivalent options, since they do not impose arbitrary
+limits in these areas.
+
+</P>
+<P>
+<A NAME="IDX1429"></A>
+<A NAME="IDX1430"></A>
+<A NAME="IDX1431"></A>
+<A NAME="IDX1432"></A>
+<A NAME="IDX1433"></A>
+<A NAME="IDX1434"></A>
+<CODE>g77</CODE> does currently limit the number of dimensions in an array
+to the same degree as do the Fortran standards--seven (7).
+This restriction might be lifted in a future version.
+
+</P>
+
+
+<H2><A NAME="SEC370" HREF="g77_toc.html#TOC370">Run-time Environment Limits</A></H2>
+<P>
+<A NAME="IDX1435"></A>
+<A NAME="IDX1436"></A>
+
+</P>
+<P>
+As a portable Fortran implementation,
+<CODE>g77</CODE> offers its users direct access to,
+and otherwise depends upon,
+the underlying facilities of the system
+used to build <CODE>g77</CODE>,
+the system on which <CODE>g77</CODE> itself is used to compile programs,
+and the system on which the <CODE>g77</CODE>-compiled program is actually run.
+(For most users, the three systems are of the same
+type--combination of operating environment and hardware--often
+the same physical system.)
+
+</P>
+<P>
+The run-time environment for a particular system
+inevitably imposes some limits on a program's use
+of various system facilities.
+These limits vary from system to system.
+
+</P>
+<P>
+Even when such limits might be well beyond the
+possibility of being encountered on a particular system,
+the <CODE>g77</CODE> run-time environment
+has certain built-in limits,
+usually, but not always, stemming from intrinsics
+with inherently limited interfaces.
+
+</P>
+<P>
+Currently, the <CODE>g77</CODE> run-time environment
+does not generally offer a less-limiting environment
+by augmenting the underlying system's own environment.
+
+</P>
+<P>
+Therefore, code written in the GNU Fortran language,
+while syntactically and semantically portable,
+might nevertheless make non-portable assumptions
+about the run-time environment--assumptions that
+prove to be false for some particular environments.
+
+</P>
+<P>
+The GNU Fortran language,
+the <CODE>g77</CODE> compiler and run-time environment,
+and the <CODE>g77</CODE> documentation
+do not yet offer comprehensive portable work-arounds for such limits,
+though programmers should be able to
+find their own in specific instances.
+
+</P>
+<P>
+Not all of the limitations are described in this document.
+Some of the known limitations include:
+
+</P>
+
+<UL>
+<LI><A HREF="g77_14.html#SEC371">Timer Wraparounds</A>
+<LI><A HREF="g77_14.html#SEC372">Year 2000 (Y2K) Problems</A>
+<LI><A HREF="g77_14.html#SEC373">Array Size</A>
+<LI><A HREF="g77_14.html#SEC374">Character-variable Length</A>
+<LI><A HREF="g77_14.html#SEC375">Year 10000 (Y10K) Problems</A>
+</UL>
+
+
+
+<H3><A NAME="SEC371" HREF="g77_toc.html#TOC371">Timer Wraparounds</A></H3>
+
+<P>
+Intrinsics that return values computed from system timers,
+whether elapsed (wall-clock) timers,
+process CPU timers,
+or other kinds of timers,
+are prone to experiencing wrap-around errors
+(or returning wrapped-around values from successive calls)
+due to insufficient ranges
+offered by the underlying system's timers.
+
+</P>
+<P>
+<A NAME="IDX1437"></A>
+<A NAME="IDX1438"></A>
+<A NAME="IDX1439"></A>
+Some of the symptoms of such behaviors include
+apparently negative time being computed for a duration,
+an extremely short amount of time being computed for a long duration,
+and an extremely long amount of time being computed for a short duration.
+
+</P>
+<P>
+See the following for intrinsics
+known to have potential problems in these areas
+on at least some systems:
+section <A HREF="g77_12.html#SEC124">CPU_Time Intrinsic</A>,
+section <A HREF="g77_14.html#SEC416">DTime Intrinsic (function)</A>, section <A HREF="g77_12.html#SEC166">DTime Intrinsic (subroutine)</A>,
+section <A HREF="g77_12.html#SEC172">ETime Intrinsic (function)</A>, section <A HREF="g77_12.html#SEC171">ETime Intrinsic (subroutine)</A>,
+section <A HREF="g77_12.html#SEC260">MClock Intrinsic</A>, section <A HREF="g77_12.html#SEC261">MClock8 Intrinsic</A>,
+section <A HREF="g77_14.html#SEC507">Secnds Intrinsic</A>,
+section <A HREF="g77_12.html#SEC295">Second Intrinsic (function)</A>, section <A HREF="g77_12.html#SEC296">Second Intrinsic (subroutine)</A>,
+section <A HREF="g77_12.html#SEC317">System_Clock Intrinsic</A>,
+section <A HREF="g77_12.html#SEC320">Time Intrinsic (UNIX)</A>, section <A HREF="g77_14.html#SEC514">Time Intrinsic (VXT)</A>,
+section <A HREF="g77_12.html#SEC321">Time8 Intrinsic</A>.
+
+</P>
+
+
+<H3><A NAME="SEC372" HREF="g77_toc.html#TOC372">Year 2000 (Y2K) Problems</A></H3>
+<P>
+<A NAME="IDX1440"></A>
+<A NAME="IDX1441"></A>
+
+</P>
+<P>
+While the <CODE>g77</CODE> compiler itself is believed to
+be Year-2000 (Y2K) compliant,
+some intrinsics are not,
+and, potentially, some underlying systems are not,
+perhaps rendering some Y2K-compliant intrinsics
+non-compliant when used on those particular systems.
+
+</P>
+<P>
+Fortran code that uses non-Y2K-compliant intrinsics
+(listed below)
+is, itself, almost certainly not compliant,
+and should be modified to use Y2K-compliant intrinsics instead.
+
+</P>
+<P>
+Fortran code that uses no non-Y2K-compliant intrinsics,
+but which currently is running on a non-Y2K-compliant system,
+can be made more Y2K compliant by compiling and
+linking it for use on a new Y2K-compliant system,
+such as a new version of an old, non-Y2K-compliant, system.
+
+</P>
+<P>
+Currently, information on Y2K and related issues
+is being maintained at
+<A HREF="http://www.gnu.org/software/year2000-list.html"><TT>http://www.gnu.org/software/year2000-list.html</TT></A>.
+
+</P>
+<P>
+See the following for intrinsics
+known to have potential problems in these areas
+on at least some systems:
+section <A HREF="g77_14.html#SEC404">Date Intrinsic</A>,
+section <A HREF="g77_14.html#SEC423">IDate Intrinsic (VXT)</A>.
+
+</P>
+<P>
+<A NAME="IDX1442"></A>
+<A NAME="IDX1443"></A>
+<A NAME="IDX1444"></A>
+<A NAME="IDX1445"></A>
+<A NAME="IDX1446"></A>
+The <CODE>libg2c</CODE> library
+shipped with any <CODE>g77</CODE> that warns
+about invocation of a non-Y2K-compliant intrinsic
+has renamed the <CODE>EXTERNAL</CODE> procedure names
+of those intrinsics.
+This is done so that
+the <CODE>libg2c</CODE> implementations of these intrinsics
+cannot be directly linked to
+as <CODE>EXTERNAL</CODE> names
+(which normally would avoid the non-Y2K-intrinsic warning).
+
+</P>
+<P>
+The renamed forms of the <CODE>EXTERNAL</CODE> names
+of these renamed procedures
+may be linked to
+by appending the string <SAMP>`_y2kbug'</SAMP>
+to the name of the procedure
+in the source code.
+For example:
+
+</P>
+
+<PRE>
+CHARACTER*20 STR
+INTEGER YY, MM, DD
+EXTERNAL DATE_Y2KBUG, VXTIDATE_Y2KBUG
+CALL DATE_Y2KBUG (STR)
+CALL VXTIDATE_Y2KBUG (MM, DD, YY)
+</PRE>
+
+<P>
+(Note that the <CODE>EXTERNAL</CODE> statement
+is not actually required,
+since the modified names are not recognized as intrinsics
+by the current version of <CODE>g77</CODE>.
+But it is shown in this specific case,
+for purposes of illustration.)
+
+</P>
+<P>
+The renaming of <CODE>EXTERNAL</CODE> procedure names of these intrinsics
+causes unresolved references at link time.
+For example, <SAMP>`EXTERNAL DATE; CALL DATE(STR)'</SAMP>
+is normally compiled by <CODE>g77</CODE>
+as, in C, <SAMP>`date_(&#38;str, 20);'</SAMP>.
+This, in turn, links to the <CODE>date_</CODE> procedure
+in the <CODE>libE77</CODE> portion of <CODE>libg2c</CODE>,
+which purposely calls a nonexistent procedure
+named <CODE>G77_date_y2kbuggy_0</CODE>.
+The resulting link-time error is designed, via this name,
+to encourage the programmer to look up the
+index entries to this portion of the <CODE>g77</CODE> documentation.
+
+</P>
+<P>
+Generally, we recommend that the <CODE>EXTERNAL</CODE> method
+of invoking procedures in <CODE>libg2c</CODE>
+<EM>not</EM> be used.
+When used, some of the correctness checking
+normally performed by <CODE>g77</CODE>
+is skipped.
+
+</P>
+<P>
+In particular, it is probably better to use the
+<CODE>INTRINSIC</CODE> method of invoking
+non-Y2K-compliant procedures,
+so anyone compiling the code
+can quickly notice the potential Y2K problems
+(via the warnings printing by <CODE>g77</CODE>)
+without having to even look at the code itself.
+
+</P>
+<P>
+If there are problems linking <CODE>libg2c</CODE>
+to code compiled by <CODE>g77</CODE>
+that involve the string <SAMP>`y2kbug'</SAMP>,
+and these are not explained above,
+that probably indicates
+that a version of <CODE>libg2c</CODE>
+older than <CODE>g77</CODE>
+is being linked to,
+or that the new library is being linked
+to code compiled by an older version of <CODE>g77</CODE>.
+
+</P>
+<P>
+That's because, as of the version that warns about
+non-Y2K-compliant intrinsic invocation,
+<CODE>g77</CODE> references the <CODE>libg2c</CODE> implementations
+of those intrinsics
+using new names, containing the string <SAMP>`y2kbug'</SAMP>.
+
+</P>
+<P>
+So, linking newly-compiled code
+(invoking one of the intrinsics in question)
+to an old library
+might yield an unresolved reference
+to <CODE>G77_date_y2kbug_0</CODE>.
+(The old library calls it <CODE>G77_date_0</CODE>.)
+
+</P>
+<P>
+Similarly, linking previously-compiled code
+to a new library
+might yield an unresolved reference
+to <CODE>G77_vxtidate_0</CODE>.
+(The new library calls it <CODE>G77_vxtidate_y2kbug_0</CODE>.)
+
+</P>
+<P>
+The proper fix for the above problems
+is to obtain the latest release of <CODE>g77</CODE>
+and related products
+(including <CODE>libg2c</CODE>)
+and install them on all systems,
+then recompile, relink, and install
+(as appropriate)
+all existing Fortran programs.
+
+</P>
+<P>
+(Normally, this sort of renaming is steadfastly avoided.
+In this case, however, it seems more important to highlight
+potential Y2K problems
+than to ease the transition
+of potentially non-Y2K-compliant code
+to new versions of <CODE>g77</CODE> and <CODE>libg2c</CODE>.)
+
+</P>
+
+
+<H3><A NAME="SEC373" HREF="g77_toc.html#TOC373">Array Size</A></H3>
+<P>
+<A NAME="IDX1447"></A>
+<A NAME="IDX1448"></A>
+
+</P>
+<P>
+Currently, <CODE>g77</CODE> uses the default <CODE>INTEGER</CODE> type
+for array indexes,
+which limits the sizes of single-dimension arrays
+on systems offering a larger address space
+than can be addressed by that type.
+(That <CODE>g77</CODE> puts all arrays in memory
+could be considered another limitation--it
+could use large temporary files--but that decision
+is left to the programmer as an implementation choice
+by most Fortran implementations.)
+
+</P>
+<P>
+It is not yet clear whether this limitation
+never, sometimes, or always applies to the
+sizes of multiple-dimension arrays as a whole.
+
+</P>
+<P>
+For example, on a system with 64-bit addresses
+and 32-bit default <CODE>INTEGER</CODE>,
+an array with a size greater than can be addressed
+by a 32-bit offset
+can be declared using multiple dimensions.
+Such an array is therefore larger
+than a single-dimension array can be,
+on the same system.
+
+</P>
+<P>
+<A NAME="IDX1449"></A>
+<A NAME="IDX1450"></A>
+<A NAME="IDX1451"></A>
+Whether large multiple-dimension arrays are reliably supported
+depends mostly on the <CODE>gcc</CODE> back end (code generator)
+used by <CODE>g77</CODE>, and has not yet been fully investigated.
+
+</P>
+
+
+<H3><A NAME="SEC374" HREF="g77_toc.html#TOC374">Character-variable Length</A></H3>
+<P>
+<A NAME="IDX1452"></A>
+<A NAME="IDX1453"></A>
+
+</P>
+<P>
+Currently, <CODE>g77</CODE> uses the default <CODE>INTEGER</CODE> type
+for the lengths of <CODE>CHARACTER</CODE> variables
+and array elements.
+
+</P>
+<P>
+This means that, for example,
+a system with a 64-bit address space
+and a 32-bit default <CODE>INTEGER</CODE> type
+does not, under <CODE>g77</CODE>,
+support a <CODE>CHARACTER*<VAR>n</VAR></CODE> declaration
+where <VAR>n</VAR> is greater than 2147483647.
+
+</P>
+
+
+<H3><A NAME="SEC375" HREF="g77_toc.html#TOC375">Year 10000 (Y10K) Problems</A></H3>
+<P>
+<A NAME="IDX1454"></A>
+<A NAME="IDX1455"></A>
+
+</P>
+<P>
+Most intrinsics returning, or computing values based on,
+date information are prone to Year-10000 (Y10K) problems,
+due to supporting only 4 digits for the year.
+
+</P>
+<P>
+See the following for examples:
+section <A HREF="g77_12.html#SEC177">FDate Intrinsic (function)</A>, section <A HREF="g77_12.html#SEC176">FDate Intrinsic (subroutine)</A>,
+section <A HREF="g77_12.html#SEC213">IDate Intrinsic (UNIX)</A>,
+section <A HREF="g77_14.html#SEC514">Time Intrinsic (VXT)</A>,
+section <A HREF="g77_12.html#SEC135">Date_and_Time Intrinsic</A>.
+
+</P>
+
+
+<H2><A NAME="SEC376" HREF="g77_toc.html#TOC376">Compiler Types</A></H2>
+<P>
+<A NAME="IDX1456"></A>
+<A NAME="IDX1457"></A>
+
+</P>
+<P>
+Fortran implementations have a fair amount of freedom given them by the
+standard as far as how much storage space is used and how much precision
+and range is offered by the various types such as <CODE>LOGICAL(KIND=1)</CODE>,
+<CODE>INTEGER(KIND=1)</CODE>, <CODE>REAL(KIND=1)</CODE>, <CODE>REAL(KIND=2)</CODE>,
+<CODE>COMPLEX(KIND=1)</CODE>, and <CODE>CHARACTER</CODE>.
+Further, many compilers offer so-called <SAMP>`*<VAR>n</VAR>'</SAMP> notation, but
+the interpretation of <VAR>n</VAR> varies across compilers and target architectures.
+
+</P>
+<P>
+The standard requires that <CODE>LOGICAL(KIND=1)</CODE>, <CODE>INTEGER(KIND=1)</CODE>,
+and <CODE>REAL(KIND=1)</CODE>
+occupy the same amount of storage space, and that <CODE>COMPLEX(KIND=1)</CODE>
+and <CODE>REAL(KIND=2)</CODE> take twice as much storage space as <CODE>REAL(KIND=1)</CODE>.
+Further, it requires that <CODE>COMPLEX(KIND=1)</CODE>
+entities be ordered such that when a <CODE>COMPLEX(KIND=1)</CODE> variable is
+storage-associated (such as via <CODE>EQUIVALENCE</CODE>)
+with a two-element <CODE>REAL(KIND=1)</CODE> array named <SAMP>`R'</SAMP>, <SAMP>`R(1)'</SAMP>
+corresponds to the real element and <SAMP>`R(2)'</SAMP> to the imaginary
+element of the <CODE>COMPLEX(KIND=1)</CODE> variable.
+
+</P>
+<P>
+(Few requirements as to precision or ranges of any of these are
+placed on the implementation, nor is the relationship of storage sizes of
+these types to the <CODE>CHARACTER</CODE> type specified, by the standard.)
+
+</P>
+<P>
+<CODE>g77</CODE> follows the above requirements, warning when compiling
+a program requires placement of items in memory that contradict the
+requirements of the target architecture.
+(For example, a program can require placement of a <CODE>REAL(KIND=2)</CODE>
+on a boundary that is not an even multiple of its size, but still an
+even multiple of the size of a <CODE>REAL(KIND=1)</CODE> variable.
+On some target architectures, using the canonical
+mapping of Fortran types to underlying architectural types, such
+placement is prohibited by the machine definition or
+the Application Binary Interface (ABI) in force for
+the configuration defined for building <CODE>gcc</CODE> and <CODE>g77</CODE>.
+<CODE>g77</CODE> warns about such
+situations when it encounters them.)
+
+</P>
+<P>
+<CODE>g77</CODE> follows consistent rules for configuring the mapping between Fortran
+types, including the <SAMP>`*<VAR>n</VAR>'</SAMP> notation, and the underlying architectural
+types as accessed by a similarly-configured applicable version of the
+<CODE>gcc</CODE> compiler.
+These rules offer a widely portable, consistent Fortran/C
+environment, although they might well conflict with the expectations of
+users of Fortran compilers designed and written for particular
+architectures.
+
+</P>
+<P>
+These rules are based on the configuration that is in force for the
+version of <CODE>gcc</CODE> built in the same release as <CODE>g77</CODE> (and
+which was therefore used to build both the <CODE>g77</CODE> compiler
+components and the <CODE>libg2c</CODE> run-time library):
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>REAL(KIND=1)</CODE>
+<DD>
+<A NAME="IDX1458"></A>
+ <A NAME="IDX1459"></A>
+ 
+Same as <CODE>float</CODE> type.
+
+<A NAME="IDX1460"></A>
+<A NAME="IDX1461"></A>
+<DT><CODE>REAL(KIND=2)</CODE>
+<DD>
+Same as whatever floating-point type that is twice the size
+of a <CODE>float</CODE>---usually, this is a <CODE>double</CODE>.
+
+<A NAME="IDX1462"></A>
+<A NAME="IDX1463"></A>
+<DT><CODE>INTEGER(KIND=1)</CODE>
+<DD>
+Same as an integral type that is occupies the same amount
+of memory storage as <CODE>float</CODE>---usually, this is either
+an <CODE>int</CODE> or a <CODE>long int</CODE>.
+
+<A NAME="IDX1464"></A>
+<A NAME="IDX1465"></A>
+<DT><CODE>LOGICAL(KIND=1)</CODE>
+<DD>
+Same <CODE>gcc</CODE> type as <CODE>INTEGER(KIND=1)</CODE>.
+
+<A NAME="IDX1466"></A>
+<A NAME="IDX1467"></A>
+<DT><CODE>INTEGER(KIND=2)</CODE>
+<DD>
+Twice the size, and usually nearly twice the range,
+as <CODE>INTEGER(KIND=1)</CODE>---usually, this is either
+a <CODE>long int</CODE> or a <CODE>long long int</CODE>.
+
+<A NAME="IDX1468"></A>
+<A NAME="IDX1469"></A>
+<DT><CODE>LOGICAL(KIND=2)</CODE>
+<DD>
+Same <CODE>gcc</CODE> type as <CODE>INTEGER(KIND=2)</CODE>.
+
+<A NAME="IDX1470"></A>
+<A NAME="IDX1471"></A>
+<DT><CODE>INTEGER(KIND=3)</CODE>
+<DD>
+Same <CODE>gcc</CODE> type as signed <CODE>char</CODE>.
+
+<A NAME="IDX1472"></A>
+<A NAME="IDX1473"></A>
+<DT><CODE>LOGICAL(KIND=3)</CODE>
+<DD>
+Same <CODE>gcc</CODE> type as <CODE>INTEGER(KIND=3)</CODE>.
+
+<A NAME="IDX1474"></A>
+<A NAME="IDX1475"></A>
+<DT><CODE>INTEGER(KIND=6)</CODE>
+<DD>
+Twice the size, and usually nearly twice the range,
+as <CODE>INTEGER(KIND=3)</CODE>---usually, this is
+a <CODE>short</CODE>.
+
+<A NAME="IDX1476"></A>
+<A NAME="IDX1477"></A>
+<DT><CODE>LOGICAL(KIND=6)</CODE>
+<DD>
+Same <CODE>gcc</CODE> type as <CODE>INTEGER(KIND=6)</CODE>.
+
+<A NAME="IDX1478"></A>
+<A NAME="IDX1479"></A>
+<DT><CODE>COMPLEX(KIND=1)</CODE>
+<DD>
+Two <CODE>REAL(KIND=1)</CODE> scalars (one for the real part followed by
+one for the imaginary part).
+
+<A NAME="IDX1480"></A>
+<A NAME="IDX1481"></A>
+<DT><CODE>COMPLEX(KIND=2)</CODE>
+<DD>
+Two <CODE>REAL(KIND=2)</CODE> scalars.
+
+<A NAME="IDX1482"></A>
+<DT><CODE><VAR>numeric-type</VAR>*<VAR>n</VAR></CODE>
+<DD>
+(Where <VAR>numeric-type</VAR> is any type other than <CODE>CHARACTER</CODE>.)
+Same as whatever <CODE>gcc</CODE> type occupies <VAR>n</VAR> times the storage
+space of a <CODE>gcc</CODE> <CODE>char</CODE> item.
+
+<A NAME="IDX1483"></A>
+<A NAME="IDX1484"></A>
+<DT><CODE>DOUBLE PRECISION</CODE>
+<DD>
+Same as <CODE>REAL(KIND=2)</CODE>.
+
+<A NAME="IDX1485"></A>
+<A NAME="IDX1486"></A>
+<DT><CODE>DOUBLE COMPLEX</CODE>
+<DD>
+Same as <CODE>COMPLEX(KIND=2)</CODE>.
+</DL>
+
+<P>
+Note that the above are proposed correspondences and might change
+in future versions of <CODE>g77</CODE>---avoid writing code depending
+on them.
+
+</P>
+<P>
+Other types supported by <CODE>g77</CODE>
+are derived from gcc types such as <CODE>char</CODE>, <CODE>short</CODE>,
+<CODE>int</CODE>, <CODE>long int</CODE>, <CODE>long long int</CODE>, <CODE>long double</CODE>,
+and so on.
+That is, whatever types <CODE>gcc</CODE> already supports, <CODE>g77</CODE> supports
+now or probably will support in a future version.
+The rules for the <SAMP>`<VAR>numeric-type</VAR>*<VAR>n</VAR>'</SAMP> notation
+apply to these types,
+and new values for <SAMP>`<VAR>numeric-type</VAR>(KIND=<VAR>n</VAR>)'</SAMP> will be
+assigned in a way that encourages clarity, consistency, and portability.
+
+</P>
+
+
+<H2><A NAME="SEC377" HREF="g77_toc.html#TOC377">Compiler Constants</A></H2>
+<P>
+<A NAME="IDX1487"></A>
+<A NAME="IDX1488"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> strictly assigns types to <EM>all</EM> constants not
+documented as "typeless" (typeless constants including <SAMP>`'1'Z'</SAMP>,
+for example).
+Many other Fortran compilers attempt to assign types to typed constants
+based on their context.
+This results in hard-to-find bugs, nonportable
+code, and is not in the spirit (though it strictly follows the letter)
+of the 77 and 90 standards.
+
+</P>
+<P>
+<CODE>g77</CODE> might offer, in a future release, explicit constructs by
+which a wider variety of typeless constants may be specified, and/or
+user-requested warnings indicating places where <CODE>g77</CODE> might differ
+from how other compilers assign types to constants.
+
+</P>
+<P>
+See section <A HREF="g77_20.html#SEC665">Context-Sensitive Constants</A>, for more information on this issue.
+
+</P>
+
+
+<H2><A NAME="SEC378" HREF="g77_toc.html#TOC378">Compiler Intrinsics</A></H2>
+
+<P>
+<CODE>g77</CODE> offers an ever-widening set of intrinsics.
+Currently these all are procedures (functions and subroutines).
+
+</P>
+<P>
+Some of these intrinsics are unimplemented, but their names reserved
+to reduce future problems with existing code as they are implemented.
+Others are implemented as part of the GNU Fortran language, while
+yet others are provided for compatibility with other dialects of
+Fortran but are not part of the GNU Fortran language.
+
+</P>
+<P>
+To manage these distinctions, <CODE>g77</CODE> provides intrinsic <EM>groups</EM>,
+a facility that is simply an extension of the intrinsic groups provided
+by the GNU Fortran language.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_14.html#SEC379">Intrinsic Groups</A>: How intrinsics are grouped for easy management.
+<LI><A HREF="g77_14.html#SEC380">Other Intrinsics</A>: Intrinsics other than those in the GNU
+                       Fortran language.
+</UL>
+
+
+
+<H3><A NAME="SEC379" HREF="g77_toc.html#TOC379">Intrinsic Groups</A></H3>
+<P>
+<A NAME="IDX1489"></A>
+<A NAME="IDX1490"></A>
+
+</P>
+<P>
+A given specific intrinsic belongs in one or more groups.
+Each group is deleted, disabled, hidden, or enabled
+by default or a command-line option.
+The meaning of each term follows.
+
+</P>
+<DL COMPACT>
+
+<DT><B>Deleted</B>
+<DD>
+<A NAME="IDX1491"></A>
+ <A NAME="IDX1492"></A>
+ 
+No intrinsics are recognized as belonging to that group.
+
+<A NAME="IDX1493"></A>
+<A NAME="IDX1494"></A>
+<DT><B>Disabled</B>
+<DD>
+Intrinsics are recognized as belonging to the group, but
+references to them (other than via the <CODE>INTRINSIC</CODE> statement)
+are disallowed through that group.
+
+<A NAME="IDX1495"></A>
+<A NAME="IDX1496"></A>
+<DT><B>Hidden</B>
+<DD>
+Intrinsics in that group are recognized and enabled (if implemented)
+<EM>only</EM> if the first mention of the actual name of an intrinsic
+in a program unit is in an <CODE>INTRINSIC</CODE> statement.
+
+<A NAME="IDX1497"></A>
+<A NAME="IDX1498"></A>
+<DT><B>Enabled</B>
+<DD>
+Intrinsics in that group are recognized and enabled (if implemented).
+</DL>
+
+<P>
+The distinction between deleting and disabling a group is illustrated
+by the following example.
+Assume intrinsic <SAMP>`FOO'</SAMP> belongs only to group <SAMP>`FGR'</SAMP>.
+If group <SAMP>`FGR'</SAMP> is deleted, the following program unit will
+successfully compile, because <SAMP>`FOO()'</SAMP> will be seen as a
+reference to an external function named <SAMP>`FOO'</SAMP>:
+
+</P>
+
+<PRE>
+PRINT *, FOO()
+END
+</PRE>
+
+<P>
+If group <SAMP>`FGR'</SAMP> is disabled, compiling the above program will produce
+diagnostics, either because the <SAMP>`FOO'</SAMP> intrinsic is improperly invoked
+or, if properly invoked, it is not enabled.
+To change the above program so it references an external function <SAMP>`FOO'</SAMP>
+instead of the disabled <SAMP>`FOO'</SAMP> intrinsic,
+add the following line to the top:
+
+</P>
+
+<PRE>
+EXTERNAL FOO
+</PRE>
+
+<P>
+So, deleting a group tells <CODE>g77</CODE> to pretend as though the intrinsics in
+that group do not exist at all, whereas disabling it tells <CODE>g77</CODE> to
+recognize them as (disabled) intrinsics in intrinsic-like contexts.
+
+</P>
+<P>
+Hiding a group is like enabling it, but the intrinsic must be first
+named in an <CODE>INTRINSIC</CODE> statement to be considered a reference to the
+intrinsic rather than to an external procedure.
+This might be the "safest" way to treat a new group of intrinsics
+when compiling old
+code, because it allows the old code to be generally written as if
+those new intrinsics never existed, but to be changed to use them
+by inserting <CODE>INTRINSIC</CODE> statements in the appropriate places.
+However, it should be the goal of development to use <CODE>EXTERNAL</CODE>
+for all names of external procedures that might be intrinsic names.
+
+</P>
+<P>
+If an intrinsic is in more than one group, it is enabled if any of its
+containing groups are enabled; if not so enabled, it is hidden if
+any of its containing groups are hidden; if not so hidden, it is disabled
+if any of its containing groups are disabled; if not so disabled, it is
+deleted.
+This extra complication is necessary because some intrinsics,
+such as <CODE>IBITS</CODE>, belong to more than one group, and hence should be
+enabled if any of the groups to which they belong are enabled, and so
+on.
+
+</P>
+<P>
+The groups are:
+
+</P>
+<P>
+<A NAME="IDX1499"></A>
+<A NAME="IDX1500"></A>
+<DL COMPACT>
+
+<DT><CODE>badu77</CODE>
+<DD>
+<A NAME="IDX1501"></A>
+ 
+UNIX intrinsics having inappropriate forms (usually functions that
+have intended side effects).
+
+<A NAME="IDX1502"></A>
+<DT><CODE>gnu</CODE>
+<DD>
+Intrinsics the GNU Fortran language supports that are extensions to
+the Fortran standards (77 and 90).
+
+<A NAME="IDX1503"></A>
+<DT><CODE>f2c</CODE>
+<DD>
+Intrinsics supported by AT&#38;T's <CODE>f2c</CODE> converter and/or <CODE>libf2c</CODE>.
+
+<A NAME="IDX1504"></A>
+<DT><CODE>f90</CODE>
+<DD>
+Fortran 90 intrinsics.
+
+<A NAME="IDX1505"></A>
+<DT><CODE>mil</CODE>
+<DD>
+MIL-STD 1753 intrinsics (<CODE>MVBITS</CODE>, <CODE>IAND</CODE>, <CODE>BTEST</CODE>, and so on).
+
+<A NAME="IDX1506"></A>
+<DT><CODE>unix</CODE>
+<DD>
+UNIX intrinsics (<CODE>IARGC</CODE>, <CODE>EXIT</CODE>, <CODE>ERF</CODE>, and so on).
+
+<A NAME="IDX1507"></A>
+<DT><CODE>vxt</CODE>
+<DD>
+VAX/VMS FORTRAN (current as of v4) intrinsics.
+</DL>
+
+
+
+<H3><A NAME="SEC380" HREF="g77_toc.html#TOC380">Other Intrinsics</A></H3>
+<P>
+<A NAME="IDX1508"></A>
+<A NAME="IDX1509"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> supports intrinsics other than those in the GNU Fortran
+language proper.
+This set of intrinsics is described below.
+
+</P>
+
+
+<UL>
+<LI><A HREF="g77_14.html#SEC381">ACosD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC382">AIMax0 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC383">AIMin0 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC384">AJMax0 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC385">AJMin0 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC386">ASinD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC387">ATan2D Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC388">ATanD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC389">BITest Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC390">BJTest Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC391">CDAbs Intrinsic</A>: Absolute value (archaic).
+<LI><A HREF="g77_14.html#SEC392">CDCos Intrinsic</A>: Cosine (archaic).
+<LI><A HREF="g77_14.html#SEC393">CDExp Intrinsic</A>: Exponential (archaic).
+<LI><A HREF="g77_14.html#SEC394">CDLog Intrinsic</A>: Natural logarithm (archaic).
+<LI><A HREF="g77_14.html#SEC395">CDSin Intrinsic</A>: Sine (archaic).
+<LI><A HREF="g77_14.html#SEC396">CDSqRt Intrinsic</A>: Square root (archaic).
+<LI><A HREF="g77_14.html#SEC397">ChDir Intrinsic (function)</A>: Change directory.
+<LI><A HREF="g77_14.html#SEC398">ChMod Intrinsic (function)</A>: Change file modes.
+<LI><A HREF="g77_14.html#SEC399">CosD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC400">DACosD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC401">DASinD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC402">DATan2D Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC403">DATanD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC404">Date Intrinsic</A>: Get current date as dd-Mon-yy.
+<LI><A HREF="g77_14.html#SEC405">DbleQ Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC406">DCmplx Intrinsic</A>: Construct <CODE>COMPLEX(KIND=2)</CODE> value.
+<LI><A HREF="g77_14.html#SEC407">DConjg Intrinsic</A>: Complex conjugate (archaic).
+<LI><A HREF="g77_14.html#SEC408">DCosD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC409">DFloat Intrinsic</A>: Conversion (archaic).
+<LI><A HREF="g77_14.html#SEC410">DFlotI Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC411">DFlotJ Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC412">DImag Intrinsic</A>: Convert/extract imaginary part of complex (archaic).
+<LI><A HREF="g77_14.html#SEC413">DReal Intrinsic</A>: Convert value to type <CODE>REAL(KIND=2)</CODE>.
+<LI><A HREF="g77_14.html#SEC414">DSinD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC415">DTanD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC416">DTime Intrinsic (function)</A>: Get elapsed time since last time.
+<LI><A HREF="g77_14.html#SEC417">FGet Intrinsic (function)</A>: Read a character from unit 5 stream-wise.
+<LI><A HREF="g77_14.html#SEC418">FGetC Intrinsic (function)</A>: Read a character stream-wise.
+<LI><A HREF="g77_14.html#SEC419">FloatI Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC420">FloatJ Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC421">FPut Intrinsic (function)</A>: Write a character to unit 6 stream-wise.
+<LI><A HREF="g77_14.html#SEC422">FPutC Intrinsic (function)</A>: Write a character stream-wise.
+<LI><A HREF="g77_14.html#SEC423">IDate Intrinsic (VXT)</A>: Get local time info (VAX/VMS).
+<LI><A HREF="g77_14.html#SEC424">IIAbs Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC425">IIAnd Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC426">IIBClr Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC427">IIBits Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC428">IIBSet Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC429">IIDiM Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC430">IIDInt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC431">IIDNnt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC432">IIEOr Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC433">IIFix Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC434">IInt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC435">IIOr Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC436">IIQint Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC437">IIQNnt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC438">IIShftC Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC439">IISign Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC440">IMax0 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC441">IMax1 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC442">IMin0 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC443">IMin1 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC444">IMod Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC445">INInt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC446">INot Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC447">IZExt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC448">JIAbs Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC449">JIAnd Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC450">JIBClr Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC451">JIBits Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC452">JIBSet Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC453">JIDiM Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC454">JIDInt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC455">JIDNnt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC456">JIEOr Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC457">JIFix Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC458">JInt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC459">JIOr Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC460">JIQint Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC461">JIQNnt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC462">JIShft Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC463">JIShftC Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC464">JISign Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC465">JMax0 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC466">JMax1 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC467">JMin0 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC468">JMin1 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC469">JMod Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC470">JNInt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC471">JNot Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC472">JZExt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC473">Kill Intrinsic (function)</A>: Signal a process.
+<LI><A HREF="g77_14.html#SEC474">Link Intrinsic (function)</A>: Make hard link in file system.
+<LI><A HREF="g77_14.html#SEC475">QAbs Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC476">QACos Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC477">QACosD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC478">QASin Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC479">QASinD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC480">QATan Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC481">QATan2 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC482">QATan2D Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC483">QATanD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC484">QCos Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC485">QCosD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC486">QCosH Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC487">QDiM Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC488">QExp Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC489">QExt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC490">QExtD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC491">QFloat Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC492">QInt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC493">QLog Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC494">QLog10 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC495">QMax1 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC496">QMin1 Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC497">QMod Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC498">QNInt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC499">QSin Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC500">QSinD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC501">QSinH Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC502">QSqRt Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC503">QTan Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC504">QTanD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC505">QTanH Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC506">Rename Intrinsic (function)</A>: Rename file.
+<LI><A HREF="g77_14.html#SEC507">Secnds Intrinsic</A>: Get local time offset since midnight.
+<LI><A HREF="g77_14.html#SEC508">Signal Intrinsic (function)</A>: Muck with signal handling.
+<LI><A HREF="g77_14.html#SEC509">SinD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC510">SnglQ Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC511">SymLnk Intrinsic (function)</A>: Make symbolic link in file system.
+<LI><A HREF="g77_14.html#SEC512">System Intrinsic (function)</A>: Invoke shell (system) command.
+<LI><A HREF="g77_14.html#SEC513">TanD Intrinsic</A>: (Reserved for future use.)
+<LI><A HREF="g77_14.html#SEC514">Time Intrinsic (VXT)</A>: Get the time as a character value.
+<LI><A HREF="g77_14.html#SEC515">UMask Intrinsic (function)</A>: Set file creation permissions mask.
+<LI><A HREF="g77_14.html#SEC516">Unlink Intrinsic (function)</A>: Unlink file.
+<LI><A HREF="g77_14.html#SEC517">ZExt Intrinsic</A>: (Reserved for future use.)
+</UL>
+
+
+
+<H4><A NAME="SEC381" HREF="g77_toc.html#TOC381">ACosD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1510"></A>
+<A NAME="IDX1511"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL ACosD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC382" HREF="g77_toc.html#TOC382">AIMax0 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1512"></A>
+<A NAME="IDX1513"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL AIMax0'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC383" HREF="g77_toc.html#TOC383">AIMin0 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1514"></A>
+<A NAME="IDX1515"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL AIMin0'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC384" HREF="g77_toc.html#TOC384">AJMax0 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1516"></A>
+<A NAME="IDX1517"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL AJMax0'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC385" HREF="g77_toc.html#TOC385">AJMin0 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1518"></A>
+<A NAME="IDX1519"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL AJMin0'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC386" HREF="g77_toc.html#TOC386">ASinD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1520"></A>
+<A NAME="IDX1521"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL ASinD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC387" HREF="g77_toc.html#TOC387">ATan2D Intrinsic</A></H4>
+<P>
+<A NAME="IDX1522"></A>
+<A NAME="IDX1523"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL ATan2D'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC388" HREF="g77_toc.html#TOC388">ATanD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1524"></A>
+<A NAME="IDX1525"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL ATanD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC389" HREF="g77_toc.html#TOC389">BITest Intrinsic</A></H4>
+<P>
+<A NAME="IDX1526"></A>
+<A NAME="IDX1527"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL BITest'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC390" HREF="g77_toc.html#TOC390">BJTest Intrinsic</A></H4>
+<P>
+<A NAME="IDX1528"></A>
+<A NAME="IDX1529"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL BJTest'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC391" HREF="g77_toc.html#TOC391">CDAbs Intrinsic</A></H4>
+<P>
+<A NAME="IDX1530"></A>
+<A NAME="IDX1531"></A>
+
+</P>
+<P>
+
+<PRE>
+CDAbs(<VAR>A</VAR>)
+</PRE>
+
+<P>
+CDAbs: <CODE>REAL(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>A</VAR>: <CODE>COMPLEX(KIND=2)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>ABS()</CODE> that is specific
+to one type for <VAR>A</VAR>.
+See section <A HREF="g77_12.html#SEC77">Abs Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC392" HREF="g77_toc.html#TOC392">CDCos Intrinsic</A></H4>
+<P>
+<A NAME="IDX1532"></A>
+<A NAME="IDX1533"></A>
+
+</P>
+<P>
+
+<PRE>
+CDCos(<VAR>X</VAR>)
+</PRE>
+
+<P>
+CDCos: <CODE>COMPLEX(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>X</VAR>: <CODE>COMPLEX(KIND=2)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>COS()</CODE> that is specific
+to one type for <VAR>X</VAR>.
+See section <A HREF="g77_12.html#SEC121">Cos Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC393" HREF="g77_toc.html#TOC393">CDExp Intrinsic</A></H4>
+<P>
+<A NAME="IDX1534"></A>
+<A NAME="IDX1535"></A>
+
+</P>
+<P>
+
+<PRE>
+CDExp(<VAR>X</VAR>)
+</PRE>
+
+<P>
+CDExp: <CODE>COMPLEX(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>X</VAR>: <CODE>COMPLEX(KIND=2)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>EXP()</CODE> that is specific
+to one type for <VAR>X</VAR>.
+See section <A HREF="g77_12.html#SEC174">Exp Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC394" HREF="g77_toc.html#TOC394">CDLog Intrinsic</A></H4>
+<P>
+<A NAME="IDX1536"></A>
+<A NAME="IDX1537"></A>
+
+</P>
+<P>
+
+<PRE>
+CDLog(<VAR>X</VAR>)
+</PRE>
+
+<P>
+CDLog: <CODE>COMPLEX(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>X</VAR>: <CODE>COMPLEX(KIND=2)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>LOG()</CODE> that is specific
+to one type for <VAR>X</VAR>.
+See section <A HREF="g77_12.html#SEC245">Log Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC395" HREF="g77_toc.html#TOC395">CDSin Intrinsic</A></H4>
+<P>
+<A NAME="IDX1538"></A>
+<A NAME="IDX1539"></A>
+
+</P>
+<P>
+
+<PRE>
+CDSin(<VAR>X</VAR>)
+</PRE>
+
+<P>
+CDSin: <CODE>COMPLEX(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>X</VAR>: <CODE>COMPLEX(KIND=2)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>SIN()</CODE> that is specific
+to one type for <VAR>X</VAR>.
+See section <A HREF="g77_12.html#SEC304">Sin Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC396" HREF="g77_toc.html#TOC396">CDSqRt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1540"></A>
+<A NAME="IDX1541"></A>
+
+</P>
+<P>
+
+<PRE>
+CDSqRt(<VAR>X</VAR>)
+</PRE>
+
+<P>
+CDSqRt: <CODE>COMPLEX(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>X</VAR>: <CODE>COMPLEX(KIND=2)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>SQRT()</CODE> that is specific
+to one type for <VAR>X</VAR>.
+See section <A HREF="g77_12.html#SEC310">SqRt Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC397" HREF="g77_toc.html#TOC397">ChDir Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1542"></A>
+<A NAME="IDX1543"></A>
+
+</P>
+<P>
+
+<PRE>
+ChDir(<VAR>Dir</VAR>)
+</PRE>
+
+<P>
+ChDir: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Dir</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Sets the current working directory to be <VAR>Dir</VAR>.
+Returns 0 on success or a non-zero error code.
+See <CODE>chdir(3)</CODE>.
+
+</P>
+<P>
+<EM>Caution:</EM> Using this routine during I/O to a unit connected with a
+non-absolute file name can cause subsequent I/O on such a unit to fail
+because the I/O library might reopen files by name.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC115">ChDir Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC398" HREF="g77_toc.html#TOC398">ChMod Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1544"></A>
+<A NAME="IDX1545"></A>
+
+</P>
+<P>
+
+<PRE>
+ChMod(<VAR>Name</VAR>, <VAR>Mode</VAR>)
+</PRE>
+
+<P>
+ChMod: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Name</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>Mode</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Changes the access mode of file <VAR>Name</VAR> according to the
+specification <VAR>Mode</VAR>, which is given in the format of
+<CODE>chmod(1)</CODE>.
+A null character (<SAMP>`CHAR(0)'</SAMP>) marks the end of
+the name in <VAR>Name</VAR>---otherwise,
+trailing blanks in <VAR>Name</VAR> are ignored.
+Currently, <VAR>Name</VAR> must not contain the single quote
+character.
+
+</P>
+<P>
+Returns 0 on success or a non-zero error code otherwise.
+
+</P>
+<P>
+Note that this currently works
+by actually invoking <CODE>/bin/chmod</CODE> (or the <CODE>chmod</CODE> found when
+the library was configured) and so might fail in some circumstances and
+will, anyway, be slow.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC116">ChMod Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC399" HREF="g77_toc.html#TOC399">CosD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1546"></A>
+<A NAME="IDX1547"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL CosD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC400" HREF="g77_toc.html#TOC400">DACosD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1548"></A>
+<A NAME="IDX1549"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DACosD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC401" HREF="g77_toc.html#TOC401">DASinD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1550"></A>
+<A NAME="IDX1551"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DASinD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC402" HREF="g77_toc.html#TOC402">DATan2D Intrinsic</A></H4>
+<P>
+<A NAME="IDX1552"></A>
+<A NAME="IDX1553"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DATan2D'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC403" HREF="g77_toc.html#TOC403">DATanD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1554"></A>
+<A NAME="IDX1555"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DATanD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC404" HREF="g77_toc.html#TOC404">Date Intrinsic</A></H4>
+<P>
+<A NAME="IDX1556"></A>
+<A NAME="IDX1557"></A>
+
+</P>
+<P>
+
+<PRE>
+CALL Date(<VAR>Date</VAR>)
+</PRE>
+
+<P>
+<VAR>Date</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(OUT).
+
+</P>
+<P>
+Intrinsic groups: <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Returns <VAR>Date</VAR> in the form <SAMP>`<VAR>dd</VAR>-<VAR>mmm</VAR>-<VAR>yy</VAR>'</SAMP>,
+representing the numeric day of the month <VAR>dd</VAR>, a three-character
+abbreviation of the month name <VAR>mmm</VAR> and the last two digits of
+the year <VAR>yy</VAR>, e.g. <SAMP>`25-Nov-96'</SAMP>.
+
+</P>
+<P>
+<A NAME="IDX1558"></A>
+<A NAME="IDX1559"></A>
+This intrinsic is not recommended, due to the year 2000 approaching.
+Therefore, programs making use of this intrinsic
+might not be Year 2000 (Y2K) compliant.
+See section <A HREF="g77_12.html#SEC128">CTime Intrinsic (subroutine)</A>, for information on obtaining more digits
+for the current (or any) date.
+
+</P>
+
+
+<H4><A NAME="SEC405" HREF="g77_toc.html#TOC405">DbleQ Intrinsic</A></H4>
+<P>
+<A NAME="IDX1560"></A>
+<A NAME="IDX1561"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DbleQ'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC406" HREF="g77_toc.html#TOC406">DCmplx Intrinsic</A></H4>
+<P>
+<A NAME="IDX1562"></A>
+<A NAME="IDX1563"></A>
+
+</P>
+<P>
+
+<PRE>
+DCmplx(<VAR>X</VAR>, <VAR>Y</VAR>)
+</PRE>
+
+<P>
+DCmplx: <CODE>COMPLEX(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>X</VAR>: <CODE>INTEGER</CODE>, <CODE>REAL</CODE>, or <CODE>COMPLEX</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>Y</VAR>: <CODE>INTEGER</CODE> or <CODE>REAL</CODE>; OPTIONAL (must be omitted if <VAR>X</VAR> is <CODE>COMPLEX</CODE>); scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+If <VAR>X</VAR> is not type <CODE>COMPLEX</CODE>,
+constructs a value of type <CODE>COMPLEX(KIND=2)</CODE> from the
+real and imaginary values specified by <VAR>X</VAR> and
+<VAR>Y</VAR>, respectively.
+If <VAR>Y</VAR> is omitted, <SAMP>`0D0'</SAMP> is assumed.
+
+</P>
+<P>
+If <VAR>X</VAR> is type <CODE>COMPLEX</CODE>,
+converts it to type <CODE>COMPLEX(KIND=2)</CODE>.
+
+</P>
+<P>
+Although this intrinsic is not standard Fortran,
+it is a popular extension offered by many compilers
+that support <CODE>DOUBLE COMPLEX</CODE>, since it offers
+the easiest way to convert to <CODE>DOUBLE COMPLEX</CODE>
+without using Fortran 90 features (such as the <SAMP>`KIND='</SAMP>
+argument to the <CODE>CMPLX()</CODE> intrinsic).
+
+</P>
+<P>
+(<SAMP>`CMPLX(0D0, 0D0)'</SAMP> returns a single-precision
+<CODE>COMPLEX</CODE> result, as required by standard FORTRAN 77.
+That's why so many compilers provide <CODE>DCMPLX()</CODE>, since
+<SAMP>`DCMPLX(0D0, 0D0)'</SAMP> returns a <CODE>DOUBLE COMPLEX</CODE>
+result.
+Still, <CODE>DCMPLX()</CODE> converts even <CODE>REAL*16</CODE> arguments
+to their <CODE>REAL*8</CODE> equivalents in most dialects of
+Fortran, so neither it nor <CODE>CMPLX()</CODE> allow easy
+construction of arbitrary-precision values without
+potentially forcing a conversion involving extending or
+reducing precision.
+GNU Fortran provides such an intrinsic, called <CODE>COMPLEX()</CODE>.)
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC119">Complex Intrinsic</A>, for information on easily constructing
+a <CODE>COMPLEX</CODE> value of arbitrary precision from <CODE>REAL</CODE>
+arguments.
+
+</P>
+
+
+<H4><A NAME="SEC407" HREF="g77_toc.html#TOC407">DConjg Intrinsic</A></H4>
+<P>
+<A NAME="IDX1564"></A>
+<A NAME="IDX1565"></A>
+
+</P>
+<P>
+
+<PRE>
+DConjg(<VAR>Z</VAR>)
+</PRE>
+
+<P>
+DConjg: <CODE>COMPLEX(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>Z</VAR>: <CODE>COMPLEX(KIND=2)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>CONJG()</CODE> that is specific
+to one type for <VAR>Z</VAR>.
+See section <A HREF="g77_12.html#SEC120">Conjg Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC408" HREF="g77_toc.html#TOC408">DCosD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1566"></A>
+<A NAME="IDX1567"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DCosD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC409" HREF="g77_toc.html#TOC409">DFloat Intrinsic</A></H4>
+<P>
+<A NAME="IDX1568"></A>
+<A NAME="IDX1569"></A>
+
+</P>
+<P>
+
+<PRE>
+DFloat(<VAR>A</VAR>)
+</PRE>
+
+<P>
+DFloat: <CODE>REAL(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>A</VAR>: <CODE>INTEGER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>REAL()</CODE> that is specific
+to one type for <VAR>A</VAR>.
+See section <A HREF="g77_12.html#SEC286">Real Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC410" HREF="g77_toc.html#TOC410">DFlotI Intrinsic</A></H4>
+<P>
+<A NAME="IDX1570"></A>
+<A NAME="IDX1571"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DFlotI'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC411" HREF="g77_toc.html#TOC411">DFlotJ Intrinsic</A></H4>
+<P>
+<A NAME="IDX1572"></A>
+<A NAME="IDX1573"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DFlotJ'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC412" HREF="g77_toc.html#TOC412">DImag Intrinsic</A></H4>
+<P>
+<A NAME="IDX1574"></A>
+<A NAME="IDX1575"></A>
+
+</P>
+<P>
+
+<PRE>
+DImag(<VAR>Z</VAR>)
+</PRE>
+
+<P>
+DImag: <CODE>REAL(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>Z</VAR>: <CODE>COMPLEX(KIND=2)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>f2c</CODE>, <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Archaic form of <CODE>AIMAG()</CODE> that is specific
+to one type for <VAR>Z</VAR>.
+See section <A HREF="g77_12.html#SEC83">AImag Intrinsic</A>.
+
+</P>
+
+
+<H4><A NAME="SEC413" HREF="g77_toc.html#TOC413">DReal Intrinsic</A></H4>
+<P>
+<A NAME="IDX1576"></A>
+<A NAME="IDX1577"></A>
+
+</P>
+<P>
+
+<PRE>
+DReal(<VAR>A</VAR>)
+</PRE>
+
+<P>
+DReal: <CODE>REAL(KIND=2)</CODE> function.
+
+</P>
+<P>
+<VAR>A</VAR>: <CODE>INTEGER</CODE>, <CODE>REAL</CODE>, or <CODE>COMPLEX</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Converts <VAR>A</VAR> to <CODE>REAL(KIND=2)</CODE>.
+
+</P>
+<P>
+If <VAR>A</VAR> is type <CODE>COMPLEX</CODE>, its real part
+is converted (if necessary) to <CODE>REAL(KIND=2)</CODE>,
+and its imaginary part is disregarded.
+
+</P>
+<P>
+Although this intrinsic is not standard Fortran,
+it is a popular extension offered by many compilers
+that support <CODE>DOUBLE COMPLEX</CODE>, since it offers
+the easiest way to extract the real part of a <CODE>DOUBLE COMPLEX</CODE>
+value without using the Fortran 90 <CODE>REAL()</CODE> intrinsic
+in a way that produces a return value inconsistent with
+the way many FORTRAN 77 compilers handle <CODE>REAL()</CODE> of
+a <CODE>DOUBLE COMPLEX</CODE> value.
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC287">RealPart Intrinsic</A>, for information on a GNU Fortran
+intrinsic that avoids these areas of confusion.
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC142">Dble Intrinsic</A>, for information on the standard FORTRAN 77
+replacement for <CODE>DREAL()</CODE>.
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC71"><CODE>REAL()</CODE> and <CODE>AIMAG()</CODE> of Complex</A>, for more information on
+this issue.
+
+</P>
+
+
+<H4><A NAME="SEC414" HREF="g77_toc.html#TOC414">DSinD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1578"></A>
+<A NAME="IDX1579"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DSinD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC415" HREF="g77_toc.html#TOC415">DTanD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1580"></A>
+<A NAME="IDX1581"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL DTanD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC416" HREF="g77_toc.html#TOC416">DTime Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1582"></A>
+<A NAME="IDX1583"></A>
+
+</P>
+<P>
+
+<PRE>
+DTime(<VAR>TArray</VAR>)
+</PRE>
+
+<P>
+DTime: <CODE>REAL(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>TArray</VAR>: <CODE>REAL(KIND=1)</CODE>; DIMENSION(2); INTENT(OUT).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Initially, return the number of seconds of runtime
+since the start of the process's execution
+as the function value,
+and the user and system components of this in <SAMP>`<VAR>TArray</VAR>(1)'</SAMP>
+and <SAMP>`<VAR>TArray</VAR>(2)'</SAMP> respectively.
+The functions' value is equal to <SAMP>`<VAR>TArray</VAR>(1) + <VAR>TArray</VAR>(2)'</SAMP>.
+
+</P>
+<P>
+Subsequent invocations of <SAMP>`DTIME()'</SAMP> return values accumulated since the
+previous invocation.
+
+</P>
+<P>
+<A NAME="IDX1584"></A>
+<A NAME="IDX1585"></A>
+On some systems, the underlying timings are represented
+using types with sufficiently small limits that overflows
+(wraparounds) are possible, such as 32-bit types.
+Therefore, the values returned by this intrinsic
+might be, or become, negative,
+or numerically less than previous values,
+during a single run of the compiled program.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC166">DTime Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC417" HREF="g77_toc.html#TOC417">FGet Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1586"></A>
+<A NAME="IDX1587"></A>
+
+</P>
+<P>
+
+<PRE>
+FGet(<VAR>C</VAR>)
+</PRE>
+
+<P>
+FGet: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>C</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(OUT).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Reads a single character into <VAR>C</VAR> in stream mode from unit 5
+(by-passing normal formatted input) using <CODE>getc(3)</CODE>.
+Returns 0 on
+success, -1 on end-of-file, and the error code from
+<CODE>ferror(3)</CODE> otherwise.
+
+</P>
+<P>
+Stream I/O should not be mixed with normal record-oriented (formatted or
+unformatted) I/O on the same unit; the results are unpredictable.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC178">FGet Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC418" HREF="g77_toc.html#TOC418">FGetC Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1588"></A>
+<A NAME="IDX1589"></A>
+
+</P>
+<P>
+
+<PRE>
+FGetC(<VAR>Unit</VAR>, <VAR>C</VAR>)
+</PRE>
+
+<P>
+FGetC: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Unit</VAR>: <CODE>INTEGER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>C</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(OUT).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Reads a single character into <VAR>C</VAR> in stream mode from unit <VAR>Unit</VAR>
+(by-passing normal formatted output) using <CODE>getc(3)</CODE>.
+Returns 0 on
+success, -1 on end-of-file, and the error code from
+<CODE>ferror(3)</CODE> otherwise.
+
+</P>
+<P>
+Stream I/O should not be mixed with normal record-oriented (formatted or
+unformatted) I/O on the same unit; the results are unpredictable.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC179">FGetC Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC419" HREF="g77_toc.html#TOC419">FloatI Intrinsic</A></H4>
+<P>
+<A NAME="IDX1590"></A>
+<A NAME="IDX1591"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL FloatI'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC420" HREF="g77_toc.html#TOC420">FloatJ Intrinsic</A></H4>
+<P>
+<A NAME="IDX1592"></A>
+<A NAME="IDX1593"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL FloatJ'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC421" HREF="g77_toc.html#TOC421">FPut Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1594"></A>
+<A NAME="IDX1595"></A>
+
+</P>
+<P>
+
+<PRE>
+FPut(<VAR>C</VAR>)
+</PRE>
+
+<P>
+FPut: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>C</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Writes the single character <VAR>C</VAR> in stream mode to unit 6
+(by-passing normal formatted output) using <CODE>getc(3)</CODE>.
+Returns 0 on
+success, the error code from <CODE>ferror(3)</CODE> otherwise.
+
+</P>
+<P>
+Stream I/O should not be mixed with normal record-oriented (formatted or
+unformatted) I/O on the same unit; the results are unpredictable.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC184">FPut Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC422" HREF="g77_toc.html#TOC422">FPutC Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1596"></A>
+<A NAME="IDX1597"></A>
+
+</P>
+<P>
+
+<PRE>
+FPutC(<VAR>Unit</VAR>, <VAR>C</VAR>)
+</PRE>
+
+<P>
+FPutC: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Unit</VAR>: <CODE>INTEGER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>C</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Writes the single character <VAR>C</VAR> in stream mode to unit <VAR>Unit</VAR>
+(by-passing normal formatted output) using <CODE>putc(3)</CODE>.
+Returns 0 on
+success, the error code from <CODE>ferror(3)</CODE> otherwise.
+
+</P>
+<P>
+Stream I/O should not be mixed with normal record-oriented (formatted or
+unformatted) I/O on the same unit; the results are unpredictable.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC185">FPutC Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC423" HREF="g77_toc.html#TOC423">IDate Intrinsic (VXT)</A></H4>
+<P>
+<A NAME="IDX1598"></A>
+<A NAME="IDX1599"></A>
+
+</P>
+<P>
+
+<PRE>
+CALL IDate(<VAR>M</VAR>, <VAR>D</VAR>, <VAR>Y</VAR>)
+</PRE>
+
+<P>
+<VAR>M</VAR>: <CODE>INTEGER(KIND=1)</CODE>; scalar; INTENT(OUT).
+
+</P>
+<P>
+<VAR>D</VAR>: <CODE>INTEGER(KIND=1)</CODE>; scalar; INTENT(OUT).
+
+</P>
+<P>
+<VAR>Y</VAR>: <CODE>INTEGER(KIND=1)</CODE>; scalar; INTENT(OUT).
+
+</P>
+<P>
+Intrinsic groups: <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Returns the numerical values of the current local time.
+The month (in the range 1--12) is returned in <VAR>M</VAR>,
+the day (in the range 1--7) in <VAR>D</VAR>,
+and the year in <VAR>Y</VAR> (in the range 0--99).
+
+</P>
+<P>
+<A NAME="IDX1600"></A>
+<A NAME="IDX1601"></A>
+<A NAME="IDX1602"></A>
+<A NAME="IDX1603"></A>
+This intrinsic is not recommended, due to the year 2000 approaching.
+Therefore, programs making use of this intrinsic
+might not be Year 2000 (Y2K) compliant.
+For example, the date might appear,
+to such programs, to wrap around
+(change from a larger value to a smaller one)
+as of the Year 2000.
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC213">IDate Intrinsic (UNIX)</A>, for information on obtaining more digits
+for the current date.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC213">IDate Intrinsic (UNIX)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC424" HREF="g77_toc.html#TOC424">IIAbs Intrinsic</A></H4>
+<P>
+<A NAME="IDX1604"></A>
+<A NAME="IDX1605"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIAbs'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC425" HREF="g77_toc.html#TOC425">IIAnd Intrinsic</A></H4>
+<P>
+<A NAME="IDX1606"></A>
+<A NAME="IDX1607"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIAnd'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC426" HREF="g77_toc.html#TOC426">IIBClr Intrinsic</A></H4>
+<P>
+<A NAME="IDX1608"></A>
+<A NAME="IDX1609"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIBClr'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC427" HREF="g77_toc.html#TOC427">IIBits Intrinsic</A></H4>
+<P>
+<A NAME="IDX1610"></A>
+<A NAME="IDX1611"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIBits'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC428" HREF="g77_toc.html#TOC428">IIBSet Intrinsic</A></H4>
+<P>
+<A NAME="IDX1612"></A>
+<A NAME="IDX1613"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIBSet'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC429" HREF="g77_toc.html#TOC429">IIDiM Intrinsic</A></H4>
+<P>
+<A NAME="IDX1614"></A>
+<A NAME="IDX1615"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIDiM'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC430" HREF="g77_toc.html#TOC430">IIDInt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1616"></A>
+<A NAME="IDX1617"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIDInt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC431" HREF="g77_toc.html#TOC431">IIDNnt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1618"></A>
+<A NAME="IDX1619"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIDNnt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC432" HREF="g77_toc.html#TOC432">IIEOr Intrinsic</A></H4>
+<P>
+<A NAME="IDX1620"></A>
+<A NAME="IDX1621"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIEOr'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC433" HREF="g77_toc.html#TOC433">IIFix Intrinsic</A></H4>
+<P>
+<A NAME="IDX1622"></A>
+<A NAME="IDX1623"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIFix'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC434" HREF="g77_toc.html#TOC434">IInt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1624"></A>
+<A NAME="IDX1625"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IInt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC435" HREF="g77_toc.html#TOC435">IIOr Intrinsic</A></H4>
+<P>
+<A NAME="IDX1626"></A>
+<A NAME="IDX1627"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIOr'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC436" HREF="g77_toc.html#TOC436">IIQint Intrinsic</A></H4>
+<P>
+<A NAME="IDX1628"></A>
+<A NAME="IDX1629"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIQint'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC437" HREF="g77_toc.html#TOC437">IIQNnt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1630"></A>
+<A NAME="IDX1631"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIQNnt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC438" HREF="g77_toc.html#TOC438">IIShftC Intrinsic</A></H4>
+<P>
+<A NAME="IDX1632"></A>
+<A NAME="IDX1633"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IIShftC'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC439" HREF="g77_toc.html#TOC439">IISign Intrinsic</A></H4>
+<P>
+<A NAME="IDX1634"></A>
+<A NAME="IDX1635"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IISign'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC440" HREF="g77_toc.html#TOC440">IMax0 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1636"></A>
+<A NAME="IDX1637"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IMax0'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC441" HREF="g77_toc.html#TOC441">IMax1 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1638"></A>
+<A NAME="IDX1639"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IMax1'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC442" HREF="g77_toc.html#TOC442">IMin0 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1640"></A>
+<A NAME="IDX1641"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IMin0'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC443" HREF="g77_toc.html#TOC443">IMin1 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1642"></A>
+<A NAME="IDX1643"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IMin1'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC444" HREF="g77_toc.html#TOC444">IMod Intrinsic</A></H4>
+<P>
+<A NAME="IDX1644"></A>
+<A NAME="IDX1645"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IMod'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC445" HREF="g77_toc.html#TOC445">INInt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1646"></A>
+<A NAME="IDX1647"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL INInt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC446" HREF="g77_toc.html#TOC446">INot Intrinsic</A></H4>
+<P>
+<A NAME="IDX1648"></A>
+<A NAME="IDX1649"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL INot'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC447" HREF="g77_toc.html#TOC447">IZExt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1650"></A>
+<A NAME="IDX1651"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL IZExt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC448" HREF="g77_toc.html#TOC448">JIAbs Intrinsic</A></H4>
+<P>
+<A NAME="IDX1652"></A>
+<A NAME="IDX1653"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIAbs'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC449" HREF="g77_toc.html#TOC449">JIAnd Intrinsic</A></H4>
+<P>
+<A NAME="IDX1654"></A>
+<A NAME="IDX1655"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIAnd'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC450" HREF="g77_toc.html#TOC450">JIBClr Intrinsic</A></H4>
+<P>
+<A NAME="IDX1656"></A>
+<A NAME="IDX1657"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIBClr'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC451" HREF="g77_toc.html#TOC451">JIBits Intrinsic</A></H4>
+<P>
+<A NAME="IDX1658"></A>
+<A NAME="IDX1659"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIBits'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC452" HREF="g77_toc.html#TOC452">JIBSet Intrinsic</A></H4>
+<P>
+<A NAME="IDX1660"></A>
+<A NAME="IDX1661"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIBSet'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC453" HREF="g77_toc.html#TOC453">JIDiM Intrinsic</A></H4>
+<P>
+<A NAME="IDX1662"></A>
+<A NAME="IDX1663"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIDiM'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC454" HREF="g77_toc.html#TOC454">JIDInt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1664"></A>
+<A NAME="IDX1665"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIDInt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC455" HREF="g77_toc.html#TOC455">JIDNnt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1666"></A>
+<A NAME="IDX1667"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIDNnt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC456" HREF="g77_toc.html#TOC456">JIEOr Intrinsic</A></H4>
+<P>
+<A NAME="IDX1668"></A>
+<A NAME="IDX1669"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIEOr'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC457" HREF="g77_toc.html#TOC457">JIFix Intrinsic</A></H4>
+<P>
+<A NAME="IDX1670"></A>
+<A NAME="IDX1671"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIFix'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC458" HREF="g77_toc.html#TOC458">JInt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1672"></A>
+<A NAME="IDX1673"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JInt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC459" HREF="g77_toc.html#TOC459">JIOr Intrinsic</A></H4>
+<P>
+<A NAME="IDX1674"></A>
+<A NAME="IDX1675"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIOr'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC460" HREF="g77_toc.html#TOC460">JIQint Intrinsic</A></H4>
+<P>
+<A NAME="IDX1676"></A>
+<A NAME="IDX1677"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIQint'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC461" HREF="g77_toc.html#TOC461">JIQNnt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1678"></A>
+<A NAME="IDX1679"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIQNnt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC462" HREF="g77_toc.html#TOC462">JIShft Intrinsic</A></H4>
+<P>
+<A NAME="IDX1680"></A>
+<A NAME="IDX1681"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIShft'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC463" HREF="g77_toc.html#TOC463">JIShftC Intrinsic</A></H4>
+<P>
+<A NAME="IDX1682"></A>
+<A NAME="IDX1683"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JIShftC'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC464" HREF="g77_toc.html#TOC464">JISign Intrinsic</A></H4>
+<P>
+<A NAME="IDX1684"></A>
+<A NAME="IDX1685"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JISign'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC465" HREF="g77_toc.html#TOC465">JMax0 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1686"></A>
+<A NAME="IDX1687"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JMax0'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC466" HREF="g77_toc.html#TOC466">JMax1 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1688"></A>
+<A NAME="IDX1689"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JMax1'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC467" HREF="g77_toc.html#TOC467">JMin0 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1690"></A>
+<A NAME="IDX1691"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JMin0'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC468" HREF="g77_toc.html#TOC468">JMin1 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1692"></A>
+<A NAME="IDX1693"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JMin1'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC469" HREF="g77_toc.html#TOC469">JMod Intrinsic</A></H4>
+<P>
+<A NAME="IDX1694"></A>
+<A NAME="IDX1695"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JMod'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC470" HREF="g77_toc.html#TOC470">JNInt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1696"></A>
+<A NAME="IDX1697"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JNInt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC471" HREF="g77_toc.html#TOC471">JNot Intrinsic</A></H4>
+<P>
+<A NAME="IDX1698"></A>
+<A NAME="IDX1699"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JNot'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC472" HREF="g77_toc.html#TOC472">JZExt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1700"></A>
+<A NAME="IDX1701"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL JZExt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC473" HREF="g77_toc.html#TOC473">Kill Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1702"></A>
+<A NAME="IDX1703"></A>
+
+</P>
+<P>
+
+<PRE>
+Kill(<VAR>Pid</VAR>, <VAR>Signal</VAR>)
+</PRE>
+
+<P>
+Kill: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Pid</VAR>: <CODE>INTEGER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>Signal</VAR>: <CODE>INTEGER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Sends the signal specified by <VAR>Signal</VAR> to the process <VAR>Pid</VAR>.
+Returns 0 on success or a non-zero error code.
+See <CODE>kill(2)</CODE>.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC233">Kill Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC474" HREF="g77_toc.html#TOC474">Link Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1704"></A>
+<A NAME="IDX1705"></A>
+
+</P>
+<P>
+
+<PRE>
+Link(<VAR>Path1</VAR>, <VAR>Path2</VAR>)
+</PRE>
+
+<P>
+Link: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Path1</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>Path2</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Makes a (hard) link from file <VAR>Path1</VAR> to <VAR>Path2</VAR>.
+A null character (<SAMP>`CHAR(0)'</SAMP>) marks the end of
+the names in <VAR>Path1</VAR> and <VAR>Path2</VAR>---otherwise,
+trailing blanks in <VAR>Path1</VAR> and <VAR>Path2</VAR> are ignored.
+Returns 0 on success or a non-zero error code.
+See <CODE>link(2)</CODE>.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC240">Link Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC475" HREF="g77_toc.html#TOC475">QAbs Intrinsic</A></H4>
+<P>
+<A NAME="IDX1706"></A>
+<A NAME="IDX1707"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QAbs'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC476" HREF="g77_toc.html#TOC476">QACos Intrinsic</A></H4>
+<P>
+<A NAME="IDX1708"></A>
+<A NAME="IDX1709"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QACos'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC477" HREF="g77_toc.html#TOC477">QACosD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1710"></A>
+<A NAME="IDX1711"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QACosD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC478" HREF="g77_toc.html#TOC478">QASin Intrinsic</A></H4>
+<P>
+<A NAME="IDX1712"></A>
+<A NAME="IDX1713"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QASin'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC479" HREF="g77_toc.html#TOC479">QASinD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1714"></A>
+<A NAME="IDX1715"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QASinD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC480" HREF="g77_toc.html#TOC480">QATan Intrinsic</A></H4>
+<P>
+<A NAME="IDX1716"></A>
+<A NAME="IDX1717"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QATan'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC481" HREF="g77_toc.html#TOC481">QATan2 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1718"></A>
+<A NAME="IDX1719"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QATan2'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC482" HREF="g77_toc.html#TOC482">QATan2D Intrinsic</A></H4>
+<P>
+<A NAME="IDX1720"></A>
+<A NAME="IDX1721"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QATan2D'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC483" HREF="g77_toc.html#TOC483">QATanD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1722"></A>
+<A NAME="IDX1723"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QATanD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC484" HREF="g77_toc.html#TOC484">QCos Intrinsic</A></H4>
+<P>
+<A NAME="IDX1724"></A>
+<A NAME="IDX1725"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QCos'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC485" HREF="g77_toc.html#TOC485">QCosD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1726"></A>
+<A NAME="IDX1727"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QCosD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC486" HREF="g77_toc.html#TOC486">QCosH Intrinsic</A></H4>
+<P>
+<A NAME="IDX1728"></A>
+<A NAME="IDX1729"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QCosH'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC487" HREF="g77_toc.html#TOC487">QDiM Intrinsic</A></H4>
+<P>
+<A NAME="IDX1730"></A>
+<A NAME="IDX1731"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QDiM'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC488" HREF="g77_toc.html#TOC488">QExp Intrinsic</A></H4>
+<P>
+<A NAME="IDX1732"></A>
+<A NAME="IDX1733"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QExp'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC489" HREF="g77_toc.html#TOC489">QExt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1734"></A>
+<A NAME="IDX1735"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QExt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC490" HREF="g77_toc.html#TOC490">QExtD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1736"></A>
+<A NAME="IDX1737"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QExtD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC491" HREF="g77_toc.html#TOC491">QFloat Intrinsic</A></H4>
+<P>
+<A NAME="IDX1738"></A>
+<A NAME="IDX1739"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QFloat'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC492" HREF="g77_toc.html#TOC492">QInt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1740"></A>
+<A NAME="IDX1741"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QInt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC493" HREF="g77_toc.html#TOC493">QLog Intrinsic</A></H4>
+<P>
+<A NAME="IDX1742"></A>
+<A NAME="IDX1743"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QLog'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC494" HREF="g77_toc.html#TOC494">QLog10 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1744"></A>
+<A NAME="IDX1745"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QLog10'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC495" HREF="g77_toc.html#TOC495">QMax1 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1746"></A>
+<A NAME="IDX1747"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QMax1'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC496" HREF="g77_toc.html#TOC496">QMin1 Intrinsic</A></H4>
+<P>
+<A NAME="IDX1748"></A>
+<A NAME="IDX1749"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QMin1'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC497" HREF="g77_toc.html#TOC497">QMod Intrinsic</A></H4>
+<P>
+<A NAME="IDX1750"></A>
+<A NAME="IDX1751"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QMod'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC498" HREF="g77_toc.html#TOC498">QNInt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1752"></A>
+<A NAME="IDX1753"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QNInt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC499" HREF="g77_toc.html#TOC499">QSin Intrinsic</A></H4>
+<P>
+<A NAME="IDX1754"></A>
+<A NAME="IDX1755"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QSin'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC500" HREF="g77_toc.html#TOC500">QSinD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1756"></A>
+<A NAME="IDX1757"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QSinD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC501" HREF="g77_toc.html#TOC501">QSinH Intrinsic</A></H4>
+<P>
+<A NAME="IDX1758"></A>
+<A NAME="IDX1759"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QSinH'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC502" HREF="g77_toc.html#TOC502">QSqRt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1760"></A>
+<A NAME="IDX1761"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QSqRt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC503" HREF="g77_toc.html#TOC503">QTan Intrinsic</A></H4>
+<P>
+<A NAME="IDX1762"></A>
+<A NAME="IDX1763"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QTan'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC504" HREF="g77_toc.html#TOC504">QTanD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1764"></A>
+<A NAME="IDX1765"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QTanD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC505" HREF="g77_toc.html#TOC505">QTanH Intrinsic</A></H4>
+<P>
+<A NAME="IDX1766"></A>
+<A NAME="IDX1767"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL QTanH'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC506" HREF="g77_toc.html#TOC506">Rename Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1768"></A>
+<A NAME="IDX1769"></A>
+
+</P>
+<P>
+
+<PRE>
+Rename(<VAR>Path1</VAR>, <VAR>Path2</VAR>)
+</PRE>
+
+<P>
+Rename: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Path1</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>Path2</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Renames the file <VAR>Path1</VAR> to <VAR>Path2</VAR>.
+A null character (<SAMP>`CHAR(0)'</SAMP>) marks the end of
+the names in <VAR>Path1</VAR> and <VAR>Path2</VAR>---otherwise,
+trailing blanks in <VAR>Path1</VAR> and <VAR>Path2</VAR> are ignored.
+See <CODE>rename(2)</CODE>.
+Returns 0 on success or a non-zero error code.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC288">Rename Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC507" HREF="g77_toc.html#TOC507">Secnds Intrinsic</A></H4>
+<P>
+<A NAME="IDX1770"></A>
+<A NAME="IDX1771"></A>
+
+</P>
+<P>
+
+<PRE>
+Secnds(<VAR>T</VAR>)
+</PRE>
+
+<P>
+Secnds: <CODE>REAL(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>T</VAR>: <CODE>REAL(KIND=1)</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Returns the local time in seconds since midnight minus the value
+<VAR>T</VAR>.
+
+</P>
+<P>
+<A NAME="IDX1772"></A>
+<A NAME="IDX1773"></A>
+This values returned by this intrinsic
+become numerically less than previous values
+(they wrap around) during a single run of the
+compiler program, under normal circumstances
+(such as running through the midnight hour).
+
+</P>
+
+
+<H4><A NAME="SEC508" HREF="g77_toc.html#TOC508">Signal Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1774"></A>
+<A NAME="IDX1775"></A>
+
+</P>
+<P>
+
+<PRE>
+Signal(<VAR>Number</VAR>, <VAR>Handler</VAR>)
+</PRE>
+
+<P>
+Signal: <CODE>INTEGER(KIND=7)</CODE> function.
+
+</P>
+<P>
+<VAR>Number</VAR>: <CODE>INTEGER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>Handler</VAR>: Signal handler (<CODE>INTEGER FUNCTION</CODE> or <CODE>SUBROUTINE</CODE>)
+or dummy/global <CODE>INTEGER(KIND=1)</CODE> scalar.
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+If <VAR>Handler</VAR> is a an <CODE>EXTERNAL</CODE> routine, arranges for it to be
+invoked with a single integer argument (of system-dependent length)
+when signal <VAR>Number</VAR> occurs.
+If <VAR>Handler</VAR> is an integer, it can be
+used to turn off handling of signal <VAR>Number</VAR> or revert to its default
+action.
+See <CODE>signal(2)</CODE>.
+
+</P>
+<P>
+Note that <VAR>Handler</VAR> will be called using C conventions,
+so the value of its argument in Fortran terms
+is obtained by applying <CODE>%LOC()</CODE> (or <VAR>LOC()</VAR>) to it.
+
+</P>
+<P>
+The value returned by <CODE>signal(2)</CODE> is returned.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+<EM>Warning:</EM> If the returned value is stored in
+an <CODE>INTEGER(KIND=1)</CODE> (default <CODE>INTEGER</CODE>) argument,
+truncation of the original return value occurs on some systems
+(such as Alphas, which have 64-bit pointers but 32-bit default integers),
+with no warning issued by <CODE>g77</CODE> under normal circumstances.
+
+</P>
+<P>
+Therefore, the following code fragment might silently fail on
+some systems:
+
+</P>
+
+<PRE>
+INTEGER RTN
+EXTERNAL MYHNDL
+RTN = SIGNAL(<VAR>signum</VAR>, MYHNDL)
+...
+! Restore original handler:
+RTN = SIGNAL(<VAR>signum</VAR>, RTN)
+</PRE>
+
+<P>
+The reason for the failure is that <SAMP>`RTN'</SAMP> might not hold
+all the information on the original handler for the signal,
+thus restoring an invalid handler.
+This bug could manifest itself as a spurious run-time failure
+at an arbitrary point later during the program's execution,
+for example.
+
+</P>
+<P>
+<EM>Warning:</EM> Use of the <CODE>libf2c</CODE> run-time library function
+<SAMP>`signal_'</SAMP> directly
+(such as via <SAMP>`EXTERNAL SIGNAL'</SAMP>)
+requires use of the <CODE>%VAL()</CODE> construct
+to pass an <CODE>INTEGER</CODE> value
+(such as <SAMP>`SIG_IGN'</SAMP> or <SAMP>`SIG_DFL'</SAMP>)
+for the <VAR>Handler</VAR> argument.
+
+</P>
+<P>
+However, while <SAMP>`RTN = SIGNAL(<VAR>signum</VAR>, %VAL(SIG_IGN))'</SAMP>
+works when <SAMP>`SIGNAL'</SAMP> is treated as an external procedure
+(and resolves, at link time, to <CODE>libf2c</CODE>'s <SAMP>`signal_'</SAMP> routine),
+this construct is not valid when <SAMP>`SIGNAL'</SAMP> is recognized
+as the intrinsic of that name.
+
+</P>
+<P>
+Therefore, for maximum portability and reliability,
+code such references to the <SAMP>`SIGNAL'</SAMP> facility as follows:
+
+</P>
+
+<PRE>
+INTRINSIC SIGNAL
+...
+RTN = SIGNAL(<VAR>signum</VAR>, SIG_IGN)
+</PRE>
+
+<P>
+<CODE>g77</CODE> will compile such a call correctly,
+while other compilers will generally either do so as well
+or reject the <SAMP>`INTRINSIC SIGNAL'</SAMP> statement via a diagnostic,
+allowing you to take appropriate action.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC303">Signal Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC509" HREF="g77_toc.html#TOC509">SinD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1776"></A>
+<A NAME="IDX1777"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL SinD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC510" HREF="g77_toc.html#TOC510">SnglQ Intrinsic</A></H4>
+<P>
+<A NAME="IDX1778"></A>
+<A NAME="IDX1779"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL SnglQ'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC511" HREF="g77_toc.html#TOC511">SymLnk Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1780"></A>
+<A NAME="IDX1781"></A>
+
+</P>
+<P>
+
+<PRE>
+SymLnk(<VAR>Path1</VAR>, <VAR>Path2</VAR>)
+</PRE>
+
+<P>
+SymLnk: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Path1</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+<VAR>Path2</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Makes a symbolic link from file <VAR>Path1</VAR> to <VAR>Path2</VAR>.
+A null character (<SAMP>`CHAR(0)'</SAMP>) marks the end of
+the names in <VAR>Path1</VAR> and <VAR>Path2</VAR>---otherwise,
+trailing blanks in <VAR>Path1</VAR> and <VAR>Path2</VAR> are ignored.
+Returns 0 on success or a non-zero error code
+(<CODE>ENOSYS</CODE> if the system does not provide <CODE>symlink(2)</CODE>).
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC315">SymLnk Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC512" HREF="g77_toc.html#TOC512">System Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1782"></A>
+<A NAME="IDX1783"></A>
+
+</P>
+<P>
+
+<PRE>
+System(<VAR>Command</VAR>)
+</PRE>
+
+<P>
+System: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Command</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Passes the command <VAR>Command</VAR> to a shell (see <CODE>system(3)</CODE>).
+Returns the value returned by
+<CODE>system(3)</CODE>, presumably 0 if the shell command succeeded.
+Note that which shell is used to invoke the command is system-dependent
+and environment-dependent.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+However, the function form can be valid in cases where the
+actual side effects performed by the call are unimportant to
+the application.
+
+</P>
+<P>
+For example, on a UNIX system, <SAMP>`SAME = SYSTEM('cmp a b')'</SAMP>
+does not perform any side effects likely to be important to the
+program, so the programmer would not care if the actual system
+call (and invocation of <CODE>cmp</CODE>) was optimized away in a situation
+where the return value could be determined otherwise, or was not
+actually needed (<SAMP>`SAME'</SAMP> not actually referenced after the
+sample assignment statement).
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC316">System Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC513" HREF="g77_toc.html#TOC513">TanD Intrinsic</A></H4>
+<P>
+<A NAME="IDX1784"></A>
+<A NAME="IDX1785"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL TanD'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+
+<H4><A NAME="SEC514" HREF="g77_toc.html#TOC514">Time Intrinsic (VXT)</A></H4>
+<P>
+<A NAME="IDX1786"></A>
+<A NAME="IDX1787"></A>
+
+</P>
+<P>
+
+<PRE>
+CALL Time(<VAR>Time</VAR>)
+</PRE>
+
+<P>
+<VAR>Time</VAR>: <CODE>CHARACTER*8</CODE>; scalar; INTENT(OUT).
+
+</P>
+<P>
+Intrinsic groups: <CODE>vxt</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Returns in <VAR>Time</VAR> a character representation of the current time as
+obtained from <CODE>ctime(3)</CODE>.
+
+</P>
+<P>
+<A NAME="IDX1788"></A>
+<A NAME="IDX1789"></A>
+<A NAME="IDX1790"></A>
+<A NAME="IDX1791"></A>
+Programs making use of this intrinsic
+might not be Year 10000 (Y10K) compliant.
+For example, the date might appear,
+to such programs, to wrap around
+(change from a larger value to a smaller one)
+as of the Year 10000.
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC176">FDate Intrinsic (subroutine)</A>, for an equivalent routine.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC320">Time Intrinsic (UNIX)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC515" HREF="g77_toc.html#TOC515">UMask Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1792"></A>
+<A NAME="IDX1793"></A>
+
+</P>
+<P>
+
+<PRE>
+UMask(<VAR>Mask</VAR>)
+</PRE>
+
+<P>
+UMask: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>Mask</VAR>: <CODE>INTEGER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Sets the file creation mask to <VAR>Mask</VAR> and returns the old value.
+See <CODE>umask(2)</CODE>.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC329">UMask Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC516" HREF="g77_toc.html#TOC516">Unlink Intrinsic (function)</A></H4>
+<P>
+<A NAME="IDX1794"></A>
+<A NAME="IDX1795"></A>
+
+</P>
+<P>
+
+<PRE>
+Unlink(<VAR>File</VAR>)
+</PRE>
+
+<P>
+Unlink: <CODE>INTEGER(KIND=1)</CODE> function.
+
+</P>
+<P>
+<VAR>File</VAR>: <CODE>CHARACTER</CODE>; scalar; INTENT(IN).
+
+</P>
+<P>
+Intrinsic groups: <CODE>badu77</CODE>.
+
+</P>
+<P>
+Description:
+
+</P>
+<P>
+Unlink the file <VAR>File</VAR>.
+A null character (<SAMP>`CHAR(0)'</SAMP>) marks the end of
+the name in <VAR>File</VAR>---otherwise,
+trailing blanks in <VAR>File</VAR> are ignored.
+Returns 0 on success or a non-zero error code.
+See <CODE>unlink(2)</CODE>.
+
+</P>
+<P>
+Due to the side effects performed by this intrinsic, the function
+form is not recommended.
+
+</P>
+<P>
+For information on other intrinsics with the same name:
+See section <A HREF="g77_12.html#SEC330">Unlink Intrinsic (subroutine)</A>.
+
+</P>
+
+
+<H4><A NAME="SEC517" HREF="g77_toc.html#TOC517">ZExt Intrinsic</A></H4>
+<P>
+<A NAME="IDX1796"></A>
+<A NAME="IDX1797"></A>
+
+</P>
+<P>
+This intrinsic is not yet implemented.
+The name is, however, reserved as an intrinsic.
+Use <SAMP>`EXTERNAL ZExt'</SAMP> to use this name for an
+external procedure.
+
+</P>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_13.html">previous</A>, <A HREF="g77_15.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

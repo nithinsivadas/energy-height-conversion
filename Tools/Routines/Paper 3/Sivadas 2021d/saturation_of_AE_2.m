@@ -109,7 +109,7 @@ for i = 1:max(xindx2)
         CI2(i,:) = Y2gX2(i) + ts2(i,:)*SEM2(i);
         XBins2(i) = 0.5*(E2(i)+E2(i+1));
 end
-
+%%
 figure; 
 CI1 = interp_nans(CI);
 p1=plot(XBins, YgX,'k');
@@ -143,9 +143,9 @@ xlim([0 20]);
 
 xlabel({'E_m [mV/m]','Geoeffective electric field'});
 ylabel({'<SML|E_m> [nT]','Westward auroral electrojet current'});
-legend(p1,{'1998-2019','Error in E_m < 5%'},'Location','southwest');
-% hold on;
-% 
+legend(p1,{'1998-2019','Error in E_m $< 5%$'},'Location','southwest');
+hold on;
+
 % hold on;
 % 
 % CIy = interp_nans(CIy);

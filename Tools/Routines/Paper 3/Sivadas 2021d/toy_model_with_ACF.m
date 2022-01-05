@@ -8,12 +8,11 @@
 %         is 3 times smaller than the true current!
 % See FigureX1.m & FigureX1a.m
 
-%% OMNI Extract
+%% Extract OMNI for SML
 omniFile = 'G:\My Drive\Research\Projects\Data\omni.h5';
 omni = extract_omni_data(omniFile);
 
-
-%% Extract error and X pdf from data
+% Extract error and X pdf from data
 dataFolder = 'G:\My Drive\Research\Projects\Data\omni_components\';
 geotail1 = extract_set_of_data(dataFolder,'geotail');
 wind1 = extract_set_of_data(dataFolder,'wind');
@@ -30,80 +29,94 @@ ace = ace1(ai,:);
 wind = wind1(wi,:);
 geotail = geotail1(gi,:);
 
-%%
+%% Data
+% Input X, and output Y as real measurements
+
 time_S = wind.datetime; 
-XmSa = wind.E_kl*10^-3;
-XS = geotail.E_kl*10^-3;
-eS = XmSa - XS;
-eNormS = eS./XS;
-YS = omni.Fsml(datenum(time_S));
+XmSa = wind.E_kl*10^-3; % Measurement with error, from Wind s/c
+XS = geotail.E_kl*10^-3;% True value (as close to true value we can get)
+eS = XmSa - XS;         % Error in the measurements between the two spacecraft
+eNormS = eS./XS;        % Normalized by their magnitudes
+YS = omni.Fsml(datenum(time_S)); % Ionospheric currents
 
-
-
-%% Finding ACF
+% Finding ACF of X, from data
 [Me, nSample,  nEnsemble]  = split_series(wind1.E_kl.*10^-3,2^13);
 [RArraye,lage] = find_correlation(Me-nanmean(Me,1),nSample,nEnsemble,1);
 
 acf_E = mean(RArraye(:,1:2^12)./RArraye(:,1));
 lag_E = lage(1:2^12);
-acf_fit = fit(lag_E,acf_E','spline'); 
+acf_fit = fit(lag_E,acf_E','spline'); % Fitting the ACF with a spline! 
 
-%% Constructing a random variable X, with log normal distribution and the above ACF
-
-% pdfx1 = makedist('Lognormal',-0.286163,1.09028);
+%% Developing the Toy Model
+% Constructing a random variable X, with log normal distribution and the above ACF
+dt = 1; % 1 min intervals
 nSamples = 2^12; % Upto 80 hours
 nEnsembles=1000;
 lag = fftshift(-nSamples:1:nSamples-1)'.*dt;
 Rm = acf_fit(abs(lag));
+% Input 2 : The autocorrelation matrix/function
 RmMatrix = toeplitz(Rm(find(lag==0):find(lag==(nSamples-1)*dt)));
 
 % The desired random variable 
-X = MvLogNRand(repmat(-0.286163,nSamples,1),repmat(0.789428,nSamples,1),nEnsembles,RmMatrix);
+% Input 1 : Random variable X, with log-normal distribution and the above
+%           ACF
+% pdfx = makedist('Lognormal',-0.286163,0.789428);
+% X = MvLogNRand(repmat(-0.286163,nSamples,1),repmat(0.789428,nSamples,1),nEnsembles,RmMatrix);
+X = MvLogNRand(repmat(-0.286163,nSamples,1),repmat(1.09028,nSamples,1),nEnsembles,RmMatrix);
 % This is approximated to be the true variable of interest
 % Log-normal distribution was arrived at from using Geotail, <5 RE from nose
-%%
-time = 1:1:nSamples;
 
-% Calculating the error due to propagation delay from L1 to Nose
+% Using X, and ACF, calculating the errors
+time = 1:1:nSamples;
+% Input 3: The error due to propagation delay from L1 to Nose, and Nose
+% to Ionosphere
 sigma_L1_N = 8; %8 minutes
 sigma_N_I = 20; %20 minutes
+% Temporal uncertainty due to propagation delay from L1 to Nose
 terr_L1_N = (random('Weibull',sigma_L1_N,0.5,nSamples,nEnsembles))';
-time_L1_N = time + terr_L1_N;
+time_L1_N1 = time - terr_L1_N;
+% Temporal uncertainty due to propagation delay from Nose to Ioonosphere
 terr_N_I = (random('Weibull',sigma_N_I,5,nSamples,nEnsembles))';
-time_L1_I = time + terr_L1_N + terr_N_I; 
-
+time_L1_I = time - terr_L1_N - terr_N_I; 
+% Using the temporal uncertainty, calculating the error-prone 
+% measurement X
+X_L1_N = zeros(nEnsembles,nSamples);
+X_L1_I = zeros(nEnsembles,nSamples);
 for i=1:1:nEnsembles
-    X_L1_N(i,:) = interp1(time',X(i,:)',time_L1_N(i,:)')';
+    X_L1_N(i,:) = interp1(time',X(i,:)',time_L1_N1(i,:)')';
     X_L1_I(i,:) = interp1(time',X(i,:)',time_L1_I(i,:)')';
 end
-e_L1_N = X_L1_N - X;
+e_L1_N = X_L1_N - X; % Error in X, due to propagation delay from L1 to nose
 eNorm_L1_N = e_L1_N./X; 
 
-e_L1_I = X_L1_I - X;
+e_L1_I = X_L1_I - X; % Error in X, due to propagation delay from L1 to ionosphere
 eNorm_L1_I = e_L1_I./X;
 
-pdfe = fitdist(eNorm_L1_N(:),'kernel');
+% Fitting a probability density function on the normalized error
+pdfe = fitdist(eNorm_L1_N(:),'kernel'); 
 pdfeTotal = fitdist(eNorm_L1_I(:),'kernel');
 
+% Generating samples of the error varible
 U = random(pdfe,nSamples,nEnsembles)'; % Normalized error (almost homoscedastic)
-UT = random(pdfeTotal,nSamples,nEnsemble)';
+UT = random(pdfeTotal,nSamples,nEnsembles)';
 
-W = X + X.*U; % Errorneous measurements made by WIND-like spacecraft
+% The ERROR MODEL
+W = X + X.*U; % Errorneous measurements made by WIND-like spacecraft (L1 to nose)
 Wa = X + X.*random(pdfe,nSamples,nEnsembles)'; % Another spacecraft measurement (like ACE)
 
-WT = X + X.*UT;
+WT = X + X.*UT; % Total error, L1 to Ionosphere
 WTa = X + X.*random(pdfeTotal,nSamples,nEnsembles)'; % Another spacecraft measurement (like ACE)
 
-e = W - X; 
+e = W - X; % Calculating the error in the toy model
 e2 = W - Wa;
 
-eT = WT - X;
+eT = WT - X; % Total error from L1 to ionosphere, in the toy model
 eT2 = WT - WTa;
 
 eNorm = e./X; % Type 1 - difference between errenous measurements and true-value
 eNorm2 = e2./X; % Type 2 - difference between two errenous measurements
 
-eNormT = eT./X;
+eNormT = eT./X; % Normalized version of the total error
 eNormT2 = eT2./X;
 
 % Checking if ACFs makes sense
@@ -112,23 +125,12 @@ eNormT2 = eT2./X;
 % samples (:/). Which is right? Why do they match more closely than when we
 % take the same?\
 
+% Calculating ACFs from the toy-model
 [RArrayX,lageX] = find_correlation(X-nanmean(X,1),nSamples,nEnsembles,1);
 [RArrayW,lageW] = find_correlation(W-nanmean(W,1),nSamples,nEnsembles,1);
 [RArrayWT,lageWT] = find_correlation(WT-nanmean(WT,1),nSamples,nEnsembles,1);
 
-% 
-% figure; 
-% plot(fftshift(lag/60),fftshift(Rm),'k');
-% hold on;
-% plot(fftshift(lageX/60),fftshift(mean(RArrayX./RArrayX(:,1))),'b');
-% hold on;
-% plot(fftshift(lageW/60),fftshift(mean(RArrayW./RArrayW(:,1))),'r');
-% legend('From Wind s/c E_{kl}','Model: True Variable X(t)','Model: Measured with noise W(t)','Location','south');
-% xlim([-20,20]);
-% ylim([0,1]);
-% xlabel('Lag $\Delta \tau$ [hr]');
-% ylabel('$R_{xx}(\tau)$');
-% title('Auto-correlation of the toy-model stochastic processes X and W')
+% Calculating conditional probability distributions
 XBins = 0:1:100;
 
 [PegX,XPegX,YPegX] = conditional_pdf(e(:),X(:),-5:0.1:5,0:1:20);
@@ -140,36 +142,44 @@ XBins = 0:1:100;
 [PeSgXS,XPeSgXS,YPeSgXS] = conditional_pdf(eS,XS,-5:0.1:5,0:1:20);
 [PeNSgXS,XPeNSgXS,YPeNSgXS] = conditional_pdf(eNormS,XS,-5:0.1:5,0:1:20);
 
-
+% Calculating conditional expectations
 EXgW = create_curve(W(:),X(:),XBins);
 EXgX = create_curve(X(:),X(:),XBins);
-
 EXgWT = create_curve(WT(:),X(:),XBins);
-
 EYSgXm = create_curve(XmSa,YS,XBins);
 
+% Calculating the conditional expectations associated with variable Y,
+% which is related to X
+%
 YBins = -100:-100:-3000;
-Y = -(150.*X + random('Normal',0,1,nSamples,nEnsembles)');
+Y = -(150.*X + random('Normal',0,1,nSamples,nEnsembles)'); 
+% Y = -(180.*X + random('Normal',0,1,nSamples,nEnsembles)');
+% Here is the second term is intrisic scatter. 
+
 Yw = Y + random('Normal',0,2,nSamples,nEnsembles)';
-% YS = omni.Fsml(datenum(time));
+% Measurement uncertainty in measuring Y. This is probably also varying
+% with the magnitude of Y. Need to incorporate it.
+%??
+
+% Conditional expectations with Y, and X. 
 EYgW = create_curve(W(:),Yw(:),XBins);
 EYgWT = create_curve(WT(:),Yw(:),XBins);
 EYgX = create_curve(X(:),Yw(:),XBins);
 % EYSgXm = create_curve(XmSa,YS,XBins);
-%% Plot Overview of Toy-Model
+
+%% Plotting Overview of Toy-Model
 set(0,'defaulttextInterpreter','latex');
 h=figure;
 resize_figure(h,150,480);
 p = panel();
 p.pack(2,5);
-
 p.select('all');
 p.marginleft = 30;
 p.marginright = 25;
 p.margintop = 15;
-
 p(2).de.margintop = 15;
 
+% Plotting Conditional Probability of error given X, Model
 p(1,1).select();
 colormap(inferno);
 plot_2D_error(XPegX, YPegX, PegX,'$P(X^*-X|X)$');
@@ -178,16 +188,17 @@ xlabel('$X^*-X$','Interpreter','latex');
 ylabel('$X$');
 title('Model: Error (L1 to Magnetopause)');
 
-
+% Plotting Conditional Probability of error given X, Data
 p(2,1).select();
 colormap(inferno);
-plot_2D_error(XPeSgXS, YPeSgXS, PeSgXS,'$P(X^*_{Wind}-X_{Geotial}|X_{Geotail})$');
+plot_2D_error(XPeSgXS, YPeSgXS, PeSgXS,'$P(X^*_{Wind}-X_{Geotail}|X_{Geotail})$');
 caxis([0,1]);
 xlabel('$X^*_{Wind}-X_{Geotail}$','Interpreter','latex');
 ylabel('$X_{Geotail}$');
 title('Data: Error (L1 to Magnetopause)');
 
 
+% Plotting Conditional Probability of normalized error given X, Model
 p(1,2).select();
 colormap(inferno);
 plot_2D_error(XPeNgX, YPeNgX, PeNgX,'$P((X^*-X)/X|X)$');
@@ -199,6 +210,7 @@ hold on;
 plot(repmat(0,100),linspace(0,20,100),'k');
 xlim([-2,2]);
 
+% Plotting Conditional Probability of normalized error given X, Data
 p(2,2).select();
 colormap(inferno);
 plot_2D_error(XPeNSgXS, YPeNSgXS, PeNSgXS,'$P((X^*_{Wind}-X_{Geotail})/X_{Geotail}|X_{Geotail})$');
@@ -210,7 +222,7 @@ hold on;
 plot(repmat(0,100),linspace(0,20,100),'k');
 xlim([-2,2]);
 
-
+% Normalized error pdf, Model (L1-magnetopause)
 p(1,3).select();
 eBins = -5:0.1:5;
 histogram(U,eBins,'Normalization','pdf');
@@ -218,6 +230,9 @@ xlabel('$(X^*-X)/X$','Interpreter','latex');
 ylabel('pdf');
 title('Model: Normalized Error (L1-Magnetopause)');
 
+% Comparing this with data
+%?? Here there is a problem with magnitude of pdfs not matching,  but the
+% shape does
 p(2,3).select();
 eBins = -5:0.1:5;
 yyaxis left
@@ -231,6 +246,7 @@ xlabel('$(X^*_{Wind}-X_{Geotail})/X_{Geotail}$','Interpreter','latex');
 ylabel('pdf');
 title('Data: Normalized Error (L1-Magnetopause)');
 
+%
 p(1,4).select();
 histogram(time_L1_N - time,'Normalization','pdf');
 hold on;
@@ -271,7 +287,7 @@ hold on;
 p4 = plot_curve(EYSgXm,'g');
 xlabel('$X^*$');
 ylabel('$Y$');
-legend([p1,p2,p3,p4],{'$<Y|X>$','$<Y|X_{L1-Mag.}^*>$','$<Y|X_{L1-Iono.}^*>$','$<Y|X_{Geotial}^*>$'},'Location','best','Interpreter','latex');
+legend([p1,p2,p3,p4],{'$<Y|X>$','$<Y|X_{L1-Mag.}^*>$','$<Y|X_{L1-Iono.}^*>$','$<Y|X_{Wind}^*>$'},'Location','best','Interpreter','latex');
 ylim([-6000,0]);
 xlim([0,40]);
 title('Non-linear bias in measuring $Y|X$');
@@ -320,7 +336,178 @@ xlabel('Propagation Delay [min]');
 ylabel('pdf');
 title('Input 3: Error in propagation delay [Guess]');
 
+
+%% Insights
+% 1: Geotail might not be the true value (?)
+% There is uncertainty in the geotail measurement, that alters the 
+% P(Y|X*)
+filter.geo = ((geotail.noseYGSE-geotail.YGSE).^2 + (geotail.noseZGSE-geotail.ZGSE).^2).^0.5 < 20;
+EYSgXS = create_curve(XS(filter.geo),YS(filter.geo),XBins);
+
+figure;
+p1 = plot_curve(EYgX,'k');
+hold on;
+p2 = plot_curve(EYgW,'b');
+hold on;
+p3 = plot_curve(EYgWT,'r');
+hold on;
+p4 = plot_curve(EYSgXm,'g');
+hold on;
+p5 = plot_curve(EYSgXS,'m');
+xlabel('$X^*$');
+ylabel('$Y$');
+legend([p1,p2,p3,p4,p5],{'$<Y|X>$','$<Y|X_{L1-Mag.}^*>$',...
+    '$<Y|X_{L1-Iono.}^*>$','$<Y|X_{Wind}^*>$','$<Y|X_{Geotail}^*>$'},...
+'Location','best','Interpreter','latex');
+ylim([-6000,0]);
+xlim([0,40]);
+title('Non-linear bias in measuring $Y|X$');
+
+
+% 2: Probability distribution is changed, overestimation beyond a threshold
+h3 = figure; 
+resize_figure(h3,100,200);
+p = panel();
+p.pack(1,2);
+p.select('all');
+
+XBinsLog = logspace(-2,2,100);
+
+p(1,1).select();
+histogram(X,XBinsLog,'Normalization','pdf','DisplayStyle','stairs','LineWidth',1,'EdgeColor','k');
+hold on;
+histogram(W, XBinsLog, 'Normalization', 'pdf','DisplayStyle','stairs','LineWidth',1,'EdgeColor','b');
+set(gca,'XScale','log','Yscale','linear','XTick',[0.1,1,4,10,100]);
+hold on;
+plot(repmat(4,100,1),linspace(0,1,100),'k');
+legend('Model-X','Model-X^*','Transition to overestimation','Location','best');
+xlabel('X [Linear-scale]]');
+ylabel('pdf [Log-scale]');
+
+p(1,2).select();
+histogram(X,XBinsLog,'Normalization','pdf','DisplayStyle','stairs','LineWidth',1,'EdgeColor','k');
+hold on;
+histogram(W, XBinsLog, 'Normalization', 'pdf','DisplayStyle','stairs','LineWidth',1,'EdgeColor','b');
+hold on;
+plot(repmat(4,100,1),linspace(10^-8,1,100),'k');
+legend('Model-X','Model-X^*','Transition to overestimation','Location','best');
+set(gca,'XScale','log','Yscale','log','XTick',[0.1,1,4,10,100]);
+xlabel('X [Log-scale]]');
+ylabel('pdf [Log-scale]');
+
+
+% 3: Probability distribution scrambling
+nBins = 100;
+XBins = logspace(-2,3,nBins);
+[edges1, value1] = create_segmented_pdfs(X,X,XBins,XBins);
+cf = colormap(get_colormap3('k','w','b',nBins));
+% cf = inferno(nBins);
+
+h4 = figure; 
+resize_figure(h4,100,200);
+p = panel();
+p.pack(1,2);
+p.select('all');
+
+p(1,1).select();
+bar(log10(edges1),value1','BarLayout','stacked','BarWidth',1,'EdgeColor','none');
+set(gca,'XScale','linear','YScale','log',...
+    'XTick',log10([0.1,1,4,10,100,300]),'XTickLabel',{'0.1','1','4','10','100','300'});
+colororder(cf);
+xlabel('$X$ [mV/m]');
+ylabel('Probability Distribution [Count Density]');
+title('Model - $X$ ');
+xlim([-1.1,3.1]);
+ylim([10^-2,10^8]);
+
+
+p(1,2).select();
+[edges2, value2] = create_segmented_pdfs(X,W,XBins,XBins);
+bar(log10(edges2),value2','BarLayout','stacked','BarWidth',1,'EdgeColor','none');
+set(gca,'XScale','linear','YScale','log',...
+    'XTick',log10([0.1,1,4,10,100,300]),'XTickLabel',{'0.1','1','4','10','100','300'});
+colororder(cf);
+ylim([10^-2,10^8]);
+xlim([-1,3]);
+xlabel('$X^*$ [mV/m]');
+ylabel('Probability Distribution [Count Density]');
+title('Model - $X^*$ (Scrambled $X$ in Color)');
+
+
+% 4: Conditional probabilities are affected
+
+XBins = 0:1:100;
+[PWgX,XPWgX,YPWgX] = conditional_pdf(W(:),X(:),0:1:30,0:1:30);
+[PXgW,XPXgW,YPXgW] = conditional_pdf(X(:),W(:),0:1:30,0:1:30);
+EWgX = create_curve(X(:),W(:),XBins);
+
+
+h5 = figure; 
+resize_figure(h5,100,220);
+p = panel();
+p.pack(1,2);
+p.marginright=30;
+p.select('all');
+
+XBin = 0:30; 
+
+p(1,1).select();
+colormap(inferno);
+plot_2D_error(XPWgX, YPWgX, PWgX','$P(X^*|X)$');
+caxis([0,0.5]);
+ylabel('$X^*$','Interpreter','latex');
+xlabel('$X$');
+title('Model: $P(X^*|X)$');
+hold on;
+p1 = plot(XBin,XBin,'m');
+hold on;
+p2 = plot_curve(EWgX,'c');
+xlim([0,30]);
+ylim([0,30]);
+legend([p1,p2],{'$<X|X>$','$<X^*|X>$'},'Location','northwest','Interpreter','latex');
+
+
+p(1,2).select();
+colormap(inferno);
+plot_2D_error(XPXgW, YPXgW, PXgW','$P(X|X^*)$');
+caxis([0,0.5]);
+ylabel('$X$','Interpreter','latex');
+xlabel('$X^*$');
+hold on;
+p3 = plot(XBin,XBin,'m');
+hold on;
+p4 = plot_curve(EXgW,'c');
+xlim([0,30]);
+ylim([0,30]);
+legend([p3,p4],{'$<X|X>$','$<X|X^*>$'},'Location','northwest','Interpreter','latex');
+title('Model: $P(X|X^*)$, Non-linear bias');
+
 %% Functions
+
+function [edges, value] = create_segmented_pdfs(X,Y,XBins,XSegments,normalizationStr)
+
+if nargin<5
+    normalizationStr = 'countdensity';
+end
+
+value = zeros(length(XSegments),length(XBins)-1);
+for i=1:1:length(XSegments)
+    if i==1
+        [value(i,:),edges] = histcounts(Y(X<=XSegments(i)),XBins,'Normalization',normalizationStr);
+%         edges = hh.BinEdges(2:end) - (hh.BinEdges(2)-hh.BinEdges(1))/2;
+        edges = edges(2:end) - (edges(2)-edges(1))/2;
+%         edges = edges(1:end-1);
+    elseif i>1 && i < length(XSegments)
+        value(i,:) = histcounts(Y(X>XSegments(i-1) & X<=XSegments(i)),XBins,'Normalization',normalizationStr);
+    else
+       value(i,:) = histcounts(Y(X>=XSegments(i-1)),XBins,'Normalization',normalizationStr);
+    end
+    
+%     value(i,:) = hh.Values; 
+end
+
+end
+
 
 function p = plot_curve(curve, color)
 

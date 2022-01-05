@@ -1,0 +1,39 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Footnotes</TITLE>
+
+</HEAD>
+<BODY>
+<H1>Using and Porting GNU Fortran</H1>
+<P>
+<P><HR><P>
+<H3><A NAME="FOOT1" HREF="g77_9.html#DOCF1">(1)</A></H3>
+<P><STRONG>loop discovery</STRONG> refers to the
+process by which a compiler, or indeed any reader of a program,
+determines which portions of the program are more likely to be executed
+repeatedly as it is being run.  Such discovery typically is done early
+when compiling using optimization techniques, so the "discovered"
+loops get more attention--and more run-time resources, such as
+registers--from the compiler.  It is easy to "discover" loops that are
+constructed out of looping constructs in the language
+(such as Fortran's <CODE>DO</CODE>).  For some programs, "discovering" loops
+constructed out of lower-level constructs (such as <CODE>IF</CODE> and
+<CODE>GOTO</CODE>) can lead to generation of more optimal code
+than otherwise.
+<H3><A NAME="FOOT2" HREF="g77_16.html#DOCF2">(2)</A></H3>
+<P>The files generated like this can also be used for
+inter-unit consistency checking of dummy and actual arguments, although
+the <CODE>ftnchek</CODE> tool from <A HREF="ftp://ftp.netlib.org/fortran"><TT>ftp://ftp.netlib.org/fortran</TT></A>
+or <A HREF="ftp://ftp.dsm.fordham.edu"><TT>ftp://ftp.dsm.fordham.edu</TT></A> is
+probably better for this purpose.
+<H3><A NAME="FOOT3" HREF="g77_20.html#DOCF3">(3)</A></H3>
+<P>No, not <EM>that</EM> one.
+<P><HR><P>
+This document was generated on 30 July 1999 using the
+<A HREF="http://wwwcn.cern.ch/dci/texi2html/">texi2html</A>
+translator version 1.51a.</P>
+</BODY>
+</HTML>

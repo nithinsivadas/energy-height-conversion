@@ -1,0 +1,1511 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Other Dialects</TITLE>
+<link href="g77_14.html" rel=Next>
+<link href="g77_12.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_12.html">previous</A>, <A HREF="g77_14.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC344" HREF="g77_toc.html#TOC344">Other Dialects</A></H1>
+
+<P>
+GNU Fortran supports a variety of features that are not
+considered part of the GNU Fortran language itself, but
+are representative of various dialects of Fortran that
+<CODE>g77</CODE> supports in whole or in part.
+
+</P>
+<P>
+Any of the features listed below might be disallowed by
+<CODE>g77</CODE> unless some command-line option is specified.
+Currently, some of the features are accepted using the
+default invocation of <CODE>g77</CODE>, but that might change
+in the future.
+
+</P>
+<P>
+<EM>Note: This portion of the documentation definitely needs a lot
+of work!</EM>
+
+</P>
+
+<UL>
+<LI><A HREF="g77_13.html#SEC345">Source Form</A>: Details of fixed-form and free-form source.
+<LI><A HREF="g77_13.html#SEC351">Trailing Comment</A>: Use of <SAMP>`/*'</SAMP> to start a comment.
+<LI><A HREF="g77_13.html#SEC352">Debug Line</A>: Use of <SAMP>`D'</SAMP> in column 1.
+<LI><A HREF="g77_13.html#SEC353">Dollar Signs</A>: Use of <SAMP>`$'</SAMP> in symbolic names.
+<LI><A HREF="g77_13.html#SEC354">Case Sensitivity</A>: Uppercase and lowercase in source files.
+<LI><A HREF="g77_13.html#SEC355">VXT Fortran</A>: ...versus the GNU Fortran language.
+<LI><A HREF="g77_13.html#SEC358">Fortran 90</A>: ...versus the GNU Fortran language.
+<LI><A HREF="g77_13.html#SEC359">Pedantic Compilation</A>: Enforcing the standard.
+<LI><A HREF="g77_13.html#SEC360">Distensions</A>: Misfeatures supported by GNU Fortran.
+</UL>
+
+
+
+<H2><A NAME="SEC345" HREF="g77_toc.html#TOC345">Source Form</A></H2>
+<P>
+<A NAME="IDX1340"></A>
+<A NAME="IDX1341"></A>
+<A NAME="IDX1342"></A>
+<A NAME="IDX1343"></A>
+<A NAME="IDX1344"></A>
+<A NAME="IDX1345"></A>
+<A NAME="IDX1346"></A>
+
+</P>
+<P>
+GNU Fortran accepts programs written in either fixed form or
+free form.
+
+</P>
+<P>
+Fixed form
+corresponds to ANSI FORTRAN 77 (plus popular extensions, such as
+allowing tabs) and Fortran 90's fixed form.
+
+</P>
+<P>
+Free form corresponds to
+Fortran 90's free form (though possibly not entirely up-to-date, and
+without complaining about some things that for which Fortran 90 requires
+diagnostics, such as the spaces in the constant in <SAMP>`R = 3 . 1'</SAMP>).
+
+</P>
+<P>
+The way a Fortran compiler views source files depends entirely on the
+implementation choices made for the compiler, since those choices
+are explicitly left to the implementation by the published Fortran
+standards.
+GNU Fortran currently tries to be somewhat like a few popular compilers
+(<CODE>f2c</CODE>, Digital ("DEC") Fortran, and so on), though a cleaner default
+definition along with more
+flexibility offered by command-line options is likely to be offered
+in version 0.6.
+
+</P>
+<P>
+This section describes how <CODE>g77</CODE> interprets source lines.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_13.html#SEC346">Carriage Returns</A>: Carriage returns ignored.
+<LI><A HREF="g77_13.html#SEC347">Tabs</A>: Tabs converted to spaces.
+<LI><A HREF="g77_13.html#SEC348">Short Lines</A>: Short lines padded with spaces (fixed-form only).
+<LI><A HREF="g77_13.html#SEC349">Long Lines</A>: Long lines truncated.
+<LI><A HREF="g77_13.html#SEC350">Ampersands</A>: Special Continuation Lines.
+</UL>
+
+
+
+<H3><A NAME="SEC346" HREF="g77_toc.html#TOC346">Carriage Returns</A></H3>
+<P>
+<A NAME="IDX1347"></A>
+
+</P>
+<P>
+Carriage returns (<SAMP>`\r'</SAMP>) in source lines are ignored.
+This is somewhat different from <CODE>f2c</CODE>, which seems to treat them as
+spaces outside character/Hollerith constants, and encodes them as <SAMP>`\r'</SAMP>
+inside such constants.
+
+</P>
+
+
+<H3><A NAME="SEC347" HREF="g77_toc.html#TOC347">Tabs</A></H3>
+<P>
+<A NAME="IDX1348"></A>
+<A NAME="IDX1349"></A>
+
+</P>
+<P>
+A source line with a <KBD>TAB</KBD> character anywhere in it is treated as
+entirely significant--however long it is--instead of ending in
+column 72 (for fixed-form source) or 132 (for free-form source).
+This also is different from <CODE>f2c</CODE>, which encodes tabs as
+<SAMP>`\t'</SAMP> (the ASCII <KBD>TAB</KBD> character) inside character
+and Hollerith constants, but nevertheless seems to treat the column
+position as if it had been affected by the canonical tab positioning.
+
+</P>
+<P>
+<CODE>g77</CODE> effectively
+translates tabs to the appropriate number of spaces (a la the default
+for the UNIX <CODE>expand</CODE> command) before doing any other processing, other
+than (currently) noting whether a tab was found on a line and using this
+information to decide how to interpret the length of the line and continued
+constants.
+
+</P>
+<P>
+Note that this default behavior probably will change for version 0.6,
+when it will presumably be available via a command-line option.
+The default as of version 0.6 is planned to be a "pure visual"
+model, where tabs are immediately
+converted to spaces and otherwise have no effect, so the way a typical
+user sees source lines produces a consistent result no matter how the
+spacing in those source lines is actually implemented via tabs, spaces,
+and trailing tabs/spaces before newline.
+Command-line options are likely to be added to specify whether all or
+just-tabbed lines are to be extended to 132 or full input-line length,
+and perhaps even an option will be added to specify the truncated-line
+behavior to which some Digital compilers default (and which affects
+the way continued character/Hollerith constants are interpreted).
+
+</P>
+
+
+<H3><A NAME="SEC348" HREF="g77_toc.html#TOC348">Short Lines</A></H3>
+<P>
+<A NAME="IDX1350"></A>
+<A NAME="IDX1351"></A>
+<A NAME="IDX1352"></A>
+<A NAME="IDX1353"></A>
+
+</P>
+<P>
+Source lines shorter than the applicable fixed-form length are treated as
+if they were padded with spaces to that length.
+(None of this is relevant to source files written in free form.)
+
+</P>
+<P>
+This affects only
+continued character and Hollerith constants, and is a different
+interpretation than provided by some other popular compilers
+(although a bit more consistent with the traditional punched-card
+basis of Fortran and the way the Fortran standard expressed fixed
+source form).
+
+</P>
+<P>
+<CODE>g77</CODE> might someday offer an option to warn about cases where differences
+might be seen as a result of this treatment, and perhaps an option to
+specify the alternate behavior as well.
+
+</P>
+<P>
+Note that this padding cannot apply to lines that are effectively of
+infinite length--such lines are specified using command-line options
+like <SAMP>`-ffixed-line-length-none'</SAMP>, for example.
+
+</P>
+
+
+<H3><A NAME="SEC349" HREF="g77_toc.html#TOC349">Long Lines</A></H3>
+<P>
+<A NAME="IDX1354"></A>
+<A NAME="IDX1355"></A>
+<A NAME="IDX1356"></A>
+<A NAME="IDX1357"></A>
+
+</P>
+<P>
+Source lines longer than the applicable length are truncated to that
+length.
+Currently, <CODE>g77</CODE> does not warn if the truncated characters are
+not spaces, to accommodate existing code written for systems that
+treated truncated text as commentary (especially in columns 73 through 80).
+
+</P>
+<P>
+See section <A HREF="g77_9.html#SEC16">Options Controlling Fortran Dialect</A>,
+for information on the <SAMP>`-ffixed-line-length-<VAR>n</VAR>'</SAMP> option,
+which can be used to set the line length applicable to fixed-form
+source files.
+
+</P>
+
+
+<H3><A NAME="SEC350" HREF="g77_toc.html#TOC350">Ampersand Continuation Line</A></H3>
+<P>
+<A NAME="IDX1358"></A>
+<A NAME="IDX1359"></A>
+
+</P>
+<P>
+A <SAMP>`&#38;'</SAMP> in column 1 of fixed-form source denotes an arbitrary-length
+continuation line, imitating the behavior of <CODE>f2c</CODE>.
+
+</P>
+
+
+<H2><A NAME="SEC351" HREF="g77_toc.html#TOC351">Trailing Comment</A></H2>
+
+<P>
+<A NAME="IDX1360"></A>
+<A NAME="IDX1361"></A>
+<A NAME="IDX1362"></A>
+<A NAME="IDX1363"></A>
+<A NAME="IDX1364"></A>
+<A NAME="IDX1365"></A>
+<CODE>g77</CODE> supports use of <SAMP>`/*'</SAMP> to start a trailing
+comment.
+In the GNU Fortran language, <SAMP>`!'</SAMP> is used for this purpose.
+
+</P>
+<P>
+<SAMP>`/*'</SAMP> is not in the GNU Fortran language
+because the use of <SAMP>`/*'</SAMP> in a program might
+suggest to some readers that a block, not trailing, comment is
+started (and thus ended by <SAMP>`*/'</SAMP>, not end of line),
+since that is the meaning of <SAMP>`/*'</SAMP> in C.
+
+</P>
+<P>
+Also, such readers might think they can use <SAMP>`//'</SAMP> to start
+a trailing comment as an alternative to <SAMP>`/*'</SAMP>, but
+<SAMP>`//'</SAMP> already denotes concatenation, and such a "comment"
+might actually result in a program that compiles without
+error (though it would likely behave incorrectly).
+
+</P>
+
+
+<H2><A NAME="SEC352" HREF="g77_toc.html#TOC352">Debug Line</A></H2>
+<P>
+<A NAME="IDX1366"></A>
+<A NAME="IDX1367"></A>
+
+</P>
+<P>
+Use of <SAMP>`D'</SAMP> or <SAMP>`d'</SAMP> as the first character (column 1) of
+a source line denotes a debug line.
+
+</P>
+<P>
+In turn, a debug line is treated as either a comment line
+or a normal line, depending on whether debug lines are enabled.
+
+</P>
+<P>
+When treated as a comment line, a line beginning with <SAMP>`D'</SAMP> or
+<SAMP>`d'</SAMP> is treated as if it the first character was <SAMP>`C'</SAMP> or <SAMP>`c'</SAMP>, respectively.
+When treated as a normal line, such a line is treated as if
+the first character was <KBD>SPC</KBD> (space).
+
+</P>
+<P>
+(Currently, <CODE>g77</CODE> provides no means for treating debug
+lines as normal lines.)
+
+</P>
+
+
+<H2><A NAME="SEC353" HREF="g77_toc.html#TOC353">Dollar Signs in Symbol Names</A></H2>
+<P>
+<A NAME="IDX1368"></A>
+<A NAME="IDX1369"></A>
+
+</P>
+<P>
+Dollar signs (<SAMP>`$'</SAMP>) are allowed in symbol names (after the first character)
+when the <SAMP>`-fdollar-ok'</SAMP> option is specified.
+
+</P>
+
+
+<H2><A NAME="SEC354" HREF="g77_toc.html#TOC354">Case Sensitivity</A></H2>
+<P>
+<A NAME="IDX1370"></A>
+<A NAME="IDX1371"></A>
+<A NAME="IDX1372"></A>
+<A NAME="IDX1373"></A>
+<A NAME="IDX1374"></A>
+<A NAME="IDX1375"></A>
+<A NAME="IDX1376"></A>
+<A NAME="IDX1377"></A>
+
+</P>
+<P>
+GNU Fortran offers the programmer way too much flexibility in deciding
+how source files are to be treated vis-a-vis uppercase and lowercase
+characters.
+There are 66 useful settings that affect case sensitivity, plus 10
+settings that are nearly useless, with the remaining 116 settings
+being either redundant or useless.
+
+</P>
+<P>
+None of these settings have any effect on the contents of comments
+(the text after a <SAMP>`c'</SAMP> or <SAMP>`C'</SAMP> in Column 1, for example)
+or of character or Hollerith constants.
+Note that things like the <SAMP>`E'</SAMP> in the statement
+<SAMP>`CALL FOO(3.2E10)'</SAMP> and the <SAMP>`TO'</SAMP> in <SAMP>`ASSIGN 10 TO LAB'</SAMP>
+are considered built-in keywords, and so are affected by
+these settings.
+
+</P>
+<P>
+Low-level switches are identified in this section as follows:
+
+</P>
+
+<UL>
+<LI>A
+
+Source Case Conversion:
+
+
+<UL>
+<LI>0
+
+Preserve (see Note 1)
+<LI>1
+
+Convert to Upper Case
+<LI>2
+
+Convert to Lower Case
+</UL>
+
+<LI>B
+
+Built-in Keyword Matching:
+
+
+<UL>
+<LI>0
+
+Match Any Case (per-character basis)
+<LI>1
+
+Match Upper Case Only
+<LI>2
+
+Match Lower Case Only
+<LI>3
+
+Match InitialCaps Only (see tables for spellings)
+</UL>
+
+<LI>C
+
+Built-in Intrinsic Matching:
+
+
+<UL>
+<LI>0
+
+Match Any Case (per-character basis)
+<LI>1
+
+Match Upper Case Only
+<LI>2
+
+Match Lower Case Only
+<LI>3
+
+Match InitialCaps Only (see tables for spellings)
+</UL>
+
+<LI>D
+
+User-defined Symbol Possibilities (warnings only):
+
+
+<UL>
+<LI>0
+
+Allow Any Case (per-character basis)
+<LI>1
+
+Allow Upper Case Only
+<LI>2
+
+Allow Lower Case Only
+<LI>3
+
+Allow InitialCaps Only (see Note 2)
+</UL>
+
+</UL>
+
+<P>
+Note 1: <CODE>g77</CODE> eventually will support <CODE>NAMELIST</CODE> in a manner that is
+consistent with these source switches--in the sense that input will be
+expected to meet the same requirements as source code in terms
+of matching symbol names and keywords (for the exponent letters).
+
+</P>
+<P>
+Currently, however, <CODE>NAMELIST</CODE> is supported by <CODE>libg2c</CODE>,
+which uppercases <CODE>NAMELIST</CODE> input and symbol names for matching.
+This means not only that <CODE>NAMELIST</CODE> output currently shows symbol
+(and keyword) names in uppercase even if lower-case source
+conversion (option A2) is selected, but that <CODE>NAMELIST</CODE> cannot be
+adequately supported when source case preservation (option A0)
+is selected.
+
+</P>
+<P>
+If A0 is selected, a warning message will be
+output for each <CODE>NAMELIST</CODE> statement to this effect.
+The behavior
+of the program is undefined at run time if two or more symbol names
+appear in a given <CODE>NAMELIST</CODE> such that the names are identical
+when converted to upper case (e.g. <SAMP>`NAMELIST /X/ VAR, Var, var'</SAMP>).
+For complete and total elegance, perhaps there should be a warning
+when option A2 is selected, since the output of NAMELIST is currently
+in uppercase but will someday be lowercase (when a <CODE>libg77</CODE> is written),
+but that seems to be overkill for a product in beta test.
+
+</P>
+<P>
+Note 2: Rules for InitialCaps names are:
+
+</P>
+
+<UL>
+<LI>
+
+Must be a single uppercase letter, <STRONG>or</STRONG>
+<LI>
+
+Must start with an uppercase letter and contain at least one
+lowercase letter.
+</UL>
+
+<P>
+So <SAMP>`A'</SAMP>, <SAMP>`Ab'</SAMP>, <SAMP>`ABc'</SAMP>, <SAMP>`AbC'</SAMP>, and <SAMP>`Abc'</SAMP> are
+valid InitialCaps names, but <SAMP>`AB'</SAMP>, <SAMP>`A2'</SAMP>, and <SAMP>`ABC'</SAMP> are
+not.
+Note that most, but not all, built-in names meet these
+requirements--the exceptions are some of the two-letter format
+specifiers, such as <CODE>BN</CODE> and <CODE>BZ</CODE>.
+
+</P>
+<P>
+Here are the names of the corresponding command-line options:
+
+</P>
+
+<PRE>
+A0: -fsource-case-preserve
+A1: -fsource-case-upper
+A2: -fsource-case-lower
+
+B0: -fmatch-case-any
+B1: -fmatch-case-upper
+B2: -fmatch-case-lower
+B3: -fmatch-case-initcap
+
+C0: -fintrin-case-any
+C1: -fintrin-case-upper
+C2: -fintrin-case-lower
+C3: -fintrin-case-initcap
+
+D0: -fsymbol-case-any
+D1: -fsymbol-case-upper
+D2: -fsymbol-case-lower
+D3: -fsymbol-case-initcap
+</PRE>
+
+<P>
+Useful combinations of the above settings, along with abbreviated
+option names that set some of these combinations all at once:
+
+</P>
+
+<PRE>
+ 1: A0--  B0--  C0--  D0--    -fcase-preserve
+ 2: A0--  B0--  C0--  D-1--
+ 3: A0--  B0--  C0--  D--2-
+ 4: A0--  B0--  C0--  D--3
+ 5: A0--  B0--  C-1--  D0---
+ 6: A0--  B0--  C-1--  D-1--
+ 7: A0--  B0--  C-1--  D--2-
+ 8: A0--  B0--  C-1--  D--3
+ 9: A0--  B0--  C--2-  D0---
+10: A0--  B0--  C--2-  D-1--
+11: A0--  B0--  C--2-  D--2-
+12: A0--  B0--  C--2-  D--3
+13: A0--  B0--  C--3  D0---
+14: A0--  B0--  C--3  D-1--
+15: A0--  B0--  C--3  D--2-
+16: A0--  B0--  C--3  D--3
+17: A0--  B-1--  C0--  D0---
+18: A0--  B-1--  C0--  D-1--
+19: A0--  B-1--  C0--  D--2-
+20: A0--  B-1--  C0--  D--3
+21: A0--  B-1--  C-1--  D0---
+22: A0--  B-1--  C-1--  D-1--    -fcase-strict-upper
+23: A0--  B-1--  C-1--  D--2-
+24: A0--  B-1--  C-1--  D--3
+25: A0--  B-1--  C--2-  D0---
+26: A0--  B-1--  C--2-  D-1--
+27: A0--  B-1--  C--2-  D--2-
+28: A0--  B-1--  C--2-  D--3
+29: A0--  B-1--  C--3  D0---
+30: A0--  B-1--  C--3  D-1--
+31: A0--  B-1--  C--3  D--2-
+32: A0--  B-1--  C--3  D--3
+33: A0--  B--2-  C0--  D0---
+34: A0--  B--2-  C0--  D-1--
+35: A0--  B--2-  C0--  D--2-
+36: A0--  B--2-  C0--  D--3
+37: A0--  B--2-  C-1--  D0---
+38: A0--  B--2-  C-1--  D-1--
+39: A0--  B--2-  C-1--  D--2-
+40: A0--  B--2-  C-1--  D--3
+41: A0--  B--2-  C--2-  D0---
+42: A0--  B--2-  C--2-  D-1--
+43: A0--  B--2-  C--2-  D--2-    -fcase-strict-lower
+44: A0--  B--2-  C--2-  D--3
+45: A0--  B--2-  C--3  D0---
+46: A0--  B--2-  C--3  D-1--
+47: A0--  B--2-  C--3  D--2-
+48: A0--  B--2-  C--3  D--3
+49: A0--  B--3  C0--  D0---
+50: A0--  B--3  C0--  D-1--
+51: A0--  B--3  C0--  D--2-
+52: A0--  B--3  C0--  D--3
+53: A0--  B--3  C-1--  D0---
+54: A0--  B--3  C-1--  D-1--
+55: A0--  B--3  C-1--  D--2-
+56: A0--  B--3  C-1--  D--3
+57: A0--  B--3  C--2-  D0---
+58: A0--  B--3  C--2-  D-1--
+59: A0--  B--3  C--2-  D--2-
+60: A0--  B--3  C--2-  D--3
+61: A0--  B--3  C--3  D0---
+62: A0--  B--3  C--3  D-1--
+63: A0--  B--3  C--3  D--2-
+64: A0--  B--3  C--3  D--3    -fcase-initcap
+65: A-1-  B01--  C01--  D01--    -fcase-upper
+66: A--2  B0-2-  C0-2-  D0-2-    -fcase-lower
+</PRE>
+
+<P>
+Number 22 is the "strict" ANSI FORTRAN 77 model wherein all input
+(except comments, character constants, and Hollerith strings) must
+be entered in uppercase.
+Use <SAMP>`-fcase-strict-upper'</SAMP> to specify this
+combination.
+
+</P>
+<P>
+Number 43 is like Number 22 except all input must be lowercase.  Use
+<SAMP>`-fcase-strict-lower'</SAMP> to specify this combination.
+
+</P>
+<P>
+Number 65 is the "classic" ANSI FORTRAN 77 model as implemented on many
+non-UNIX machines whereby all the source is translated to uppercase.
+Use <SAMP>`-fcase-upper'</SAMP> to specify this combination.
+
+</P>
+<P>
+Number 66 is the "canonical" UNIX model whereby all the source is
+translated to lowercase.
+Use <SAMP>`-fcase-lower'</SAMP> to specify this combination.
+
+</P>
+<P>
+There are a few nearly useless combinations:
+
+</P>
+
+<PRE>
+67: A-1-  B01--  C01--  D--2-
+68: A-1-  B01--  C01--  D--3
+69: A-1-  B01--  C--23  D01--
+70: A-1-  B01--  C--23  D--2-
+71: A-1-  B01--  C--23  D--3
+72: A--2  B01--  C0-2-  D-1--
+73: A--2  B01--  C0-2-  D--3
+74: A--2  B01--  C-1-3  D0-2-
+75: A--2  B01--  C-1-3  D-1--
+76: A--2  B01--  C-1-3  D--3
+</PRE>
+
+<P>
+The above allow some programs to be compiled but with restrictions that
+make most useful programs impossible: Numbers 67 and 72 warn about
+<EM>any</EM> user-defined symbol names (such as <SAMP>`SUBROUTINE FOO'</SAMP>);
+Numbers
+68 and 73 warn about any user-defined symbol names longer than one
+character that don't have at least one non-alphabetic character after
+the first;
+Numbers 69 and 74 disallow any references to intrinsics;
+and Numbers 70, 71, 75, and 76 are combinations of the restrictions in
+67+69, 68+69, 72+74, and 73+74, respectively.
+
+</P>
+<P>
+All redundant combinations are shown in the above tables anyplace
+where more than one setting is shown for a low-level switch.
+For example, <SAMP>`B0-2-'</SAMP> means either setting 0 or 2 is valid for switch B.
+The "proper" setting in such a case is the one that copies the setting
+of switch A--any other setting might slightly reduce the speed of
+the compiler, though possibly to an unmeasurable extent.
+
+</P>
+<P>
+All remaining combinations are useless in that they prevent successful
+compilation of non-null source files (source files with something other
+than comments).
+
+</P>
+
+
+<H2><A NAME="SEC355" HREF="g77_toc.html#TOC355">VXT Fortran</A></H2>
+
+<P>
+<A NAME="IDX1378"></A>
+<A NAME="IDX1379"></A>
+<CODE>g77</CODE> supports certain constructs that
+have different meanings in VXT Fortran than they
+do in the GNU Fortran language.
+
+</P>
+<P>
+Generally, this manual uses the invented term VXT Fortran to refer
+VAX FORTRAN (circa v4).
+That compiler offered many popular features, though not necessarily
+those that are specific to the VAX processor architecture,
+the VMS operating system,
+or Digital Equipment Corporation's Fortran product line.
+(VAX and VMS probably are trademarks of Digital Equipment
+Corporation.)
+
+</P>
+<P>
+An extension offered by a Digital Fortran product that also is
+offered by several other Fortran products for different kinds of
+systems is probably going to be considered for inclusion in <CODE>g77</CODE>
+someday, and is considered a VXT Fortran feature.
+
+</P>
+<P>
+The <SAMP>`-fvxt'</SAMP> option generally specifies that, where
+the meaning of a construct is ambiguous (means one thing
+in GNU Fortran and another in VXT Fortran), the VXT Fortran
+meaning is to be assumed.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_13.html#SEC356">Double Quote Meaning</A>: <SAMP>`"2000'</SAMP> as octal constant.
+<LI><A HREF="g77_13.html#SEC357">Exclamation Point</A>: <SAMP>`!'</SAMP> in column 6.
+</UL>
+
+
+
+<H3><A NAME="SEC356" HREF="g77_toc.html#TOC356">Meaning of Double Quote</A></H3>
+<P>
+<A NAME="IDX1380"></A>
+<A NAME="IDX1381"></A>
+<A NAME="IDX1382"></A>
+<A NAME="IDX1383"></A>
+<A NAME="IDX1384"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> treats double-quote (<SAMP>`"'</SAMP>)
+as beginning an octal constant of <CODE>INTEGER(KIND=1)</CODE> type
+when the <SAMP>`-fvxt'</SAMP> option is specified.
+The form of this octal constant is
+
+</P>
+
+<PRE>
+"<VAR>octal-digits</VAR>
+</PRE>
+
+<P>
+where <VAR>octal-digits</VAR> is a nonempty string of characters in
+the set <SAMP>`01234567'</SAMP>.
+
+</P>
+<P>
+For example, the <SAMP>`-fvxt'</SAMP> option permits this:
+
+</P>
+
+<PRE>
+PRINT *, "20
+END
+</PRE>
+
+<P>
+The above program would print the value <SAMP>`16'</SAMP>.
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC54">Integer Type</A>, for information on the preferred construct
+for integer constants specified using GNU Fortran's octal notation.
+
+</P>
+<P>
+(In the GNU Fortran language, the double-quote character (<SAMP>`"'</SAMP>)
+delimits a character constant just as does apostrophe (<SAMP>`''</SAMP>).
+There is no way to allow
+both constructs in the general case, since statements like
+<SAMP>`PRINT *,"2000 !comment?"'</SAMP> would be ambiguous.)
+
+</P>
+
+
+<H3><A NAME="SEC357" HREF="g77_toc.html#TOC357">Meaning of Exclamation Point in Column 6</A></H3>
+<P>
+<A NAME="IDX1385"></A>
+<A NAME="IDX1386"></A>
+<A NAME="IDX1387"></A>
+<A NAME="IDX1388"></A>
+<A NAME="IDX1389"></A>
+<A NAME="IDX1390"></A>
+
+</P>
+<P>
+<CODE>g77</CODE> treats an exclamation point (<SAMP>`!'</SAMP>) in column 6 of
+a fixed-form source file
+as a continuation character rather than
+as the beginning of a comment
+(as it does in any other column)
+when the <SAMP>`-fvxt'</SAMP> option is specified.
+
+</P>
+<P>
+The following program, when run, prints a message indicating
+whether it is interpreted according to GNU Fortran (and Fortran 90)
+rules or VXT Fortran rules:
+
+</P>
+
+<PRE>
+C234567  (This line begins in column 1.)
+      I = 0
+     !1
+      IF (I.EQ.0) PRINT *, ' I am a VXT Fortran program'
+      IF (I.EQ.1) PRINT *, ' I am a Fortran 90 program'
+      IF (I.LT.0 .OR. I.GT.1) PRINT *, ' I am a HAL 9000 computer'
+      END
+</PRE>
+
+<P>
+(In the GNU Fortran and Fortran 90 languages, exclamation point is
+a valid character and, unlike space (<KBD>SPC</KBD>) or zero (<SAMP>`0'</SAMP>),
+marks a line as a continuation line when it appears in column 6.)
+
+</P>
+
+
+<H2><A NAME="SEC358" HREF="g77_toc.html#TOC358">Fortran 90</A></H2>
+<P>
+<A NAME="IDX1391"></A>
+<A NAME="IDX1392"></A>
+
+</P>
+<P>
+The GNU Fortran language includes a number of features that are
+part of Fortran 90, even when the <SAMP>`-ff90'</SAMP> option is not specified.
+The features enabled by <SAMP>`-ff90'</SAMP> are intended to be those that,
+when <SAMP>`-ff90'</SAMP> is not specified, would have another
+meaning to <CODE>g77</CODE>---usually meaning something invalid in the
+GNU Fortran language.
+
+</P>
+<P>
+So, the purpose of <SAMP>`-ff90'</SAMP> is not to specify whether <CODE>g77</CODE> is
+to gratuitously reject Fortran 90 constructs.
+The <SAMP>`-pedantic'</SAMP> option specified with <SAMP>`-fno-f90'</SAMP> is intended
+to do that, although its implementation is certainly incomplete at
+this point.
+
+</P>
+<P>
+When <SAMP>`-ff90'</SAMP> is specified:
+
+</P>
+
+<UL>
+<LI>
+
+The type of <SAMP>`REAL(<VAR>expr</VAR>)'</SAMP> and <SAMP>`AIMAG(<VAR>expr</VAR>)'</SAMP>,
+where <VAR>expr</VAR> is <CODE>COMPLEX</CODE> type,
+is the same type as the real part of <VAR>expr</VAR>.
+
+For example, assuming <SAMP>`Z'</SAMP> is type <CODE>COMPLEX(KIND=2)</CODE>,
+<SAMP>`REAL(Z)'</SAMP> would return a value of type <CODE>REAL(KIND=2)</CODE>,
+not of type <CODE>REAL(KIND=1)</CODE>, since <SAMP>`-ff90'</SAMP> is specified.
+</UL>
+
+
+
+<H2><A NAME="SEC359" HREF="g77_toc.html#TOC359">Pedantic Compilation</A></H2>
+<P>
+<A NAME="IDX1393"></A>
+<A NAME="IDX1394"></A>
+
+</P>
+<P>
+The <SAMP>`-fpedantic'</SAMP> command-line option specifies that <CODE>g77</CODE>
+is to warn about code that is not standard-conforming.
+This is useful for finding
+some extensions <CODE>g77</CODE> accepts that other compilers might not accept.
+(Note that the <SAMP>`-pedantic'</SAMP> and <SAMP>`-pedantic-errors'</SAMP> options
+always imply <SAMP>`-fpedantic'</SAMP>.)
+
+</P>
+<P>
+With <SAMP>`-fno-f90'</SAMP> in force, ANSI FORTRAN 77 is used as the standard
+for conforming code.
+With <SAMP>`-ff90'</SAMP> in force, Fortran 90 is used.
+
+</P>
+<P>
+The constructs for which <CODE>g77</CODE> issues diagnostics when <SAMP>`-fpedantic'</SAMP>
+and <SAMP>`-fno-f90'</SAMP> are in force are:
+
+</P>
+
+<UL>
+<LI>
+
+Automatic arrays, as in
+
+
+<PRE>
+SUBROUTINE X(N)
+REAL A(N)
+...
+</PRE>
+
+where <SAMP>`A'</SAMP> is not listed in any <CODE>ENTRY</CODE> statement,
+and thus is not a dummy argument.
+
+<LI>
+
+The commas in <SAMP>`READ (5), I'</SAMP> and <SAMP>`WRITE (10), J'</SAMP>.
+
+These commas are disallowed by FORTRAN 77, but, while strictly
+superfluous, are syntactically elegant,
+especially given that commas are required in statements such
+as <SAMP>`READ 99, I'</SAMP> and <SAMP>`PRINT *, J'</SAMP>.
+Many compilers permit the superfluous commas for this reason.
+
+<LI>
+
+<CODE>DOUBLE COMPLEX</CODE>, either explicitly or implicitly.
+
+An explicit use of this type is via a <CODE>DOUBLE COMPLEX</CODE> or
+<CODE>IMPLICIT DOUBLE COMPLEX</CODE> statement, for examples.
+
+An example of an implicit use is the expression <SAMP>`C*D'</SAMP>,
+where <SAMP>`C'</SAMP> is <CODE>COMPLEX(KIND=1)</CODE>
+and <SAMP>`D'</SAMP> is <CODE>DOUBLE PRECISION</CODE>.
+This expression is prohibited by ANSI FORTRAN 77
+because the rules of promotion would suggest that it
+produce a <CODE>DOUBLE COMPLEX</CODE> result--a type not
+provided for by that standard.
+
+<LI>
+
+Automatic conversion of numeric
+expressions to <CODE>INTEGER(KIND=1)</CODE> in contexts such as:
+
+
+<UL>
+<LI>
+
+Array-reference indexes.
+<LI>
+
+Alternate-return values.
+<LI>
+
+Computed <CODE>GOTO</CODE>.
+<LI>
+
+<CODE>FORMAT</CODE> run-time expressions (not yet supported).
+<LI>
+
+Dimension lists in specification statements.
+<LI>
+
+Numbers for I/O statements (such as <SAMP>`READ (UNIT=3.2), I'</SAMP>)
+<LI>
+
+Sizes of <CODE>CHARACTER</CODE> entities in specification statements.
+<LI>
+
+Kind types in specification entities (a Fortran 90 feature).
+<LI>
+
+Initial, terminal, and incrementation parameters for implied-<CODE>DO</CODE>
+constructs in <CODE>DATA</CODE> statements.
+</UL>
+
+<LI>
+
+Automatic conversion of <CODE>LOGICAL</CODE> expressions to <CODE>INTEGER</CODE>
+in contexts such as arithmetic <CODE>IF</CODE> (where <CODE>COMPLEX</CODE>
+expressions are disallowed anyway).
+
+<LI>
+
+Zero-size array dimensions, as in:
+
+
+<PRE>
+INTEGER I(10,20,4:2)
+</PRE>
+
+<LI>
+
+Zero-length <CODE>CHARACTER</CODE> entities, as in:
+
+
+<PRE>
+PRINT *, "
+</PRE>
+
+<LI>
+
+Substring operators applied to character constants and named
+constants, as in:
+
+
+<PRE>
+PRINT *, 'hello'(3:5)
+</PRE>
+
+<LI>
+
+Null arguments passed to statement function, as in:
+
+
+<PRE>
+PRINT *, FOO(,3)
+</PRE>
+
+<LI>
+
+Disagreement among program units regarding whether a given <CODE>COMMON</CODE>
+area is <CODE>SAVE</CODE>d (for targets where program units in a single source
+file are "glued" together as they typically are for UNIX development
+environments).
+
+<LI>
+
+Disagreement among program units regarding the size of a
+named <CODE>COMMON</CODE> block.
+
+<LI>
+
+Specification statements following first <CODE>DATA</CODE> statement.
+
+(In the GNU Fortran language, <SAMP>`DATA I/1/'</SAMP> may be followed by <SAMP>`INTEGER J'</SAMP>,
+but not <SAMP>`INTEGER I'</SAMP>.
+The <SAMP>`-fpedantic'</SAMP> option disallows both of these.)
+
+<LI>
+
+Semicolon as statement separator, as in:
+
+
+<PRE>
+CALL FOO; CALL BAR
+</PRE>
+
+<LI>
+
+Use of <SAMP>`&#38;'</SAMP> in column 1 of fixed-form source (to indicate continuation).
+
+<LI>
+
+Use of <CODE>CHARACTER</CODE> constants to initialize numeric entities, and vice
+versa.
+
+<LI>
+
+Expressions having two arithmetic operators in a row, such
+as <SAMP>`X*-Y'</SAMP>.
+</UL>
+
+<P>
+If <SAMP>`-fpedantic'</SAMP> is specified along with <SAMP>`-ff90'</SAMP>, the
+following constructs result in diagnostics:
+
+</P>
+
+<UL>
+<LI>
+
+Use of semicolon as a statement separator on a line
+that has an <CODE>INCLUDE</CODE> directive.
+</UL>
+
+
+
+<H2><A NAME="SEC360" HREF="g77_toc.html#TOC360">Distensions</A></H2>
+<P>
+<A NAME="IDX1395"></A>
+<A NAME="IDX1396"></A>
+<A NAME="IDX1397"></A>
+
+</P>
+<P>
+The <SAMP>`-fugly-*'</SAMP> command-line options determine whether certain
+features supported by VAX FORTRAN and other such compilers, but considered
+too ugly to be in code that can be changed to use safer and/or more
+portable constructs, are accepted.
+These are humorously referred to as "distensions",
+extensions that just plain look ugly in the harsh light of day.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_13.html#SEC361">Ugly Implicit Argument Conversion</A>: Disabled via <SAMP>`-fno-ugly-args'</SAMP>.
+<LI><A HREF="g77_13.html#SEC362">Ugly Assumed-Size Arrays</A>: Enabled via <SAMP>`-fugly-assumed'</SAMP>.
+<LI><A HREF="g77_13.html#SEC364">Ugly Null Arguments</A>: Enabled via <SAMP>`-fugly-comma'</SAMP>.
+<LI><A HREF="g77_13.html#SEC363">Ugly Complex Part Extraction</A>: Enabled via <SAMP>`-fugly-complex'</SAMP>.
+<LI><A HREF="g77_13.html#SEC365">Ugly Conversion of Initializers</A>: Disabled via <SAMP>`-fno-ugly-init'</SAMP>.
+<LI><A HREF="g77_13.html#SEC366">Ugly Integer Conversions</A>: Enabled via <SAMP>`-fugly-logint'</SAMP>.
+<LI><A HREF="g77_13.html#SEC367">Ugly Assigned Labels</A>: Enabled via <SAMP>`-fugly-assign'</SAMP>.
+</UL>
+
+
+
+<H3><A NAME="SEC361" HREF="g77_toc.html#TOC361">Implicit Argument Conversion</A></H3>
+<P>
+<A NAME="IDX1398"></A>
+<A NAME="IDX1399"></A>
+
+</P>
+<P>
+The <SAMP>`-fno-ugly-args'</SAMP> option disables
+passing typeless and Hollerith constants as actual arguments
+in procedure invocations.
+For example:
+
+</P>
+
+<PRE>
+CALL FOO(4HABCD)
+CALL BAR('123'O)
+</PRE>
+
+<P>
+These constructs can be too easily used to create non-portable
+code, but are not considered as "ugly" as others.
+Further, they are widely used in existing Fortran source code
+in ways that often are quite portable.
+Therefore, they are enabled by default.
+
+</P>
+
+
+<H3><A NAME="SEC362" HREF="g77_toc.html#TOC362">Ugly Assumed-Size Arrays</A></H3>
+<P>
+<A NAME="IDX1400"></A>
+<A NAME="IDX1401"></A>
+<A NAME="IDX1402"></A>
+
+</P>
+<P>
+The <SAMP>`-fugly-assumed'</SAMP> option enables
+the treatment of any array with a final dimension specified as <SAMP>`1'</SAMP>
+as an assumed-size array, as if <SAMP>`*'</SAMP> had been specified
+instead.
+
+</P>
+<P>
+For example, <SAMP>`DIMENSION X(1)'</SAMP> is treated as if it
+had read <SAMP>`DIMENSION X(*)'</SAMP> if <SAMP>`X'</SAMP> is listed as
+a dummy argument in a preceding <CODE>SUBROUTINE</CODE>, <CODE>FUNCTION</CODE>,
+or <CODE>ENTRY</CODE> statement in the same program unit.
+
+</P>
+<P>
+Use an explicit lower bound to avoid this interpretation.
+For example, <SAMP>`DIMENSION X(1:1)'</SAMP> is never treated as if
+it had read <SAMP>`DIMENSION X(*)'</SAMP> or <SAMP>`DIMENSION X(1:*)'</SAMP>.
+Nor is <SAMP>`DIMENSION X(2-1)'</SAMP> affected by this option,
+since that kind of expression is unlikely to have been
+intended to designate an assumed-size array.
+
+</P>
+<P>
+This option is used to prevent warnings being issued about apparent
+out-of-bounds reference such as <SAMP>`X(2) = 99'</SAMP>.
+
+</P>
+<P>
+It also prevents the array from being used in contexts that
+disallow assumed-size arrays, such as <SAMP>`PRINT *,X'</SAMP>.
+In such cases, a diagnostic is generated and the source file is
+not compiled.
+
+</P>
+<P>
+The construct affected by this option is used only in old code
+that pre-exists the widespread acceptance of adjustable and assumed-size
+arrays in the Fortran community.
+
+</P>
+<P>
+<EM>Note:</EM> This option does not affect how <SAMP>`DIMENSION X(1)'</SAMP> is
+treated if <SAMP>`X'</SAMP> is listed as a dummy argument only
+<EM>after</EM> the <CODE>DIMENSION</CODE> statement (presumably in
+an <CODE>ENTRY</CODE> statement).
+For example, <SAMP>`-fugly-assumed'</SAMP> has no effect on the
+following program unit:
+
+</P>
+
+<PRE>
+SUBROUTINE X
+REAL A(1)
+RETURN
+ENTRY Y(A)
+PRINT *, A
+END
+</PRE>
+
+
+
+<H3><A NAME="SEC363" HREF="g77_toc.html#TOC363">Ugly Complex Part Extraction</A></H3>
+<P>
+<A NAME="IDX1403"></A>
+<A NAME="IDX1404"></A>
+<A NAME="IDX1405"></A>
+
+</P>
+<P>
+The <SAMP>`-fugly-complex'</SAMP> option enables
+use of the <CODE>REAL()</CODE> and <CODE>AIMAG()</CODE>
+intrinsics with arguments that are
+<CODE>COMPLEX</CODE> types other than <CODE>COMPLEX(KIND=1)</CODE>.
+
+</P>
+<P>
+With <SAMP>`-ff90'</SAMP> in effect, these intrinsics return
+the unconverted real and imaginary parts (respectively)
+of their argument.
+
+</P>
+<P>
+With <SAMP>`-fno-f90'</SAMP> in effect, these intrinsics convert
+the real and imaginary parts to <CODE>REAL(KIND=1)</CODE>, and return
+the result of that conversion.
+
+</P>
+<P>
+Due to this ambiguity, the GNU Fortran language defines
+these constructs as invalid, except in the specific
+case where they are entirely and solely passed as an
+argument to an invocation of the <CODE>REAL()</CODE> intrinsic.
+For example,
+
+</P>
+
+<PRE>
+REAL(REAL(Z))
+</PRE>
+
+<P>
+is permitted even when <SAMP>`Z'</SAMP> is <CODE>COMPLEX(KIND=2)</CODE>
+and <SAMP>`-fno-ugly-complex'</SAMP> is in effect, because the
+meaning is clear.
+
+</P>
+<P>
+<CODE>g77</CODE> enforces this restriction, unless <SAMP>`-fugly-complex'</SAMP>
+is specified, in which case the appropriate interpretation is
+chosen and no diagnostic is issued.
+
+</P>
+<P>
+See section <A HREF="g77_27.html#SEC719"><CODE>CMPAMBIG</CODE></A>, for information on how to cope with existing
+code with unclear expectations of <CODE>REAL()</CODE> and <CODE>AIMAG()</CODE>
+with <CODE>COMPLEX(KIND=2)</CODE> arguments.
+
+</P>
+<P>
+See section <A HREF="g77_12.html#SEC287">RealPart Intrinsic</A>, for information on the <CODE>REALPART()</CODE>
+intrinsic, used to extract the real part of a complex expression
+without conversion.
+See section <A HREF="g77_12.html#SEC221">ImagPart Intrinsic</A>, for information on the <CODE>IMAGPART()</CODE>
+intrinsic, used to extract the imaginary part of a complex expression
+without conversion.
+
+</P>
+
+
+<H3><A NAME="SEC364" HREF="g77_toc.html#TOC364">Ugly Null Arguments</A></H3>
+<P>
+<A NAME="IDX1406"></A>
+<A NAME="IDX1407"></A>
+<A NAME="IDX1408"></A>
+<A NAME="IDX1409"></A>
+<A NAME="IDX1410"></A>
+
+</P>
+<P>
+The <SAMP>`-fugly-comma'</SAMP> option enables use of a single trailing comma
+to mean "pass an extra trailing null argument"
+in a list of actual arguments to an external procedure,
+and use of an empty list of arguments to such a procedure
+to mean "pass a single null argument".
+
+</P>
+<P>
+<A NAME="IDX1411"></A>
+<A NAME="IDX1412"></A>
+(Null arguments often are used in some procedure-calling
+schemes to indicate omitted arguments.)
+
+</P>
+<P>
+For example, <SAMP>`CALL FOO(,)'</SAMP> means "pass
+two null arguments", rather than "pass one null argument".
+Also, <SAMP>`CALL BAR()'</SAMP> means "pass one null argument".
+
+</P>
+<P>
+This construct is considered "ugly" because it does not
+provide an elegant way to pass a single null argument
+that is syntactically distinct from passing no arguments.
+That is, this construct changes the meaning of code that
+makes no use of the construct.
+
+</P>
+<P>
+So, with <SAMP>`-fugly-comma'</SAMP> in force, <SAMP>`CALL FOO()'</SAMP>
+and <SAMP>`I = JFUNC()'</SAMP> pass a single null argument, instead
+of passing no arguments as required by the Fortran 77 and
+90 standards.
+
+</P>
+<P>
+<EM>Note:</EM> Many systems gracefully allow the case
+where a procedure call passes one extra argument that the
+called procedure does not expect.
+
+</P>
+<P>
+So, in practice, there might be no difference in
+the behavior of a program that does <SAMP>`CALL FOO()'</SAMP>
+or <SAMP>`I = JFUNC()'</SAMP> and is compiled with <SAMP>`-fugly-comma'</SAMP>
+in force as compared to its behavior when compiled
+with the default, <SAMP>`-fno-ugly-comma'</SAMP>, in force,
+assuming <SAMP>`FOO'</SAMP> and <SAMP>`JFUNC'</SAMP> do not expect any
+arguments to be passed.
+
+</P>
+
+
+<H3><A NAME="SEC365" HREF="g77_toc.html#TOC365">Ugly Conversion of Initializers</A></H3>
+
+<P>
+The constructs disabled by <SAMP>`-fno-ugly-init'</SAMP> are:
+
+</P>
+
+<UL>
+<LI>
+
+<A NAME="IDX1413"></A>
+ <A NAME="IDX1414"></A>
+ 
+Use of Hollerith and typeless constants in contexts where they set
+initial (compile-time) values for variables, arrays, and named
+constants--that is, <CODE>DATA</CODE> and <CODE>PARAMETER</CODE> statements, plus
+type-declaration statements specifying initial values.
+
+Here are some sample initializations that are disabled by the
+<SAMP>`-fno-ugly-init'</SAMP> option:
+
+
+<PRE>
+PARAMETER (VAL='9A304FFE'X)
+REAL*8 STRING/8HOUTPUT00/
+DATA VAR/4HABCD/
+</PRE>
+
+<A NAME="IDX1415"></A>
+<A NAME="IDX1416"></A>
+<LI>
+
+In the same contexts as above, use of character constants to initialize
+numeric items and vice versa (one constant per item).
+
+Here are more sample initializations that are disabled by the
+<SAMP>`-fno-ugly-init'</SAMP> option:
+
+
+<PRE>
+INTEGER IA
+CHARACTER BELL
+PARAMETER (IA = 'A')
+PARAMETER (BELL = 7)
+</PRE>
+
+<LI>
+
+Use of Hollerith and typeless constants on the right-hand side
+of assignment statements to numeric types, and in other
+contexts (such as passing arguments in invocations of
+intrinsic procedures and statement functions) that
+are treated as assignments to known types (the dummy
+arguments, in these cases).
+
+Here are sample statements that are disabled by the
+<SAMP>`-fno-ugly-init'</SAMP> option:
+
+
+<PRE>
+IVAR = 4HABCD
+PRINT *, IMAX0(2HAB, 2HBA)
+</PRE>
+
+</UL>
+
+<P>
+The above constructs, when used,
+can tend to result in non-portable code.
+But, they are widely used in existing Fortran code in ways
+that often are quite portable.
+Therefore, they are enabled by default.
+
+</P>
+
+
+<H3><A NAME="SEC366" HREF="g77_toc.html#TOC366">Ugly Integer Conversions</A></H3>
+
+<P>
+The constructs enabled via <SAMP>`-fugly-logint'</SAMP> are:
+
+</P>
+
+<UL>
+<LI>
+
+Automatic conversion between <CODE>INTEGER</CODE> and <CODE>LOGICAL</CODE> as
+dictated by
+context (typically implies nonportable dependencies on how a
+particular implementation encodes <CODE>.TRUE.</CODE> and <CODE>.FALSE.</CODE>).
+
+<LI>
+
+Use of a <CODE>LOGICAL</CODE> variable in <CODE>ASSIGN</CODE> and assigned-<CODE>GOTO</CODE>
+statements.
+</UL>
+
+<P>
+The above constructs are disabled by default because use
+of them tends to lead to non-portable code.
+Even existing Fortran code that uses that often turns out
+to be non-portable, if not outright buggy.
+
+</P>
+<P>
+Some of this is due to differences among implementations as
+far as how <CODE>.TRUE.</CODE> and <CODE>.FALSE.</CODE> are encoded as
+<CODE>INTEGER</CODE> values--Fortran code that assumes a particular
+coding is likely to use one of the above constructs, and is
+also likely to not work correctly on implementations using
+different encodings.
+
+</P>
+<P>
+See section <A HREF="g77_20.html#SEC666">Equivalence Versus Equality</A>, for more information.
+
+</P>
+
+
+<H3><A NAME="SEC367" HREF="g77_toc.html#TOC367">Ugly Assigned Labels</A></H3>
+<P>
+<A NAME="IDX1417"></A>
+<A NAME="IDX1418"></A>
+<A NAME="IDX1419"></A>
+<A NAME="IDX1420"></A>
+
+</P>
+<P>
+The <SAMP>`-fugly-assign'</SAMP> option forces <CODE>g77</CODE> to use the
+same storage for assigned labels as it would for a normal
+assignment to the same variable.
+
+</P>
+<P>
+For example, consider the following code fragment:
+
+</P>
+
+<PRE>
+I = 3
+ASSIGN 10 TO I
+</PRE>
+
+<P>
+Normally, for portability and improved diagnostics, <CODE>g77</CODE>
+reserves distinct storage for a "sibling" of <SAMP>`I'</SAMP>, used
+only for <CODE>ASSIGN</CODE> statements to that variable (along with
+the corresponding assigned-<CODE>GOTO</CODE> and assigned-<CODE>FORMAT</CODE>-I/O
+statements that reference the variable).
+
+</P>
+<P>
+However, some code (that violates the ANSI FORTRAN 77 standard)
+attempts to copy assigned labels among variables involved with
+<CODE>ASSIGN</CODE> statements, as in:
+
+</P>
+
+<PRE>
+ASSIGN 10 TO I
+ISTATE(5) = I
+...
+J = ISTATE(ICUR)
+GOTO J
+</PRE>
+
+<P>
+Such code doesn't work under <CODE>g77</CODE> unless <SAMP>`-fugly-assign'</SAMP>
+is specified on the command-line, ensuring that the value of <CODE>I</CODE>
+referenced in the second line is whatever value <CODE>g77</CODE> uses
+to designate statement label <SAMP>`10'</SAMP>, so the value may be
+copied into the <SAMP>`ISTATE'</SAMP> array, later retrieved into a
+variable of the appropriate type (<SAMP>`J'</SAMP>), and used as the target of
+an assigned-<CODE>GOTO</CODE> statement.
+
+</P>
+<P>
+<EM>Note:</EM> To avoid subtle program bugs,
+when <SAMP>`-fugly-assign'</SAMP> is specified,
+<CODE>g77</CODE> requires the type of variables
+specified in assigned-label contexts
+<EM>must</EM> be the same type returned by <CODE>%LOC()</CODE>.
+On many systems, this type is effectively the same
+as <CODE>INTEGER(KIND=1)</CODE>, while, on others, it is
+effectively the same as <CODE>INTEGER(KIND=2)</CODE>.
+
+</P>
+<P>
+Do <EM>not</EM> depend on <CODE>g77</CODE> actually writing valid pointers
+to these variables, however.
+While <CODE>g77</CODE> currently chooses that implementation, it might
+be changed in the future.
+
+</P>
+<P>
+See section <A HREF="g77_18.html#SEC562">Assigned Statement Labels (ASSIGN and GOTO)</A>,
+for implementation details on assigned-statement labels.
+
+</P>
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_12.html">previous</A>, <A HREF="g77_14.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

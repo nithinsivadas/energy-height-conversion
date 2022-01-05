@@ -1,0 +1,358 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Other Languages</TITLE>
+<link href="g77_17.html" rel=Next>
+<link href="g77_15.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_15.html">previous</A>, <A HREF="g77_17.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC521" HREF="g77_toc.html#TOC521">Other Languages</A></H1>
+
+<P>
+<EM>Note: This portion of the documentation definitely needs a lot
+of work!</EM>
+
+</P>
+
+<UL>
+<LI><A HREF="g77_16.html#SEC522">Interoperating with C and C++</A>
+</UL>
+
+
+
+<H2><A NAME="SEC522" HREF="g77_toc.html#TOC522">Tools and advice for interoperating with C and C++</A></H2>
+
+<P>
+<A NAME="IDX1798"></A>
+<A NAME="IDX1799"></A>
+<A NAME="IDX1800"></A>
+The following discussion assumes that you are running <CODE>g77</CODE> in <CODE>f2c</CODE>
+compatibility mode, i.e. not using <SAMP>`-fno-f2c'</SAMP>.
+It provides some
+advice about quick and simple techniques for linking Fortran and C (or
+C++), the most common requirement.
+For the full story consult the
+description of code generation.
+See section <A HREF="g77_18.html#SEC550">Debugging and Interfacing</A>.
+
+</P>
+<P>
+When linking Fortran and C, it's usually best to use <CODE>g77</CODE> to do
+the linking so that the correct libraries are included (including the
+maths one).
+If you're linking with C++ you will want to add
+<SAMP>`-lstdc++'</SAMP>, <SAMP>`-lg++'</SAMP> or whatever.
+If you need to use another
+driver program (or <CODE>ld</CODE> directly),
+you can find out what linkage
+options <CODE>g77</CODE> passes by running <SAMP>`g77 -v'</SAMP>.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_16.html#SEC523">C Interfacing Tools</A>
+<LI><A HREF="g77_16.html#SEC524">C Access to Type Information</A>
+<LI><A HREF="g77_16.html#SEC525">f2c Skeletons and Prototypes</A>
+<LI><A HREF="g77_16.html#SEC526">C++ Considerations</A>
+<LI><A HREF="g77_16.html#SEC527">Startup Code</A>
+</UL>
+
+
+
+<H3><A NAME="SEC523" HREF="g77_toc.html#TOC523">C Interfacing Tools</A></H3>
+<P>
+<A NAME="IDX1801"></A>
+<A NAME="IDX1802"></A>
+<A NAME="IDX1803"></A>
+Even if you don't actually use it as a compiler, <CODE>f2c</CODE> from
+<A HREF="ftp://ftp.netlib.org/f2c/src"><TT>ftp://ftp.netlib.org/f2c/src</TT></A>, can be a useful tool when you're
+interfacing (linking) Fortran and C.
+See section <A HREF="g77_16.html#SEC525">Generating Skeletons and Prototypes with <CODE>f2c</CODE></A>.
+
+</P>
+<P>
+To use <CODE>f2c</CODE> for this purpose you only need retrieve and
+build the <TT>`src'</TT> directory from the distribution, consult the
+<TT>`README'</TT> instructions there for machine-specifics, and install the
+<CODE>f2c</CODE> program on your path.
+
+</P>
+<P>
+Something else that might be useful is <SAMP>`cfortran.h'</SAMP> from
+<A HREF="ftp://zebra/desy.de/cfortran"><TT>ftp://zebra/desy.de/cfortran</TT></A>.
+This is a fairly general tool which
+can be used to generate interfaces for calling in both directions
+between Fortran and C.
+It can be used in <CODE>f2c</CODE> mode with
+<CODE>g77</CODE>---consult its documentation for details.
+
+</P>
+
+
+<H3><A NAME="SEC524" HREF="g77_toc.html#TOC524">Accessing Type Information in C</A></H3>
+
+<P>
+<A NAME="IDX1804"></A>
+Generally, C code written to link with
+<CODE>g77</CODE> code--calling and/or being
+called from Fortran--should <SAMP>`#include &#60;g2c.h&#62;'</SAMP> to define the C
+versions of the Fortran types.
+Don't assume Fortran <CODE>INTEGER</CODE> types
+correspond to C <CODE>int</CODE>s, for instance; instead, declare them as
+<CODE>integer</CODE>, a type defined by <TT>`g2c.h'</TT>.
+<TT>`g2c.h'</TT> is installed where <CODE>gcc</CODE> will find it by
+default, assuming you use a copy of <CODE>gcc</CODE> compatible with
+<CODE>g77</CODE>, probably built at the same time as <CODE>g77</CODE>.
+
+</P>
+
+
+<H3><A NAME="SEC525" HREF="g77_toc.html#TOC525">Generating Skeletons and Prototypes with <CODE>f2c</CODE></A></H3>
+
+<P>
+<A NAME="IDX1805"></A>
+<A NAME="IDX1806"></A>
+A simple and foolproof way to write <CODE>g77</CODE>-callable C routines--e.g. to
+interface with an existing library--is to write a file (named, for
+example, <TT>`fred.f'</TT>) of dummy Fortran
+skeletons comprising just the declaration of the routine(s) and dummy
+arguments plus <CODE>END</CODE> statements.
+Then run <CODE>f2c</CODE> on file <TT>`fred.f'</TT> to produce <TT>`fred.c'</TT>
+into which you can edit
+useful code, confident the calling sequence is correct, at least.
+(There are some errors otherwise commonly made in generating C
+interfaces with <CODE>f2c</CODE> conventions,
+such as not using <CODE>doublereal</CODE>
+as the return type of a <CODE>REAL</CODE> <CODE>FUNCTION</CODE>.)
+
+</P>
+<P>
+<A NAME="IDX1807"></A>
+<CODE>f2c</CODE> also can help with calling Fortran from C, using its
+<SAMP>`-P'</SAMP> option to generate C prototypes appropriate for calling the
+Fortran.<A NAME="DOCF2" HREF="g77_foot.html#FOOT2">(2)</A>
+If the Fortran code containing any
+routines to be called from C is in file <TT>`joe.f'</TT>, use the command
+<KBD>f2c -P joe.f</KBD> to generate the file <TT>`joe.P'</TT> containing
+prototype information.
+<CODE>#include</CODE> this in the C which has to call
+the Fortran routines to make sure you get it right.
+
+</P>
+<P>
+See section <A HREF="g77_18.html#SEC558">Arrays (DIMENSION)</A>, for information on the differences
+between the way Fortran (including compilers like <CODE>g77</CODE>) and
+C handle arrays.
+
+</P>
+
+
+<H3><A NAME="SEC526" HREF="g77_toc.html#TOC526">C++ Considerations</A></H3>
+
+<P>
+<A NAME="IDX1808"></A>
+<CODE>f2c</CODE> can be used to generate suitable code for compilation with a
+C++ system using the <SAMP>`-C++'</SAMP> option.
+The important thing about linking <CODE>g77</CODE>-compiled
+code with C++ is that the prototypes for the <CODE>g77</CODE>
+routines must specify C linkage to avoid name mangling.
+So, use an <SAMP>`extern "C"'</SAMP> declaration.
+<CODE>f2c</CODE>'s <SAMP>`-C++'</SAMP> option will take care
+of this when generating skeletons or prototype files as above, and also
+avoid clashes with C++ reserved words in addition to those in C.
+
+</P>
+
+
+<H3><A NAME="SEC527" HREF="g77_toc.html#TOC527">Startup Code</A></H3>
+
+<P>
+<A NAME="IDX1809"></A>
+<A NAME="IDX1810"></A>
+<A NAME="IDX1811"></A>
+Unlike with some runtime systems,
+it shouldn't be necessary
+(unless there are bugs)
+to use a Fortran main program unit to ensure the
+runtime--specifically the I/O system--is initialized.
+
+</P>
+<P>
+However, to use the <CODE>g77</CODE> intrinsics <CODE>GETARG</CODE> and <CODE>IARGC</CODE>,
+either the <CODE>main</CODE> routine from the <TT>`libg2c'</TT> library must be used,
+or the <CODE>f_setarg</CODE> routine
+(new as of <CODE>egcs</CODE> version 1.1 and <CODE>g77</CODE> version 0.5.23)
+must be called with the appropriate <CODE>argc</CODE> and <CODE>argv</CODE> arguments
+prior to the program calling <CODE>GETARG</CODE> or <CODE>IARGC</CODE>.
+
+</P>
+<P>
+To provide more flexibility for mixed-language programming
+involving <CODE>g77</CODE> while allowing for shared libraries,
+as of <CODE>egcs</CODE> version 1.1 and <CODE>g77</CODE> version 0.5.23,
+<CODE>g77</CODE>'s <CODE>main</CODE> routine in <CODE>libg2c</CODE>
+does the following, in order:
+
+</P>
+
+<OL>
+<LI>
+
+Calls <CODE>f_setarg</CODE>
+with the incoming <CODE>argc</CODE> and <CODE>argv</CODE> arguments,
+in the same order as for <CODE>main</CODE> itself.
+
+This sets up the command-line environment
+for <CODE>GETARG</CODE> and <CODE>IARGC</CODE>.
+
+<LI>
+
+Calls <CODE>f_setsig</CODE> (with no arguments).
+
+This sets up the signaling and exception environment.
+
+<LI>
+
+Calls <CODE>f_init</CODE> (with no arguments).
+
+This initializes the I/O environment,
+though that should not be necessary,
+as all I/O functions in <CODE>libf2c</CODE>
+are believed to call <CODE>f_init</CODE> automatically,
+if necessary.
+
+(A future version of <CODE>g77</CODE> might skip this explicit step,
+to speed up normal exit of a program.)
+
+<LI>
+
+Arranges for <CODE>f_exit</CODE> to be called (with no arguments)
+when the program exits.
+
+This ensures that the I/O environment is properly shut down
+before the program exits normally.
+Otherwise, output buffers might not be fully flushed,
+scratch files might not be deleted, and so on.
+
+The simple way <CODE>main</CODE> does this is
+to call <CODE>f_exit</CODE> itself after calling
+<CODE>MAIN__</CODE> (in the next step).
+
+However, this does not catch the cases where the program
+might call <CODE>exit</CODE> directly,
+instead of using the <CODE>EXIT</CODE> intrinsic
+(implemented as <CODE>exit_</CODE> in <CODE>libf2c</CODE>).
+
+So, <CODE>main</CODE> attempts to use
+the operating environment's <CODE>onexit</CODE> or <CODE>atexit</CODE>
+facility, if available,
+to cause <CODE>f_exit</CODE> to be called automatically
+upon any invocation of <CODE>exit</CODE>.
+
+<LI>
+
+Calls <CODE>MAIN__</CODE> (with no arguments).
+
+This starts executing the Fortran main program unit for
+the application.
+(Both <CODE>g77</CODE> and <CODE>f2c</CODE> currently compile a main
+program unit so that its global name is <CODE>MAIN__</CODE>.)
+
+<LI>
+
+If no <CODE>onexit</CODE> or <CODE>atexit</CODE> is provided by the system,
+calls <CODE>f_exit</CODE>.
+
+<LI>
+
+Calls <CODE>exit</CODE> with a zero argument,
+to signal a successful program termination.
+
+<LI>
+
+Returns a zero value to the caller,
+to signal a successful program termination,
+in case <CODE>exit</CODE> doesn't exit on the system.
+</OL>
+
+<P>
+All of the above names are C <CODE>extern</CODE> names,
+i.e. not mangled.
+
+</P>
+<P>
+When using the <CODE>main</CODE> procedure provided by <CODE>g77</CODE>
+without a Fortran main program unit,
+you need to provide <CODE>MAIN__</CODE>
+as the entry point for your C code.
+(Make sure you link the object file that defines that
+entry point with the rest of your program.)
+
+</P>
+<P>
+To provide your own <CODE>main</CODE> procedure
+in place of <CODE>g77</CODE>'s,
+make sure you specify the object file defining that procedure
+<EM>before</EM> <SAMP>`-lg2c'</SAMP> on the <CODE>g77</CODE> command line.
+Since the <SAMP>`-lg2c'</SAMP> option is implicitly provided,
+this is usually straightforward.
+(Use the <SAMP>`--verbose'</SAMP> option to see how and where
+<CODE>g77</CODE> implicitly adds <SAMP>`-lg2c'</SAMP> in a command line
+that will link the program.
+Feel free to specify <SAMP>`-lg2c'</SAMP> explicitly,
+as appropriate.)
+
+</P>
+<P>
+However, when providing your own <CODE>main</CODE>,
+make sure you perform the appropriate tasks in the
+appropriate order.
+For example, if your <CODE>main</CODE> does not call <CODE>f_setarg</CODE>,
+make sure the rest of your application does not call
+<CODE>GETARG</CODE> or <CODE>IARGC</CODE>.
+
+</P>
+<P>
+And, if your <CODE>main</CODE> fails to ensure that <CODE>f_exit</CODE>
+is called upon program exit,
+some files might end up incompletely written,
+some scratch files might be left lying around,
+and some existing files being written might be left
+with old data not properly truncated at the end.
+
+</P>
+<P>
+Note that, generally, the <CODE>g77</CODE> operating environment
+does not depend on a procedure named <CODE>MAIN__</CODE> actually
+being called prior to any other <CODE>g77</CODE>-compiled code.
+That is, <CODE>MAIN__</CODE> does not, itself,
+set up any important operating-environment characteristics
+upon which other code might depend.
+This might change in future versions of <CODE>g77</CODE>,
+with appropriate notification in the release notes.
+
+</P>
+<P>
+For more information, consult the source code for the above routines.
+These are in <TT>`egcs/libf2c/libF77/'</TT>, named <TT>`main.c'</TT>,
+<TT>`setarg.c'</TT>, <TT>`setsig.c'</TT>, <TT>`getarg_.c'</TT>, and <TT>`iargc_.c'</TT>.
+
+</P>
+<P>
+Also, the file <TT>`egcs/gcc/f/com.c'</TT> contains the code <CODE>g77</CODE>
+uses to open-code (inline) references to <CODE>IARGC</CODE>.
+
+</P>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_15.html">previous</A>, <A HREF="g77_17.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

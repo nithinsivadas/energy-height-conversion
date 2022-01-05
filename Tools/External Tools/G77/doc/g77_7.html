@@ -1,0 +1,401 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - What is GNU Fortran?</TITLE>
+<link href="g77_8.html" rel=Next>
+<link href="g77_6.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_6.html">previous</A>, <A HREF="g77_8.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC10" HREF="g77_toc.html#TOC10">What is GNU Fortran?</A></H1>
+<P>
+<A NAME="IDX12"></A>
+<A NAME="IDX13"></A>
+
+</P>
+<P>
+GNU Fortran, or <CODE>g77</CODE>, is designed initially as a free replacement
+for, or alternative to, the UNIX <CODE>f77</CODE> command.
+(Similarly, <CODE>gcc</CODE> is designed as a replacement
+for the UNIX <CODE>cc</CODE> command.)
+
+</P>
+<P>
+<CODE>g77</CODE> also is designed to fit in well with the other
+fine GNU compilers and tools.
+
+</P>
+<P>
+Sometimes these design goals conflict--in such cases, resolution
+often is made in favor of fitting in well with Project GNU.
+These cases are usually identified in the appropriate
+sections of this manual.
+
+</P>
+<P>
+<A NAME="IDX14"></A>
+As compilers, <CODE>g77</CODE>, <CODE>gcc</CODE>, and <CODE>f77</CODE>
+share the following characteristics:
+
+</P>
+
+<UL>
+<LI>
+
+<A NAME="IDX15"></A>
+ <A NAME="IDX16"></A>
+ <A NAME="IDX17"></A>
+ <A NAME="IDX18"></A>
+ 
+They read a user's program, stored in a file and
+containing instructions written in the appropriate
+language (Fortran, C, and so on).
+This file contains <STRONG>source code</STRONG>.
+
+<A NAME="IDX19"></A>
+<A NAME="IDX20"></A>
+<A NAME="IDX21"></A>
+<A NAME="IDX22"></A>
+<LI>
+
+They translate the user's program into instructions
+a computer can carry out more quickly than it takes
+to translate the instructions in the first place.
+These instructions are called <STRONG>machine code</STRONG>---code
+designed to be efficiently translated and processed
+by a machine such as a computer.
+Humans usually aren't as good writing machine code
+as they are at writing Fortran or C, because
+it is easy to make tiny mistakes writing machine code.
+When writing Fortran or C, it is easy
+to make big mistakes.
+
+<A NAME="IDX23"></A>
+<A NAME="IDX24"></A>
+<A NAME="IDX25"></A>
+<A NAME="IDX26"></A>
+<LI>
+
+They provide information in the generated machine code
+that can make it easier to find bugs in the program
+(using a debugging tool, called a <STRONG>debugger</STRONG>,
+such as <CODE>gdb</CODE>).
+
+<A NAME="IDX27"></A>
+<A NAME="IDX28"></A>
+<A NAME="IDX29"></A>
+<A NAME="IDX30"></A>
+<LI>
+
+They locate and gather machine code already generated
+to perform actions requested by statements in
+the user's program.
+This machine code is organized
+into <STRONG>libraries</STRONG> and is located and gathered
+during the <STRONG>link</STRONG> phase of the compilation
+process.
+(Linking often is thought of as a separate
+step, because it can be directly invoked via the
+<CODE>ld</CODE> command.
+However, the <CODE>g77</CODE> and <CODE>gcc</CODE>
+commands, as with most compiler commands, automatically
+perform the linking step by calling on <CODE>ld</CODE>
+directly, unless asked to not do so by the user.)
+
+<A NAME="IDX31"></A>
+<A NAME="IDX32"></A>
+<LI>
+
+They attempt to diagnose cases where the user's
+program contains incorrect usages of the language.
+The <STRONG>diagnostics</STRONG> produced by the compiler
+indicate the problem and the location in the user's
+source file where the problem was first noticed.
+The user can use this information to locate and
+fix the problem.
+<A NAME="IDX33"></A>
+<A NAME="IDX34"></A>
+<A NAME="IDX35"></A>
+<A NAME="IDX36"></A>
+(Sometimes an incorrect usage
+of the language leads to a situation where the
+compiler can no longer make any sense of what
+follows--while a human might be able to--and
+thus ends up complaining about many "problems"
+it encounters that, in fact, stem from just one
+problem, usually the first one reported.)
+
+<A NAME="IDX37"></A>
+<A NAME="IDX38"></A>
+<LI>
+
+They attempt to diagnose cases where the user's
+program contains a correct usage of the language,
+but instructs the computer to do something questionable.
+These diagnostics often are in the form of <STRONG>warnings</STRONG>,
+instead of the <STRONG>errors</STRONG> that indicate incorrect
+usage of the language.
+</UL>
+
+<P>
+How these actions are performed is generally under the
+control of the user.
+Using command-line options, the user can specify
+how persnickety the compiler is to be regarding
+the program (whether to diagnose questionable usage
+of the language), how much time to spend making
+the generated machine code run faster, and so on.
+
+</P>
+<P>
+<A NAME="IDX39"></A>
+<A NAME="IDX40"></A>
+<CODE>g77</CODE> consists of several components:
+
+</P>
+<P>
+<A NAME="IDX41"></A>
+<A NAME="IDX42"></A>
+
+<UL>
+<LI>
+
+A modified version of the <CODE>gcc</CODE> command, which also might be
+installed as the system's <CODE>cc</CODE> command.
+(In many cases, <CODE>cc</CODE> refers to the
+system's "native" C compiler, which
+might be a non-GNU compiler, or an older version
+of <CODE>gcc</CODE> considered more stable or that is
+used to build the operating system kernel.)
+
+<A NAME="IDX43"></A>
+<A NAME="IDX44"></A>
+<LI>
+
+The <CODE>g77</CODE> command itself, which also might be installed as the
+system's <CODE>f77</CODE> command.
+
+<A NAME="IDX45"></A>
+<A NAME="IDX46"></A>
+<A NAME="IDX47"></A>
+<A NAME="IDX48"></A>
+<A NAME="IDX49"></A>
+<LI>
+
+The <CODE>libg2c</CODE> run-time library.
+This library contains the machine code needed to support
+capabilities of the Fortran language that are not directly
+provided by the machine code generated by the <CODE>g77</CODE>
+compilation phase.
+
+<CODE>libg2c</CODE> is just the unique name <CODE>g77</CODE> gives
+to its version of <CODE>libf2c</CODE> to distinguish it from
+any copy of <CODE>libf2c</CODE> installed from <CODE>f2c</CODE>
+(or versions of <CODE>g77</CODE> that built <CODE>libf2c</CODE> under
+that same name)
+on the system.
+
+The maintainer of <CODE>libf2c</CODE> currently is
+<A HREF="mailto:dmg@bell-labs.com"><TT>dmg@bell-labs.com</TT></A>.
+
+<A NAME="IDX50"></A>
+<A NAME="IDX51"></A>
+<A NAME="IDX52"></A>
+<A NAME="IDX53"></A>
+<A NAME="IDX54"></A>
+<A NAME="IDX55"></A>
+<A NAME="IDX56"></A>
+<LI>
+
+The compiler itself, internally named <CODE>f771</CODE>.
+
+Note that <CODE>f771</CODE> does not generate machine code directly--it
+generates <STRONG>assembly code</STRONG> that is a more readable form
+of machine code, leaving the conversion to actual machine code
+to an <STRONG>assembler</STRONG>, usually named <CODE>as</CODE>.
+</UL>
+
+<P>
+<CODE>gcc</CODE> is often thought of as "the C compiler" only,
+but it does more than that.
+Based on command-line options and the names given for files
+on the command line, <CODE>gcc</CODE> determines which actions to perform, including
+preprocessing, compiling (in a variety of possible languages), assembling,
+and linking.
+
+</P>
+<P>
+<A NAME="IDX57"></A>
+<A NAME="IDX58"></A>
+<A NAME="IDX59"></A>
+<A NAME="IDX60"></A>
+<A NAME="IDX61"></A>
+<A NAME="IDX62"></A>
+<A NAME="IDX63"></A>
+<A NAME="IDX64"></A>
+<A NAME="IDX65"></A>
+For example, the command <SAMP>`gcc foo.c'</SAMP> <STRONG>drives</STRONG> the file
+<TT>`foo.c'</TT> through the preprocessor <CODE>cpp</CODE>, then
+the C compiler (internally named
+<CODE>cc1</CODE>), then the assembler (usually <CODE>as</CODE>), then the linker
+(<CODE>ld</CODE>), producing an executable program named <TT>`a.out'</TT> (on
+UNIX systems).
+
+</P>
+<P>
+<A NAME="IDX66"></A>
+<A NAME="IDX67"></A>
+As another example, the command <SAMP>`gcc foo.cc'</SAMP> would do much the same as
+<SAMP>`gcc foo.c'</SAMP>, but instead of using the C compiler named <CODE>cc1</CODE>,
+<CODE>gcc</CODE> would use the C++ compiler (named <CODE>cc1plus</CODE>).
+
+</P>
+<P>
+<A NAME="IDX68"></A>
+<A NAME="IDX69"></A>
+In a GNU Fortran installation, <CODE>gcc</CODE> recognizes Fortran source
+files by name just like it does C and C++ source files.
+It knows to use the Fortran compiler named <CODE>f771</CODE>, instead of
+<CODE>cc1</CODE> or <CODE>cc1plus</CODE>, to compile Fortran files.
+
+</P>
+<P>
+<A NAME="IDX70"></A>
+<A NAME="IDX71"></A>
+<A NAME="IDX72"></A>
+Non-Fortran-related operation of <CODE>gcc</CODE> is generally
+unaffected by installing the GNU Fortran version of <CODE>gcc</CODE>.
+However, without the installed version of <CODE>gcc</CODE> being the
+GNU Fortran version, <CODE>gcc</CODE> will not be able to compile
+and link Fortran programs--and since <CODE>g77</CODE> uses <CODE>gcc</CODE>
+to do most of the actual work, neither will <CODE>g77</CODE>!
+
+</P>
+<P>
+<A NAME="IDX73"></A>
+<A NAME="IDX74"></A>
+The <CODE>g77</CODE> command is essentially just a front-end for
+the <CODE>gcc</CODE> command.
+Fortran users will normally use <CODE>g77</CODE> instead of <CODE>gcc</CODE>,
+because <CODE>g77</CODE>
+knows how to specify the libraries needed to link with Fortran programs
+(<CODE>libg2c</CODE> and <CODE>lm</CODE>).
+<CODE>g77</CODE> can still compile and link programs and
+source files written in other languages, just like <CODE>gcc</CODE>.
+
+</P>
+<P>
+<A NAME="IDX75"></A>
+<A NAME="IDX76"></A>
+The command <SAMP>`g77 -v'</SAMP> is a quick
+way to display lots of version information for the various programs
+used to compile a typical preprocessed Fortran source file--this
+produces much more output than <SAMP>`gcc -v'</SAMP> currently does.
+(If it produces an error message near the end of the output--diagnostics
+from the linker, usually <CODE>ld</CODE>---you might
+have an out-of-date <CODE>libf2c</CODE> that improperly handles
+complex arithmetic.)
+In the output of this command, the line beginning <SAMP>`GNU Fortran Front
+End'</SAMP> identifies the version number of GNU Fortran; immediately
+preceding that line is a line identifying the version of <CODE>gcc</CODE>
+with which that version of <CODE>g77</CODE> was built.
+
+</P>
+<P>
+<A NAME="IDX77"></A>
+<A NAME="IDX78"></A>
+The <CODE>libf2c</CODE> library is distributed with GNU Fortran for
+the convenience of its users, but is not part of GNU Fortran.
+It contains the procedures
+needed by Fortran programs while they are running.
+
+</P>
+<P>
+<A NAME="IDX79"></A>
+<A NAME="IDX80"></A>
+For example, while code generated by <CODE>g77</CODE> is likely
+to do additions, subtractions, and multiplications <STRONG>in line</STRONG>---in
+the actual compiled code--it is not likely to do trigonometric
+functions this way.
+
+</P>
+<P>
+Instead, operations like trigonometric
+functions are compiled by the <CODE>f771</CODE> compiler
+(invoked by <CODE>g77</CODE> when compiling Fortran code) into machine
+code that, when run, calls on functions in <CODE>libg2c</CODE>, so
+<CODE>libg2c</CODE> must be linked with almost every useful program
+having any component compiled by GNU Fortran.
+(As mentioned above, the <CODE>g77</CODE> command takes
+care of all this for you.)
+
+</P>
+<P>
+The <CODE>f771</CODE> program represents most of what is unique to GNU Fortran.
+While much of the <CODE>libg2c</CODE> component comes from
+the <CODE>libf2c</CODE> component of <CODE>f2c</CODE>,
+a free Fortran-to-C converter distributed by Bellcore (AT&#38;T),
+plus <CODE>libU77</CODE>, provided by Dave Love,
+and the <CODE>g77</CODE> command is just a small front-end to <CODE>gcc</CODE>,
+<CODE>f771</CODE> is a combination of two rather
+large chunks of code.
+
+</P>
+<P>
+<A NAME="IDX81"></A>
+<A NAME="IDX82"></A>
+<A NAME="IDX83"></A>
+<A NAME="IDX84"></A>
+<A NAME="IDX85"></A>
+One chunk is the so-called <STRONG>GNU Back End</STRONG>, or GBE,
+which knows how to generate fast code for a wide variety of processors.
+The same GBE is used by the C, C++, and Fortran compiler programs <CODE>cc1</CODE>,
+<CODE>cc1plus</CODE>, and <CODE>f771</CODE>, plus others.
+Often the GBE is referred to as the "gcc back end" or
+even just "gcc"---in this manual, the term GBE is used
+whenever the distinction is important.
+
+</P>
+<P>
+<A NAME="IDX86"></A>
+<A NAME="IDX87"></A>
+<A NAME="IDX88"></A>
+<A NAME="IDX89"></A>
+The other chunk of <CODE>f771</CODE> is the
+majority of what is unique about GNU Fortran--the code that knows how
+to interpret Fortran programs to determine what they are intending to
+do, and then communicate that knowledge to the GBE for actual compilation
+of those programs.
+This chunk is called the <STRONG>Fortran Front End</STRONG> (FFE).
+The <CODE>cc1</CODE> and <CODE>cc1plus</CODE> programs have their own front ends,
+for the C and C++ languages, respectively.
+These fronts ends are responsible for diagnosing
+incorrect usage of their respective languages by the
+programs the process, and are responsible for most of
+the warnings about questionable constructs as well.
+(The GBE handles producing some warnings, like those
+concerning possible references to undefined variables.)
+
+</P>
+<P>
+Because so much is shared among the compilers for various languages,
+much of the behavior and many of the user-selectable options for these
+compilers are similar.
+For example, diagnostics (error messages and
+warnings) are similar in appearance; command-line
+options like <SAMP>`-Wall'</SAMP> have generally similar effects; and the quality
+of generated code (in terms of speed and size) is roughly similar
+(since that work is done by the shared GBE).
+
+</P>
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_6.html">previous</A>, <A HREF="g77_8.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

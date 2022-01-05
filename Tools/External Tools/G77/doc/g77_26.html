@@ -1,0 +1,2630 @@
+<HTML>
+<HEAD>
+<!-- This HTML file has been created by texi2html 1.54
+     from g77.texi on 30 July 1999 -->
+
+<TITLE>Using and Porting GNU Fortran - Front End</TITLE>
+<link href="g77_27.html" rel=Next>
+<link href="g77_25.html" rel=Previous>
+<link href="g77_toc.html" rel=ToC>
+
+</HEAD>
+<BODY>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_25.html">previous</A>, <A HREF="g77_27.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC686" HREF="g77_toc.html#TOC686">Front End</A></H1>
+<P>
+<A NAME="IDX2310"></A>
+<A NAME="IDX2311"></A>
+<A NAME="IDX2312"></A>
+<A NAME="IDX2313"></A>
+
+</P>
+<P>
+This chapter describes some aspects of the design and implementation
+of the <CODE>g77</CODE> front end.
+Much of the information below applies not to current
+releases of <CODE>g77</CODE>,
+but to the 0.6 rewrite being designed and implemented
+as of late May, 1999.
+
+</P>
+<P>
+To find about things that are "To Be Determined" or "To Be Done",
+search for the string TBD.
+If you want to help by working on one or more of these items,
+email me at <A HREF="mailto:craig@jcb-sc.com"><TT>craig@jcb-sc.com</TT></A>.
+If you're planning to do more than just research issues and offer comments,
+see <A HREF="http://egcs.cygnus.com/contribute.html"><TT>http://egcs.cygnus.com/contribute.html</TT></A> for steps you might
+need to take first.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_26.html#SEC687">Overview of Sources</A>
+<LI><A HREF="g77_26.html#SEC688">Overview of Translation Process</A>
+<LI><A HREF="g77_26.html#SEC705">Philosophy of Code Generation</A>
+<LI><A HREF="g77_26.html#SEC706">Two-pass Design</A>
+<LI><A HREF="g77_26.html#SEC709">Challenges Posed</A>
+<LI><A HREF="g77_26.html#SEC710">Transforming Statements</A>
+<LI><A HREF="g77_26.html#SEC716">Transforming Expressions</A>
+<LI><A HREF="g77_26.html#SEC717">Internal Naming Conventions</A>
+</UL>
+
+
+
+<H2><A NAME="SEC687" HREF="g77_toc.html#TOC687">Overview of Sources</A></H2>
+
+<P>
+The current directory layout includes the following:
+
+</P>
+<DL COMPACT>
+
+<DT><TT>`/gcc/'</TT>
+<DD>
+Non-g77 files in gcc
+
+<DT><TT>`/gcc/f/'</TT>
+<DD>
+GNU Fortran front end sources
+
+<DT><TT>`/libf2c/'</TT>
+<DD>
+<CODE>libg2c</CODE> configuration and <CODE>g2c.h</CODE> file generation
+
+<DT><TT>`/libf2c/libF77/'</TT>
+<DD>
+General support and math portion of <CODE>libg2c</CODE>
+
+<DT><TT>`/libf2c/libI77/'</TT>
+<DD>
+I/O portion of <CODE>libg2c</CODE>
+
+<DT><TT>`/libf2c/libU77/'</TT>
+<DD>
+Additional interfaces to Unix <CODE>libc</CODE> for <CODE>libg2c</CODE>
+</DL>
+
+<P>
+Components of note in <CODE>g77</CODE> are described below.
+
+</P>
+<P>
+<TT>`f/'</TT> as a whole contains the source for <CODE>g77</CODE>,
+while <TT>`libf2c/'</TT> contains a portion of the separate program
+<CODE>f2c</CODE>.
+Note that the <CODE>libf2c</CODE> code is not part of the program <CODE>g77</CODE>,
+just distributed with it.
+
+</P>
+<P>
+<TT>`f/'</TT> contains text files that document the Fortran compiler, source
+files for the GNU Fortran Front End (FFE), and some other stuff.
+The <CODE>g77</CODE> compiler code is placed in <TT>`f/'</TT> because it,
+along with its contents,
+is designed to be a subdirectory of a <CODE>gcc</CODE> source directory,
+<TT>`gcc/'</TT>,
+which is structured so that language-specific front ends can be "dropped
+in" as subdirectories.
+The C++ front end (<CODE>g++</CODE>), is an example of this--it resides in
+the <TT>`cp/'</TT> subdirectory.
+Note that the C front end (also referred to as <CODE>gcc</CODE>)
+is an exception to this, as its source files reside
+in the <TT>`gcc/'</TT> directory itself.
+
+</P>
+<P>
+<TT>`libf2c/'</TT> contains the run-time libraries for the <CODE>f2c</CODE> program,
+also used by <CODE>g77</CODE>.
+These libraries normally referred to collectively as <CODE>libf2c</CODE>.
+When built as part of <CODE>g77</CODE>,
+<CODE>libf2c</CODE> is installed under the name <CODE>libg2c</CODE> to avoid
+conflict with any existing version of <CODE>libf2c</CODE>,
+and thus is often referred to as <CODE>libg2c</CODE> when the
+<CODE>g77</CODE> version is specifically being referred to.
+
+</P>
+<P>
+The <CODE>netlib</CODE> version of <CODE>libf2c/</CODE>
+contains two distinct libraries,
+<CODE>libF77</CODE> and <CODE>libI77</CODE>,
+each in their own subdirectories.
+In <CODE>g77</CODE>, this distinction is not made,
+beyond maintaining the subdirectory structure in the source-code tree.
+
+</P>
+<P>
+<TT>`libf2c/'</TT> is not part of the program <CODE>g77</CODE>,
+just distributed with it.
+It contains files not present
+in the official (<CODE>netlib</CODE>) version of <CODE>libf2c</CODE>,
+and also contains some minor changes made from <CODE>libf2c</CODE>,
+to fix some bugs,
+and to facilitate automatic configuration, building, and installation of
+<CODE>libf2c</CODE> (as <CODE>libg2c</CODE>) for use by <CODE>g77</CODE> users.
+See <TT>`libf2c/README'</TT> for more information,
+including licensing conditions
+governing distribution of programs containing code from <CODE>libg2c</CODE>.
+
+</P>
+<P>
+<CODE>libg2c</CODE>, <CODE>g77</CODE>'s version of <CODE>libf2c</CODE>,
+adds Dave Love's implementation of <CODE>libU77</CODE>,
+in the <TT>`libf2c/libU77/'</TT> directory.
+This library is distributed under the
+GNU Library General Public License (LGPL)---see the
+file <TT>`libf2c/libU77/COPYING.LIB'</TT>
+for more information,
+as this license
+governs distribution conditions for programs containing code
+from this portion of the library.
+
+</P>
+<P>
+Files of note in <TT>`f/'</TT> and <TT>`libf2c/'</TT> are described below:
+
+</P>
+<DL COMPACT>
+
+<DT><TT>`f/BUGS'</TT>
+<DD>
+Lists some important bugs known to be in g77.
+Or use Info (or GNU Emacs Info mode) to read
+the "Actual Bugs" node of the <CODE>g77</CODE> documentation:
+
+
+<PRE>
+info -f f/g77.info -n "Actual Bugs"
+</PRE>
+
+<DT><TT>`f/ChangeLog'</TT>
+<DD>
+Lists recent changes to <CODE>g77</CODE> internals.
+
+<DT><TT>`libf2c/ChangeLog'</TT>
+<DD>
+Lists recent changes to <CODE>libg2c</CODE> internals.
+
+<DT><TT>`f/NEWS'</TT>
+<DD>
+Contains the per-release changes.
+These include the user-visible
+changes described in the node "Changes"
+in the <CODE>g77</CODE> documentation, plus internal
+changes of import.
+Or use:
+
+
+<PRE>
+info -f f/g77.info -n News
+</PRE>
+
+<DT><TT>`f/g77.info*'</TT>
+<DD>
+The <CODE>g77</CODE> documentation, in Info format,
+produced by building <CODE>g77</CODE>.
+
+All users of <CODE>g77</CODE> (not just installers) should read this,
+using the <CODE>more</CODE> command if neither the <CODE>info</CODE> command,
+nor GNU Emacs (with its Info mode), are available, or if users
+aren't yet accustomed to using these tools.
+All of these files are readable as "plain text" files,
+though they're easier to navigate using Info readers
+such as <CODE>info</CODE> and GNU Emacs Info mode.
+</DL>
+
+<P>
+If you want to explore the FFE code, which lives entirely in <TT>`f/'</TT>,
+here are a few clues.
+The file <TT>`g77spec.c'</TT> contains the <CODE>g77</CODE>-specific source code
+for the <CODE>g77</CODE> command only--this just forms a variant of the
+<CODE>gcc</CODE> command, so,
+just as the <CODE>gcc</CODE> command itself does not contain the C front end,
+the <CODE>g77</CODE> command does not contain the Fortran front end (FFE).
+The FFE code ends up in an executable named <TT>`f771'</TT>,
+which does the actual compiling,
+so it contains the FFE plus the <CODE>gcc</CODE> back end (GBE),
+the latter to do most of the optimization, and the code generation.
+
+</P>
+<P>
+The file <TT>`parse.c'</TT> is the source file for <CODE>yyparse()</CODE>,
+which is invoked by the GBE to start the compilation process,
+for <TT>`f771'</TT>.
+
+</P>
+<P>
+The file <TT>`top.c'</TT> contains the top-level FFE function <CODE>ffe_file</CODE>
+and it (along with top.h) define all <SAMP>`ffe_[a-z].*'</SAMP>, <SAMP>`ffe[A-Z].*'</SAMP>,
+and <SAMP>`FFE_[A-Za-z].*'</SAMP> symbols.
+
+</P>
+<P>
+The file <TT>`fini.c'</TT> is a <CODE>main()</CODE> program that is used when building
+the FFE to generate C header and source files for recognizing keywords.
+The files <TT>`malloc.c'</TT> and <TT>`malloc.h'</TT> comprise a memory manager
+that defines all <SAMP>`malloc_[a-z].*'</SAMP>, <SAMP>`malloc[A-Z].*'</SAMP>, and
+<SAMP>`MALLOC_[A-Za-z].*'</SAMP> symbols.
+
+</P>
+<P>
+All other modules named <VAR>xyz</VAR>
+are comprised of all files named <SAMP>`<VAR>xyz</VAR>*.<VAR>ext</VAR>'</SAMP>
+and define all <SAMP>`ffe<VAR>xyz</VAR>_[a-z].*'</SAMP>, <SAMP>`ffe<VAR>xyz</VAR>[A-Z].*'</SAMP>,
+and <SAMP>`FFE<VAR>XYZ</VAR>_[A-Za-z].*'</SAMP> symbols.
+If you understand all this, congratulations--it's easier for me to remember
+how it works than to type in these regular expressions.
+But it does make it easy to find where a symbol is defined.
+For example, the symbol <SAMP>`ffexyz_set_something'</SAMP> would be defined
+in <TT>`xyz.h'</TT> and implemented there (if it's a macro) or in <TT>`xyz.c'</TT>.
+
+</P>
+<P>
+The "porting" files of note currently are:
+
+</P>
+<DL COMPACT>
+
+<DT><TT>`proj.c'</TT>
+<DD>
+<DT><TT>`proj.h'</TT>
+<DD>
+This defines the "language" used by all the other source files,
+the language being Standard C plus some useful things
+like <CODE>ARRAY_SIZE</CODE> and such.
+
+<DT><TT>`target.c'</TT>
+<DD>
+<DT><TT>`target.h'</TT>
+<DD>
+These describe the target machine
+in terms of what data types are supported,
+how they are denoted
+(to what C type does an <CODE>INTEGER*8</CODE> map, for example),
+how to convert between them,
+and so on.
+Over time, versions of <CODE>g77</CODE> rely less on this file
+and more on run-time configuration based on GBE info
+in <TT>`com.c'</TT>.
+
+<DT><TT>`com.c'</TT>
+<DD>
+<DT><TT>`com.h'</TT>
+<DD>
+These are the primary interface to the GBE.
+
+<DT><TT>`ste.c'</TT>
+<DD>
+<DT><TT>`ste.h'</TT>
+<DD>
+This contains code for implementing recognized executable statements
+in the GBE.
+
+<DT><TT>`src.c'</TT>
+<DD>
+<DT><TT>`src.h'</TT>
+<DD>
+These contain information on the format(s) of source files
+(such as whether they are never to be processed as case-insensitive
+with regard to Fortran keywords).
+</DL>
+
+<P>
+If you want to debug the <TT>`f771'</TT> executable,
+for example if it crashes,
+note that the global variables <CODE>lineno</CODE> and <CODE>input_filename</CODE>
+are usually set to reflect the current line being read by the lexer
+during the first-pass analysis of a program unit and to reflect
+the current line being processed during the second-pass compilation
+of a program unit.
+
+</P>
+<P>
+If an invocation of the function <CODE>ffestd_exec_end</CODE> is on the stack,
+the compiler is in the second pass, otherwise it is in the first.
+
+</P>
+<P>
+(This information might help you reduce a test case and/or work around
+a bug in <CODE>g77</CODE> until a fix is available.)
+
+</P>
+
+
+<H2><A NAME="SEC688" HREF="g77_toc.html#TOC688">Overview of Translation Process</A></H2>
+
+<P>
+The order of phases translating source code to the form accepted
+by the GBE is:
+
+</P>
+
+<OL>
+<LI>
+
+Stripping punched-card sources (<TT>`g77stripcard.c'</TT>)
+
+<LI>
+
+Lexing (<TT>`lex.c'</TT>)
+
+<LI>
+
+Stand-alone statement identification (<TT>`sta.c'</TT>)
+
+<LI>
+
+Parsing (<TT>`stb.c'</TT> and <TT>`expr.c'</TT>)
+
+<LI>
+
+Constructing (<TT>`stc.c'</TT>)
+
+<LI>
+
+Collecting (<TT>`std.c'</TT>)
+
+<LI>
+
+Expanding (<TT>`ste.c'</TT>)
+</OL>
+
+<P>
+To get a rough idea of how a particularly twisted Fortran statement
+gets treated by the passes, consider:
+
+</P>
+
+<PRE>
+      FORMAT(I2 4H)=(J/
+     &#38;   I3)
+</PRE>
+
+<P>
+The job of <TT>`lex.c'</TT> is to know enough about Fortran syntax rules
+to break the statement up into distinct lexemes without requiring
+any feedback from subsequent phases:
+
+</P>
+
+<PRE>
+`FORMAT'
+`('
+`I24H'
+`)'
+`='
+`('
+`J'
+`/'
+`I3'
+`)'
+</PRE>
+
+<P>
+The job of <TT>`sta.c'</TT> is to figure out the kind of statement,
+or, at least, statement form, that sequence of lexemes represent.
+
+</P>
+<P>
+The sooner it can do this (in terms of using the smallest number of
+lexemes, starting with the first for each statement), the better,
+because that leaves diagnostics for problems beyond the recognition
+of the statement form to subsequent phases,
+which can usually better describe the nature of the problem.
+
+</P>
+<P>
+In this case, the <SAMP>`='</SAMP> at "level zero"
+(not nested within parentheses)
+tells <TT>`sta.c'</TT> that this is an <EM>assignment-form</EM>,
+not <CODE>FORMAT</CODE>, statement.
+
+</P>
+<P>
+An assignment-form statement might be a statement-function
+definition or an executable assignment statement.
+
+</P>
+<P>
+To make that determination,
+<TT>`sta.c'</TT> looks at the first two lexemes.
+
+</P>
+<P>
+Since the second lexeme is <SAMP>`('</SAMP>,
+the first must represent an array for this to be an assignment statement,
+else it's a statement function.
+
+</P>
+<P>
+Either way, <TT>`sta.c'</TT> hands off the statement to <TT>`stb.c'</TT>
+(either its statement-function parser or its assignment-statement parser).
+
+</P>
+<P>
+<TT>`stb.c'</TT> forms a
+statement-specific record containing the pertinent information.
+That information includes a source expression and,
+for an assignment statement, a destination expression.
+Expressions are parsed by <TT>`expr.c'</TT>.
+
+</P>
+<P>
+This record is passed to <TT>`stc.c'</TT>,
+which copes with the implications of the statement
+within the context established by previous statements.
+
+</P>
+<P>
+For example, if it's the first statement in the file
+or after an <CODE>END</CODE> statement,
+<TT>`stc.c'</TT> recognizes that, first of all,
+a main program unit is now being lexed
+(and tells that to <TT>`std.c'</TT>
+before telling it about the current statement).
+
+</P>
+<P>
+<TT>`stc.c'</TT> attaches whatever information it can,
+usually derived from the context established by the preceding statements,
+and passes the information to <TT>`std.c'</TT>.
+
+</P>
+<P>
+<TT>`std.c'</TT> saves this information away,
+since the GBE cannot cope with information
+that might be incomplete at this stage.
+
+</P>
+<P>
+For example, <SAMP>`I3'</SAMP> might later be determined
+to be an argument to an alternate <CODE>ENTRY</CODE> point.
+
+</P>
+<P>
+When <TT>`std.c'</TT> is told about the end of an external (top-level)
+program unit,
+it passes all the information it has saved away
+on statements in that program unit
+to <TT>`ste.c'</TT>.
+
+</P>
+<P>
+<TT>`ste.c'</TT> "expands" each statement, in sequence, by
+constructing the appropriate GBE information and calling
+the appropriate GBE routines.
+
+</P>
+<P>
+Details on the transformational phases follow.
+Keep in mind that Fortran numbering is used,
+so the first character on a line is column 1,
+decimal numbering is used, and so on.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_26.html#SEC689">g77stripcard</A>
+<LI><A HREF="g77_26.html#SEC690">lex.c</A>
+<LI><A HREF="g77_26.html#SEC691">sta.c</A>
+<LI><A HREF="g77_26.html#SEC692">stb.c</A>
+<LI><A HREF="g77_26.html#SEC693">expr.c</A>
+<LI><A HREF="g77_26.html#SEC694">stc.c</A>
+<LI><A HREF="g77_26.html#SEC695">std.c</A>
+<LI><A HREF="g77_26.html#SEC696">ste.c</A>
+
+<LI><A HREF="g77_26.html#SEC697">Gotchas (Transforming)</A>
+<LI><A HREF="g77_26.html#SEC704">TBD (Transforming)</A>
+</UL>
+
+
+
+<H3><A NAME="SEC689" HREF="g77_toc.html#TOC689">g77stripcard</A></H3>
+
+<P>
+The <CODE>g77stripcard</CODE> program handles removing content beyond
+column 72 (adjustable via a command-line option),
+optionally warning about that content being something other
+than trailing whitespace or Fortran commentary.
+
+</P>
+<P>
+This program is needed because <CODE>lex.c</CODE> doesn't pay attention
+to maximum line lengths at all, to make it easier to maintain,
+as well as faster (for sources that don't depend on the maximum
+column length vis-a-vis trailing non-blank non-commentary content).
+
+</P>
+<P>
+Just how this program will be run--whether automatically for
+old source (perhaps as the default for <TT>`.f'</TT> files?)---is not
+yet determined.
+
+</P>
+<P>
+In the meantime, it might as well be implemented as a typical UNIX pipe.
+
+</P>
+<P>
+It should accept a <SAMP>`-fline-length-<VAR>n</VAR>'</SAMP> option,
+with the default line length set to 72.
+
+</P>
+<P>
+When the text it strips off the end of a line is not blank
+(not spaces and tabs),
+it should insert an additional comment line
+(beginning with <SAMP>`!'</SAMP>,
+so it works for both fixed-form and free-form files)
+containing the text,
+following the stripped line.
+The inserted comment should have a prefix of some kind,
+TBD, that distinguishes the comment as representing stripped text.
+Users could use that to <CODE>sed</CODE> out such lines, if they wished--it
+seems silly to provide a command-line option to delete information
+when it can be so easily filtered out by another program.
+
+</P>
+<P>
+(This inserted comment should be designed to "fit in" well
+with whatever the Fortran community is using these days for
+preprocessor, translator, and other such products, like OpenMP.
+What that's all about, and how <CODE>g77</CODE> can elegantly fit its
+special comment conventions into it all, is TBD as well.
+We don't want to reinvent the wheel here, but if there turn out
+to be too many conflicting conventions, we might have to invent
+one that looks nothing like the others, but which offers their
+host products a better infrastructure in which to fit and coexist
+peacefully.)
+
+</P>
+<P>
+<CODE>g77stripcard</CODE> probably shouldn't do any tab expansion or other
+fancy stuff.
+People can use <CODE>expand</CODE> or other pre-filtering if they like.
+The idea here is to keep each stage quite simple, while providing
+excellent performance for "normal" code.
+
+</P>
+<P>
+(Code with junk beyond column 73 is not really "normal",
+as it comes from a card-punch heritage,
+and will be increasingly hard for tomorrow's Fortran programmers to read.)
+
+</P>
+
+
+<H3><A NAME="SEC690" HREF="g77_toc.html#TOC690">lex.c</A></H3>
+
+<P>
+To help make the lexer simple, fast, and easy to maintain,
+while also having <CODE>g77</CODE> generally encourage Fortran programmers
+to write simple, maintainable, portable code by maximizing the
+performance of compiling that kind of code:
+
+</P>
+
+<UL>
+<LI>
+
+There'll be just one lexer, for both fixed-form and free-form source.
+
+<LI>
+
+It'll care about the form only when handling the first 7 columns of
+text, stuff like spaces between strings of alphanumerics, and
+how lines are continued.
+
+Some other distinctions will be handled by subsequent phases,
+so at least one of them will have to know which form is involved.
+
+For example, <SAMP>`I = 2 . 4'</SAMP> is acceptable in fixed form,
+and works in free form as well given the implementation <CODE>g77</CODE>
+presently uses.
+But the standard requires a diagnostic for it in free form,
+so the parser has to be able to recognize that
+the lexemes aren't contiguous
+(information the lexer <EM>does</EM> have to provide)
+and that free-form source is being parsed,
+so it can provide the diagnostic.
+
+The <CODE>g77</CODE> lexer doesn't try to gather <SAMP>`2 . 4'</SAMP> into a single lexeme.
+Otherwise, it'd have to know a whole lot more about how to parse Fortran,
+or subsequent phases (mainly parsing) would have two paths through
+lots of critical code--one to handle the lexeme <SAMP>`2'</SAMP>, <SAMP>`.'</SAMP>,
+and <SAMP>`4'</SAMP> in sequence, another to handle the lexeme <SAMP>`2.4'</SAMP>.
+
+<LI>
+
+It won't worry about line lengths
+(beyond the first 7 columns for fixed-form source).
+
+That is, once it starts parsing the "statement" part of a line
+(column 7 for fixed-form, column 1 for free-form),
+it'll keep going until it finds a newline,
+rather than ignoring everything past a particular column
+(72 or 132).
+
+The implication here is that there shouldn't <EM>be</EM>
+anything past that last column, other than whitespace or
+commentary, because users using typical editors
+(or viewing output as typically printed)
+won't necessarily know just where the last column is.
+
+Code that has "garbage" beyond the last column
+(almost certainly only fixed-form code with a punched-card legacy,
+such as code using columns 73-80 for "sequence numbers")
+will have to be run through <CODE>g77stripcard</CODE> first.
+
+Also, keeping track of the maximum column position while also watching out
+for the end of a line <EM>and</EM> while reading from a file
+just makes things slower.
+Since a file must be read, and watching for the end of the line
+is necessary (unless the typical input file was preprocessed to
+include the necessary number of trailing spaces),
+dropping the tracking of the maximum column position
+is the only way to reduce the complexity of the pertinent code
+while maintaining high performance.
+
+<LI>
+
+ASCII encoding is assumed for the input file.
+
+Code written in other character sets will have to be converted first.
+
+<LI>
+
+Tabs (ASCII code 9)
+will be converted to spaces via the straightforward
+approach.
+
+Specifically, a tab is converted to between one and eight spaces
+as necessary to reach column <VAR>n</VAR>,
+where dividing <SAMP>`(<VAR>n</VAR> - 1)'</SAMP> by eight
+results in a remainder of zero.
+
+<LI>
+
+Linefeeds (ASCII code 10)
+mark the ends of lines.
+
+<LI>
+
+A carriage return (ASCII code 13)
+is accept if it immediately precedes a linefeed,
+in which case it is ignored.
+
+Otherwise, it is rejected (with a diagnostic).
+
+<LI>
+
+Any other characters other than the above
+that are not part of the GNU Fortran Character Set
+(see section <A HREF="g77_12.html#SEC40">GNU Fortran Character Set</A>)
+are rejected with a diagnostic.
+
+This includes backspaces, form feeds, and the like.
+
+(It might make sense to allow a form feed in column 1
+as long as that's the only character on a line.
+It certainly wouldn't seem to cost much in terms of performance.)
+
+<LI>
+
+The end of the input stream (EOF)
+ends the current line.
+
+<LI>
+
+The distinction between uppercase and lowercase letters
+will be preserved.
+
+It will be up to subsequent phases to decide to fold case.
+
+Current plans are to permit any casing for Fortran (reserved) keywords
+while preserving casing for user-defined names.
+(This might not be made the default for <TT>`.f'</TT> files, though.)
+
+Preserving case seems necessary to provide more direct access
+to facilities outside of <CODE>g77</CODE>, such as to C or Pascal code.
+
+Names of intrinsics will probably be matchable in any case,
+However, there probably won't be any option to require
+a particular mixed-case appearance of intrinsics
+(as there was for <CODE>g77</CODE> prior to version 0.6),
+because that's painful to maintain,
+and probably nobody uses it.
+
+(How <SAMP>`external SiN; r = sin(x)'</SAMP> would be handled is TBD.
+I think old <CODE>g77</CODE> might already handle that pretty elegantly,
+but whether we can cope with allowing the same fragment to reference
+a <EM>different</EM> procedure, even with the same interface,
+via <SAMP>`s = SiN(r)'</SAMP>, needs to be determined.
+If it can't, we need to make sure that when code introduces
+a user-defined name, any intrinsic matching that name
+using a case-insensitive comparison
+is "turned off".)
+
+<LI>
+
+Backslashes in <CODE>CHARACTER</CODE> and Hollerith constants
+are not allowed.
+
+This avoids the confusion introduced by some Fortran compiler vendors
+providing C-like interpretation of backslashes,
+while others provide straight-through interpretation.
+
+Some kind of lexical construct (TBD) will be provided to allow
+flagging of a <CODE>CHARACTER</CODE>
+(but probably not a Hollerith)
+constant that permits backslashes.
+It'll necessarily be a prefix, such as:
+
+
+<PRE>
+PRINT *, C'This line has a backspace \b here.'
+PRINT *, F'This line has a straight backslash \ here.'
+</PRE>
+
+Further, command-line options might be provided to specify that
+one prefix or the other is to be assumed as the default
+for <CODE>CHARACTER</CODE> constants.
+
+However, it seems more helpful for <CODE>g77</CODE> to provide a program
+that converts prefix all constants
+(or just those containing backslashes)
+with the desired designation,
+so printouts of code can be read
+without knowing the compile-time options used when compiling it.
+
+If such a program is provided
+(let's name it <CODE>g77slash</CODE> for now),
+then a command-line option to <CODE>g77</CODE> should not be provided.
+(Though, given that it'll be easy to implement, it might be hard
+to resist user requests for it "to compile faster than if we
+have to invoke another filter".)
+
+This program would take a command-line option to specify the
+default interpretation of slashes,
+affecting which prefix it uses for constants.
+
+<CODE>g77slash</CODE> probably should automatically convert Hollerith
+constants that contain slashes
+to the appropriate <CODE>CHARACTER</CODE> constants.
+Then <CODE>g77</CODE> wouldn't have to define a prefix syntax for Hollerith
+constants specifying whether they want C-style or straight-through
+backslashes.
+</UL>
+
+<P>
+The above implements nearly exactly what is specified by
+section <A HREF="g77_12.html#SEC40">GNU Fortran Character Set</A>,
+and
+section <A HREF="g77_12.html#SEC41">Lines</A>,
+except it also provides automatic conversion of tabs
+and ignoring of newline-related carriage returns.
+
+</P>
+<P>
+It also effects the "pure visual" model,
+by which is meant that a user viewing his code
+in a typical text editor
+(assuming it's not preprocessed via <CODE>g77stripcard</CODE> or similar)
+doesn't need any special knowledge
+of whether spaces on the screen are really tabs,
+whether lines end immediately after the last visible non-space character
+or after a number of spaces and tabs that follow it,
+or whether the last line in the file is ended by a newline.
+
+</P>
+<P>
+Most editors don't make these distinctions,
+the ANSI FORTRAN 77 standard doesn't require them to,
+and it permits a standard-conforming compiler
+to define a method for transforming source code to
+"standard form" however it wants.
+
+</P>
+<P>
+So, GNU Fortran defines it such that users have the best chance
+of having the code be interpreted the way it looks on the screen
+of the typical editor.
+
+</P>
+<P>
+(Fancy editors should <EM>never</EM> be required to correctly read code
+written in classic two-dimensional-plaintext form.
+By correct reading I mean ability to read it, book-like, without
+mistaking text ignored by the compiler for program code and vice versa,
+and without having to count beyond the first several columns.
+The vague meaning of ASCII TAB, among other things, complicates
+this somewhat, but as long as "everyone", including the editor,
+other tools, and printer, agrees about the every-eighth-column convention,
+the GNU Fortran "pure visual" model meets these requirements.
+Any language or user-visible source form
+requiring special tagging of tabs,
+the ends of lines after spaces/tabs,
+and so on, is broken by this definition.
+Fortunately, Fortran <EM>itself</EM> is not broken,
+even if most vendor-supplied defaults for their Fortran compilers <EM>are</EM>
+in this regard.)
+
+</P>
+<P>
+Further, this model provides a clean interface
+to whatever preprocessors or code-generators are used
+to produce input to this phase of <CODE>g77</CODE>.
+Mainly, they need not worry about long lines.
+
+</P>
+
+
+<H3><A NAME="SEC691" HREF="g77_toc.html#TOC691">sta.c</A></H3>
+
+
+
+<H3><A NAME="SEC692" HREF="g77_toc.html#TOC692">stb.c</A></H3>
+
+
+
+<H3><A NAME="SEC693" HREF="g77_toc.html#TOC693">expr.c</A></H3>
+
+
+
+<H3><A NAME="SEC694" HREF="g77_toc.html#TOC694">stc.c</A></H3>
+
+
+
+<H3><A NAME="SEC695" HREF="g77_toc.html#TOC695">std.c</A></H3>
+
+
+
+<H3><A NAME="SEC696" HREF="g77_toc.html#TOC696">ste.c</A></H3>
+
+
+
+<H3><A NAME="SEC697" HREF="g77_toc.html#TOC697">Gotchas (Transforming)</A></H3>
+
+<P>
+This section is not about transforming "gotchas" into something else.
+It is about the weirder aspects of transforming Fortran,
+however that's defined,
+into a more modern, canonical form.
+
+</P>
+
+
+<H4><A NAME="SEC698" HREF="g77_toc.html#TOC698">Multi-character Lexemes</A></H4>
+
+<P>
+Each lexeme carries with it a pointer to where it appears in the source.
+
+</P>
+<P>
+To provide the ability for diagnostics to point to column numbers,
+in addition to line numbers and names,
+lexemes that represent more than one (significant) character
+in the source code need, generally,
+to provide pointers to where each <EM>character</EM> appears in the source.
+
+</P>
+<P>
+This provides the ability to properly identify the precise location
+of the problem in code like
+
+</P>
+
+<PRE>
+SUBROUTINE X
+END
+BLOCK DATA X
+END
+</PRE>
+
+<P>
+which, in fixed-form source, would result in single lexemes
+consisting of the strings <SAMP>`SUBROUTINEX'</SAMP> and <SAMP>`BLOCKDATAX'</SAMP>.
+(The problem is that <SAMP>`X'</SAMP> is defined twice,
+so a pointer to the <SAMP>`X'</SAMP> in the second definition,
+as well as a follow-up pointer to the corresponding pointer in the first,
+would be preferable to pointing to the beginnings of the statements.)
+
+</P>
+<P>
+This need also arises when parsing (and diagnosing) <CODE>FORMAT</CODE>
+statements.
+
+</P>
+<P>
+Further, it arises when diagnosing
+<CODE>FMT=</CODE> specifiers that contain constants
+(or partial constants, or even propagated constants!)
+in I/O statements, as in:
+
+</P>
+
+<PRE>
+PRINT '(I2, 3HAB)', J
+</PRE>
+
+<P>
+(A pointer to the beginning of the prematurely-terminated Hollerith
+constant, and/or to the close parenthese, is preferable to a pointer
+to the open-parenthese or the apostrophe that precedes it.)
+
+</P>
+<P>
+Multi-character lexemes, which would seem to naturally include
+at least digit strings, alphanumeric strings, <CODE>CHARACTER</CODE>
+constants, and Hollerith constants, therefore need to provide
+location information on each character.
+(Maybe Hollerith constants don't, but it's unnecessary to except them.)
+
+</P>
+<P>
+The question then arises, what about <EM>other</EM> multi-character lexemes,
+such as <SAMP>`**'</SAMP> and <SAMP>`//'</SAMP>,
+and Fortran 90's <SAMP>`(/'</SAMP>, <SAMP>`/)'</SAMP>, <SAMP>`::'</SAMP>, and so on?
+
+</P>
+<P>
+Turns out there's a need to identify the location of the second character
+of these two-character lexemes.
+For example, in <SAMP>`I(/J) = K'</SAMP>, the slash needs to be diagnosed
+as the problem, not the open parenthese.
+Similarly, it is preferable to diagnose the second slash in
+<SAMP>`I = J // K'</SAMP> rather than the first, given the implicit typing
+rules, which would result in the compiler disallowing the attempted
+concatenation of two integers.
+(Though, since that's more of a semantic issue,
+it's not <EM>that</EM> much preferable.)
+
+</P>
+<P>
+Even sequences that could be parsed as digit strings could use location info,
+for example, to diagnose the <SAMP>`9'</SAMP> in the octal constant <SAMP>`O'129''</SAMP>.
+(This probably will be parsed as a character string,
+to be consistent with the parsing of <SAMP>`Z'129A''</SAMP>.)
+
+</P>
+<P>
+To avoid the hassle of recording the location of the second character,
+while also preserving the general rule that each significant character
+is distinctly pointed to by the lexeme that contains it,
+it's best to simply not have any fixed-size lexemes
+larger than one character.
+
+</P>
+<P>
+This new design is expected to make checking for two
+<SAMP>`*'</SAMP> lexemes in a row much easier than the old design,
+so this is not much of a sacrifice.
+It probably makes the lexer much easier to implement
+than it makes the parser harder.
+
+</P>
+
+
+<H4><A NAME="SEC699" HREF="g77_toc.html#TOC699">Space-padding Lexemes</A></H4>
+
+<P>
+Certain lexemes need to be padded with virtual spaces when the
+end of the line (or file) is encountered.
+
+</P>
+<P>
+This is necessary in fixed form, to handle lines that don't
+extend to column 72, assuming that's the line length in effect.
+
+</P>
+
+
+<H4><A NAME="SEC700" HREF="g77_toc.html#TOC700">Bizarre Free-form Hollerith Constants</A></H4>
+
+<P>
+Last I checked, the Fortran 90 standard actually required the compiler
+to silently accept something like
+
+</P>
+
+<PRE>
+FORMAT ( 1 2   Htwelve chars )
+</PRE>
+
+<P>
+as a valid <CODE>FORMAT</CODE> statement specifying a twelve-character
+Hollerith constant.
+
+</P>
+<P>
+The implication here is that, since the new lexer is a zero-feedback one,
+it won't know that the special case of a <CODE>FORMAT</CODE> statement being parsed
+requires apparently distinct lexemes <SAMP>`1'</SAMP> and <SAMP>`2'</SAMP> to be treated as
+a single lexeme.
+
+</P>
+<P>
+(This is a horrible misfeature of the Fortran 90 language.
+It's one of many such misfeatures that almost make me want
+to not support them, and forge ahead with designing a new
+"GNU Fortran" language that has the features,
+but not the misfeatures, of Fortran 90,
+and provide utility programs to do the conversion automatically.)
+
+</P>
+<P>
+So, the lexer must gather distinct chunks of decimal strings into
+a single lexeme in contexts where a single decimal lexeme might
+start a Hollerith constant.
+
+</P>
+<P>
+(Which probably means it might as well do that all the time
+for all multi-character lexemes, even in free-form mode,
+leaving it to subsequent phases to pull them apart as they see fit.)
+
+</P>
+<P>
+Compare the treatment of this to how
+
+</P>
+
+<PRE>
+CHARACTER * 4 5 HEY
+</PRE>
+
+<P>
+and
+
+</P>
+
+<PRE>
+CHARACTER * 12 HEY
+</PRE>
+
+<P>
+must be treated--the former must be diagnosed, due to the separation
+between lexemes, the latter must be accepted as a proper declaration.
+
+</P>
+
+
+<H4><A NAME="SEC701" HREF="g77_toc.html#TOC701">Hollerith Constants</A></H4>
+
+<P>
+Recognizing a Hollerith constant--specifically,
+that an <SAMP>`H'</SAMP> or <SAMP>`h'</SAMP> after a digit string begins
+such a constant--requires some knowledge of context.
+
+</P>
+<P>
+Hollerith constants (such as <SAMP>`2HAB'</SAMP>) can appear after:
+
+</P>
+
+<UL>
+<LI>
+
+<SAMP>`('</SAMP>
+
+<LI>
+
+<SAMP>`,'</SAMP>
+
+<LI>
+
+<SAMP>`='</SAMP>
+
+<LI>
+
+<SAMP>`+'</SAMP>, <SAMP>`-'</SAMP>, <SAMP>`/'</SAMP>
+
+<LI>
+
+<SAMP>`*'</SAMP>, except as noted below
+</UL>
+
+<P>
+Hollerith constants don't appear after:
+
+</P>
+
+<UL>
+<LI>
+
+<SAMP>`CHARACTER*'</SAMP>,
+which can be treated generally as
+any <SAMP>`*'</SAMP> that is the second lexeme of a statement
+</UL>
+
+
+
+<H4><A NAME="SEC702" HREF="g77_toc.html#TOC702">Confusing Function Keyword</A></H4>
+
+<P>
+While
+
+</P>
+
+<PRE>
+REAL FUNCTION FOO ()
+</PRE>
+
+<P>
+must be a <CODE>FUNCTION</CODE> statement and
+
+</P>
+
+<PRE>
+REAL FUNCTION FOO (5)
+</PRE>
+
+<P>
+must be a type-definition statement,
+
+</P>
+
+<PRE>
+REAL FUNCTION FOO (<VAR>names</VAR>)
+</PRE>
+
+<P>
+where <VAR>names</VAR> is a comma-separated list of names,
+can be one or the other.
+
+</P>
+<P>
+The only way to disambiguate that statement
+(short of mandating free-form source or a short maximum
+length for name for external procedures)
+is based on the context of the statement.
+
+</P>
+<P>
+In particular, the statement is known to be within an
+already-started program unit
+(but not at the outer level of the <CODE>CONTAINS</CODE> block),
+it is a type-declaration statement.
+
+</P>
+<P>
+Otherwise, the statement is a <CODE>FUNCTION</CODE> statement,
+in that it begins a function program unit
+(external, or, within <CODE>CONTAINS</CODE>, nested).
+
+</P>
+
+
+<H4><A NAME="SEC703" HREF="g77_toc.html#TOC703">Weird READ</A></H4>
+
+<P>
+The statement
+
+</P>
+
+<PRE>
+READ (N)
+</PRE>
+
+<P>
+is equivalent to either
+
+</P>
+
+<PRE>
+READ (UNIT=(N))
+</PRE>
+
+<P>
+or
+
+</P>
+
+<PRE>
+READ (FMT=(N))
+</PRE>
+
+<P>
+depending on which would be valid in context.
+
+</P>
+<P>
+Specifically, if <SAMP>`N'</SAMP> is type <CODE>INTEGER</CODE>,
+<SAMP>`READ (FMT=(N))'</SAMP> would not be valid,
+because parentheses may not be used around <SAMP>`N'</SAMP>,
+whereas they may around it in <SAMP>`READ (UNIT=(N))'</SAMP>.
+
+</P>
+<P>
+Further, if <SAMP>`N'</SAMP> is type <CODE>CHARACTER</CODE>,
+the opposite is true---<SAMP>`READ (UNIT=(N))'</SAMP> is not valid,
+but <SAMP>`READ (FMT=(N))'</SAMP> is.
+
+</P>
+<P>
+Strictly speaking, if anything follows
+
+</P>
+
+<PRE>
+READ (N)
+</PRE>
+
+<P>
+in the statement, whether the first lexeme after the close
+parenthese is a comma could be used to disambiguate the two cases,
+without looking at the type of <SAMP>`N'</SAMP>,
+because the comma is required for the <SAMP>`READ (FMT=(N))'</SAMP>
+interpretation and disallowed for the <SAMP>`READ (UNIT=(N))'</SAMP>
+interpretation.
+
+</P>
+<P>
+However, in practice, many Fortran compilers allow
+the comma for the <SAMP>`READ (UNIT=(N))'</SAMP>
+interpretation anyway
+(in that they generally allow a leading comma before
+an I/O list in an I/O statement),
+and much code takes advantage of this allowance.
+
+</P>
+<P>
+(This is quite a reasonable allowance, since the
+juxtaposition of a comma-separated list immediately
+after an I/O control-specification list, which is also comma-separated,
+without an intervening comma,
+looks sufficiently "wrong" to programmers
+that they can't resist the itch to insert the comma.
+<SAMP>`READ (I, J), K, L'</SAMP> simply looks cleaner than
+<SAMP>`READ (I, J) K, L'</SAMP>.)
+
+</P>
+<P>
+So, type-based disambiguation is needed unless strict adherence
+to the standard is always assumed, and we're not going to assume that.
+
+</P>
+
+
+<H3><A NAME="SEC704" HREF="g77_toc.html#TOC704">TBD (Transforming)</A></H3>
+
+<P>
+Continue researching gotchas, designing the transformational process,
+and implementing it.
+
+</P>
+<P>
+Specific issues to resolve:
+
+</P>
+
+<UL>
+<LI>
+
+Just where should <CODE>INCLUDE</CODE> processing take place?
+
+Clearly before (or part of) statement identification (<TT>`sta.c'</TT>),
+since determining whether <SAMP>`I(J)=K'</SAMP> is a statement-function
+definition or an assignment statement requires knowing the context,
+which in turn requires having processed <CODE>INCLUDE</CODE> files.
+
+<LI>
+
+Just where should (if it was implemented) <CODE>USE</CODE> processing take place?
+
+This gets into the whole issue of how <CODE>g77</CODE> should handle the concept
+of modules.
+I think GNAT already takes on this issue, but don't know more than that.
+Jim Giles has written extensively on <CODE>comp.lang.fortran</CODE>
+about his opinions on module handling, as have others.
+Jim's views should be taken into account.
+
+Actually, Richard M. Stallman (RMS) also has written up
+some guidelines for implementing such things,
+but I'm not sure where I read them.
+Perhaps the old <A HREF="mailto:gcc2@cygnus.com"><TT>gcc2@cygnus.com</TT></A> list.
+
+If someone could dig references to these up and get them to me,
+that would be much appreciated!
+Even though modules are not on the short-term list for implementation,
+it'd be helpful to know <EM>now</EM> how to avoid making them harder to
+implement them <EM>later</EM>.
+
+<LI>
+
+Should the <CODE>g77</CODE> command become just a script that invokes
+all the various preprocessing that might be needed,
+thus making it seem slower than necessary for legacy code
+that people are unwilling to convert,
+or should we provide a separate script for that,
+thus encouraging people to convert their code once and for all?
+
+At least, a separate script to behave as old <CODE>g77</CODE> did,
+perhaps named <CODE>g77old</CODE>, might ease the transition,
+as might a corresponding one that converts source codes
+named <CODE>g77oldnew</CODE>.
+
+These scripts would take all the pertinent options <CODE>g77</CODE> used
+to take and run the appropriate filters,
+passing the results to <CODE>g77</CODE> or just making new sources out of them
+(in a subdirectory, leaving the user to do the dirty deed of
+moving or copying them over the old sources).
+
+<LI>
+
+Do other Fortran compilers provide a prefix syntax
+to govern the treatment of backslashes in <CODE>CHARACTER</CODE>
+(or Hollerith) constants?
+
+Knowing what other compilers provide would help.
+
+<LI>
+
+Is it okay to drop support for the <SAMP>`-fintrin-case-initcap'</SAMP>,
+<SAMP>`-fmatch-case-initcap'</SAMP>, <SAMP>`-fsymbol-case-initcap'</SAMP>,
+and <SAMP>`-fcase-initcap'</SAMP> options?
+
+I've asked <A HREF="mailto:info-gnu-fortran@gnu.org"><TT>info-gnu-fortran@gnu.org</TT></A> for input on this.
+Not having to support these makes it easier to write the new front end,
+and might also avoid complicated its design.
+</UL>
+
+
+
+<H2><A NAME="SEC705" HREF="g77_toc.html#TOC705">Philosophy of Code Generation</A></H2>
+
+<P>
+Don't poke the bear.
+
+</P>
+<P>
+The <CODE>g77</CODE> front end generates code
+via the <CODE>gcc</CODE> back end.
+
+</P>
+<P>
+<A NAME="IDX2314"></A>
+<A NAME="IDX2315"></A>
+<A NAME="IDX2316"></A>
+<A NAME="IDX2317"></A>
+<A NAME="IDX2318"></A>
+The <CODE>gcc</CODE> back end (GBE) is a large, complex
+labyrinth of intricate code
+written in a combination of the C language
+and specialized languages internal to <CODE>gcc</CODE>.
+
+</P>
+<P>
+While the <EM>code</EM> that implements the GBE
+is written in a combination of languages,
+the GBE itself is,
+to the front end for a language like Fortran,
+best viewed as a <EM>compiler</EM>
+that compiles its own, unique, language.
+
+</P>
+<P>
+The GBE's "source", then, is written in this language,
+which consists primarily of
+a combination of calls to GBE functions
+and <STRONG>tree</STRONG> nodes
+(which are, themselves, created
+by calling GBE functions).
+
+</P>
+<P>
+So, the <CODE>g77</CODE> generates code by, in effect,
+translating the Fortran code it reads
+into a form "written" in the "language"
+of the <CODE>gcc</CODE> back end.
+
+</P>
+<P>
+<A NAME="IDX2319"></A>
+<A NAME="IDX2320"></A>
+This language will heretofore be referred to as <STRONG>GBEL</STRONG>,
+for GNU Back End Language.
+
+</P>
+<P>
+GBEL is an evolving language,
+not fully specified in any published form
+as of this writing.
+It offers many facilities,
+but its "core" facilities
+are those that corresponding most directly
+to those needed to support <CODE>gcc</CODE>
+(compiling code written in GNU C).
+
+</P>
+<P>
+The <CODE>g77</CODE> Fortran Front End (FFE)
+is designed and implemented
+to navigate the currents and eddies
+of ongoing GBEL and <CODE>gcc</CODE> development
+while also delivering on the potential
+of an integrated FFE
+(as compared to using a converter like <CODE>f2c</CODE>
+and feeding the output into <CODE>gcc</CODE>).
+
+</P>
+<P>
+Goals of the FFE's code-generation strategy include:
+
+</P>
+
+<UL>
+<LI>
+
+High likelihood of generation of correct code,
+or, failing that, producing a fatal diagnostic or crashing.
+
+<LI>
+
+Generation of highly optimized code,
+as directed by the user
+via GBE-specific (versus <CODE>g77</CODE>-specific) constructs,
+such as command-line options.
+
+<LI>
+
+Fast overall (FFE plus GBE) compilation.
+
+<LI>
+
+Preservation of source-level debugging information.
+</UL>
+
+<P>
+The strategies historically, and currently, used by the FFE
+to achieve these goals include:
+
+</P>
+
+<UL>
+<LI>
+
+Use of GBEL constructs that most faithfully encapsulate
+the semantics of Fortran.
+
+<LI>
+
+Avoidance of GBEL constructs that are so rarely used,
+or limited to use in specialized situations not related to Fortran,
+that their reliability and performance has not yet been established
+as sufficient for use by the FFE.
+
+<LI>
+
+Flexible design, to readily accommodate changes to specific
+code-generation strategies, perhaps governed by command-line options.
+</UL>
+
+<P>
+<A NAME="IDX2321"></A>
+<A NAME="IDX2322"></A>
+"Don't poke the bear" somewhat summarizes the above strategies.
+The GBE is the bear.
+The FFE is designed and implemented to avoid poking it
+in ways that are likely to just annoy it.
+The FFE usually either tackles it head-on,
+or avoids treating it in ways dissimilar to how
+the <CODE>gcc</CODE> front end treats it.
+
+</P>
+<P>
+For example, the FFE uses the native array facility in the back end
+instead of the lower-level pointer-arithmetic facility
+used by <CODE>gcc</CODE> when compiling <CODE>f2c</CODE> output).
+Theoretically, this presents more opportunities for optimization,
+faster compile times,
+and the production of more faithful debugging information.
+These benefits were not, however, immediately realized,
+mainly because <CODE>gcc</CODE> itself makes little or no use
+of the native array facility.
+
+</P>
+<P>
+Complex arithmetic is a case study of the evolution of this strategy.
+When originally implemented,
+the GBEL had just evolved its own native complex-arithmetic facility,
+so the FFE took advantage of that.
+
+</P>
+<P>
+When porting <CODE>g77</CODE> to 64-bit systems,
+it was discovered that the GBE didn't really
+implement its native complex-arithmetic facility properly.
+
+</P>
+<P>
+The short-term solution was to rewrite the FFE
+to instead use the lower-level facilities
+that'd be used by <CODE>gcc</CODE>-compiled code
+(assuming that code, itself, didn't use the native complex type
+provided, as an extension, by <CODE>gcc</CODE>),
+since these were known to work,
+and, in any case, if shown to not work,
+would likely be rapidly fixed
+(since they'd likely not work for vanilla C code in similar circumstances).
+
+</P>
+<P>
+However, the rewrite accommodated the original, native approach as well
+by offering a command-line option to select it over the emulated approach.
+This allowed users, and especially GBE maintainers, to try out
+fixes to complex-arithmetic support in the GBE
+while <CODE>g77</CODE> continued to default to compiling more code correctly,
+albeit producing (typically) slower executables.
+
+</P>
+<P>
+As of April 1999, it appeared that the last few bugs
+in the GBE's support of its native complex-arithmetic facility
+were worked out.
+The FFE was changed back to default to using that native facility,
+leaving emulation as an option.
+
+</P>
+<P>
+Other Fortran constructs--arrays, character strings,
+complex division, <CODE>COMMON</CODE> and <CODE>EQUIVALENCE</CODE> aggregates,
+and so on--involve issues similar to those pertaining to complex arithmetic.
+
+</P>
+<P>
+So, it is possible that the history
+of how the FFE handled complex arithmetic
+will be repeated, probably in modified form
+(and hopefully over shorter timeframes),
+for some of these other facilities.
+
+</P>
+
+
+<H2><A NAME="SEC706" HREF="g77_toc.html#TOC706">Two-pass Design</A></H2>
+
+<P>
+The FFE does not tell the GBE anything about a program unit
+until after the last statement in that unit has been parsed.
+(A program unit is a Fortran concept that corresponds, in the C world,
+mostly closely to functions definitions in ISO C.
+That is, a program unit in Fortran is like a top-level function in C.
+Nested functions, found among the extensions offered by GNU C,
+correspond roughly to Fortran's statement functions.)
+
+</P>
+<P>
+So, while parsing the code in a program unit,
+the FFE saves up all the information
+on statements, expressions, names, and so on,
+until it has seen the last statement.
+
+</P>
+<P>
+At that point, the FFE revisits the saved information
+(in what amounts to a second <STRONG>pass</STRONG> over the program unit)
+to perform the actual translation of the program unit into GBEL,
+ultimating in the generation of assembly code for it.
+
+</P>
+<P>
+Some lookahead is performed during this second pass,
+so the FFE could be viewed as a "two-plus-pass" design.
+
+</P>
+
+<UL>
+<LI><A HREF="g77_26.html#SEC707">Two-pass Code</A>
+<LI><A HREF="g77_26.html#SEC708">Why Two Passes</A>
+</UL>
+
+
+
+<H3><A NAME="SEC707" HREF="g77_toc.html#TOC707">Two-pass Code</A></H3>
+
+<P>
+Most of the code that turns the first pass (parsing)
+into a second pass for code generation
+is in <TT>`egcs/gcc/f/std.c'</TT>.
+
+</P>
+<P>
+It has external functions,
+called mainly by siblings in <TT>`egcs/gcc/f/stc.c'</TT>,
+that record the information on statements and expressions
+in the order they are seen in the source code.
+These functions save that information.
+
+</P>
+<P>
+It also has an external function that revisits that information,
+calling the siblings in <TT>`egcs/gcc/f/ste.c'</TT>,
+which handles the actual code generation
+(by generating GBEL code,
+that is, by calling GBE routines
+to represent and specify expressions, statements, and so on).
+
+</P>
+
+
+<H3><A NAME="SEC708" HREF="g77_toc.html#TOC708">Why Two Passes</A></H3>
+
+<P>
+The need for two passes was not immediately evident
+during the design and implementation of the code in the FFE
+that was to produce GBEL.
+Only after a few kludges,
+to handle things like incorrectly-guessed <CODE>ASSIGN</CODE> label nature,
+had been implemented,
+did enough evidence pile up to make it clear
+that <TT>`std.c'</TT> had to be introduced to intercept,
+save, then revisit as part of a second pass,
+the digested contents of a program unit.
+
+</P>
+<P>
+Other such missteps have occurred during the evolution of the FFE,
+because of the different goals of the FFE and the GBE.
+
+</P>
+<P>
+Because the GBE's original, and still primary, goal
+was to directly support the GNU C language,
+the GBEL, and the GBE itself,
+requires more complexity
+on the part of most front ends
+than it requires of <CODE>gcc</CODE>'s.
+
+</P>
+<P>
+For example,
+the GBEL offers an interface that permits the <CODE>gcc</CODE> front end
+to implement most, or all, of the language features it supports,
+without the front end having to
+make use of non-user-defined variables.
+(It's almost certainly the case that all of K&#38;R C,
+and probably ANSI C as well,
+is handled by the <CODE>gcc</CODE> front end
+without declaring such variables.)
+
+</P>
+<P>
+The FFE, on the other hand, must resort to a variety of "tricks"
+to achieve its goals.
+
+</P>
+<P>
+Consider the following C code:
+
+</P>
+
+<PRE>
+int
+foo (int a, int b)
+{
+  int c = 0;
+
+  if ((c = bar (c)) == 0)
+    goto done;
+
+  quux (c &#60;&#60; 1);
+
+done:
+  return c;
+}
+</PRE>
+
+<P>
+Note what kinds of objects are declared, or defined, before their use,
+and before any actual code generation involving them
+would normally take place:
+
+</P>
+
+<UL>
+<LI>
+
+Return type of function
+
+<LI>
+
+Entry point(s) of function
+
+<LI>
+
+Dummy arguments
+
+<LI>
+
+Variables
+
+<LI>
+
+Initial values for variables
+</UL>
+
+<P>
+Whereas, the following items can, and do,
+suddenly appear "out of the blue" in C:
+
+</P>
+
+<UL>
+<LI>
+
+Label references
+
+<LI>
+
+Function references
+</UL>
+
+<P>
+Not surprisingly, the GBE faithfully permits the latter set of items
+to be "discovered" partway through GBEL "programs",
+just as they are permitted to in C.
+
+</P>
+<P>
+Yet, the GBE has tended, at least in the past,
+to be reticent to fully support similar "late" discovery
+of items in the former set.
+
+</P>
+<P>
+This makes Fortran a poor fit for the "safe" subset of GBEL.
+Consider:
+
+</P>
+
+<PRE>
+      FUNCTION X (A, ARRAY, ID1)
+      CHARACTER*(*) A
+      DOUBLE PRECISION X, Y, Z, TMP, EE, PI
+      REAL ARRAY(ID1*ID2)
+      COMMON ID2
+      EXTERNAL FRED
+
+      ASSIGN 100 TO J
+      CALL FOO (I)
+      IF (I .EQ. 0) PRINT *, A(0)
+      GOTO 200
+
+      ENTRY Y (Z)
+      ASSIGN 101 TO J
+200   PRINT *, A(1)
+      READ *, TMP
+      GOTO J
+100   X = TMP * EE
+      RETURN
+101   Y = TMP * PI
+      CALL FRED
+      DATA EE, PI /2.71D0, 3.14D0/
+      END
+</PRE>
+
+<P>
+Here are some observations about the above code,
+which, while somewhat contrived,
+conforms to the FORTRAN 77 and Fortran 90 standards:
+
+</P>
+
+<UL>
+<LI>
+
+The return type of function <SAMP>`X'</SAMP> is not known
+until the <SAMP>`DOUBLE PRECISION'</SAMP> line has been parsed.
+
+<LI>
+
+Whether <SAMP>`A'</SAMP> is a function or a variable
+is not known until the <SAMP>`PRINT *, A(0)'</SAMP> statement
+has been parsed.
+
+<LI>
+
+The bounds of the array of argument <SAMP>`ARRAY'</SAMP>
+depend on a computation involving
+the subsequent argument <SAMP>`ID1'</SAMP>
+and the blank-common member <SAMP>`ID2'</SAMP>.
+
+<LI>
+
+Whether <SAMP>`Y'</SAMP> and <SAMP>`Z'</SAMP> are local variables,
+additional function entry points,
+or dummy arguments to additional entry points
+is not known
+until the <CODE>ENTRY</CODE> statement is parsed.
+
+<LI>
+
+Similarly, whether <SAMP>`TMP'</SAMP> is a local variable is not known
+until the <SAMP>`READ *, TMP'</SAMP> statement is parsed.
+
+<LI>
+
+The initial values for <SAMP>`EE'</SAMP> and <SAMP>`PI'</SAMP>
+are not known until after the <CODE>DATA</CODE> statement is parsed.
+
+<LI>
+
+Whether <SAMP>`FRED'</SAMP> is a function returning type <CODE>REAL</CODE>
+or a subroutine
+(which can be thought of as returning type <CODE>void</CODE>
+<EM>or</EM>, to support alternate returns in a simple way,
+type <CODE>int</CODE>)
+is not known
+until the <SAMP>`CALL FRED'</SAMP> statement is parsed.
+
+<LI>
+
+Whether <SAMP>`100'</SAMP> is a <CODE>FORMAT</CODE> label
+or the label of an executable statement
+is not known
+until the <SAMP>`X ='</SAMP> statement is parsed.
+(These two types of labels get <EM>very</EM> different treatment,
+especially when <CODE>ASSIGN</CODE>'ed.)
+
+<LI>
+
+That <SAMP>`J'</SAMP> is a local variable is not known
+until the first <CODE>ASSIGN</CODE> statement is parsed.
+(This happens <EM>after</EM> executable code has been seen.)
+</UL>
+
+<P>
+Very few of these "discoveries"
+can be accommodated by the GBE as it has evolved over the years.
+The GBEL doesn't support several of them,
+and those it might appear to support
+don't always work properly,
+especially in combination with other GBEL and GBE features,
+as implemented in the GBE.
+
+</P>
+<P>
+(Had the GBE and its GBEL originally evolved to support <CODE>g77</CODE>,
+the shoe would be on the other foot, so to speak--most, if not all,
+of the above would be directly supported by the GBEL,
+and a few C constructs would probably not, as they are in reality,
+be supported.
+Both this mythical, and today's real, GBE caters to its GBEL
+by, sometimes, scrambling around, cleaning up after itself--after
+discovering that assumptions it made earlier during code generation
+are incorrect.)
+
+</P>
+<P>
+So, the FFE handles these discrepancies--between the order in which
+it discovers facts about the code it is compiling,
+and the order in which the GBEL and GBE support such discoveries--by
+performing what amounts to two
+passes over each program unit.
+
+</P>
+<P>
+(A few ambiguities can remain at that point,
+such as whether, given <SAMP>`EXTERNAL BAZ'</SAMP>
+and no other reference to <SAMP>`BAZ'</SAMP> in the program unit,
+it is a subroutine, a function, or a block-data--which, in C-speak,
+governs its declared return type.
+Fortunately, these distinctions are easily finessed
+for the procedure, library, and object-file interfaces
+supported by <CODE>g77</CODE>.)
+
+</P>
+
+
+<H2><A NAME="SEC709" HREF="g77_toc.html#TOC709">Challenges Posed</A></H2>
+
+<P>
+Consider the following Fortran code, which uses various extensions
+(including some to Fortran 90):
+
+</P>
+
+<PRE>
+SUBROUTINE X(A)
+CHARACTER*(*) A
+COMPLEX CFUNC
+INTEGER*2 CLOCKS(200)
+INTEGER IFUNC
+
+CALL SYSTEM_CLOCK (CLOCKS (IFUNC (CFUNC ('('//A//')'))))
+</PRE>
+
+<P>
+The above poses the following challenges to any Fortran compiler
+that uses run-time interfaces, and a run-time library, roughly similar
+to those used by <CODE>g77</CODE>:
+
+</P>
+
+<UL>
+<LI>
+
+Assuming the library routine that supports <CODE>SYSTEM_CLOCK</CODE>
+expects to set an <CODE>INTEGER*4</CODE> variable via its <CODE>COUNT</CODE> argument,
+the compiler must make available to it a temporary variable of that type.
+
+<LI>
+
+Further, after the <CODE>SYSTEM_CLOCK</CODE> library routine returns,
+the compiler must ensure that the temporary variable it wrote
+is copied into the appropriate element of the <SAMP>`CLOCKS'</SAMP> array.
+(This assumes the compiler doesn't just reject the code,
+which it should if it is compiling under some kind of a "strict" option.)
+
+<LI>
+
+To determine the correct index into the <SAMP>`CLOCKS'</SAMP> array,
+(putting aside the fact that the index, in this particular case,
+need not be computed until after
+the <CODE>SYSTEM_CLOCK</CODE> library routine returns),
+the compiler must ensure that the <CODE>IFUNC</CODE> function is called.
+
+That requires evaluating its argument,
+which requires, for <CODE>g77</CODE>
+(assuming <CODE>-ff2c</CODE> is in force),
+reserving a temporary variable of type <CODE>COMPLEX</CODE>
+for use as a repository for the return value
+being computed by <SAMP>`CFUNC'</SAMP>.
+
+<LI>
+
+Before invoking <SAMP>`CFUNC'</SAMP>,
+is argument must be evaluated,
+which requires allocating, at run time,
+a temporary large enough to hold the result of the concatenation,
+as well as actually performing the concatenation.
+
+<LI>
+
+The large temporary needed during invocation of <CODE>CFUNC</CODE>
+should, ideally, be deallocated
+(or, at least, left to the GBE to dispose of, as it sees fit)
+as soon as <CODE>CFUNC</CODE> returns,
+which means before <CODE>IFUNC</CODE> is called
+(as it might need a lot of dynamically allocated memory).
+</UL>
+
+<P>
+<CODE>g77</CODE> currently doesn't support all of the above,
+but, so that it might someday, it has evolved to handle
+at least some of the above requirements.
+
+</P>
+<P>
+Meeting the above requirements is made more challenging
+by conforming to the requirements of the GBEL/GBE combination.
+
+</P>
+
+
+<H2><A NAME="SEC710" HREF="g77_toc.html#TOC710">Transforming Statements</A></H2>
+
+<P>
+Most Fortran statements are given their own block,
+and, for temporary variables they might need, their own scope.
+(A block is what distinguishes <SAMP>`{ foo (); }'</SAMP>
+from just <SAMP>`foo ();'</SAMP> in C.
+A scope is included with every such block,
+providing a distinct name space for local variables.)
+
+</P>
+<P>
+Label definitions for the statement precede this block,
+so <SAMP>`10 PRINT *, I'</SAMP> is handled more like
+<SAMP>`fl10: { ... }'</SAMP> than <SAMP>`{ fl10: ... }'</SAMP>
+(where <SAMP>`fl10'</SAMP> is just a notation meaning "Fortran Label 10"
+for the purposes of this document).
+
+</P>
+
+<UL>
+<LI><A HREF="g77_26.html#SEC711">Statements Needing Temporaries</A>
+<LI><A HREF="g77_26.html#SEC712">Transforming DO WHILE</A>
+<LI><A HREF="g77_26.html#SEC713">Transforming Iterative DO</A>
+<LI><A HREF="g77_26.html#SEC714">Transforming Block IF</A>
+<LI><A HREF="g77_26.html#SEC715">Transforming SELECT CASE</A>
+</UL>
+
+
+
+<H3><A NAME="SEC711" HREF="g77_toc.html#TOC711">Statements Needing Temporaries</A></H3>
+
+<P>
+Any temporaries needed during, but not beyond,
+execution of a Fortran statement,
+are made local to the scope of that statement's block.
+
+</P>
+<P>
+This allows the GBE to share storage for these temporaries
+among the various statements without the FFE
+having to manage that itself.
+
+</P>
+<P>
+(The GBE could, of course, decide to optimize 
+management of these temporaries.
+For example, it could, theoretically,
+schedule some of the computations involving these temporaries
+to occur in parallel.
+More practically, it might leave the storage for some temporaries
+"live" beyond their scopes, to reduce the number of
+manipulations of the stack pointer at run time.)
+
+</P>
+<P>
+Temporaries needed across distinct statement boundaries usually
+are associated with Fortran blocks (such as <CODE>DO</CODE>/<CODE>END DO</CODE>).
+(Also, there might be temporaries not associated with blocks at all--these
+would be in the scope of the entire program unit.)
+
+</P>
+<P>
+Each Fortran block <EM>should</EM> get its own block/scope in the GBE.
+This is best, because it allows temporaries to be more naturally handled.
+However, it might pose problems when handling labels
+(in particular, when they're the targets of <CODE>GOTO</CODE>s outside the Fortran
+block), and generally just hassling with replicating
+parts of the <CODE>gcc</CODE> front end
+(because the FFE needs to support
+an arbitrary number of nested back-end blocks
+if each Fortran block gets one).
+
+</P>
+<P>
+So, there might still be a need for top-level temporaries, whose
+"owning" scope is that of the containing procedure.
+
+</P>
+<P>
+Also, there seems to be problems declaring new variables after
+generating code (within a block) in the back end, leading to, e.g.,
+<SAMP>`label not defined before binding contour'</SAMP> or similar messages,
+when compiling with <SAMP>`-fstack-check'</SAMP> or
+when compiling for certain targets.
+
+</P>
+<P>
+Because of that, and because sometimes these temporaries are not
+discovered until in the middle of of generating code for an expression
+statement (as in the case of the optimization for <SAMP>`X**I'</SAMP>),
+it seems best to always
+pre-scan all the expressions that'll be expanded for a block
+before generating any of the code for that block.
+
+</P>
+<P>
+This pre-scan then handles discovering and declaring, to the back end,
+the temporaries needed for that block.
+
+</P>
+<P>
+It's also important to treat distinct items in an I/O list as distinct
+statements deserving their own blocks.
+That's because there's a requirement
+that each I/O item be fully processed before the next one,
+which matters in cases like <SAMP>`READ (*,*), I, A(I)'</SAMP>---the
+element of <SAMP>`A'</SAMP> read in the second item
+<EM>must</EM> be determined from the value
+of <SAMP>`I'</SAMP> read in the first item.
+
+</P>
+
+
+<H3><A NAME="SEC712" HREF="g77_toc.html#TOC712">Transforming DO WHILE</A></H3>
+
+<P>
+<SAMP>`DO WHILE(expr)'</SAMP> <EM>must</EM> be implemented
+so that temporaries needed to evaluate <SAMP>`expr'</SAMP>
+are generated just for the test, each time.
+
+</P>
+<P>
+Consider how <SAMP>`DO WHILE (A//B .NE. 'END'); ...; END DO'</SAMP> is transformed:
+
+</P>
+
+<PRE>
+for (;;)
+  {
+    int temp0;
+
+    {
+      char temp1[large];
+
+      libg77_catenate (temp1, a, b);
+      temp0 = libg77_ne (temp1, 'END');
+    }
+
+    if (! temp0)
+      break;
+
+    ...
+  }
+</PRE>
+
+<P>
+In this case, it seems like a time/space tradeoff
+between allocating and deallocating <SAMP>`temp1'</SAMP> for each iteration
+and allocating it just once for the entire loop.
+
+</P>
+<P>
+However, if <SAMP>`temp1'</SAMP> is allocated just once for the entire loop,
+it could be the wrong size for subsequent iterations of that loop
+in cases like <SAMP>`DO WHILE (A(I:J)//B .NE. 'END')'</SAMP>,
+because the body of the loop might modify <SAMP>`I'</SAMP> or <SAMP>`J'</SAMP>.
+
+</P>
+<P>
+So, the above implementation is used,
+though a more optimal one can be used
+in specific circumstances.
+
+</P>
+
+
+<H3><A NAME="SEC713" HREF="g77_toc.html#TOC713">Transforming Iterative DO</A></H3>
+
+<P>
+An iterative <CODE>DO</CODE> loop
+(one that specifies an iteration variable)
+is required by the Fortran standards
+to be implemented as though an iteration count
+is computed before entering the loop body,
+and that iteration count used to determine
+the number of times the loop body is to be performed
+(assuming the loop isn't cut short via <CODE>GOTO</CODE> or <CODE>EXIT</CODE>).
+
+</P>
+<P>
+The FFE handles this by allocating a temporary variable
+to contain the computed number of iterations.
+Since this variable must be in a scope that includes the entire loop,
+a GBEL block is created for that loop,
+and the variable declared as belonging to the scope of that block.
+
+</P>
+
+
+<H3><A NAME="SEC714" HREF="g77_toc.html#TOC714">Transforming Block IF</A></H3>
+
+<P>
+Consider:
+
+</P>
+
+<PRE>
+SUBROUTINE X(A,B,C)
+CHARACTER*(*) A, B, C
+LOGICAL LFUNC
+
+IF (LFUNC (A//B)) THEN
+  CALL SUBR1
+ELSE IF (LFUNC (A//C)) THEN
+  CALL SUBR2
+ELSE
+  CALL SUBR3
+END
+</PRE>
+
+<P>
+The arguments to the two calls to <SAMP>`LFUNC'</SAMP>
+require dynamic allocation (at run time),
+but are not required during execution of the <CODE>CALL</CODE> statements.
+
+</P>
+<P>
+So, the scopes of those temporaries must be within blocks inside
+the block corresponding to the Fortran <CODE>IF</CODE> block.
+
+</P>
+<P>
+This cannot be represented "naturally"
+in vanilla C, nor in GBEL.
+The <CODE>if</CODE>, <CODE>elseif</CODE>, <CODE>else</CODE>,
+and <CODE>endif</CODE> constructs
+provided by both languages must,
+for a given <CODE>if</CODE> block,
+share the same C/GBE block.
+
+</P>
+<P>
+Therefore, any temporaries needed during evaluation of <SAMP>`expr'</SAMP>
+while executing <SAMP>`ELSE IF(expr)'</SAMP>
+must either have been predeclared
+at the top of the corresponding <CODE>IF</CODE> block,
+or declared within a new block for that <CODE>ELSE IF</CODE>---a block that,
+since it cannot contain the <CODE>else</CODE> or <CODE>else if</CODE> itself
+(due to the above requirement),
+actually implements the rest of the <CODE>IF</CODE> block's
+<CODE>ELSE IF</CODE> and <CODE>ELSE</CODE> statements
+within an inner block.
+
+</P>
+<P>
+The FFE takes the latter approach.
+
+</P>
+
+
+<H3><A NAME="SEC715" HREF="g77_toc.html#TOC715">Transforming SELECT CASE</A></H3>
+
+<P>
+<CODE>SELECT CASE</CODE> poses a few interesting problems for code generation,
+if efficiency and frugal stack management are important.
+
+</P>
+<P>
+Consider <SAMP>`SELECT CASE (I('PREFIX'//A))'</SAMP>,
+where <SAMP>`A'</SAMP> is <CODE>CHARACTER*(*)</CODE>.
+In a case like this--basically,
+in any case where largish temporaries are needed
+to evaluate the expression--those temporaries should
+not be "live" during execution of any of the <CODE>CASE</CODE> blocks.
+
+</P>
+<P>
+So, evaluation of the expression is best done within its own block,
+which in turn is within the <CODE>SELECT CASE</CODE> block itself
+(which contains the code for the CASE blocks as well,
+though each within their own block).
+
+</P>
+<P>
+Otherwise, we'd have the rough equivalent of this pseudo-code:
+
+</P>
+
+<PRE>
+{
+  char temp[large];
+
+  libg77_catenate (temp, 'prefix', a);
+
+  switch (i (temp))
+    {
+    case 0:
+      ...
+    }
+}
+</PRE>
+
+<P>
+And that would leave temp[large] in scope during the CASE blocks
+(although a clever back end *could* see that it isn't referenced
+in them, and thus free that temp before executing the blocks).
+
+</P>
+<P>
+So this approach is used instead:
+
+</P>
+
+<PRE>
+{
+  int temp0;
+
+  {
+    char temp1[large];
+
+    libg77_catenate (temp1, 'prefix', a);
+    temp0 = i (temp1);
+  }
+
+  switch (temp0)
+    {
+    case 0:
+      ...
+    }
+}
+</PRE>
+
+<P>
+Note how <SAMP>`temp1'</SAMP> goes out of scope before starting the switch,
+thus making it easy for a back end to free it.
+
+</P>
+<P>
+The problem <EM>that</EM> solution has, however,
+is with <SAMP>`SELECT CASE('prefix'//A)'</SAMP>
+(which is currently not supported).
+
+</P>
+<P>
+Unless the GBEL is extended to support arbitrarily long character strings
+in its <CODE>case</CODE> facility,
+the FFE has to implement <CODE>SELECT CASE</CODE> on <CODE>CHARACTER</CODE>
+(probably excepting <CODE>CHARACTER*1</CODE>)
+using a cascade of
+<CODE>if</CODE>, <CODE>elseif</CODE>, <CODE>else</CODE>, and <CODE>endif</CODE> constructs
+in GBEL.
+
+</P>
+<P>
+To prevent the (potentially large) temporary,
+needed to hold the selected expression itself (<SAMP>`'prefix'//A'</SAMP>),
+from being in scope during execution of the <CODE>CASE</CODE> blocks,
+two approaches are available:
+
+</P>
+
+<UL>
+<LI>
+
+Pre-evaluate all the <CODE>CASE</CODE> tests,
+producing an integer ordinal that is used,
+a la <SAMP>`temp0'</SAMP> in the earlier example,
+as if <SAMP>`SELECT CASE(temp0)'</SAMP> had been written.
+
+Each corresponding <CODE>CASE</CODE> is replaced with <SAMP>`CASE(<VAR>i</VAR>)'</SAMP>,
+where <VAR>i</VAR> is the ordinal for that case,
+determined while, or before,
+generating the cascade of <CODE>if</CODE>-related constructs
+to cope with <CODE>CHARACTER</CODE> selection.
+
+<LI>
+
+Make <SAMP>`temp0'</SAMP> above just
+large enough to hold the longest <CODE>CASE</CODE> string
+that'll actually be compared against the expression
+(in this case, <SAMP>`'prefix'//A'</SAMP>).
+
+Since that length must be constant
+(because <CODE>CASE</CODE> expressions are all constant),
+it won't be so large,
+and, further, <SAMP>`temp1'</SAMP> need not be dynamically allocated,
+since normal <CODE>CHARACTER</CODE> assignment can be used
+into the fixed-length <SAMP>`temp0'</SAMP>.
+</UL>
+
+<P>
+Both of these solutions require <CODE>SELECT CASE</CODE> implementation
+to be changed so all the corresponding <CODE>CASE</CODE> statements
+are seen during the actual code generation for <CODE>SELECT CASE</CODE>.
+
+</P>
+
+
+<H2><A NAME="SEC716" HREF="g77_toc.html#TOC716">Transforming Expressions</A></H2>
+
+<P>
+The interactions between statements, expressions, and subexpressions
+at program run time can be viewed as:
+
+</P>
+
+<PRE>
+<VAR>action</VAR>(<VAR>expr</VAR>)
+</PRE>
+
+<P>
+Here, <VAR>action</VAR> is the series of steps
+performed to effect the statement,
+and <VAR>expr</VAR> is the expression
+whose value is used by <VAR>action</VAR>.
+
+</P>
+<P>
+Expanding the above shows a typical order of events at run time:
+
+</P>
+
+<PRE>
+Evaluate <VAR>expr</VAR>
+Perform <VAR>action</VAR>, using result of evaluation of <VAR>expr</VAR>
+Clean up after evaluating <VAR>expr</VAR>
+</PRE>
+
+<P>
+So, if evaluating <VAR>expr</VAR> requires allocating memory,
+that memory can be freed before performing <VAR>action</VAR>
+only if it is not needed to hold the result of evaluating <VAR>expr</VAR>.
+Otherwise, it must be freed no sooner than
+after <VAR>action</VAR> has been performed.
+
+</P>
+<P>
+The above are recursive definitions,
+in the sense that they apply to subexpressions of <VAR>expr</VAR>.
+
+</P>
+<P>
+That is, evaluating <VAR>expr</VAR> involves
+evaluating all of its subexpressions,
+performing the <VAR>action</VAR> that computes the
+result value of <VAR>expr</VAR>,
+then cleaning up after evaluating those subexpressions.
+
+</P>
+<P>
+The recursive nature of this evaluation is implemented
+via recursive-descent transformation of the top-level statements,
+their expressions, <EM>their</EM> subexpressions, and so on.
+
+</P>
+<P>
+However, that recursive-descent transformation is,
+due to the nature of the GBEL,
+focused primarily on generating a <EM>single</EM> stream of code
+to be executed at run time.
+
+</P>
+<P>
+Yet, from the above, it's clear that multiple streams of code
+must effectively be simultaneously generated
+during the recursive-descent analysis of statements.
+
+</P>
+<P>
+The primary stream implements the primary <VAR>action</VAR> items,
+while at least two other streams implement
+the evaluation and clean-up items.
+
+</P>
+<P>
+Requirements imposed by expressions include:
+
+</P>
+
+<UL>
+<LI>
+
+Whether the caller needs to have a temporary ready
+to hold the value of the expression.
+
+<LI>
+
+Other stuff???
+</UL>
+
+
+
+<H2><A NAME="SEC717" HREF="g77_toc.html#TOC717">Internal Naming Conventions</A></H2>
+
+<P>
+Names exported by FFE modules have the following (regular-expression) forms.
+Note that all names beginning <CODE>ffe<VAR>mod</VAR></CODE> or <CODE>FFE<VAR>mod</VAR></CODE>,
+where <VAR>mod</VAR> is lowercase or uppercase alphanumerics, respectively,
+are exported by the module <CODE>ffe<VAR>mod</VAR></CODE>,
+with the source code doing the exporting in <TT>`<VAR>mod</VAR>.h'</TT>.
+(Usually, the source code for the implementation is in <TT>`<VAR>mod</VAR>.c'</TT>.)
+
+</P>
+<P>
+Identifiers that don't fit the following forms
+are not considered exported,
+even if they are according to the C language.
+(For example, they might be made available to other modules
+solely for use within expansions of exported macros,
+not for use within any source code in those other modules.)
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>ffe<VAR>mod</VAR></CODE>
+<DD>
+The single typedef exported by the module.
+
+<DT><CODE>FFE<VAR>umod</VAR>_[A-Z][A-Z0-9_]*</CODE>
+<DD>
+(Where <VAR>umod</VAR> is the uppercase for of <VAR>mod</VAR>.)
+
+A <CODE>#define</CODE> or <CODE>enum</CODE> constant of the type <CODE>ffe<VAR>mod</VAR></CODE>.
+
+<DT><CODE>ffe<VAR>mod</VAR>[A-Z][A-Z][a-z0-9]*</CODE>
+<DD>
+A typedef exported by the module.
+
+The portion of the identifier after <CODE>ffe<VAR>mod</VAR></CODE> is
+referred to as <CODE>ctype</CODE>, a capitalized (mixed-case) form
+of <CODE>type</CODE>.
+
+<DT><CODE>FFE<VAR>umod</VAR>_<VAR>type</VAR>[A-Z][A-Z0-9_]*[A-Z0-9]?</CODE>
+<DD>
+(Where <VAR>umod</VAR> is the uppercase for of <VAR>mod</VAR>.)
+
+A <CODE>#define</CODE> or <CODE>enum</CODE> constant of the type
+<CODE>ffe<VAR>mod</VAR><VAR>type</VAR></CODE>,
+where <VAR>type</VAR> is the lowercase form of <VAR>ctype</VAR>
+in an exported typedef.
+
+<DT><CODE>ffe<VAR>mod</VAR>_<VAR>value</VAR></CODE>
+<DD>
+A function that does or returns something,
+as described by <VAR>value</VAR> (see below).
+
+<DT><CODE>ffe<VAR>mod</VAR>_<VAR>value</VAR>_<VAR>input</VAR></CODE>
+<DD>
+A function that does or returns something based
+primarily on the thing described by <VAR>input</VAR> (see below).
+</DL>
+
+<P>
+Below are names used for <VAR>value</VAR> and <VAR>input</VAR>,
+along with their definitions.
+
+</P>
+<DL COMPACT>
+
+<DT><CODE>col</CODE>
+<DD>
+A column number within a line (first column is number 1).
+
+<DT><CODE>file</CODE>
+<DD>
+An encapsulation of a file's name.
+
+<DT><CODE>find</CODE>
+<DD>
+Looks up an instance of some type that matches specified criteria,
+and returns that, even if it has to create a new instance or
+crash trying to find it (as appropriate).
+
+<DT><CODE>initialize</CODE>
+<DD>
+Initializes, usually a module.  No type.
+
+<DT><CODE>int</CODE>
+<DD>
+A generic integer of type <CODE>int</CODE>.
+
+<DT><CODE>is</CODE>
+<DD>
+A generic integer that contains a true (non-zero) or false (zero) value.
+
+<DT><CODE>len</CODE>
+<DD>
+A generic integer that contains the length of something.
+
+<DT><CODE>line</CODE>
+<DD>
+A line number within a source file,
+or a global line number.
+
+<DT><CODE>lookup</CODE>
+<DD>
+Looks up an instance of some type that matches specified criteria,
+and returns that, or returns nil.
+
+<DT><CODE>name</CODE>
+<DD>
+A <CODE>text</CODE> that points to a name of something.
+
+<DT><CODE>new</CODE>
+<DD>
+Makes a new instance of the indicated type.
+Might return an existing one if appropriate--if so,
+similar to <CODE>find</CODE> without crashing.
+
+<DT><CODE>pt</CODE>
+<DD>
+Pointer to a particular character (line, column pairs)
+in the input file (source code being compiled).
+
+<DT><CODE>run</CODE>
+<DD>
+Performs some herculean task.  No type.
+
+<DT><CODE>terminate</CODE>
+<DD>
+Terminates, usually a module.  No type.
+
+<DT><CODE>text</CODE>
+<DD>
+A <CODE>char *</CODE> that points to generic text.
+</DL>
+
+<P><HR><P>
+<p>Go to the <A HREF="g77_1.html">first</A>, <A HREF="g77_25.html">previous</A>, <A HREF="g77_27.html">next</A>, <A HREF="g77_28.html">last</A> section, <A HREF="g77_toc.html">table of contents</A>.
+</BODY>
+</HTML>

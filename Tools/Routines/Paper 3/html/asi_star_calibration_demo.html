@@ -1,0 +1,990 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>asi_star_calibration_demo</title><meta name="generator" content="MATLAB 9.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-07"><meta name="DC.source" content="asi_star_calibration_demo.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">This Routines Demos the steps taken for all sky calibration</a></li><li><a href="#2">Toggle figures on or off</a></li><li><a href="#3">Step 1: Collect star catalogue</a></li><li><a href="#4">Step 2: Collect information about the camera</a></li><li><a href="#6">Step 3: Calculate star positions at camera location</a></li><li><a href="#7">Step 4: Get Image/ FITS File or Matrix</a></li><li><a href="#13">Step 5: Extract stars</a></li><li><a href="#17">Step 6: Calibrate stars from camera with stars from the star chart</a></li><li><a href="#19">Step 7: Transform the stars identified from image to new Az El values</a></li><li><a href="#20">Step 7: Rotate the initial Az-El stencil according to the above calibrated parameters</a></li><li><a href="#21">Functions</a></li><li><a href="#22">Image should be post all processing</a></li><li><a href="#25">Restricting the field of view.</a></li><li><a href="#26">Assuming fish eye</a></li><li><a href="#27">Sorting the stars based on its magnitude.</a></li></ul></div><h2 id="1">This Routines Demos the steps taken for all sky calibration</h2><pre class="codeinput">clear <span class="string">all</span>;
+</pre><h2 id="2">Toggle figures on or off</h2><pre class="codeinput">toggle = 1; <span class="comment">% ON</span>
+<span class="comment">% toggle = 0; % OFF</span>
+</pre><h2 id="3">Step 1: Collect star catalogue</h2><pre class="codeinput">starCatFITS = [initialize_root_path,filesep,<span class="string">'energy-height-conversion'</span>,<span class="keyword">...</span>
+        filesep,<span class="string">'Tools'</span>,filesep,<span class="string">'External Tools'</span>,filesep,<span class="keyword">...</span>
+       <span class="string">'skymap'</span>,filesep,<span class="string">'hipparcos_extended_catalogue_J2000.fit'</span>];
+
+stars = get_star_catalogue(starCatFITS); <span class="comment">% Star catalogue [INPUT]</span>
+</pre><h2 id="4">Step 2: Collect information about the camera</h2><pre class="codeinput"><span class="comment">% Automatically calculating the darkest frame, so that we have a clearer sky</span>
+<span class="comment">% %%??</span>
+fileStr = <span class="string">'C:\Users\nithin\Downloads\20080326.001_bc_15sec-full_v2.h5'</span>;
+[totalIntensity,timeArr]=estimate_darkest_frame(fileStr);
+[val,indx]=min(totalIntensity);
+timeStr = datestr(timeArr(indx));
+
+<span class="comment">% Get the time of the image</span>
+time = timeArr(indx); <span class="comment">% [INPUT]</span>
+
+<span class="comment">% Get camera location</span>
+dasc.sensorLoc = h5read(fileStr,<span class="string">'/DASC/sensorloc'</span>); <span class="comment">% [INPUT]</span>
+</pre><p>%%?? Get initial Azimuth - Elevation</p><pre class="codeinput">dasc.az = modify_matrix_size((h5read(fileStr,<span class="string">'/DASC/azCalData'</span>))',1024,1024);
+dasc.el = modify_matrix_size((h5read(fileStr,<span class="string">'/DASC/elCalData'</span>))',1024,1024);
+dasc.az(dasc.az==0) = nan;
+dasc.el(dasc.az==0) = nan;
+</pre><h2 id="6">Step 3: Calculate star positions at camera location</h2><pre class="codeinput"><span class="comment">% Approximate star position can be calculated using this function</span>
+[stars.az,stars.el] = RADec2AzEl(rad2deg(stars.RA),rad2deg(stars.DEC),<span class="keyword">...</span>
+    dasc.sensorLoc(1),dasc.sensorLoc(2),datestr(time,<span class="string">'yyyy/mm/dd HH:MM:ss'</span>));
+
+<span class="comment">% Storing the location of a known star. In this case: the pole star .</span>
+
+polarisIndx = find(stars.HIP==11767); <span class="comment">% The index of polaris star in the star catalogue</span>
+
+polaris.az = stars.az(polarisIndx);
+polaris.el = stars.el(polarisIndx);
+
+<span class="comment">% A more accurate calculation can be made using the following function</span>
+<span class="comment">% It takes more time though.</span>
+[polaris.azAccurate,polaris.elAccurate] = get_star_az_el<span class="keyword">...</span>
+    (stars.RA(polarisIndx),stars.DEC(polarisIndx),<span class="keyword">...</span>
+    stars.pmRA(polarisIndx),stars.pmDEC(polarisIndx),stars.parallax(polarisIndx),<span class="keyword">...</span>
+    stars.RV(polarisIndx),time,deg2rad(dasc.sensorLoc(1)),deg2rad(dasc.sensorLoc(2)),dasc.sensorLoc(3));
+</pre><h2 id="7">Step 4: Get Image/ FITS File or Matrix</h2><pre class="codeinput">asiPath = <span class="string">'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\20080326\'</span>;
+asi1File = <span class="string">'PKR_DASC_0000_20080326_103958.000.FITS'</span>;
+image1 = fitsread([asiPath,asi1File]); <span class="comment">%% [INPUT]</span>
+display_image(toggle,image1,[],<span class="string">'Original Image'</span>);
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_01.png" alt=""> <p><b>Step 4.1. Remove hot pixels</b> If one needs to remove hot pixels one can attach another image that is separated in time</p><pre class="codeinput">asi2File = <span class="string">'PKR_DASC_0000_20080326_133018.000.FITS'</span>;
+image2 = fitsread([asiPath,asi2File]);
+[hotPixels] = identify_hot_pixels(image1, image2, 10);
+<span class="comment">%</span>
+<span class="comment">% image1(logical(hotPixels(:))) = nan;</span>
+display_image(toggle,hotPixels,[],<span class="string">'Hot pixles'</span>);
+<span class="comment">% display_image(toggle,image1,[],'Hot pixles removed');</span>
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_02.png" alt=""> <p><b>Step 4.2. Remove background</b></p><pre class="codeinput">[image1BkgRem,backgroundRow, imRowNoise, pRow, muRow, a] = remove_background(image1,5);
+display_image(toggle,image1BkgRem,[0 100],<span class="string">'Image with background removed from row'</span>);
+display_image(toggle,backgroundRow, [200 800], <span class="string">'Background with stars removed (After Row fits)'</span>);
+display_image(toggle,imRowNoise,[0 10],<span class="string">'Noise (row fit)'</span>);
+
+[image1BkgRem,background1, imColNoise] = remove_background(image1BkgRem');
+image1BkgRem = image1BkgRem';
+imColNoise = imColNoise';
+background1 = background1'; <span class="comment">%Background of the image i.e. without the stars.</span>
+display_image(toggle, image1BkgRem, [0 100], <span class="string">'Image with background removed from row and column'</span>);
+display_image(toggle,background1, [0 50], <span class="string">'Background with stars removed (After Row and Col fits)'</span>);
+display_image(toggle,imColNoise,[0 10],<span class="string">'Noise (col fit)'</span>);
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_03.png" alt=""> <img vspace="5" hspace="5" src="asi_star_calibration_demo_04.png" alt=""> <img vspace="5" hspace="5" src="asi_star_calibration_demo_05.png" alt=""> <img vspace="5" hspace="5" src="asi_star_calibration_demo_06.png" alt=""> <img vspace="5" hspace="5" src="asi_star_calibration_demo_07.png" alt=""> <img vspace="5" hspace="5" src="asi_star_calibration_demo_08.png" alt=""> <p><b>Step 4.3. Calculate noise at each pixel</b></p><pre class="codeinput">fnoise = @(x) nanstd(x(:));
+totalNoise = imColNoise+imRowNoise;
+totalNoise(totalNoise==0)=nan;
+sigma_n = nlfilter(totalNoise,[9 9],fnoise); <span class="comment">% calculating std deviation from neighbouring pixels!</span>
+display_image(toggle, sigma_n, [0 10], <span class="string">'\sigma_n Noise at each pixel'</span>);
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_09.png" alt=""> <p><b>Step 4.4. Removing noise spikes</b></p><pre class="codeinput">image1NoiseRem = remove_noise_spikes(image1BkgRem, sigma_n);
+display_image(toggle, image1NoiseRem, [0 100], <span class="string">'Image with bkg and noise removed'</span>);
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_10.png" alt=""> <p><b>Step 4.5. Removing hot pixels</b> See step 4.1</p><pre class="codeinput">image1BkgRem(logical(hotPixels(:)))= nan;
+</pre><h2 id="13">Step 5: Extract stars</h2><pre class="codeinput">starImage = faint_star_extracter(image1BkgRem, sigma_n);
+starImage(starImage &lt;= 20) = 0;
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_11.png" alt=""> <pre class="codeinput">display_image(toggle, starImage, [0 100], <span class="string">'Stars extracted'</span>);
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_12.png" alt=""> <p>Step 5.1. Extract stars</p><pre class="codeinput">imstarStruct = extract_stars(starImage);
+dascstar = filter_stars(imstarStruct, 22.5); <span class="comment">% remove points in the corners of the image</span>
+<span class="keyword">if</span> toggle == 1
+    hold <span class="string">on</span>;
+    scatter(dascstar.location(:,1), dascstar.location(:,2),20*dascstar.brightness, <span class="string">'r'</span>);
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_13.png" alt=""> <p>Step 5.2. Get real stars in the above format</p><pre class="codeinput">realstar = get_actual_stars(stars, 22.5, 4, 0, 0, 0, 1);
+</pre><h2 id="17">Step 6: Calibrate stars from camera with stars from the star chart</h2><pre class="codeinput">[dascstarCal,calPar,fval] = calibrate_stars(realstar,dascstar,dasc.az, dasc.el);
+</pre><pre class="codeoutput">Optimization terminated: average change in the penalty fitness value less than options.FunctionTolerance
+and constraint violation is less than options.ConstraintTolerance.
+Optimization terminated: average change in the penalty fitness value less than options.FunctionTolerance
+and constraint violation is less than options.ConstraintTolerance.
+Optimization terminated: average change in the penalty fitness value less than options.FunctionTolerance
+and constraint violation is less than options.ConstraintTolerance.
+Optimization terminated: average change in the penalty fitness value less than options.FunctionTolerance
+and constraint violation is less than options.ConstraintTolerance.
+Optimization terminated: average change in the penalty fitness value less than options.FunctionTolerance
+and constraint violation is less than options.ConstraintTolerance.
+</pre><pre class="codeinput"><span class="keyword">if</span> toggle == 1
+    figure;
+    plot_aer_stars(realstar.locationAzEl(:,1), realstar.locationAzEl(:,2),<span class="keyword">...</span>
+        realstar.brightness*50, <span class="string">'r'</span>, 0, 0, 0, 1);
+    hold <span class="string">on</span>;
+    plot_aer_stars(dascstarCal.locationAzEl(:,1), dascstarCal.locationAzEl(:,2),<span class="keyword">...</span>
+        dascstarCal.brightness*50, <span class="string">'c'</span>, calPar(1), calPar(2), calPar(3), calPar(4));
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_14.png" alt=""> <h2 id="19">Step 7: Transform the stars identified from image to new Az El values</h2><pre class="codeinput">[dascStarAz, dascStarEl] = calculate_new_AzEl(dascstarCal.locationAzEl(:,1),<span class="keyword">...</span>
+    dascstarCal.locationAzEl(:,2),calPar);
+<span class="keyword">if</span> toggle == 1
+    hold <span class="string">on</span>;
+    plot_aer_stars(dascStarAz, dascStarEl, dascstarCal.brightness*30, <span class="string">'g'</span>, 0, 0, 0, 1);
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_15.png" alt=""> <h2 id="20">Step 7: Rotate the initial Az-El stencil according to the above calibrated parameters</h2><pre class="codeinput">[dasc.azCal, dasc.elCal] = calculate_new_AzEl(dasc.az,dasc.el,calPar);
+
+<span class="keyword">if</span> toggle == 1
+    indx = dasc.elCal&gt;0;
+    figure;
+    dsign = -1;
+    plot_DASC_aer(image1(indx), dasc.azCal(indx), dasc.elCal(indx), 1024, dsign);
+    colorbar;
+    colormap(viridis);
+    xlim([-120,+120]);
+    ylim([-120,+120]);
+    hold <span class="string">on</span>;
+    plot_grid_aer([0, 90], 22.5, <span class="string">'m'</span>);
+    caxis([300 450]);
+    hold <span class="string">on</span>;
+    plot_aer_stars(realstar.locationAzEl(:,1), realstar.locationAzEl(:,2),<span class="keyword">...</span>
+        realstar.brightness*50, <span class="string">'c'</span>, 0, 0, 0, dsign);
+    plot_aer_stars(dascStarAz, dascStarEl, dascstarCal.brightness*30, <span class="string">'r'</span>, 0, 0, 0, dsign);
+    plot_star_names(realstar, 8, <span class="string">'w'</span>, 0, 0, 0, dsign);
+    title(timeStr);
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="asi_star_calibration_demo_16.png" alt=""> <h2 id="21">Functions</h2><pre class="codeinput"><span class="keyword">function</span> [totalIntensity,timeArr]=estimate_darkest_frame(h5FileStr)
+
+asi = permute(h5read(h5FileStr,<span class="string">'/DASC/ASI'</span>),[3 2 1]);
+timeArr = unixtime2matlab((h5read(h5FileStr,<span class="string">'/DASC/time'</span>))');
+totalIntensity = sum(sum(asi,3),2);
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> display_image(toggle,image,clim,titleStr)
+
+    <span class="keyword">if</span> toggle==1
+
+        <span class="keyword">if</span> nargin&lt;4
+            titleStr = <span class="string">''</span>;
+        <span class="keyword">end</span>
+
+        figure;
+        h=pcolor(image);
+        set(h,<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>);
+        colorbar;
+        colormap(get_colormap(<span class="string">'k'</span>,<span class="string">'w'</span>))
+        title(titleStr);
+
+        <span class="keyword">if</span> ~(nargin&lt;3) &amp;&amp; ~isempty(clim)
+            caxis(clim);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [hotPixels] = identify_hot_pixels(image1, image2, threshold)
+
+    <span class="keyword">if</span> nargin&lt;3
+        threshold = 2;
+    <span class="keyword">end</span>
+
+    temp = image1 - image2;
+    temp2 = temp;
+    hotPixels=zeros(size(temp2));
+    hotPixels(abs(temp2)&lt;=threshold) = 1;
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [ASINew, background, ASINoise, pRow, muRow, a] = remove_background(ASI, nPoly)
+
+<span class="comment">% Remove background along the row</span>
+
+<span class="keyword">if</span> nargin &lt; 2
+    nPoly = 3;
+<span class="keyword">end</span>
+
+<span class="comment">% ASINew, background</span>
+rowIndx = 1:1:size(ASI,2);
+colIndx = 1:1:size(ASI,1);
+ASINew = zeros(size(ASI));
+background = zeros(size(ASI));
+ASItemp = ASI;
+ASINoise = zeros(size(ASI));
+pRow = zeros([length(rowIndx),nPoly+1]);
+<span class="comment">% First iteration</span>
+<span class="keyword">for</span> ifit = 1:2
+    <span class="keyword">for</span> i = rowIndx
+        lchord = sqrt(512.^2-(abs(512-i)).^2);
+        fitRangeIndx =512-round(lchord)+1:1:512+round(lchord);
+        x = colIndx(fitRangeIndx);
+        y = ASItemp(i,fitRangeIndx);
+        <span class="keyword">if</span> length(fitRangeIndx)&gt;10
+            pRow(i,:)=polyfit(x,y,nPoly);
+        <span class="keyword">end</span>
+        muRow(i,:)=mean(y);
+        stdRow(i,:) = std(y);
+        a(i).fitRangeIndx = fitRangeIndx;
+        background(i,fitRangeIndx) = polyval(pRow(i,:),colIndx(fitRangeIndx));
+        <span class="keyword">if</span> ifit==1
+            brightStarIndx = ASItemp(i,:) &gt; (background(i,:)+1*stdRow(i,:));
+            <span class="keyword">if</span> length(find(brightStarIndx)&gt;0)
+                ASItemp(i,brightStarIndx) = nan;
+                ASItemp(i,fitRangeIndx) = interp_nans(ASItemp(i,fitRangeIndx)')';
+            <span class="keyword">end</span>
+        <span class="keyword">else</span>
+            ASINew(i,fitRangeIndx) = ASI(i,fitRangeIndx)-background(i,fitRangeIndx);
+            ASINoise(i,fitRangeIndx) = ASItemp(i,fitRangeIndx)-background(i,fitRangeIndx);
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> ASI = remove_noise_spikes(ASI, sigma_n)
+
+    <span class="keyword">for</span> i=3:1:size(ASI,1) - 2
+        <span class="keyword">for</span> j = 3:1:size(ASI,2) - 2
+            A = ASI(i,j);
+            B1 = ASI(i,j-1);    B2 = ASI(i,j-2);
+            C1 = ASI(i-1,j);    C2 = ASI(i-2,j);
+            D1 = ASI(i,j+1);    D2 = ASI(i,j+2);
+            E1 = ASI(i+1,j);    E2 = ASI(i+2,j);
+            s = sigma_n(i,j);
+            singleSpike = (A &gt; 2*s)*(B1 &lt; 2*s)*(C1 &lt; 2*s)*(D1 &lt; 2*s)*(E1 &lt; 2*s);
+            doubleSpike(1) = (A &gt; 3*s)*((B1&gt;2*s)*(B2&lt;2*s))*<span class="keyword">...</span>
+                not((C1&gt;2*s))*not((D1&gt;2*s))*<span class="keyword">...</span>
+                not((E1&gt;2*s));
+            doubleSpike(2) = (A &gt; 3*s)*not((B1&gt;2*s))*<span class="keyword">...</span>
+                ((C1&gt;2*s)*(C2&lt;2*s))*not((D1&gt;2*s))*<span class="keyword">...</span>
+                not((E1&gt;2*s));
+            doubleSpike(3) = (A &gt; 3*s)*not((B1&gt;2*s))*<span class="keyword">...</span>
+                not((C1&gt;2*s))*((D1&gt;2*s)*(D2&lt;2*s))*<span class="keyword">...</span>
+                not((E1&gt;2*s));
+            doubleSpike(4) = (A &gt; 3*s)*not((B1&gt;2*s))*<span class="keyword">...</span>
+                not((C1&gt;2*s))*not((D1&gt;2*s))*<span class="keyword">...</span>
+                ((E1&gt;2*s)*(E2&lt;2*s));
+            ASI(i,j) = not(singleSpike).*A;
+            ASI(i,j) = not(sum(doubleSpike)).*A;
+            ASI(i,j-1) = not(doubleSpike(1)).*B1;
+            ASI(i-1,j) = not(doubleSpike(2)).*C1;
+            ASI(i,j+1) = not(doubleSpike(3)).*D1;
+            ASI(i+1,j) = not(doubleSpike(4)).*E1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [starImage] = faint_star_extracter(ASI, sigma_n)
+
+    mSz = 7;
+    MSz = 9;
+    dSz = (MSz-mSz)/2;
+    <span class="keyword">if</span> mod(dSz,1)
+        error(<span class="string">'mSz-MSz has to be even'</span>);
+    <span class="keyword">end</span>
+
+    starImage = zeros(size(ASI));
+
+    multiWaitbar(<span class="string">'Faint Star Extraction...'</span>,0);
+    id = 1./size(ASI,1);
+     <span class="comment">% For faint stars</span>
+    <span class="keyword">for</span> i=1:1:size(ASI,1) - MSz
+        <span class="keyword">for</span> j = 1:1:size(ASI,2) - MSz
+        M = ASI(i:i+MSz-1,j:j+MSz-1);
+        in = M(1+dSz:dSz+mSz,1+dSz:dSz+mSz);
+        out = M;
+        out(1+dSz:dSz+mSz,1+dSz:dSz+mSz)=0;
+        sig_n = sigma_n(i+dSz+ceil(mSz/2),j+dSz+ceil(mSz/2));
+        mu_in = nanmean(in(:));
+        mu_out = nanmean(out(:));
+        <span class="comment">% Condition</span>
+        <span class="keyword">if</span> mu_in &gt; 2*sig_n &amp;&amp; mu_out &lt; 2*sig_n
+            starImage(i:i+MSz-1,j:j+MSz-1) = M;
+        <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+    multiWaitbar(<span class="string">'Faint Star Extraction...'</span>,<span class="string">'Increment'</span>,id);
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+
+<span class="keyword">function</span> imstar = extract_stars(image)
+</pre><h2 id="22">Image should be post all processing</h2><pre class="codeinput">binaryImage = zeros(size(image));
+binaryImage(image&gt;0)=1;
+[labelImage, numSpots] = bwlabel(binaryImage);
+props = regionprops(labelImage,image,<span class="string">'Centroid'</span>,<span class="string">'Area'</span>,<span class="string">'MeanIntensity'</span>);
+<span class="keyword">for</span> i =1:1:numSpots
+    imstar.ID(i,1) = i;
+    imstar.location(i,:) = props(i).Centroid;
+    imstar.brightness(i,1) = props(i).Area.*props(i).MeanIntensity;
+<span class="keyword">end</span>
+imstar.brightness = imstar.brightness./max(imstar.brightness); <span class="comment">% Relative magnitude</span>
+imstar.size = size(image);
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+<span class="keyword">function</span> newstar = filter_stars(imstar, el, astrometryFileStr)
+</pre><pre class="codeinput">    <span class="keyword">if</span> nargin&lt;3
+        astrometryFileStr = []; <span class="comment">% File containing text that can uploaded to astrometry</span>
+    <span class="keyword">end</span>
+</pre><h2 id="25">Restricting the field of view.</h2><pre class="codeinput">    FOV  = (90-el)*2;
+</pre><h2 id="26">Assuming fish eye</h2><pre class="codeinput">    imLength = imstar.size(1);
+    LengthperElevation = imLength/180;
+    p.min = round(imLength/2) - round(LengthperElevation*FOV/2);
+    p.max = round(imLength/2) + round(LengthperElevation*FOV/2);
+
+    selectedStarIndx =(imstar.location(:,1)&gt;p.min &amp;<span class="keyword">...</span>
+        imstar.location(:,1)&lt;p.max &amp; <span class="keyword">...</span>
+        imstar.location(:,2)&gt;p.min &amp; <span class="keyword">...</span>
+        imstar.location(:,2)&lt;p.max);
+
+    newstar.location = imstar.location(selectedStarIndx,:);
+    newstar.brightness = imstar.brightness(selectedStarIndx)';
+</pre><h2 id="27">Sorting the stars based on its magnitude.</h2><pre class="codeinput">    [newstar, I] = sort_star(newstar);
+
+
+    <span class="keyword">if</span> ~isempty(astrometryFileStr)
+    dlmwrite(astrometryFileStr,round(newstar.location));
+    <span class="keyword">end</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+
+<span class="keyword">function</span> [newstar, I] = sort_star(newstar)
+    [newstar.brightness, I] = sort(newstar.brightness,<span class="string">'descend'</span>);
+    newstar.brightness = newstar.brightness';
+    newstar.location = newstar.location(I,:);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> realstar = get_actual_stars(stars,elCutOff,magCutOff,dx,dy,drot, dsign)
+    <span class="keyword">if</span> nargin &lt; 7
+        dsign = 1;
+    <span class="keyword">end</span>
+
+    starfilter=stars.vmag&lt;magCutOff &amp; stars.el&gt;elCutOff;
+    [x,y] = get_aer_stars(stars.az(starfilter), stars.el(starfilter), dx, dy, drot, dsign);
+    realstar.location = [x, y]; <span class="comment">%pixel location</span>
+    realstar.brightness = stars.relIntensity(starfilter);
+    realstar.locationAzEl = [stars.az(starfilter), stars.el(starfilter)];
+    realstar.name = stars.name(starfilter);
+    [realstar, I] = sort_star(realstar); <span class="comment">%s</span>
+    realstar.locationAzEl = realstar.locationAzEl(I,:);
+    realstar.name = realstar.name(I);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [x,y] = get_aer_stars(az,el,dx,dy,drot,dsign)
+    <span class="keyword">if</span> nargin&lt;6
+        dsign = 1;
+    <span class="keyword">end</span>
+    az = rotate_array(az,drot);
+    x = dx+dsign*(90-el).*sind(az);
+    y = dy+(90-el).*cosd(az);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [dascstar,x,fval] = calibrate_stars(realstar,dascstar,azOld,elOld)
+
+    dloc = round(dascstar.location);
+    dascstar.brightness = dascstar.brightness./max(dascstar.brightness);
+    lindx = sub2ind(size(azOld),dloc(:,2),dloc(:,1)); <span class="comment">%% There was issue, x - column , y - are rows</span>
+    dascstar.locationAzEl = [azOld(lindx), elOld(lindx)];
+    minElFilter = find(dascstar.locationAzEl(:,2)&gt;=22.5);
+    dascstar.locationAzEl = dascstar.locationAzEl(minElFilter,:);
+    dascstar.brightness = dascstar.brightness(minElFilter);
+    dascstar.location = dascstar.location(minElFilter,:);
+    ndasc = length(dascstar.brightness);
+
+    x0 = [0,0,-90,1];
+    nvars = 4;
+    lb = [-10,-10,-180, -1];
+    ub = [+10,+10,+180,+1];
+    IntCon = 4;
+
+    pflag = 0;
+    nflag = 0;
+    k = 0;
+    <span class="keyword">while</span>(pflag == 0 || nflag ==0)
+        k = k+1;
+        [y(k,:),fval(k),exitflag] = ga(@starDistance,nvars,[],[],[],[],lb,ub,[],IntCon);
+
+        <span class="keyword">if</span> y(k,4) == -1
+            nflag = 1;
+        <span class="keyword">end</span>
+
+        <span class="keyword">if</span> y(k,4) == 1
+            pflag = 1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    [~,minIndx] = min(fval);
+    x = y(minIndx,:);
+
+    <span class="keyword">function</span> dmin=starDistance(x)
+        [x1,y1] = get_aer_stars(dascstar.locationAzEl(:,1),dascstar.locationAzEl(:,2),x(1),x(2),x(3),x(4));
+        dascstar.newxy = [x1,y1];
+        D = pdist2(dascstar.newxy,realstar.location(1:ndasc,:));
+        dmin = sum(min(D));
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [azNew, elNew] = calculate_new_AzEl(azOld,elOld,x)
+
+    [xNew,yNew] = get_aer_stars(azOld,elOld,x(1),x(2),x(3),x(4));
+    azNew = wrapTo360(atan2d(xNew,yNew));
+    elNew = 90 - xNew./(sind(azNew));
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> plot_aer_stars(az,el,relIntensity,colorStr, dx, dy, drot, dsign)
+    <span class="keyword">if</span> nargin&lt;8
+        dsign = 1;
+    <span class="keyword">end</span>
+    [x,y] = get_aer_stars(az, el, dx, dy, drot, dsign);
+    scatter(x,y,relIntensity,colorStr);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> plot_star_names(sortedStars, n, color, dx, dy, drot ,dsign)
+    <span class="keyword">if</span> nargin &lt; 3 || isempty(color)
+        color = <span class="string">'c'</span>;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt;2 || isempty(n)
+        n = 5;
+    <span class="keyword">end</span>
+
+    hold <span class="string">on</span>;
+    starNames = string(extractBetween((sortedStars.name(1:1:n)),<span class="string">'('</span>,<span class="string">')'</span>));
+    <span class="keyword">for</span> i = 1:1:n
+        [x,y] = get_aer_stars(sortedStars.locationAzEl(i,1), sortedStars.locationAzEl(i,2),<span class="keyword">...</span>
+            dx,dy,drot,dsign);
+        t=text(x,y,strcat(<span class="string">"  "</span>,starNames(i)));
+        t.Color = color;
+        t.FontSize = 7;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2018b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% This Routines Demos the steps taken for all sky calibration
+clear all;
+
+%% Toggle figures on or off
+toggle = 1; % ON
+% toggle = 0; % OFF
+
+%% Step 1: Collect star catalogue
+starCatFITS = [initialize_root_path,filesep,'energy-height-conversion',...
+        filesep,'Tools',filesep,'External Tools',filesep,...
+       'skymap',filesep,'hipparcos_extended_catalogue_J2000.fit'];
+
+stars = get_star_catalogue(starCatFITS); % Star catalogue [INPUT]
+
+%% Step 2: Collect information about the camera
+
+% Automatically calculating the darkest frame, so that we have a clearer sky
+% %%??
+fileStr = 'C:\Users\nithin\Downloads\20080326.001_bc_15sec-full_v2.h5';
+[totalIntensity,timeArr]=estimate_darkest_frame(fileStr);
+[val,indx]=min(totalIntensity);
+timeStr = datestr(timeArr(indx));
+
+% Get the time of the image
+time = timeArr(indx); % [INPUT]
+
+% Get camera location
+dasc.sensorLoc = h5read(fileStr,'/DASC/sensorloc'); % [INPUT]
+
+%%
+% %%?? Get initial Azimuth - Elevation
+dasc.az = modify_matrix_size((h5read(fileStr,'/DASC/azCalData'))',1024,1024);
+dasc.el = modify_matrix_size((h5read(fileStr,'/DASC/elCalData'))',1024,1024);
+dasc.az(dasc.az==0) = nan;
+dasc.el(dasc.az==0) = nan;
+
+%% Step 3: Calculate star positions at camera location
+
+% Approximate star position can be calculated using this function
+[stars.az,stars.el] = RADec2AzEl(rad2deg(stars.RA),rad2deg(stars.DEC),...
+    dasc.sensorLoc(1),dasc.sensorLoc(2),datestr(time,'yyyy/mm/dd HH:MM:ss'));
+
+% Storing the location of a known star. In this case: the pole star . 
+
+polarisIndx = find(stars.HIP==11767); % The index of polaris star in the star catalogue
+
+polaris.az = stars.az(polarisIndx);
+polaris.el = stars.el(polarisIndx);
+
+% A more accurate calculation can be made using the following function
+% It takes more time though. 
+[polaris.azAccurate,polaris.elAccurate] = get_star_az_el...
+    (stars.RA(polarisIndx),stars.DEC(polarisIndx),...
+    stars.pmRA(polarisIndx),stars.pmDEC(polarisIndx),stars.parallax(polarisIndx),...
+    stars.RV(polarisIndx),time,deg2rad(dasc.sensorLoc(1)),deg2rad(dasc.sensorLoc(2)),dasc.sensorLoc(3));
+
+%% Step 4: Get Image/ FITS File or Matrix
+asiPath = 'C:\Users\nithin\Documents\GitHub\LargeFiles\DASC\20080326\';
+asi1File = 'PKR_DASC_0000_20080326_103958.000.FITS';
+image1 = fitsread([asiPath,asi1File]); %% [INPUT]
+display_image(toggle,image1,[],'Original Image');
+
+%%
+% *Step 4.1. Remove hot pixels* 
+% If one needs to remove hot pixels one can attach another image that is
+% separated in time
+
+asi2File = 'PKR_DASC_0000_20080326_133018.000.FITS';
+image2 = fitsread([asiPath,asi2File]);
+[hotPixels] = identify_hot_pixels(image1, image2, 10);
+% 
+% image1(logical(hotPixels(:))) = nan;
+display_image(toggle,hotPixels,[],'Hot pixles');
+% display_image(toggle,image1,[],'Hot pixles removed');
+
+%%
+% *Step 4.2. Remove background* 
+[image1BkgRem,backgroundRow, imRowNoise, pRow, muRow, a] = remove_background(image1,5);
+display_image(toggle,image1BkgRem,[0 100],'Image with background removed from row');
+display_image(toggle,backgroundRow, [200 800], 'Background with stars removed (After Row fits)');
+display_image(toggle,imRowNoise,[0 10],'Noise (row fit)');
+
+[image1BkgRem,background1, imColNoise] = remove_background(image1BkgRem');
+image1BkgRem = image1BkgRem';
+imColNoise = imColNoise';
+background1 = background1'; %Background of the image i.e. without the stars. 
+display_image(toggle, image1BkgRem, [0 100], 'Image with background removed from row and column');
+display_image(toggle,background1, [0 50], 'Background with stars removed (After Row and Col fits)');
+display_image(toggle,imColNoise,[0 10],'Noise (col fit)');
+
+%% 
+% *Step 4.3. Calculate noise at each pixel*
+fnoise = @(x) nanstd(x(:));
+totalNoise = imColNoise+imRowNoise;
+totalNoise(totalNoise==0)=nan;
+sigma_n = nlfilter(totalNoise,[9 9],fnoise); % calculating std deviation from neighbouring pixels! 
+display_image(toggle, sigma_n, [0 10], '\sigma_n Noise at each pixel');
+
+%%
+% *Step 4.4. Removing noise spikes*
+image1NoiseRem = remove_noise_spikes(image1BkgRem, sigma_n);
+display_image(toggle, image1NoiseRem, [0 100], 'Image with bkg and noise removed');
+
+%%
+% *Step 4.5. Removing hot pixels* See step 4.1
+image1BkgRem(logical(hotPixels(:)))= nan;
+%% Step 5: Extract stars
+starImage = faint_star_extracter(image1BkgRem, sigma_n);
+starImage(starImage <= 20) = 0;
+%%
+display_image(toggle, starImage, [0 100], 'Stars extracted');
+%%
+% Step 5.1. Extract stars
+imstarStruct = extract_stars(starImage);
+dascstar = filter_stars(imstarStruct, 22.5); % remove points in the corners of the image
+if toggle == 1
+    hold on;
+    scatter(dascstar.location(:,1), dascstar.location(:,2),20*dascstar.brightness, 'r');
+end
+%%
+% Step 5.2. Get real stars in the above format
+realstar = get_actual_stars(stars, 22.5, 4, 0, 0, 0, 1);
+
+%% Step 6: Calibrate stars from camera with stars from the star chart
+[dascstarCal,calPar,fval] = calibrate_stars(realstar,dascstar,dasc.az, dasc.el);
+%%
+if toggle == 1
+    figure;
+    plot_aer_stars(realstar.locationAzEl(:,1), realstar.locationAzEl(:,2),...
+        realstar.brightness*50, 'r', 0, 0, 0, 1);
+    hold on;
+    plot_aer_stars(dascstarCal.locationAzEl(:,1), dascstarCal.locationAzEl(:,2),...
+        dascstarCal.brightness*50, 'c', calPar(1), calPar(2), calPar(3), calPar(4));
+end
+
+%% Step 7: Transform the stars identified from image to new Az El values 
+[dascStarAz, dascStarEl] = calculate_new_AzEl(dascstarCal.locationAzEl(:,1),...
+    dascstarCal.locationAzEl(:,2),calPar);
+if toggle == 1
+    hold on;
+    plot_aer_stars(dascStarAz, dascStarEl, dascstarCal.brightness*30, 'g', 0, 0, 0, 1);
+end
+
+%% Step 7: Rotate the initial Az-El stencil according to the above calibrated parameters
+[dasc.azCal, dasc.elCal] = calculate_new_AzEl(dasc.az,dasc.el,calPar);
+
+if toggle == 1
+    indx = dasc.elCal>0;
+    figure;
+    dsign = -1;
+    plot_DASC_aer(image1(indx), dasc.azCal(indx), dasc.elCal(indx), 1024, dsign);
+    colorbar;
+    colormap(viridis);
+    xlim([-120,+120]);
+    ylim([-120,+120]);
+    hold on;
+    plot_grid_aer([0, 90], 22.5, 'm');
+    caxis([300 450]);
+    hold on;
+    plot_aer_stars(realstar.locationAzEl(:,1), realstar.locationAzEl(:,2),...
+        realstar.brightness*50, 'c', 0, 0, 0, dsign);
+    plot_aer_stars(dascStarAz, dascStarEl, dascstarCal.brightness*30, 'r', 0, 0, 0, dsign);
+    plot_star_names(realstar, 8, 'w', 0, 0, 0, dsign);
+    title(timeStr);
+end
+
+
+%% Functions
+function [totalIntensity,timeArr]=estimate_darkest_frame(h5FileStr)
+
+asi = permute(h5read(h5FileStr,'/DASC/ASI'),[3 2 1]);
+timeArr = unixtime2matlab((h5read(h5FileStr,'/DASC/time'))');
+totalIntensity = sum(sum(asi,3),2);
+
+end
+
+function display_image(toggle,image,clim,titleStr)
+    
+    if toggle==1
+    
+        if nargin<4
+            titleStr = '';
+        end
+
+        figure;
+        h=pcolor(image);
+        set(h,'EdgeColor','none');
+        colorbar;
+        colormap(get_colormap('k','w'))
+        title(titleStr);
+
+        if ~(nargin<3) && ~isempty(clim)
+            caxis(clim);
+        end
+    end
+    
+end
+
+function [hotPixels] = identify_hot_pixels(image1, image2, threshold)
+    
+    if nargin<3
+        threshold = 2;
+    end
+    
+    temp = image1 - image2;
+    temp2 = temp;
+    hotPixels=zeros(size(temp2));
+    hotPixels(abs(temp2)<=threshold) = 1;
+end
+
+function [ASINew, background, ASINoise, pRow, muRow, a] = remove_background(ASI, nPoly)
+
+% Remove background along the row
+
+if nargin < 2
+    nPoly = 3;
+end
+
+% ASINew, background
+rowIndx = 1:1:size(ASI,2);
+colIndx = 1:1:size(ASI,1);
+ASINew = zeros(size(ASI));
+background = zeros(size(ASI));
+ASItemp = ASI;
+ASINoise = zeros(size(ASI));
+pRow = zeros([length(rowIndx),nPoly+1]);
+% First iteration
+for ifit = 1:2
+    for i = rowIndx
+        lchord = sqrt(512.^2-(abs(512-i)).^2);
+        fitRangeIndx =512-round(lchord)+1:1:512+round(lchord);
+        x = colIndx(fitRangeIndx);
+        y = ASItemp(i,fitRangeIndx);
+        if length(fitRangeIndx)>10
+            pRow(i,:)=polyfit(x,y,nPoly);
+        end
+        muRow(i,:)=mean(y);
+        stdRow(i,:) = std(y);
+        a(i).fitRangeIndx = fitRangeIndx;
+        background(i,fitRangeIndx) = polyval(pRow(i,:),colIndx(fitRangeIndx));
+        if ifit==1
+            brightStarIndx = ASItemp(i,:) > (background(i,:)+1*stdRow(i,:));
+            if length(find(brightStarIndx)>0)
+                ASItemp(i,brightStarIndx) = nan;
+                ASItemp(i,fitRangeIndx) = interp_nans(ASItemp(i,fitRangeIndx)')';
+            end
+        else
+            ASINew(i,fitRangeIndx) = ASI(i,fitRangeIndx)-background(i,fitRangeIndx);
+            ASINoise(i,fitRangeIndx) = ASItemp(i,fitRangeIndx)-background(i,fitRangeIndx);
+        end
+        
+    end
+end
+
+end
+
+function ASI = remove_noise_spikes(ASI, sigma_n)
+    
+    for i=3:1:size(ASI,1) - 2
+        for j = 3:1:size(ASI,2) - 2
+            A = ASI(i,j);   
+            B1 = ASI(i,j-1);    B2 = ASI(i,j-2);
+            C1 = ASI(i-1,j);    C2 = ASI(i-2,j);
+            D1 = ASI(i,j+1);    D2 = ASI(i,j+2);
+            E1 = ASI(i+1,j);    E2 = ASI(i+2,j);
+            s = sigma_n(i,j);
+            singleSpike = (A > 2*s)*(B1 < 2*s)*(C1 < 2*s)*(D1 < 2*s)*(E1 < 2*s);
+            doubleSpike(1) = (A > 3*s)*((B1>2*s)*(B2<2*s))*...
+                not((C1>2*s))*not((D1>2*s))*...
+                not((E1>2*s));
+            doubleSpike(2) = (A > 3*s)*not((B1>2*s))*...
+                ((C1>2*s)*(C2<2*s))*not((D1>2*s))*...
+                not((E1>2*s));
+            doubleSpike(3) = (A > 3*s)*not((B1>2*s))*...
+                not((C1>2*s))*((D1>2*s)*(D2<2*s))*...
+                not((E1>2*s));
+            doubleSpike(4) = (A > 3*s)*not((B1>2*s))*...
+                not((C1>2*s))*not((D1>2*s))*...
+                ((E1>2*s)*(E2<2*s));
+            ASI(i,j) = not(singleSpike).*A;
+            ASI(i,j) = not(sum(doubleSpike)).*A;
+            ASI(i,j-1) = not(doubleSpike(1)).*B1;
+            ASI(i-1,j) = not(doubleSpike(2)).*C1;
+            ASI(i,j+1) = not(doubleSpike(3)).*D1;
+            ASI(i+1,j) = not(doubleSpike(4)).*E1;
+        end
+    end
+
+
+end
+
+function [starImage] = faint_star_extracter(ASI, sigma_n)
+    
+    mSz = 7;
+    MSz = 9;
+    dSz = (MSz-mSz)/2;
+    if mod(dSz,1)
+        error('mSz-MSz has to be even');
+    end
+    
+    starImage = zeros(size(ASI));
+    
+    multiWaitbar('Faint Star Extraction...',0);
+    id = 1./size(ASI,1);
+     % For faint stars
+    for i=1:1:size(ASI,1) - MSz
+        for j = 1:1:size(ASI,2) - MSz
+        M = ASI(i:i+MSz-1,j:j+MSz-1);
+        in = M(1+dSz:dSz+mSz,1+dSz:dSz+mSz);
+        out = M;
+        out(1+dSz:dSz+mSz,1+dSz:dSz+mSz)=0;
+        sig_n = sigma_n(i+dSz+ceil(mSz/2),j+dSz+ceil(mSz/2));
+        mu_in = nanmean(in(:));
+        mu_out = nanmean(out(:));
+        % Condition
+        if mu_in > 2*sig_n && mu_out < 2*sig_n 
+            starImage(i:i+MSz-1,j:j+MSz-1) = M;
+        end
+        
+        end
+    multiWaitbar('Faint Star Extraction...','Increment',id);    
+    end
+
+end
+
+
+function imstar = extract_stars(image)
+%% Image should be post all processing
+binaryImage = zeros(size(image));
+binaryImage(image>0)=1;
+[labelImage, numSpots] = bwlabel(binaryImage);
+props = regionprops(labelImage,image,'Centroid','Area','MeanIntensity');
+for i =1:1:numSpots
+    imstar.ID(i,1) = i;
+    imstar.location(i,:) = props(i).Centroid;
+    imstar.brightness(i,1) = props(i).Area.*props(i).MeanIntensity;
+end
+imstar.brightness = imstar.brightness./max(imstar.brightness); % Relative magnitude
+imstar.size = size(image);
+end
+
+function newstar = filter_stars(imstar, el, astrometryFileStr)
+    if nargin<3
+        astrometryFileStr = []; % File containing text that can uploaded to astrometry
+    end
+    %% Restricting the field of view.
+    FOV  = (90-el)*2;
+    %% Assuming fish eye
+    imLength = imstar.size(1);
+    LengthperElevation = imLength/180;
+    p.min = round(imLength/2) - round(LengthperElevation*FOV/2);
+    p.max = round(imLength/2) + round(LengthperElevation*FOV/2);
+    
+    selectedStarIndx =(imstar.location(:,1)>p.min &...
+        imstar.location(:,1)<p.max & ...
+        imstar.location(:,2)>p.min & ...
+        imstar.location(:,2)<p.max);
+    
+    newstar.location = imstar.location(selectedStarIndx,:);
+    newstar.brightness = imstar.brightness(selectedStarIndx)';
+    
+    %% Sorting the stars based on its magnitude.
+    [newstar, I] = sort_star(newstar);
+
+    
+    if ~isempty(astrometryFileStr)
+    dlmwrite(astrometryFileStr,round(newstar.location));
+    end
+    
+end
+
+function [newstar, I] = sort_star(newstar)
+    [newstar.brightness, I] = sort(newstar.brightness,'descend');
+    newstar.brightness = newstar.brightness';
+    newstar.location = newstar.location(I,:);
+end
+
+function realstar = get_actual_stars(stars,elCutOff,magCutOff,dx,dy,drot, dsign)
+    if nargin < 7
+        dsign = 1;
+    end
+
+    starfilter=stars.vmag<magCutOff & stars.el>elCutOff;
+    [x,y] = get_aer_stars(stars.az(starfilter), stars.el(starfilter), dx, dy, drot, dsign);
+    realstar.location = [x, y]; %pixel location
+    realstar.brightness = stars.relIntensity(starfilter);
+    realstar.locationAzEl = [stars.az(starfilter), stars.el(starfilter)];
+    realstar.name = stars.name(starfilter);
+    [realstar, I] = sort_star(realstar); %s
+    realstar.locationAzEl = realstar.locationAzEl(I,:);
+    realstar.name = realstar.name(I);
+end
+
+function [x,y] = get_aer_stars(az,el,dx,dy,drot,dsign)
+    if nargin<6
+        dsign = 1;
+    end
+    az = rotate_array(az,drot);
+    x = dx+dsign*(90-el).*sind(az);
+    y = dy+(90-el).*cosd(az);  
+end
+
+function [dascstar,x,fval] = calibrate_stars(realstar,dascstar,azOld,elOld)
+    
+    dloc = round(dascstar.location);
+    dascstar.brightness = dascstar.brightness./max(dascstar.brightness);
+    lindx = sub2ind(size(azOld),dloc(:,2),dloc(:,1)); %% There was issue, x - column , y - are rows
+    dascstar.locationAzEl = [azOld(lindx), elOld(lindx)];
+    minElFilter = find(dascstar.locationAzEl(:,2)>=22.5);
+    dascstar.locationAzEl = dascstar.locationAzEl(minElFilter,:);
+    dascstar.brightness = dascstar.brightness(minElFilter);
+    dascstar.location = dascstar.location(minElFilter,:);
+    ndasc = length(dascstar.brightness);
+    
+    x0 = [0,0,-90,1];
+    nvars = 4;
+    lb = [-10,-10,-180, -1];
+    ub = [+10,+10,+180,+1];
+    IntCon = 4;
+    
+    pflag = 0;
+    nflag = 0;
+    k = 0;
+    while(pflag == 0 || nflag ==0)
+        k = k+1;
+        [y(k,:),fval(k),exitflag] = ga(@starDistance,nvars,[],[],[],[],lb,ub,[],IntCon);
+        
+        if y(k,4) == -1
+            nflag = 1;
+        end
+        
+        if y(k,4) == 1
+            pflag = 1;
+        end
+    end
+    
+    [~,minIndx] = min(fval);
+    x = y(minIndx,:);    
+    
+    function dmin=starDistance(x)
+        [x1,y1] = get_aer_stars(dascstar.locationAzEl(:,1),dascstar.locationAzEl(:,2),x(1),x(2),x(3),x(4));
+        dascstar.newxy = [x1,y1];
+        D = pdist2(dascstar.newxy,realstar.location(1:ndasc,:));
+        dmin = sum(min(D));
+    end
+
+end
+
+function [azNew, elNew] = calculate_new_AzEl(azOld,elOld,x)
+
+    [xNew,yNew] = get_aer_stars(azOld,elOld,x(1),x(2),x(3),x(4));
+    azNew = wrapTo360(atan2d(xNew,yNew));
+    elNew = 90 - xNew./(sind(azNew));
+    
+end
+
+function plot_aer_stars(az,el,relIntensity,colorStr, dx, dy, drot, dsign)
+    if nargin<8
+        dsign = 1;
+    end
+    [x,y] = get_aer_stars(az, el, dx, dy, drot, dsign);
+    scatter(x,y,relIntensity,colorStr);
+end
+
+function plot_star_names(sortedStars, n, color, dx, dy, drot ,dsign)
+    if nargin < 3 || isempty(color)
+        color = 'c';
+    end
+    if nargin <2 || isempty(n)
+        n = 5;
+    end
+
+    hold on;
+    starNames = string(extractBetween((sortedStars.name(1:1:n)),'(',')'));
+    for i = 1:1:n
+        [x,y] = get_aer_stars(sortedStars.locationAzEl(i,1), sortedStars.locationAzEl(i,2),...
+            dx,dy,drot,dsign);
+        t=text(x,y,strcat("  ",starNames(i)));
+        t.Color = color;
+        t.FontSize = 7;
+    end
+end
+##### SOURCE END #####
+--></body></html>

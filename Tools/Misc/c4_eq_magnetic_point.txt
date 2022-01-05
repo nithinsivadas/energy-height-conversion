@@ -1,0 +1,3 @@
+       DateTime           Kp      Dst    Np_SW     V_SW     Pdyn yIMF_GSM zIMF_GSM       G1       G2    x_GSE    y_GSE    z_GSE   Bx_GSE   By_GSE   Bz_GSE footType  x_eqGSE  y_eqGSE  z_eqGSE alt_NFoot lat_NFoot lon_NFoot alt_SFoot lat_SFoot lon_SFoot 
+[yyyy-mm-dd HH:MM:ss]   [a.u]     [nT]   [cm-3]   [km/s]    [nPa]     [nT]     [nT]   [a.u.]   [a.u.]     [RE]     [RE]     [RE]     [nT]     [nT]     [nT]  [0,1,2]     [RE]     [RE]     [RE]     [km]    [deg]    [deg]     [km]    [deg]    [deg] 
+2001-01-09 15:23:00      NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN    -0.24     5.02     8.44      NaN      NaN      NaN        2      NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN      NaN 
